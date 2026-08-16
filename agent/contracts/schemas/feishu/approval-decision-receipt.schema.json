@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/feishu/approval-decision-receipt.schema.json",
+  "title": "Approval decision receipt",
+  "description": "Receipt from an atomic compare-and-set. candidate_revision is the authoritative committed revision after the decision.",
+  "x-invariants": [
+    "a newly recorded decision sets candidate_revision == request.expected_candidate_revision + 1",
+    "an identical approval_instance replay returns the original receipt and does not increment candidate_revision",
+    "next_step WORKFLOW_CLOSED makes the candidate terminal for later approval instances"
+  ],
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "decision_id",
+    "release_id",
+    "candidate_id",
+    "record_status",
+    "activation_status",
+    "next_step",
+    "candidate_revision",
+    "trace_id",
+    "recorded_at"
+  ],
+  "properties": {
+    "decision_id": {
+      "type": "string",
+      "pattern": "^dec_[A-Za-z0-9_-]{8,128}$"
+    },
+    "release_id": {
+      "type": "string",
+      "pattern": "^rel_[A-Za-z0-9_-]{8,128}$"
+    },
+    "candidate_id": {
+      "type": "string",
+      "pattern": "^cand_[A-Za-z0-9_-]{8,128}$"
+    },
+    "record_status": {
+      "const": "RECORDED"
+    },
+    "activation_status": {
+      "const": "NOT_ACTIVATED"
+    },
+    "next_step": {
+      "type": "string",
+      "enum": [
+        "VALIDATION_REQUIRED",
+        "WAITING_FOR_CHANGES",
+        "WORKFLOW_CLOSED"
+      ]
+    },
+    "candidate_revision": {
+      "type": "integer",
+      "minimum": 2
+    },
+    "trace_id": {
+      "type": "string",
+      "pattern": "^trace_[A-Za-z0-9_-]{8,96}$"
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

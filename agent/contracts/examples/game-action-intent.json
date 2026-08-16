@@ -1,0 +1,11 @@
+{
+  "schema_ref": "../schemas/game/action-intent.schema.json",
+  "value": {
+    "intent_id": "intent_water_001",
+    "action_type": "WATER",
+    "actor_entity_id": "agent_entity_001",
+    "expected_world_revision": 184,
+    "plot_id": "farm_plot_0001",
+    "amount_ml": 200
+  }
+}

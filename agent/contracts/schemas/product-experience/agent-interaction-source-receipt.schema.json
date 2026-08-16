@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/product-experience/agent-interaction-source-receipt.schema.json",
+  "title": "Authoritative Product agent interaction source receipt",
+  "description": "Immutable Product projection receipt created only from the canonical AgentTurnCommit record and an exact base SkillDraft. It binds the structured decision fields that intentionally do not extend the closed Game AgentTurnFeedback DTO.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "receipt_id",
+    "source_type",
+    "source_revision",
+    "actor",
+    "content_ref",
+    "interaction_id",
+    "session_id",
+    "turn_id",
+    "sequence",
+    "command_id",
+    "feedback_event_id",
+    "feedback_sha256",
+    "role",
+    "response_type",
+    "question",
+    "hint_level",
+    "skill_patch_sha256",
+    "committed_at",
+    "source_sha256"
+  ],
+  "properties": {
+    "receipt_id": { "$ref": "#/$defs/identifier" },
+    "source_type": { "const": "AGENT_TURN_PRODUCT_PROJECTION" },
+    "source_revision": { "const": 1 },
+    "actor": { "$ref": "../common/actor-ref.schema.json" },
+    "content_ref": { "$ref": "../common/content-ref.schema.json" },
+    "interaction_id": { "$ref": "#/$defs/identifier" },
+    "session_id": { "$ref": "#/$defs/identifier" },
+    "turn_id": { "$ref": "#/$defs/identifier" },
+    "sequence": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+    "command_id": { "$ref": "../common/command-id.schema.json" },
+    "feedback_event_id": { "$ref": "../common/event-envelope.schema.json#/properties/event_id" },
+    "feedback_sha256": { "$ref": "#/$defs/sha256" },
+    "role": {
+      "type": "string",
+      "enum": ["world_agent", "xiaohutao", "teaching_agent", "bug_agent", "book_agent", "system"]
+    },
+    "response_type": {
+      "type": "string",
+      "enum": ["message", "question", "hint", "skill_patch", "growth_summary"]
+    },
+    "question": {
+      "oneOf": [
+        { "type": "string", "minLength": 1, "maxLength": 1000 },
+        { "type": "null" }
+      ]
+    },
+    "hint_level": {
+      "oneOf": [
+        { "type": "integer", "minimum": 0, "maximum": 4 },
+        { "type": "null" }
+      ]
+    },
+    "skill_patch_sha256": {
+      "oneOf": [
+        { "$ref": "#/$defs/sha256" },
+        { "type": "null" }
+      ]
+    },
+    "committed_at": { "type": "string", "format": "date-time" },
+    "source_sha256": { "$ref": "#/$defs/sha256" }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "response_type": { "const": "question" } },
+        "required": ["response_type"]
+      },
+      "then": {
+        "properties": {
+          "question": { "type": "string", "minLength": 1, "maxLength": 1000 },
+          "hint_level": { "type": "null" },
+          "skill_patch_sha256": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "response_type": { "const": "hint" } },
+        "required": ["response_type"]
+      },
+      "then": {
+        "properties": {
+          "question": { "type": "null" },
+          "hint_level": { "type": "integer", "minimum": 0, "maximum": 3 },
+          "skill_patch_sha256": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "response_type": { "const": "skill_patch" } },
+        "required": ["response_type"]
+      },
+      "then": {
+        "properties": {
+          "role": { "const": "teaching_agent" },
+          "question": { "type": "null" },
+          "hint_level": { "const": 4 },
+          "skill_patch_sha256": { "$ref": "#/$defs/sha256" }
+        }
+      },
+      "else": {
+        "properties": { "skill_patch_sha256": { "type": "null" } }
+      }
+    },
+    {
+      "if": {
+        "properties": { "response_type": { "enum": ["message", "growth_summary"] } },
+        "required": ["response_type"]
+      },
+      "then": {
+        "properties": {
+          "question": { "type": "null" },
+          "hint_level": { "type": "null" }
+        }
+      }
+    }
+  ],
+  "x-source-hash-contract": {
+    "algorithm": "SHA-256",
+    "encoding": "UTF-8",
+    "canonicalization": "YAYA_CANONICAL_JSON_V1",
+    "excluded_fields": ["source_sha256"]
+  },
+  "x-invariants": [
+    "the Product projector resolves one canonical CommittedAgentTurn through AgentTurnCommitPort and never infers role, response_type, question, hint_level or skill_patch from AgentTurnFeedback",
+    "receipt, AgentInteraction revision 1 and projection outbox commit atomically; no subset is externally visible",
+    "actor, content_ref, session_id, turn_id, command_id, feedback_event_id and feedback_sha256 equal the canonical AgentTurnCommit and agent.turn.feedback_ready identities",
+    "role, response_type, question and hint_level are byte-equivalent to the validated AgentDecision stored by AgentTurnCommitPort",
+    "skill_patch_sha256 is null unless response_type is skill_patch; otherwise it equals the exact Product SkillPatch created against the locked base SkillDraft in the same transaction",
+    "source_sha256 equals SHA-256 of every other receipt field under YAYA_CANONICAL_JSON_V1",
+    "receipt_id resolves to exactly one immutable canonical receipt and is byte-equivalent on every AgentInteraction revision"
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

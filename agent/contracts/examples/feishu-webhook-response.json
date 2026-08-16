@@ -1,0 +1,10 @@
+{
+  "schema_ref": "../schemas/feishu/webhook-response.schema.json",
+  "value": {
+    "event_id": "evt_feishu_00000001",
+    "receipt_id": "fwr_00000001",
+    "disposition": "ACCEPTED",
+    "received_at": "2026-08-06T10:00:01Z",
+    "trace_id": "trace_feishu_00000001"
+  }
+}

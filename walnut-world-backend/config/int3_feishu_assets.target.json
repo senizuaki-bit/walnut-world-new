@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0.0",
+  "binding": {
+    "scheme": "WALNUT_FEISHU_HMAC_SHA256_V1",
+    "tenant_fingerprint": "hmac-sha256:57a124fe2825a65541f7b8df5365cb674e4b89e24971227ac425af1ee0448332",
+    "pseudonym_secret_fingerprint": "sha256:2e823a60b24eb791778e1cbaff04876d1c3382f96da98aba6ce77a00737a1dfc"
+  },
+  "base": {
+    "token": "Q6V9biulZaezaHskZqacYm2JnHe",
+    "url": "https://larkcommunity.feishu.cn/base/Q6V9biulZaezaHskZqacYm2JnHe",
+    "tables": {
+      "student_profiles": "tblqvSmGCoSQPbz5",
+      "daily_records": "tblCjoEvjxVvVgBs",
+      "evidence_summaries": "tbl1GKtqWcNb67xM"
+    }
+  },
+  "dashboard": {
+    "id": "blkK3ldZA0pePRGb",
+    "url": "https://larkcommunity.feishu.cn/base/Q6V9biulZaezaHskZqacYm2JnHe?table=blkK3ldZA0pePRGb"
+  },
+  "growth_document": {
+    "template_version": "v1",
+    "template_token": "CHZ9dln03o9wkQxF4DTccWPgnOd",
+    "template_url": "https://larkcommunity.feishu.cn/docx/CHZ9dln03o9wkQxF4DTccWPgnOd"
+  },
+  "miaoda": {
+    "app_id": "app_17c6bc5hz7d",
+    "online_url": "https://dcniaqwtmoca.feishuapp.com/app/app_17c6bc5hz7d",
+    "environment": "online"
+  },
+  "backend_public_url": "http://127.0.0.1:8790"
+}

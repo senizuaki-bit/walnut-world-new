@@ -1,0 +1,1 @@
+"""Pure application domain modules."""

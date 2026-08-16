@@ -1,0 +1,9 @@
+[gd_resource type="StandardMaterial3D" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/art/environment/ground_grass_tile.png" id="1_texture"]
+
+[resource]
+albedo_texture = ExtResource("1_texture")
+roughness = 0.95
+metallic = 0.0
+texture_filter = 4

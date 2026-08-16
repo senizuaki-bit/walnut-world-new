@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0.0",
+  "hash_contract_id": "YAYA_LEARNER_INFERENCE_HASH_V1",
+  "description": "Deterministic hash of a learner.inference.recorded payload without changing the frozen YAYA_CANONICAL_JSON_V1 number domain.",
+  "source": "The exact closed learner.inference.recorded payload object.",
+  "excluded_fields": ["inference_sha256"],
+  "numeric_transform": {
+    "scale": 1000000,
+    "requirements": [
+      "score_delta and confidence are finite JSON numbers with at most six decimal places",
+      "score_delta_ppm = exact_decimal(score_delta) * 1000000 and is an integer in [-300000, 300000]",
+      "confidence_ppm = exact_decimal(confidence) * 1000000 and is an integer in [0, 1000000]"
+    ],
+    "replacements": {
+      "score_delta": "score_delta_ppm",
+      "confidence": "confidence_ppm"
+    }
+  },
+  "projection": "Copy every source field except inference_sha256, score_delta and confidence; add score_delta_ppm and confidence_ppm with the transformed integer values. Preserve null run_id and every nested actor and evidence field exactly.",
+  "canonicalization": "YAYA_CANONICAL_JSON_V1",
+  "digest": "SHA-256",
+  "encoding": "lowercase hexadecimal",
+  "invariants": [
+    "Object member order never affects the digest because YAYA_CANONICAL_JSON_V1 sorts keys.",
+    "Array order remains significant; evidence_refs is therefore sorted by evidence_id before persistence.",
+    "No implementation may round a number that has more than six decimal places."
+  ]
+}

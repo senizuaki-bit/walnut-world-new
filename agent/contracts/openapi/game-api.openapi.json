@@ -1,0 +1,886 @@
+{
+  "openapi": "3.1.0",
+  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
+  "info": {
+    "title": "芽芽家园 Game Contract API",
+    "version": "1.0.0",
+    "description": "Contract-first API between the Godot client and the authoritative game backend. A 202 response means accepted only; clients must query the returned command_id until a terminal state is observed.",
+    "license": {
+      "name": "Proprietary"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.yaya.example",
+      "description": "Environment-specific base URL"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    { "name": "Bootstrap" },
+    { "name": "Skills" },
+    { "name": "Agents" },
+    { "name": "Commands" },
+    { "name": "Runs" },
+    { "name": "World" },
+    { "name": "Client events" },
+    { "name": "Evidence" }
+  ],
+  "x-contract-invariants": [
+    "HTTP 202 means accepted, never applied.",
+    "Every accepted write returns job_id, command_id, and trace_id.",
+    "Every Game request supplies X-Request-Id, X-Trace-Id, X-Correlation-Id, and X-Schema-Version for the current HTTP attempt.",
+    "Every Game response echoes the current HTTP attempt identity in X-Request-Id, X-Trace-Id, and X-Correlation-Id; persisted response request_context remains the immutable origin context.",
+    "A retry reuses the original Idempotency-Key and byte-equivalent body.",
+    "UNKNOWN is a terminal uncertainty state and must be reconciled by command_id, not retried with a new key.",
+    "The UI treats only an APPLIED command with a WORLD_COMMIT receipt as a committed world mutation."
+  ],
+  "paths": {
+    "/v1/bootstrap": {
+      "get": {
+        "tags": ["Bootstrap"],
+        "operationId": "getGameBootstrap",
+        "x-godot-operation": "get_bootstrap",
+        "summary": "Get version-pinned client bootstrap data",
+        "parameters": [
+          { "$ref": "#/components/parameters/RequestId" },
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/CorrelationId" },
+          { "$ref": "#/components/parameters/SchemaVersion" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bootstrap data with authoritative world cursor",
+            "headers": {
+              "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+              "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+              "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "../schemas/game/bootstrap-response.schema.json" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "429": { "$ref": "#/components/responses/RateLimited" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "503": { "$ref": "#/components/responses/Unavailable" }
+        }
+      }
+    },
+    "/v1/skill-builds": {
+      "post": {
+        "tags": ["Skills"],
+        "operationId": "createSkillBuild",
+        "x-godot-operation": "submit_skill_build",
+        "summary": "Submit C++ source for validation, testing, and certification",
+        "description": "The response only acknowledges durable command acceptance. Certification is read from GET /v1/skill-builds/{build_id}.",
+        "parameters": [
+          { "$ref": "#/components/parameters/RequestId" },
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/CorrelationId" },
+          { "$ref": "#/components/parameters/SchemaVersion" },
+          { "$ref": "#/components/parameters/IdempotencyKey" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "../schemas/game/skill-build-create-request.schema.json" }
+            }
+          }
+        },
+        "responses": {
+          "202": { "$ref": "#/components/responses/AcceptedJob" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "413": { "$ref": "#/components/responses/PayloadTooLarge" },
+          "422": { "$ref": "#/components/responses/Unprocessable" },
+          "429": { "$ref": "#/components/responses/RateLimited" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "503": { "$ref": "#/components/responses/Unavailable" }
+        }
+      }
+    },
+    "/v1/skill-builds/{build_id}": {
+      "get": {
+        "tags": ["Skills"],
+        "operationId": "getSkillBuild",
+        "x-godot-operation": "get_skill_build",
+        "summary": "Get build phase status and immutable certification evidence",
+        "parameters": [
+          { "$ref": "#/components/parameters/RequestId" },
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/CorrelationId" },
+          { "$ref": "#/components/parameters/SchemaVersion" },
+          { "$ref": "#/components/parameters/BuildId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current skill build resource",
+            "headers": {
+              "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+              "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+              "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "../schemas/game/skill-build.schema.json" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "429": { "$ref": "#/components/responses/RateLimited" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "503": { "$ref": "#/components/responses/Unavailable" }
+        }
+      }
+    },
+    "/v1/skill-versions/{skill_version_id}/activations": {
+      "post": {
+        "tags": ["Skills"],
+        "operationId": "activateSkillVersion",
+        "x-godot-operation": "activate_skill_version",
+        "summary": "Activate one exact certified skill artifact",
+        "parameters": [
+          { "$ref": "#/components/parameters/RequestId" },
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/CorrelationId" },
+          { "$ref": "#/components/parameters/SchemaVersion" },
+          { "$ref": "#/components/parameters/IdempotencyKey" },
+          { "$ref": "#/components/parameters/SkillVersionId" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "../schemas/game/skill-activation-request.schema.json" }
+            }
+          }
+        },
+        "responses": {
+          "202": { "$ref": "#/components/responses/AcceptedJob" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "422": { "$ref": "#/components/responses/Unprocessable" },
+          "429": { "$ref": "#/components/responses/RateLimited" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "503": { "$ref": "#/components/responses/Unavailable" }
+        }
+      }
+    },
+    "/v1/skill-activations/{activation_id}": {
+      "get": {
+        "tags": ["Skills"],
+        "operationId": "getSkillActivation",
+        "x-godot-operation": "get_skill_activation",
+        "summary": "Get the immutable materialized activation and registry revision",
+        "parameters": [
+          { "$ref": "#/components/parameters/RequestId" },
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/CorrelationId" },
+          { "$ref": "#/components/parameters/SchemaVersion" },
+          { "$ref": "#/components/parameters/ActivationId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Materialized skill activation",
+            "headers": {
+              "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+              "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+              "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "../schemas/game/skill-activation.schema.json" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "429": { "$ref": "#/components/responses/RateLimited" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "503": { "$ref": "#/components/responses/Unavailable" }
+        }
+      }
+    },
+    "/v1/agent-sessions": {
+      "post": {
+        "tags": ["Agents"],
+        "operationId": "createAgentSession",
+        "x-godot-operation": "create_agent_session",
+        "summary": "Create a version-pinned agent session",
+        "parameters": [
+          { "$ref": "#/components/parameters/RequestId" },
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/CorrelationId" },
+          { "$ref": "#/components/parameters/SchemaVersion" },
+          { "$ref": "#/components/parameters/IdempotencyKey" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "../schemas/game/agent-session-create-request.schema.json" }
+            }
+          }
+        },
+        "responses": {
+          "202": { "$ref": "#/components/responses/AcceptedJob" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "422": { "$ref": "#/components/responses/Unprocessable" },
+          "429": { "$ref": "#/components/responses/RateLimited" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "503": { "$ref": "#/components/responses/Unavailable" }
+        }
+      }
+    },
+    "/v1/agent-sessions/{session_id}": {
+      "get": {
+        "tags": ["Agents"],
+        "operationId": "getAgentSession",
+        "x-godot-operation": "get_agent_session",
+        "summary": "Get the current agent session cursor and pinned versions",
+        "parameters": [
+          { "$ref": "#/components/parameters/RequestId" },
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/CorrelationId" },
+          { "$ref": "#/components/parameters/SchemaVersion" },
+          { "$ref": "#/components/parameters/SessionId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agent session resource",
+            "headers": {
+              "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+              "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+              "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "../schemas/game/agent-session.schema.json" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "429": { "$ref": "#/components/responses/RateLimited" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "503": { "$ref": "#/components/responses/Unavailable" }
+        }
+      }
+    },
+    "/v1/agent-sessions/{session_id}/turns": {
+      "post": {
+        "tags": ["Agents"],
+        "operationId": "createAgentTurn",
+        "x-godot-operation": "submit_agent_turn",
+        "summary": "Submit one agent turn against an expected world revision",
+        "parameters": [
+          { "$ref": "#/components/parameters/RequestId" },
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/CorrelationId" },
+          { "$ref": "#/components/parameters/SchemaVersion" },
+          { "$ref": "#/components/parameters/IdempotencyKey" },
+          { "$ref": "#/components/parameters/SessionId" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "../schemas/game/agent-turn-create-request.schema.json" }
+            }
+          }
+        },
+        "responses": {
+          "202": { "$ref": "#/components/responses/AcceptedJob" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "422": { "$ref": "#/components/responses/Unprocessable" },
+          "429": { "$ref": "#/components/responses/RateLimited" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "503": { "$ref": "#/components/responses/Unavailable" }
+        }
+      }
+    },
+    "/v1/commands/{command_id}": {
+      "get": {
+        "tags": ["Commands"],
+        "operationId": "getCommand",
+        "x-godot-operation": "get_command",
+        "summary": "Reconcile an accepted command to its authoritative state",
+        "parameters": [
+          { "$ref": "#/components/parameters/RequestId" },
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/CorrelationId" },
+          { "$ref": "#/components/parameters/SchemaVersion" },
+          { "$ref": "#/components/parameters/CommandId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current command state; only APPLIED with WORLD_COMMIT proves a world mutation",
+            "headers": {
+              "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+              "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+              "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "../schemas/game/command.schema.json" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "429": { "$ref": "#/components/responses/RateLimited" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "503": { "$ref": "#/components/responses/Unavailable" }
+        }
+      }
+    },
+    "/v1/runs/{run_id}": {
+      "get": {
+        "tags": ["Runs"],
+        "operationId": "getRun",
+        "x-godot-operation": "get_run",
+        "summary": "Get sandbox and world-application results as separate stages",
+        "parameters": [
+          { "$ref": "#/components/parameters/RequestId" },
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/CorrelationId" },
+          { "$ref": "#/components/parameters/SchemaVersion" },
+          { "$ref": "#/components/parameters/RunId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Run evidence; sandbox success alone never means world commit",
+            "headers": {
+              "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+              "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+              "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "../schemas/game/run.schema.json" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "429": { "$ref": "#/components/responses/RateLimited" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "503": { "$ref": "#/components/responses/Unavailable" }
+        }
+      }
+    },
+    "/v1/worlds/{world_id}/snapshot": {
+      "get": {
+        "tags": ["World"],
+        "operationId": "getWorldSnapshot",
+        "x-godot-operation": "get_world_snapshot",
+        "summary": "Get an authoritative snapshot and event resume cursor",
+        "parameters": [
+          { "$ref": "#/components/parameters/RequestId" },
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/CorrelationId" },
+          { "$ref": "#/components/parameters/SchemaVersion" },
+          { "$ref": "#/components/parameters/WorldId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authoritative world snapshot",
+            "headers": {
+              "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+              "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+              "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" },
+              "ETag": { "$ref": "#/components/headers/SnapshotEtag" },
+              "X-World-Revision": { "$ref": "#/components/headers/WorldRevision" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "../schemas/game/world-snapshot.schema.json" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "429": { "$ref": "#/components/responses/RateLimited" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "503": { "$ref": "#/components/responses/Unavailable" }
+        }
+      }
+    },
+    "/v1/worlds/{world_id}/events": {
+      "get": {
+        "tags": ["World"],
+        "operationId": "listWorldEvents",
+        "x-godot-operation": "get_world_events",
+        "summary": "Backfill a gap after an explicit event sequence",
+        "description": "The client must detect sequence gaps and call this operation; it must not animate across a missing sequence.",
+        "parameters": [
+          { "$ref": "#/components/parameters/RequestId" },
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/CorrelationId" },
+          { "$ref": "#/components/parameters/SchemaVersion" },
+          { "$ref": "#/components/parameters/WorldId" },
+          { "$ref": "#/components/parameters/AfterSequence" },
+          { "$ref": "#/components/parameters/PageLimit" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Contiguous ordered event page",
+            "headers": {
+              "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+              "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+              "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" },
+              "X-World-Revision": { "$ref": "#/components/headers/WorldRevision" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "../schemas/game/world-event-page.schema.json" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "429": { "$ref": "#/components/responses/RateLimited" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "503": { "$ref": "#/components/responses/Unavailable" }
+        }
+      }
+    },
+    "/v1/client-events:batch": {
+      "post": {
+        "tags": ["Client events"],
+        "operationId": "ingestClientEventBatch",
+        "x-godot-operation": "upload_client_events",
+        "summary": "Durably ingest an ordered client outbox batch",
+        "description": "The client may delete local events only after the command reaches APPLIED. Duplicate event IDs are reported in the command result and do not create duplicate evidence.",
+        "parameters": [
+          { "$ref": "#/components/parameters/RequestId" },
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/CorrelationId" },
+          { "$ref": "#/components/parameters/SchemaVersion" },
+          { "$ref": "#/components/parameters/IdempotencyKey" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "../schemas/game/client-event-batch-request.schema.json" }
+            }
+          }
+        },
+        "responses": {
+          "202": { "$ref": "#/components/responses/AcceptedJob" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "413": { "$ref": "#/components/responses/PayloadTooLarge" },
+          "422": { "$ref": "#/components/responses/Unprocessable" },
+          "429": { "$ref": "#/components/responses/RateLimited" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "503": { "$ref": "#/components/responses/Unavailable" }
+        }
+      }
+    },
+    "/v1/evidence/{evidence_id}": {
+      "get": {
+        "tags": ["Evidence"],
+        "operationId": "getEvidence",
+        "x-godot-operation": "get_evidence",
+        "summary": "Get one immutable, authorized evidence object",
+        "parameters": [
+          { "$ref": "#/components/parameters/RequestId" },
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/CorrelationId" },
+          { "$ref": "#/components/parameters/SchemaVersion" },
+          { "$ref": "#/components/parameters/EvidenceId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Immutable evidence with integrity hashes",
+            "headers": {
+              "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+              "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+              "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" },
+              "ETag": { "$ref": "#/components/headers/EvidenceEtag" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "../schemas/game/evidence.schema.json" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "429": { "$ref": "#/components/responses/RateLimited" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "503": { "$ref": "#/components/responses/Unavailable" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Production profile: a short-lived signed JWT whose tenant, actor, roles and audience are verified by the gateway. Deterministic local Mock profile only: `<tenant_id>:<actor_id>`. Mock credentials MUST NOT be accepted outside local development or automated tests.",
+        "x-development-profile": {
+          "server": "http://127.0.0.1:8790",
+          "loopback_host_aliases": ["127.0.0.1", "localhost"],
+          "token_pattern": "^[A-Za-z0-9_-]{3,96}:[A-Za-z0-9_-]{3,128}$",
+          "production_allowed": false
+        }
+      }
+    },
+    "parameters": {
+      "RequestId": {
+        "name": "X-Request-Id",
+        "in": "header",
+        "required": true,
+        "description": "Identity of this HTTP attempt. A polling or idempotent replay attempt uses a new request id.",
+        "schema": {
+          "type": "string",
+          "pattern": "^req_[A-Za-z0-9_-]{8,96}$"
+        }
+      },
+      "TraceId": {
+        "name": "X-Trace-Id",
+        "in": "header",
+        "required": true,
+        "description": "Trace identity of this HTTP attempt. It is distinct from an immutable resource origin trace and from the original trace retained in an idempotent 202 receipt.",
+        "schema": {
+          "type": "string",
+          "pattern": "^trace_[A-Za-z0-9_-]{8,96}$"
+        }
+      },
+      "CorrelationId": {
+        "name": "X-Correlation-Id",
+        "in": "header",
+        "required": true,
+        "description": "Correlation identity of this HTTP attempt. A later reconciliation request may use a different correlation id without mutating the resource origin context.",
+        "schema": {
+          "type": "string",
+          "pattern": "^corr_[A-Za-z0-9_-]{8,96}$"
+        }
+      },
+      "SchemaVersion": {
+        "name": "X-Schema-Version",
+        "in": "header",
+        "required": true,
+        "description": "Reject unsupported clients explicitly instead of coercing unknown payloads.",
+        "schema": {
+          "const": "1.0.0"
+        }
+      },
+      "IdempotencyKey": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "description": "Reuse for byte-equivalent retries. Reusing the key with a different body returns 409.",
+        "schema": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{15,127}$"
+        }
+      },
+      "BuildId": {
+        "name": "build_id",
+        "in": "path",
+        "required": true,
+        "schema": { "$ref": "#/components/schemas/ResourceId" }
+      },
+      "SkillVersionId": {
+        "name": "skill_version_id",
+        "in": "path",
+        "required": true,
+        "schema": { "$ref": "#/components/schemas/ResourceId" }
+      },
+      "ActivationId": {
+        "name": "activation_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "pattern": "^activation_[A-Za-z0-9_-]{8,118}$"
+        }
+      },
+      "SessionId": {
+        "name": "session_id",
+        "in": "path",
+        "required": true,
+        "schema": { "$ref": "#/components/schemas/ResourceId" }
+      },
+      "CommandId": {
+        "name": "command_id",
+        "in": "path",
+        "required": true,
+        "schema": { "$ref": "../schemas/common/command-id.schema.json" }
+      },
+      "RunId": {
+        "name": "run_id",
+        "in": "path",
+        "required": true,
+        "schema": { "$ref": "#/components/schemas/ResourceId" }
+      },
+      "WorldId": {
+        "name": "world_id",
+        "in": "path",
+        "required": true,
+        "schema": { "$ref": "#/components/schemas/ResourceId" }
+      },
+      "EvidenceId": {
+        "name": "evidence_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "pattern": "^evidence_[A-Za-z0-9_-]{8,128}$"
+        }
+      },
+      "AfterSequence": {
+        "name": "after_sequence",
+        "in": "query",
+        "required": true,
+        "description": "Return events strictly after this last successfully applied sequence.",
+        "schema": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "PageLimit": {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500,
+          "default": 100
+        }
+      }
+    },
+    "headers": {
+      "ResponseRequestId": {
+        "description": "Echoes the current HTTP attempt X-Request-Id.",
+        "schema": { "type": "string", "pattern": "^req_[A-Za-z0-9_-]{8,96}$" }
+      },
+      "ResponseTraceId": {
+        "description": "Echoes the current HTTP attempt X-Trace-Id.",
+        "schema": { "type": "string", "pattern": "^trace_[A-Za-z0-9_-]{8,96}$" }
+      },
+      "ResponseCorrelationId": {
+        "description": "Echoes the current HTTP attempt X-Correlation-Id.",
+        "schema": { "type": "string", "pattern": "^corr_[A-Za-z0-9_-]{8,96}$" }
+      },
+      "IdempotencyReplayed": {
+        "description": "false for the first durable acceptance; true when this response replays the original receipt for the same Idempotency-Key and body.",
+        "schema": { "type": "string", "enum": ["false", "true"] }
+      },
+      "SnapshotEtag": {
+        "description": "Strong validator derived from world_id, revision, and state_hash.",
+        "schema": { "type": "string", "pattern": "^\"[A-Za-z0-9:_-]{8,200}\"$" }
+      },
+      "EvidenceEtag": {
+        "description": "Immutable evidence content hash validator.",
+        "schema": { "type": "string", "pattern": "^\"[a-f0-9]{64}\"$" }
+      },
+      "WorldRevision": {
+        "description": "Authoritative world revision represented by the response.",
+        "schema": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "responses": {
+      "AcceptedJob": {
+        "description": "Durably accepted for asynchronous processing; this is not an execution-success response. AcceptedGameJob.trace_id remains the original command trace, while X-Trace-Id identifies the current HTTP attempt.",
+        "headers": {
+          "Location": {
+            "description": "Command reconciliation URL.",
+            "schema": { "type": "string", "format": "uri-reference" }
+          },
+          "Retry-After": {
+            "description": "Suggested minimum polling delay in seconds.",
+            "schema": { "type": "integer", "minimum": 1 }
+          },
+          "Idempotency-Replayed": { "$ref": "#/components/headers/IdempotencyReplayed" },
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+        },
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/AcceptedGameJob" }
+          }
+        }
+      },
+      "BadRequest": { "$ref": "#/components/responses/Error400" },
+      "Unauthorized": { "$ref": "#/components/responses/Error401" },
+      "Forbidden": { "$ref": "#/components/responses/Error403" },
+      "NotFound": { "$ref": "#/components/responses/Error404" },
+      "Conflict": { "$ref": "#/components/responses/Error409" },
+      "PayloadTooLarge": { "$ref": "#/components/responses/Error413" },
+      "Unprocessable": { "$ref": "#/components/responses/Error422" },
+      "RateLimited": { "$ref": "#/components/responses/Error429" },
+      "InternalError": { "$ref": "#/components/responses/Error500" },
+      "Unavailable": { "$ref": "#/components/responses/Error503" },
+      "Error400": {
+        "description": "Request contract or header validation failed.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+        },
+        "content": { "application/json": { "schema": { "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status400" } } }
+      },
+      "Error401": {
+        "description": "Authentication failed.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+        },
+        "content": { "application/json": { "schema": { "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status401" } } }
+      },
+      "Error403": {
+        "description": "The authenticated actor is not authorized.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+        },
+        "content": { "application/json": { "schema": { "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status403" } } }
+      },
+      "Error404": {
+        "description": "The requested resource is not visible or does not exist.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+        },
+        "content": { "application/json": { "schema": { "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status404" } } }
+      },
+      "Error409": {
+        "description": "Idempotency payload mismatch, stale revision, or sequence conflict.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+        },
+        "content": { "application/json": { "schema": { "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status409" } } }
+      },
+      "Error413": {
+        "description": "Payload exceeds the published bootstrap limit.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+        },
+        "content": { "application/json": { "schema": { "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status413" } } }
+      },
+      "Error422": {
+        "description": "The request is structurally valid but violates a domain or policy rule.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+        },
+        "content": { "application/json": { "schema": { "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status422" } } }
+      },
+      "Error429": {
+        "description": "Rate limit exceeded.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" },
+          "Retry-After": {
+            "description": "Minimum retry delay in seconds.",
+            "schema": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "content": { "application/json": { "schema": { "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status429" } } }
+      },
+      "Error500": {
+        "description": "Unexpected internal failure with a traceable error body.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+        },
+        "content": { "application/json": { "schema": { "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status500" } } }
+      },
+      "Error503": {
+        "description": "A required dependency is unavailable; retry only when error.retryable is true. UNKNOWN_COMMIT_STATE requires Location to equal /v1/commands/{body.command_id} so the durable result can be reconciled without issuing a new command.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" },
+          "Location": {
+            "description": "Required for UNKNOWN_COMMIT_STATE after durable acceptance and exactly /v1/commands/{body.command_id}; poll this URL instead of creating a new command.",
+            "schema": { "type": "string", "format": "uri-reference" }
+          },
+          "Retry-After": {
+            "description": "Suggested retry delay in seconds.",
+            "schema": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "content": { "application/json": { "schema": { "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status503" } } }
+      }
+    },
+    "schemas": {
+      "AcceptedGameJob": {
+        "$ref": "../schemas/game/accepted-game-job.schema.json"
+      },
+      "ResourceId": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+      }
+    }
+  }
+}

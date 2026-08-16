@@ -1,0 +1,14 @@
+{
+  "schema_ref": "../schemas/feishu/approval-decision-receipt.schema.json",
+  "value": {
+    "decision_id": "dec_00000001",
+    "release_id": "rel_00000001",
+    "candidate_id": "cand_00000001",
+    "record_status": "RECORDED",
+    "activation_status": "NOT_ACTIVATED",
+    "next_step": "VALIDATION_REQUIRED",
+    "candidate_revision": 2,
+    "trace_id": "trace_feishu_00000002",
+    "recorded_at": "2026-08-06T10:15:01Z"
+  }
+}

@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/product-experience/content-unit.schema.json",
+  "title": "Version-pinned product content unit",
+  "description": "Actor-authorized product projection for one immutable published task content version. There is intentionally no latest-version lookup in this contract.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "content_ref",
+    "status",
+    "unit_type",
+    "audiences",
+    "task",
+    "published_at",
+    "links"
+  ],
+  "properties": {
+    "content_ref": { "$ref": "../common/content-ref.schema.json" },
+    "status": { "const": "PUBLISHED" },
+    "unit_type": { "const": "TASK" },
+    "audiences": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": { "type": "string", "enum": ["LEARNER", "TEACHER_PREVIEW"] }
+    },
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "task_id",
+        "name",
+        "goal",
+        "instructions",
+        "knowledge_points",
+        "allowed_capabilities",
+        "starter_skill",
+        "hint_policy",
+        "story"
+      ],
+      "properties": {
+        "task_id": { "$ref": "#/$defs/identifier" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "goal": { "type": "string", "minLength": 1, "maxLength": 1000 },
+        "instructions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": { "type": "string", "minLength": 1, "maxLength": 1000 }
+        },
+        "knowledge_points": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{1,95}$" }
+        },
+        "allowed_capabilities": {
+          "type": "array",
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["WORLD_READ", "MOVE", "PLANT", "WATER", "HARVEST", "INTERACT", "SPEAK"]
+          }
+        },
+        "starter_skill": {
+          "oneOf": [
+            { "$ref": "#/$defs/starterSkill" },
+            { "type": "null" }
+          ]
+        },
+        "hint_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["max_level", "levels"],
+          "x-invariants": [
+            "levels are strictly ordered by level and contain each integer from 0 through max_level exactly once"
+          ],
+          "properties": {
+            "max_level": { "const": 4 },
+            "levels": {
+              "type": "array",
+              "minItems": 5,
+              "maxItems": 5,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["level", "instruction"],
+                "properties": {
+                  "level": { "type": "integer", "minimum": 0, "maximum": 4 },
+                  "instruction": { "type": "string", "minLength": 1, "maxLength": 1000 }
+                }
+              }
+            }
+          }
+        },
+        "story": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["opening", "success"],
+          "properties": {
+            "opening": { "type": "string", "minLength": 1, "maxLength": 2000 },
+            "success": { "type": "string", "minLength": 1, "maxLength": 2000 }
+          }
+        }
+      }
+    },
+    "published_at": { "type": "string", "format": "date-time" },
+    "links": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["self"],
+      "properties": {
+        "self": { "type": "string", "format": "uri-reference", "minLength": 1, "maxLength": 2048 }
+      }
+    }
+  },
+  "x-invariants": [
+    "the authenticated tenant and actor are authorized for this content and one declared audience before the reader-neutral representation is returned",
+    "the representation contains no reader-specific actor, tenant, attempt or authorization data",
+    "path unit_id and content_version plus required content_hash query equal content_ref",
+    "links.self identifies the same unit_id, version and content_hash",
+    "ETag equals a quoted content_ref.content_hash and is a strong validator for this immutable reader-neutral representation",
+    "one unit_id plus version permanently identifies one content_hash and cannot be overwritten"
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "starterSkill": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["skill_id", "display_name", "source_bundle", "compiler_profile", "test_suite_version"],
+      "properties": {
+        "skill_id": { "$ref": "#/$defs/identifier" },
+        "display_name": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "source_bundle": {
+          "$ref": "./skill-source-bundle.schema.json"
+        },
+        "compiler_profile": { "const": "YAYA_CPP20_SAFE_V1" },
+        "test_suite_version": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
+        }
+      }
+    }
+  }
+}

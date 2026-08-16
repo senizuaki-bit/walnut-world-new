@@ -1,0 +1,332 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/game/command.schema.json",
+  "title": "Asynchronous game command",
+  "x-invariants": [
+    "A WORLD_COMMIT result advances exactly one revision: world_revision = previous_revision + 1."
+  ],
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_context",
+    "command_id",
+    "revision",
+    "command_type",
+    "status",
+    "stage",
+    "terminal",
+    "accepted_at",
+    "updated_at",
+    "result",
+    "error",
+    "evidence_refs",
+    "versions",
+    "links"
+  ],
+  "properties": {
+    "request_context": { "$ref": "../common/request-context.schema.json" },
+    "command_id": { "$ref": "../common/command-id.schema.json" },
+    "revision": { "type": "integer", "minimum": 1 },
+    "command_type": { "$ref": "../common/command-type.schema.json" },
+    "status": { "$ref": "../common/command-status.schema.json" },
+    "stage": {
+      "type": "string",
+      "enum": [
+        "ACCEPT",
+        "VALIDATE",
+        "POLICY",
+        "REGISTRY",
+        "SANDBOX",
+        "WORLD_VALIDATE",
+        "WORLD_COMMIT",
+        "EVIDENCE",
+        "COMPLETE"
+      ]
+    },
+    "terminal": { "type": "boolean" },
+    "accepted_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "result": {
+      "oneOf": [
+        { "$ref": "#/$defs/worldCommitResult" },
+        { "$ref": "#/$defs/resourceCreatedResult" },
+        { "$ref": "#/$defs/clientEventsAcceptedResult" },
+        { "$ref": "#/$defs/noEffectResult" },
+        { "type": "null" }
+      ]
+    },
+    "error": {
+      "oneOf": [
+        { "$ref": "../common/error.schema.json" },
+        { "type": "null" }
+      ]
+    },
+    "evidence_refs": {
+      "type": "array",
+      "maxItems": 64,
+      "x-invariants": [
+        "evidence_refs contains at most one immutable reference for each evidence_id"
+      ],
+      "items": { "$ref": "../common/evidence-ref.schema.json" }
+    },
+    "versions": { "$ref": "../common/version-set.schema.json" },
+    "links": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["self"],
+      "properties": {
+        "self": { "type": "string", "format": "uri-reference", "minLength": 1, "maxLength": 2048 },
+        "run": { "type": "string", "format": "uri-reference", "minLength": 1, "maxLength": 2048 },
+        "world_snapshot": { "type": "string", "format": "uri-reference", "minLength": 1, "maxLength": 2048 }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "status": { "enum": ["ACCEPTED", "VALIDATING", "RUNNING_SANDBOX", "APPLYING_WORLD"] } },
+        "required": ["status"]
+      },
+      "then": {
+        "properties": {
+          "terminal": { "const": false },
+          "result": { "type": "null" },
+          "error": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "status": { "const": "APPLIED" } },
+        "required": ["status"]
+      },
+      "then": {
+        "properties": {
+          "stage": { "const": "COMPLETE" },
+          "terminal": { "const": true },
+          "result": { "not": { "type": "null" } },
+          "error": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "status": { "enum": ["REJECTED", "FAILED", "UNKNOWN"] } },
+        "required": ["status"]
+      },
+      "then": {
+        "properties": {
+          "terminal": { "const": true },
+          "result": { "type": "null" },
+          "error": { "$ref": "../common/error.schema.json" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "status": { "const": "UNKNOWN" } },
+        "required": ["status"]
+      },
+      "then": {
+        "properties": {
+          "stage": { "const": "WORLD_COMMIT" },
+          "error": {
+            "allOf": [
+              { "$ref": "../common/error.schema.json" },
+              {
+                "properties": {
+                  "code": { "const": "UNKNOWN_COMMIT_STATE" },
+                  "stage": { "const": "WORLD_COMMIT" }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "status": { "const": "CANCELLED" } },
+        "required": ["status"]
+      },
+      "then": {
+        "properties": {
+          "terminal": { "const": true },
+          "result": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "command_type": { "const": "CREATE_SKILL_BUILD" }, "status": { "const": "APPLIED" } },
+        "required": ["command_type", "status"]
+      },
+      "then": {
+        "properties": {
+          "result": {
+            "allOf": [
+              { "$ref": "#/$defs/resourceCreatedResult" },
+              { "properties": { "resource_type": { "const": "SKILL_BUILD" } } }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "command_type": { "const": "ACTIVATE_SKILL_VERSION" }, "status": { "const": "APPLIED" } },
+        "required": ["command_type", "status"]
+      },
+      "then": {
+        "properties": {
+          "result": {
+            "allOf": [
+              { "$ref": "#/$defs/resourceCreatedResult" },
+              { "properties": { "resource_type": { "const": "SKILL_ACTIVATION" } } }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "command_type": { "const": "CREATE_AGENT_SESSION" }, "status": { "const": "APPLIED" } },
+        "required": ["command_type", "status"]
+      },
+      "then": {
+        "properties": {
+          "result": {
+            "allOf": [
+              { "$ref": "#/$defs/resourceCreatedResult" },
+              { "properties": { "resource_type": { "const": "AGENT_SESSION" } } }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "command_type": { "const": "EXECUTE_AGENT_TURN" }, "status": { "const": "APPLIED" } },
+        "required": ["command_type", "status"]
+      },
+      "then": {
+        "properties": {
+          "result": {
+            "oneOf": [
+              { "$ref": "#/$defs/worldCommitResult" },
+              { "$ref": "#/$defs/noEffectResult" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command_type": { "const": "EXECUTE_AGENT_TURN" },
+          "status": { "const": "APPLIED" },
+          "result": {
+            "type": "object",
+            "properties": { "result_type": { "const": "WORLD_COMMIT" } },
+            "required": ["result_type"]
+          }
+        },
+        "required": ["command_type", "status", "result"]
+      },
+      "then": {
+        "properties": {
+          "links": { "required": ["self", "run", "world_snapshot"] }
+        }
+      }
+    },
+    {
+      "if": {
+        "allOf": [
+          {
+            "properties": { "command_type": { "const": "EXECUTE_AGENT_TURN" } },
+            "required": ["command_type"]
+          },
+          {
+            "anyOf": [
+              {
+                "properties": { "status": { "enum": ["RUNNING_SANDBOX", "APPLYING_WORLD"] } },
+                "required": ["status"]
+              },
+              {
+                "properties": { "stage": { "enum": ["SANDBOX", "WORLD_VALIDATE", "WORLD_COMMIT", "EVIDENCE"] } },
+                "required": ["stage"]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "links": { "required": ["self", "run"] }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "command_type": { "const": "INGEST_CLIENT_EVENTS" }, "status": { "const": "APPLIED" } },
+        "required": ["command_type", "status"]
+      },
+      "then": { "properties": { "result": { "$ref": "#/$defs/clientEventsAcceptedResult" } } }
+    }
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "worldCommitResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "x-invariants": [
+        "world_revision == previous_revision + 1",
+        "first_event_sequence <= last_event_sequence"
+      ],
+      "required": ["result_type", "world_id", "previous_revision", "world_revision", "first_event_sequence", "last_event_sequence"],
+      "properties": {
+        "result_type": { "const": "WORLD_COMMIT" },
+        "world_id": { "$ref": "#/$defs/identifier" },
+        "previous_revision": { "type": "integer", "minimum": 0 },
+        "world_revision": { "type": "integer", "minimum": 1 },
+        "first_event_sequence": { "type": "integer", "minimum": 1 },
+        "last_event_sequence": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "resourceCreatedResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["result_type", "resource_type", "resource_id", "resource_url"],
+      "properties": {
+        "result_type": { "const": "RESOURCE_CREATED" },
+        "resource_type": { "type": "string", "enum": ["SKILL_BUILD", "AGENT_SESSION", "SKILL_ACTIVATION"] },
+        "resource_id": { "$ref": "#/$defs/identifier" },
+        "resource_url": { "type": "string", "format": "uri-reference", "minLength": 1, "maxLength": 2048 }
+      }
+    },
+    "clientEventsAcceptedResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["result_type", "batch_id", "accepted_count", "duplicate_count", "rejected_count"],
+      "properties": {
+        "result_type": { "const": "CLIENT_EVENTS_ACCEPTED" },
+        "batch_id": { "$ref": "#/$defs/identifier" },
+        "accepted_count": { "type": "integer", "minimum": 0 },
+        "duplicate_count": { "type": "integer", "minimum": 0 },
+        "rejected_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "noEffectResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["result_type", "reason_code"],
+      "properties": {
+        "result_type": { "const": "NO_EFFECT" },
+        "reason_code": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,95}$" }
+      }
+    }
+  }
+}

@@ -1,0 +1,1120 @@
+{
+  "openapi": "3.1.0",
+  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
+  "info": {
+    "title": "Yaya Agent Feishu Integration API",
+    "version": "1.0.0",
+    "description": "Contract-first boundary between Feishu and the Yaya Agent platform. Feishu is an asynchronous collaboration adapter: it may submit immutable content candidates, record approval decisions, read authorized projections and create report drafts. It has no WorldEngine command surface and cannot directly activate live content."
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Same-origin integration gateway"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Feishu Webhooks",
+      "description": "Signed provider callbacks with replay protection and explicit quarantine semantics."
+    },
+    {
+      "name": "Content Collaboration",
+      "description": "Candidate and approval workflows. Neither operation activates content or writes game world state."
+    },
+    {
+      "name": "Learning Read Models",
+      "description": "Purpose-bound, redacted, read-only learner and class projections."
+    },
+    {
+      "name": "Reports",
+      "description": "Asynchronous evidence-grounded report draft generation."
+    },
+    {
+      "name": "Evidence",
+      "description": "Read-only redacted evidence views."
+    }
+  ],
+  "security": [
+    {
+      "ServiceBearer": []
+    }
+  ],
+  "paths": {
+    "/integrations/feishu/v1/webhooks": {
+      "post": {
+        "tags": [
+          "Feishu Webhooks"
+        ],
+        "operationId": "receiveFeishuWebhook",
+        "summary": "Verify and durably receive a Feishu callback",
+        "description": "The gateway MUST validate X-Lark-Request-Timestamp, X-Lark-Request-Nonce and X-Lark-Signature against the exact raw HTTP body before JSON parsing, reject timestamps outside the configured skew window, and atomically persist the receipt before acknowledging. A known duplicate returns 200 with DUPLICATE. An authenticated but unsupported event returns 200 with QUARANTINED_UNSUPPORTED and raises an observable quarantine record; it is never silently discarded.",
+        "security": [
+          {
+            "FeishuWebhookSignature": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SchemaVersion"
+          },
+          {
+            "$ref": "#/components/parameters/LarkTimestamp"
+          },
+          {
+            "$ref": "#/components/parameters/LarkNonce"
+          },
+          {
+            "$ref": "#/components/parameters/LarkSignature"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/TraceId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schemas/feishu/webhook.schema.json"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "URL verification challenge or durable event receipt. The receipt is explicit about accepted, duplicate or quarantined disposition.",
+            "headers": {
+              "X-Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              },
+              "X-Trace-Id": {
+                "$ref": "#/components/headers/TraceId"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/feishu/webhook-response.schema.json"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidSignature"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        },
+        "x-idempotency-scope": "tenant + operation + Idempotency-Key",
+        "x-replay-key": "tenant_key + event_id",
+        "x-world-write": "FORBIDDEN",
+        "x-silent-discard": "FORBIDDEN"
+      }
+    },
+    "/integrations/feishu/v1/content-releases": {
+      "post": {
+        "tags": [
+          "Content Collaboration"
+        ],
+        "operationId": "createFeishuContentReleaseCandidate",
+        "summary": "Create and validate an immutable content candidate",
+        "description": "Creates a candidate from an exact Feishu document revision and queues schema, semantic, policy and automated validation. A 202 response returns authoritative candidate_revision=1 for later compare-and-set approval. It means only that a candidate was durably created and validation was queued, never that the candidate is active.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SchemaVersion"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/TraceId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schemas/feishu/content-release.schema.json"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Candidate recorded and validation queued; candidate_revision is the authoritative initial revision and activation_status is always NOT_ACTIVATED.",
+            "headers": {
+              "Location": {
+                "description": "Canonical content release status resource.",
+                "schema": {
+                  "type": "string",
+                  "format": "uri-reference"
+                }
+              },
+              "X-Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              },
+              "X-Trace-Id": {
+                "$ref": "#/components/headers/TraceId"
+              },
+              "Idempotency-Replayed": {
+                "$ref": "#/components/headers/IdempotencyReplayed"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/feishu/content-release-receipt.schema.json"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/Unprocessable"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        },
+        "x-required-role": "content:submitter",
+        "x-world-write": "FORBIDDEN",
+        "x-direct-content-activation": "FORBIDDEN",
+        "x-live-target": "FORBIDDEN"
+      }
+    },
+    "/integrations/feishu/v1/content-releases/{release_id}": {
+      "get": {
+        "tags": [
+          "Content Collaboration"
+        ],
+        "operationId": "getFeishuContentReleaseStatus",
+        "summary": "Read content candidate validation and release status",
+        "description": "Makes the authoritative candidate_revision and every asynchronous validation and canary outcome observable. This operation is read-only; activation_status may report a later internal activation or rollback, but no Feishu operation can change it.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SchemaVersion"
+          },
+          {
+            "$ref": "#/components/parameters/ReleaseId"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/TraceId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current authoritative candidate revision, validation, canary and activation observation with per-check status.",
+            "headers": {
+              "X-Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              },
+              "X-Trace-Id": {
+                "$ref": "#/components/headers/TraceId"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/feishu/content-release-status.schema.json"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        },
+        "x-read-only": true,
+        "x-required-role": "content:read",
+        "x-direct-content-activation": "FORBIDDEN",
+        "x-world-write": "FORBIDDEN"
+      }
+    },
+    "/integrations/feishu/v1/approval-decisions": {
+      "post": {
+        "tags": [
+          "Content Collaboration"
+        ],
+        "operationId": "recordFeishuApprovalDecision",
+        "summary": "Record an approval decision against an exact candidate revision",
+        "description": "Atomically compares expected_candidate_revision with the current candidate revision and records an authenticated decision only on an exact match. APPROVE permits the candidate to continue into validation; it is not an activation command. Reusing an Idempotency-Key with a different payload returns 409 IDEMPOTENCY_KEY_REUSED. A stale expected_candidate_revision or conflicting approval-instance business decision returns 409 CONTENT_VERSION_MISMATCH. Neither failure changes candidate state.",
+        "x-invariants": [
+          "request.expected_candidate_revision == current candidate_revision",
+          "a newly recorded decision sets response.candidate_revision == request.expected_candidate_revision + 1",
+          "tenant_id + approval_instance_id identifies one immutable canonical business decision and receipt",
+          "an identical canonical business decision returns the original receipt without another revision increment",
+          "conflicting approval-instance reuse and stale decisions return CONTENT_VERSION_MISMATCH without mutation",
+          "WORKFLOW_CLOSED rejects later approval instances for the candidate without mutation"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SchemaVersion"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/TraceId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schemas/feishu/approval-decision.schema.json"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Decision durably recorded by compare-and-set; candidate_revision is the committed +1 revision and activation_status is always NOT_ACTIVATED.",
+            "headers": {
+              "X-Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              },
+              "X-Trace-Id": {
+                "$ref": "#/components/headers/TraceId"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/feishu/approval-decision-receipt.schema.json"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/Unprocessable"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        },
+        "x-required-role": "content:approver",
+        "x-world-write": "FORBIDDEN",
+        "x-direct-content-activation": "FORBIDDEN"
+      }
+    },
+    "/integrations/feishu/v1/learner-queries": {
+      "post": {
+        "tags": [
+          "Learning Read Models"
+        ],
+        "operationId": "queryLearnerProjectionFromFeishu",
+        "summary": "Read a purpose-bound learner projection",
+        "description": "Returns only authorized fields from a derived learner projection. The request cannot write mastery, append evidence, modify policy or invoke a world command. Direct identifiers are excluded and data freshness is mandatory in the response.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SchemaVersion"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/TraceId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schemas/feishu/learner-query.schema.json"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Redacted learner projection and explicit projection freshness.",
+            "headers": {
+              "X-Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              },
+              "X-Trace-Id": {
+                "$ref": "#/components/headers/TraceId"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/feishu/learner-query-result.schema.json"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        },
+        "x-read-only": true,
+        "x-required-role": "learner:read",
+        "x-audit-access": true,
+        "x-world-write": "FORBIDDEN",
+        "x-learner-model-write": "FORBIDDEN"
+      }
+    },
+    "/integrations/feishu/v1/class-insights": {
+      "post": {
+        "tags": [
+          "Learning Read Models"
+        ],
+        "operationId": "queryClassInsightsFromFeishu",
+        "summary": "Read privacy-protected class aggregates",
+        "description": "Returns aggregate-only class insights. Small cells are always suppressed and the response schema cannot contain learner identifiers. This is a read operation despite using POST for structured query criteria.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SchemaVersion"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/TraceId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schemas/feishu/class-insights-query.schema.json"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Aggregate result with explicit suppression metadata and no learner identifiers.",
+            "headers": {
+              "X-Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              },
+              "X-Trace-Id": {
+                "$ref": "#/components/headers/TraceId"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/feishu/class-insights-result.schema.json"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        },
+        "x-read-only": true,
+        "x-required-role": "class-insights:read",
+        "x-audit-access": true,
+        "x-row-level-data": "FORBIDDEN",
+        "x-world-write": "FORBIDDEN"
+      }
+    },
+    "/integrations/feishu/v1/report-jobs": {
+      "post": {
+        "tags": [
+          "Reports"
+        ],
+        "operationId": "createFeishuReportDraftJob",
+        "summary": "Queue an evidence-grounded report draft",
+        "description": "Queues asynchronous draft generation from explicit evidence references and an immutable template. The output is always DRAFT_ONLY and NOT_SENT; delivery or publication is outside this API and requires separate authorization.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SchemaVersion"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/TraceId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schemas/feishu/report-job-request.schema.json"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Report draft job durably queued; no report has been sent.",
+            "headers": {
+              "Location": {
+                "description": "Canonical job status resource.",
+                "schema": {
+                  "type": "string",
+                  "format": "uri-reference"
+                }
+              },
+              "X-Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              },
+              "X-Trace-Id": {
+                "$ref": "#/components/headers/TraceId"
+              },
+              "Idempotency-Replayed": {
+                "$ref": "#/components/headers/IdempotencyReplayed"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/feishu/report-job.schema.json"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/Unprocessable"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        },
+        "x-required-role": "report:create",
+        "x-output-mode": "DRAFT_ONLY",
+        "x-direct-delivery": "FORBIDDEN",
+        "x-world-write": "FORBIDDEN"
+      }
+    },
+    "/integrations/feishu/v1/report-jobs/{job_id}": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "operationId": "getFeishuReportDraftJob",
+        "summary": "Read report draft job status",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SchemaVersion"
+          },
+          {
+            "$ref": "#/components/parameters/JobId"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/TraceId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current report draft status. A ready draft is still NOT_SENT.",
+            "headers": {
+              "X-Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              },
+              "X-Trace-Id": {
+                "$ref": "#/components/headers/TraceId"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/feishu/report-job.schema.json"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        },
+        "x-read-only": true,
+        "x-required-role": "report:read",
+        "x-world-write": "FORBIDDEN"
+      }
+    },
+    "/integrations/feishu/v1/evidence/{evidence_id}": {
+      "get": {
+        "tags": [
+          "Evidence"
+        ],
+        "operationId": "getRedactedEvidenceForFeishu",
+        "summary": "Read an authorized redacted evidence view",
+        "description": "Returns a redacted projection after tenant, role, purpose and subject authorization. Reads are audit logged. Raw source code, raw chat, credentials and direct learner identifiers are never returned.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SchemaVersion"
+          },
+          {
+            "$ref": "#/components/parameters/EvidenceId"
+          },
+          {
+            "$ref": "#/components/parameters/EvidencePurpose"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/TraceId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Redacted, read-only evidence projection with provenance.",
+            "headers": {
+              "X-Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              },
+              "X-Trace-Id": {
+                "$ref": "#/components/headers/TraceId"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/feishu/evidence-view.schema.json"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        },
+        "x-read-only": true,
+        "x-required-role": "evidence:read",
+        "x-audit-access": true,
+        "x-world-write": "FORBIDDEN"
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ServiceBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Short-lived integration token bound to tenant, actor, roles and audience. Production deployments should additionally enforce mTLS at the gateway."
+      },
+      "FeishuWebhookSignature": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Lark-Signature",
+        "description": "Feishu callback signature. It must be checked with timestamp and nonce over the exact raw body before parsing."
+      }
+    },
+    "parameters": {
+      "SchemaVersion": {
+        "name": "X-Schema-Version",
+        "in": "header",
+        "required": true,
+        "description": "Reject unsupported clients explicitly instead of coercing unknown payloads.",
+        "schema": {
+          "type": "string",
+          "const": "1.0.0"
+        }
+      },
+      "IdempotencyKey": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "description": "Opaque caller-generated key scoped to tenant and operation. The server stores the request hash and committed response. Repeating the same key and same payload returns the original response; reusing it with a different payload returns 409 IDEMPOTENCY_KEY_REUSED. Processing must not create duplicate candidates, decisions, jobs or receipts.",
+        "schema": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{15,127}$"
+        }
+      },
+      "RequestId": {
+        "name": "X-Request-Id",
+        "in": "header",
+        "required": true,
+        "description": "Current HTTP-attempt request identifier. On first processing it must equal context.request_id. A byte-equivalent Idempotency-Key replay retains the original body context while this header uses a new attempt identifier.",
+        "schema": {
+          "type": "string",
+          "pattern": "^req_[A-Za-z0-9_-]{8,96}$"
+        }
+      },
+      "TraceId": {
+        "name": "X-Trace-Id",
+        "in": "header",
+        "required": true,
+        "description": "Current HTTP-attempt trace identifier. On first processing it must equal context.trace_id. A byte-equivalent Idempotency-Key replay retains the original body context while this header uses a new attempt trace.",
+        "schema": {
+          "type": "string",
+          "pattern": "^trace_[A-Za-z0-9_-]{8,96}$"
+        }
+      },
+      "LarkTimestamp": {
+        "name": "X-Lark-Request-Timestamp",
+        "in": "header",
+        "required": true,
+        "description": "Provider callback timestamp used for signature verification and clock-skew rejection.",
+        "schema": {
+          "type": "string",
+          "pattern": "^[0-9]{10,16}$"
+        }
+      },
+      "LarkNonce": {
+        "name": "X-Lark-Request-Nonce",
+        "in": "header",
+        "required": true,
+        "description": "Provider nonce. A timestamp/nonce/signature tuple is accepted at most once within the replay window.",
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "LarkSignature": {
+        "name": "X-Lark-Signature",
+        "in": "header",
+        "required": true,
+        "description": "Provider signature over the exact raw request body and callback metadata.",
+        "schema": {
+          "type": "string",
+          "minLength": 32,
+          "maxLength": 512
+        }
+      },
+      "JobId": {
+        "name": "job_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "pattern": "^job_[A-Za-z0-9_-]{8,96}$"
+        }
+      },
+      "ReleaseId": {
+        "name": "release_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "pattern": "^rel_[A-Za-z0-9_-]{8,128}$"
+        }
+      },
+      "EvidenceId": {
+        "name": "evidence_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "pattern": "^evidence_[A-Za-z0-9_-]{8,128}$"
+        }
+      },
+      "EvidencePurpose": {
+        "name": "purpose",
+        "in": "query",
+        "required": true,
+        "description": "Purpose binding used in authorization and immutable access audit.",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "TEACHER_SUPPORT",
+            "GUARDIAN_REPORT",
+            "LEARNING_REVIEW",
+            "SAFETY_INVESTIGATION"
+          ]
+        }
+      }
+    },
+    "headers": {
+      "RequestId": {
+        "description": "Echoed request identifier.",
+        "schema": {
+          "type": "string",
+          "pattern": "^req_[A-Za-z0-9_-]{8,96}$"
+        }
+      },
+      "TraceId": {
+        "description": "End-to-end trace identifier.",
+        "schema": {
+          "type": "string",
+          "pattern": "^trace_[A-Za-z0-9_-]{8,96}$"
+        }
+      },
+      "RetryAfter": {
+        "description": "Seconds before the client may retry with the same Idempotency-Key.",
+        "schema": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "IdempotencyReplayed": {
+        "description": "false on first acceptance and true when the original 202 receipt is replayed.",
+        "schema": {
+          "type": "string",
+          "enum": ["false", "true"]
+        }
+      }
+    },
+    "schemas": {
+      "ErrorResponse": {
+        "$ref": "../schemas/common/error-response.schema.json"
+      },
+      "RequestContext": {
+        "$ref": "../schemas/common/request-context.schema.json"
+      },
+      "AsyncJob": {
+        "$ref": "../schemas/common/async-job.schema.json"
+      },
+      "EvidenceRef": {
+        "$ref": "../schemas/common/evidence-ref.schema.json"
+      },
+      "ContentRef": {
+        "$ref": "../schemas/common/content-ref.schema.json"
+      },
+      "ActorRef": {
+        "$ref": "../schemas/common/actor-ref.schema.json"
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Malformed request, header/body identity mismatch, invalid schema or callback timestamp outside the allowed window.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/RequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/TraceId" }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status400"
+            }
+          }
+        }
+      },
+      "InvalidSignature": {
+        "description": "Missing or invalid callback signature or invalid verification token.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/RequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/TraceId" }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status401"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Missing, expired or invalid integration identity.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/RequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/TraceId" }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status401"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Authenticated actor lacks the tenant, role, subject or purpose authorization.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/RequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/TraceId" }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status403"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Resource is absent or intentionally hidden from this actor.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/RequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/TraceId" }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status404"
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "X-Schema-Version is unsupported (SCHEMA_VERSION_UNSUPPORTED), an idempotency key was reused with a different payload, an expected revision is stale, an immutable decision conflicts with an existing record, or a callback nonce was replayed (FEISHU_REPLAY_DETECTED).",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/RequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/TraceId" }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status409"
+            }
+          }
+        }
+      },
+      "Unprocessable": {
+        "description": "Well-formed input rejected by content, approval, privacy or evidence policy.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/RequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/TraceId" }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status422"
+            }
+          }
+        }
+      },
+      "RateLimited": {
+        "description": "Rate limit reached. The client may retry only after Retry-After and with the same Idempotency-Key.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/RequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/TraceId" },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status429"
+            }
+          }
+        }
+      },
+      "InternalError": {
+        "description": "Unexpected invariant or internal failure. The response always carries request_id and trace_id; the failure must be logged and alerted rather than converted into a success response.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/RequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/TraceId" }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status500"
+            }
+          }
+        }
+      },
+      "ServiceUnavailable": {
+        "description": "Required dependency is unavailable. Accepted work must remain queryable; clients retry with the same Idempotency-Key.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/RequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/TraceId" },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status503"
+            }
+          }
+        }
+      }
+    }
+  }
+}

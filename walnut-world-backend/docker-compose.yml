@@ -1,0 +1,211 @@
+x-walnut-runtime: &walnut-runtime
+  image: ${WALNUT_BUILD_IMAGE:?set digest-pinned WALNUT_BUILD_IMAGE}
+
+x-database-environment: &database-environment
+  WALNUT_DATABASE_URL: postgresql+asyncpg://walnut:${POSTGRES_PASSWORD}@postgres:5432/walnut
+
+services:
+  postgres:
+    image: ${WALNUT_POSTGRES_IMAGE:?set digest-pinned WALNUT_POSTGRES_IMAGE}
+    environment:
+      POSTGRES_DB: walnut
+      POSTGRES_USER: walnut
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in the environment}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U walnut -d walnut"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - walnut-postgres:/var/lib/postgresql/data
+
+  migrate:
+    <<: *walnut-runtime
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      <<: *database-environment
+    command: ["alembic", "upgrade", "head"]
+    restart: "no"
+
+  backend:
+    <<: *walnut-runtime
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      <<: *database-environment
+      WALNUT_CONTRACT_PATH: /contracts-agent
+      WALNUT_CONTRACT_RELEASE_PATH: /app/contract-release.json
+      WALNUT_DEVELOPMENT_AUTH: "false"
+      WALNUT_AUTH_HMAC_SECRET: ${WALNUT_AUTH_HMAC_SECRET:?set WALNUT_AUTH_HMAC_SECRET in the environment}
+      WALNUT_AUTH_ISSUER: ${WALNUT_AUTH_ISSUER:?set WALNUT_AUTH_ISSUER in the environment}
+      WALNUT_AUTH_AUDIENCE: ${WALNUT_AUTH_AUDIENCE:?set WALNUT_AUTH_AUDIENCE in the environment}
+      WALNUT_FEISHU_PSEUDONYM_SECRET: ${WALNUT_FEISHU_PSEUDONYM_SECRET:?set WALNUT_FEISHU_PSEUDONYM_SECRET in the environment}
+      WALNUT_FEISHU_MCP_DASHBOARD_URL: ${WALNUT_FEISHU_MCP_DASHBOARD_URL:?set WALNUT_FEISHU_MCP_DASHBOARD_URL in the environment}
+      WALNUT_FEISHU_MCP_TEACHER_WORKSPACE_URL: ${WALNUT_FEISHU_MCP_TEACHER_WORKSPACE_URL:?set WALNUT_FEISHU_MCP_TEACHER_WORKSPACE_URL in the environment}
+    volumes:
+      - ../agent:/contracts-agent:ro
+    command:
+      ["uvicorn", "walnut_backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import socket; socket.create_connection(('127.0.0.1',8000),2).close()",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    ports:
+      - "127.0.0.1:8790:8000"
+    restart: unless-stopped
+
+  docker-engine:
+    image: ${WALNUT_DIND_IMAGE:?set digest-pinned WALNUT_DIND_IMAGE}
+    privileged: true
+    environment:
+      DOCKER_TLS_CERTDIR: ""
+    command:
+      [
+        "dockerd",
+        "--host=unix:///var/run/walnut-docker/docker.sock",
+        "--storage-driver=overlay2",
+      ]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "docker",
+          "--host=unix:///var/run/walnut-docker/docker.sock",
+          "info",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    volumes:
+      - walnut-runtime:/var/lib/walnut
+      - walnut-docker-data:/var/lib/docker
+      - walnut-docker-socket:/var/run/walnut-docker
+    restart: unless-stopped
+
+  sandbox-image:
+    image: ${WALNUT_DIND_IMAGE:?set digest-pinned WALNUT_DIND_IMAGE}
+    depends_on:
+      docker-engine:
+        condition: service_healthy
+    entrypoint: ["docker"]
+    command:
+      [
+        "--host=unix:///var/run/walnut-docker/docker.sock",
+        "pull",
+        "${WALNUT_SANDBOX_IMAGE:?set digest-pinned WALNUT_SANDBOX_IMAGE}",
+      ]
+    volumes:
+      - walnut-docker-socket:/var/run/walnut-docker
+    restart: "no"
+
+  llm-relay:
+    <<: *walnut-runtime
+    init: true
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      <<: *database-environment
+      WALNUT_LLM_RELAY_SERVER_API_KEY: ${WALNUT_LLM_RELAY_API_KEY:?set WALNUT_LLM_RELAY_API_KEY}
+      WALNUT_LLM_UPSTREAM_API_KEY: ${WALNUT_LLM_UPSTREAM_API_KEY:?set WALNUT_LLM_UPSTREAM_API_KEY}
+      WALNUT_LLM_UPSTREAM_ENDPOINT: ${WALNUT_LLM_UPSTREAM_ENDPOINT:-https://api.deepseek.com/chat/completions}
+      WALNUT_LLM_MODEL: ${WALNUT_LLM_MODEL:?set WALNUT_LLM_MODEL}
+      WALNUT_LLM_PROVIDER: ${WALNUT_LLM_PROVIDER:?set WALNUT_LLM_PROVIDER}
+      WALNUT_LLM_RELAY_BIND_HOST: 127.0.0.1
+      WALNUT_LLM_RELAY_BIND_PORT: "8081"
+      WALNUT_LLM_RELAY_RESULT_RETENTION_SECONDS: ${WALNUT_LLM_RELAY_REQUIRED_RETENTION_SECONDS:-604800}
+      WALNUT_LLM_RELAY_MAX_RESPONSE_BYTES: ${WALNUT_LLM_RELAY_MAX_RESPONSE_BYTES:-2097152}
+      WALNUT_LLM_UPSTREAM_TIMEOUT_MS: ${WALNUT_LLM_UPSTREAM_TIMEOUT_MS:-120000}
+      WALNUT_LLM_ACKNOWLEDGEMENT_GRACE_SECONDS: ${WALNUT_LLM_ACKNOWLEDGEMENT_GRACE_SECONDS:-5}
+    command: ["python", "-m", "walnut_backend.llm_relay.main"]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import socket; socket.create_connection(('127.0.0.1',8081),2).close()",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  workflow-worker:
+    <<: *walnut-runtime
+    init: true
+    network_mode: service:llm-relay
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      sandbox-image:
+        condition: service_completed_successfully
+      llm-relay:
+        condition: service_healthy
+    environment:
+      <<: *database-environment
+      WALNUT_TENANT_ID: ${WALNUT_TENANT_ID:?set WALNUT_TENANT_ID in the environment}
+      WALNUT_WORKER_ID: ${WALNUT_WORKER_ID:-walnut-workflow-worker-1}
+      WALNUT_RUNTIME_ROOT: /var/lib/walnut
+      DOCKER_HOST: unix:///var/run/walnut-docker/docker.sock
+      WALNUT_DOCKER_EXECUTABLE: docker
+      WALNUT_SANDBOX_IMAGE: ${WALNUT_SANDBOX_IMAGE:?set digest-pinned WALNUT_SANDBOX_IMAGE}
+      WALNUT_LLM_RELAY_ENDPOINT: http://127.0.0.1:8081
+      WALNUT_LLM_RELAY_API_KEY: ${WALNUT_LLM_RELAY_API_KEY:?set WALNUT_LLM_RELAY_API_KEY}
+      WALNUT_LLM_MODEL: ${WALNUT_LLM_MODEL:?set WALNUT_LLM_MODEL}
+      WALNUT_LLM_PROVIDER: ${WALNUT_LLM_PROVIDER:?set WALNUT_LLM_PROVIDER}
+      WALNUT_LLM_RESPONSE_FORMAT: ${WALNUT_LLM_RESPONSE_FORMAT:-json_object}
+      WALNUT_LLM_THINKING_MODE: ${WALNUT_LLM_THINKING_MODE:-disabled}
+      WALNUT_LLM_RELAY_ALLOW_INSECURE_LOCALHOST: "true"
+      WALNUT_LLM_RELAY_REQUIRED_RETENTION_SECONDS: ${WALNUT_LLM_RELAY_REQUIRED_RETENTION_SECONDS:-604800}
+      WALNUT_LLM_RELAY_MAX_RESPONSE_BYTES: ${WALNUT_LLM_RELAY_MAX_RESPONSE_BYTES:-2097152}
+      WALNUT_LLM_RELAY_CAPABILITY_TIMEOUT_MS: ${WALNUT_LLM_RELAY_CAPABILITY_TIMEOUT_MS:-5000}
+      WALNUT_PROMPT_VERSION: ${WALNUT_PROMPT_VERSION:?set WALNUT_PROMPT_VERSION}
+      WALNUT_TEACHING_SPEC_VERSION: ${WALNUT_TEACHING_SPEC_VERSION:?set WALNUT_TEACHING_SPEC_VERSION}
+      WALNUT_WORLD_RULES_VERSION: ${WALNUT_WORLD_RULES_VERSION:?set WALNUT_WORLD_RULES_VERSION}
+      WALNUT_WORLD_CONTENT_VERSION: ${WALNUT_WORLD_CONTENT_VERSION:?set WALNUT_WORLD_CONTENT_VERSION}
+      WALNUT_WORLD_MAX_ACTIONS: ${WALNUT_WORLD_MAX_ACTIONS:-8}
+      WALNUT_WORLD_MIN_X: ${WALNUT_WORLD_MIN_X:-0}
+      WALNUT_WORLD_MAX_X: ${WALNUT_WORLD_MAX_X:-31}
+      WALNUT_WORLD_MIN_Y: ${WALNUT_WORLD_MIN_Y:-0}
+      WALNUT_WORLD_MAX_Y: ${WALNUT_WORLD_MAX_Y:-31}
+      WALNUT_WORLD_HARVEST_GROWTH_STAGE: ${WALNUT_WORLD_HARVEST_GROWTH_STAGE:-2}
+      WALNUT_WORLD_SUCCESS_SCORE: ${WALNUT_WORLD_SUCCESS_SCORE:-1}
+      WALNUT_WORKER_LEASE_SECONDS: ${WALNUT_WORKER_LEASE_SECONDS:-900}
+    volumes:
+      - walnut-runtime:/var/lib/walnut
+      - walnut-docker-socket:/var/run/walnut-docker
+    command: ["python", "-m", "walnut_backend.worker_main"]
+    restart: unless-stopped
+
+  learner-worker:
+    <<: *walnut-runtime
+    init: true
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      <<: *database-environment
+      WALNUT_TENANT_ID: ${WALNUT_TENANT_ID:?set WALNUT_TENANT_ID in the environment}
+      WALNUT_LEARNER_WORKER_ID: ${WALNUT_LEARNER_WORKER_ID:-walnut-learner-worker-1}
+      WALNUT_LEARNER_WORKER_LEASE_SECONDS: ${WALNUT_LEARNER_WORKER_LEASE_SECONDS:-300}
+      WALNUT_LEARNER_WORKER_IDLE_POLL_SECONDS: ${WALNUT_LEARNER_WORKER_IDLE_POLL_SECONDS:-0.25}
+      WALNUT_LEARNER_WORKER_MAXIMUM_ATTEMPTS: ${WALNUT_LEARNER_WORKER_MAXIMUM_ATTEMPTS:-5}
+    command: ["python", "-m", "walnut_backend.learner_worker_main"]
+    restart: unless-stopped
+
+volumes:
+  walnut-docker-data:
+  walnut-docker-socket:
+  walnut-postgres:
+  walnut-runtime:

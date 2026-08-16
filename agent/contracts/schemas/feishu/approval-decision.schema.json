@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/feishu/approval-decision.schema.json",
+  "title": "Record Feishu approval decision",
+  "description": "Records an authenticated approval decision only when expected_candidate_revision equals the authoritative current revision. A stale revision returns 409 CONTENT_VERSION_MISMATCH without mutation. APPROVE authorizes validation to continue; it does not activate content and cannot write to a world.",
+  "x-invariants": [
+    "expected_candidate_revision == current candidate_revision",
+    "tenant_id + approval_instance_id identifies one immutable canonical business decision",
+    "an identical canonical business decision returns its original receipt without incrementing candidate_revision",
+    "a conflicting canonical business decision returns CONTENT_VERSION_MISMATCH without mutation",
+    "WORKFLOW_CLOSED forbids decisions from later approval instances for the same candidate"
+  ],
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "context",
+    "approval_instance_id",
+    "release_id",
+    "candidate_id",
+    "expected_candidate_revision",
+    "decision",
+    "decided_at"
+  ],
+  "properties": {
+    "context": {
+      "$ref": "../common/request-context.schema.json"
+    },
+    "approval_instance_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "release_id": {
+      "type": "string",
+      "pattern": "^rel_[A-Za-z0-9_-]{8,128}$"
+    },
+    "candidate_id": {
+      "type": "string",
+      "pattern": "^cand_[A-Za-z0-9_-]{8,128}$"
+    },
+    "expected_candidate_revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "APPROVE",
+        "REJECT",
+        "REQUEST_CHANGES"
+      ]
+    },
+    "comment": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "decided_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

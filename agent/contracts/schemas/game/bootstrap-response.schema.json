@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/game/bootstrap-response.schema.json",
+  "title": "Game bootstrap response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_context",
+    "api_version",
+    "server_time",
+    "actor",
+    "content",
+    "capabilities",
+    "limits",
+    "world"
+  ],
+  "properties": {
+    "request_context": {
+      "$ref": "../common/request-context.schema.json"
+    },
+    "api_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "server_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "actor": {
+      "$ref": "../common/actor-ref.schema.json"
+    },
+    "content": {
+      "$ref": "../common/content-ref.schema.json"
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "skill_builds",
+        "agent_sessions",
+        "world_event_stream",
+        "client_event_batch",
+        "evidence_query"
+      ],
+      "properties": {
+        "skill_builds": { "type": "boolean" },
+        "agent_sessions": { "type": "boolean" },
+        "world_event_stream": { "type": "boolean" },
+        "client_event_batch": { "type": "boolean" },
+        "evidence_query": { "type": "boolean" }
+      }
+    },
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_source_files",
+        "max_source_bytes",
+        "max_client_events_per_batch",
+        "max_agent_turn_chars"
+      ],
+      "properties": {
+        "max_source_files": {
+          "const": 32,
+          "description": "Maximum number of files in one SkillSourceBundle."
+        },
+        "max_source_bytes": {
+          "const": 1048576,
+          "description": "Maximum sum of UTF-8 content bytes across one SkillSourceBundle."
+        },
+        "max_client_events_per_batch": { "type": "integer", "minimum": 1 },
+        "max_agent_turn_chars": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "world": {
+      "type": "object",
+      "additionalProperties": false,
+      "x-invariants": [
+        "stream_id equals 'world:' plus world_id",
+        "last_event_sequence is the durable checkpoint represented by the bootstrap world view",
+        "stream_url contains no bearer token or other credential; authentication is supplied only in the WebSocket upgrade headers"
+      ],
+      "required": [
+        "world_id",
+        "revision",
+        "stream_id",
+        "last_event_sequence",
+        "stream_protocol_version",
+        "snapshot_url",
+        "events_url",
+        "stream_url"
+      ],
+      "properties": {
+        "world_id": { "$ref": "#/$defs/identifier" },
+        "revision": { "type": "integer", "minimum": 0 },
+        "stream_id": { "$ref": "#/$defs/streamIdentifier" },
+        "last_event_sequence": { "type": "integer", "minimum": 0 },
+        "stream_protocol_version": { "const": "1.0.0" },
+        "snapshot_url": { "type": "string", "format": "uri-reference", "minLength": 1, "maxLength": 2048 },
+        "events_url": { "type": "string", "format": "uri-reference", "minLength": 1, "maxLength": 2048 },
+        "stream_url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^wss://[^@/?#]+(?:/[^?#]*)?$",
+          "maxLength": 2048
+        }
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "streamIdentifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9:_-]{2,159}$"
+    }
+  }
+}

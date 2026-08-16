@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/common/command-id.schema.json",
+  "title": "CommandId",
+  "type": "string",
+  "pattern": "^cmd_[A-Za-z0-9_-]{8,96}$"
+}

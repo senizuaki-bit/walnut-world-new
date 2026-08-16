@@ -1,0 +1,29 @@
+{
+  "schema_ref": "../schemas/common/audit-record.schema.json",
+  "value": {
+    "schema_version": "1.0.0",
+    "audit_id": "audit_feishu_00000001",
+    "occurred_at": "2026-08-07T10:00:00Z",
+    "operation": "queryLearnerProjectionFromFeishu",
+    "outcome": "ALLOWED",
+    "actor": {
+      "tenant_id": "tenant_yaya",
+      "actor_id": "teacher_0001",
+      "actor_type": "teacher",
+      "roles": ["learner:read"]
+    },
+    "request_id": "req_audit_00000001",
+    "correlation_id": "corr_audit_00000001",
+    "trace_id": "trace_audit_00000001",
+    "resource_type": "LEARNER_PROJECTION",
+    "resource_id": "learner_projection_0001",
+    "purpose": "TEACHER_SUPPORT",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "redacted": true,
+    "evidence_ids": [],
+    "error_code": null,
+    "details": {
+      "fields_returned": ["mastery_summary", "support_needs"]
+    }
+  }
+}

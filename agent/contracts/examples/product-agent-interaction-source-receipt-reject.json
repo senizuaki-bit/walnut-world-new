@@ -1,0 +1,33 @@
+{
+  "schema_ref": "../schemas/product-experience/agent-interaction-source-receipt.schema.json",
+  "value": {
+    "receipt_id": "projection_water_reject_001",
+    "source_type": "AGENT_TURN_PRODUCT_PROJECTION",
+    "source_revision": 1,
+    "actor": {
+      "tenant_id": "tenant_yaya",
+      "actor_id": "student_0001",
+      "actor_type": "student",
+      "roles": ["game:player"]
+    },
+    "content_ref": {
+      "unit_id": "YAYA_FARM_001",
+      "version": "1.4.0",
+      "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "interaction_id": "interaction_reject_001",
+    "session_id": "session_agent_001",
+    "turn_id": "turn_agent_reject_001",
+    "sequence": 2,
+    "command_id": "cmd_game_reject_0001",
+    "feedback_event_id": "evt_feedback_game_reject_001",
+    "feedback_sha256": "ca4a6566af711e733d6ed6aed76800811af05df04ea326fa8030e6cb30f5229e",
+    "role": "teaching_agent",
+    "response_type": "skill_patch",
+    "question": null,
+    "hint_level": 4,
+    "skill_patch_sha256": "259ba8f6e796205d1b6090cf0372707e164b2188314ac6ac564a0ce99b4f0f70",
+    "committed_at": "2026-08-08T01:03:30Z",
+    "source_sha256": "fc1642643648c48ac8be9a3a50eb2aa3350d95253f43545183f944cdcf644fc2"
+  }
+}

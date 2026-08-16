@@ -1,0 +1,16 @@
+{
+  "schema_ref": "../schemas/game/agent-session-create-request.schema.json",
+  "value": {
+    "world_id": "world_demo_001",
+    "learner_id": "learner_0001",
+    "agent_profile_id": "agent_farmer_001",
+    "channel": "GAME",
+    "locale": "zh-CN",
+    "content": {
+      "unit_id": "YAYA_FARM_001",
+      "version": "1.4.0",
+      "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "expected_world_revision": 184
+  }
+}

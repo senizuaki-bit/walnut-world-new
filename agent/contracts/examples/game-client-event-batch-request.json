@@ -1,0 +1,36 @@
+{
+  "schema_ref": "../schemas/game/client-event-batch-request.schema.json",
+  "value": {
+    "batch_id": "batch_client_001",
+    "session_id": "session_agent_001",
+    "world_id": "world_demo_001",
+    "first_sequence": 41,
+    "last_sequence": 42,
+    "events": [
+      {
+        "event_id": "client_evt_game_00000041",
+        "sequence": 41,
+        "occurred_at": "2026-08-06T10:01:40Z",
+        "event_type": "CODE_EDITED",
+        "world_revision": 184,
+        "payload": {
+          "skill_id": "skill_water_001",
+          "draft_revision": 7,
+          "source_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "changed_file_count": 1
+        }
+      },
+      {
+        "event_id": "client_evt_game_00000042",
+        "sequence": 42,
+        "occurred_at": "2026-08-06T10:01:45Z",
+        "event_type": "BUILD_REQUESTED",
+        "world_revision": 184,
+        "payload": {
+          "build_id": "build_water_001",
+          "skill_id": "skill_water_001"
+        }
+      }
+    ]
+  }
+}

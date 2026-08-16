@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/feishu/content-release.schema.json",
+  "title": "Create content release candidate",
+  "description": "Creates an immutable candidate and queues validation. The server assigns candidate_revision=1 and returns it in both the creation receipt and status resource. This request can neither activate content nor mutate a live world.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "context",
+    "operation",
+    "source",
+    "candidate",
+    "target_environment"
+  ],
+  "properties": {
+    "context": {
+      "$ref": "../common/request-context.schema.json"
+    },
+    "operation": {
+      "const": "CREATE_RELEASE_CANDIDATE"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "document_token",
+        "revision"
+      ],
+      "properties": {
+        "provider": {
+          "const": "FEISHU"
+        },
+        "document_token": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "revision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "content_ref": {
+          "$ref": "../common/content-ref.schema.json"
+        }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "content_type",
+        "schema_version",
+        "manifest_sha256",
+        "artifact_refs"
+      ],
+      "properties": {
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "TEACHING_SPEC",
+            "PEDAGOGY_POLICY",
+            "PROMPT_PACKAGE",
+            "REPORT_TEMPLATE"
+          ]
+        },
+        "schema_version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "manifest_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "artifact_refs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          }
+        },
+        "change_summary": {
+          "type": "string",
+          "maxLength": 4000
+        }
+      }
+    },
+    "target_environment": {
+      "type": "string",
+      "enum": [
+        "VALIDATION",
+        "STAGING"
+      ],
+      "description": "LIVE is intentionally not a valid target. Activation is a separate, guarded internal workflow after validation and canary checks."
+    }
+  }
+}

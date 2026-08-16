@@ -1,0 +1,11 @@
+; Minimal headless project used only to parse and contract-test the Godot port.
+config_version=5
+
+[application]
+
+config/name="YaYa Agent Contract Test"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"

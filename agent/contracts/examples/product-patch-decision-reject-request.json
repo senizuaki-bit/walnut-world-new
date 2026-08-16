@@ -1,0 +1,20 @@
+{
+  "schema_ref": "../schemas/product-experience/patch-decision-request.schema.json",
+  "value": {
+    "decision_id": "decision_water_reject_001",
+    "session_id": "session_agent_001",
+    "turn_id": "turn_agent_reject_001",
+    "interaction_id": "interaction_reject_001",
+    "expected_interaction_revision": 1,
+    "patch_id": "patch_water_reject_001",
+    "patch_sha256": "259ba8f6e796205d1b6090cf0372707e164b2188314ac6ac564a0ce99b4f0f70",
+    "draft_id": "draft_water_001",
+    "skill_id": "skill_water_001",
+    "base_draft_revision": 7,
+    "base_draft_sha256": "53c203ad61eb09d45d0ca946b2d751cdca5eac9a029baceb8103cb740cc7226c",
+    "result_draft_sha256": "7ca9375e5ab9fdf0718aee94c82a4bf179ec6c86488e99207139359abd02b55e",
+    "decision": "REJECT",
+    "reason_code": "STUDENT_DECLINED_PATCH",
+    "decided_at": "2026-08-08T01:04:00Z"
+  }
+}

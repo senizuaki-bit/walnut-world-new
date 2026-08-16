@@ -1,0 +1,172 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "YaYa Public Student Bootstrap API",
+    "version": "0.4.0",
+    "description": "Additive public bootstrap surface for the canonical Godot student client. The v0.3 Game API remains byte-frozen."
+  },
+  "servers": [
+    { "url": "https://api.yaya.example" },
+    { "url": "http://127.0.0.1:8790", "description": "Contract mock only" }
+  ],
+  "security": [{ "bearerAuth": [] }],
+  "paths": {
+    "/v1/student-bootstrap": {
+      "get": {
+        "tags": ["StudentBootstrap"],
+        "operationId": "getStudentBootstrap",
+        "x-godot-operation": "get_student_bootstrap",
+        "summary": "Get the version-pinned public student launch authority",
+        "description": "session.create_request is a closed createAgentSession request body and can be POSTed unchanged; session.teaching_spec_version is read-only launch authority.",
+        "parameters": [
+          { "$ref": "#/components/parameters/RequestId" },
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/CorrelationId" },
+          { "$ref": "#/components/parameters/SchemaVersion" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Student launch, build, activation, session, and world recovery authority",
+            "headers": {
+              "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+              "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+              "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "../schemas/game/student-bootstrap-v2.schema.json" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/Error400" },
+          "401": { "$ref": "#/components/responses/Error401" },
+          "403": { "$ref": "#/components/responses/Error403" },
+          "409": { "$ref": "#/components/responses/Error409" },
+          "429": { "$ref": "#/components/responses/Error429" },
+          "500": { "$ref": "#/components/responses/Error500" },
+          "503": { "$ref": "#/components/responses/Error503" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "parameters": {
+      "RequestId": {
+        "name": "X-Request-Id",
+        "in": "header",
+        "required": true,
+        "schema": { "type": "string", "pattern": "^req_[A-Za-z0-9_-]{8,96}$" }
+      },
+      "TraceId": {
+        "name": "X-Trace-Id",
+        "in": "header",
+        "required": true,
+        "schema": { "type": "string", "pattern": "^trace_[A-Za-z0-9_-]{8,96}$" }
+      },
+      "CorrelationId": {
+        "name": "X-Correlation-Id",
+        "in": "header",
+        "required": true,
+        "schema": { "type": "string", "pattern": "^corr_[A-Za-z0-9_-]{8,96}$" }
+      },
+      "SchemaVersion": {
+        "name": "X-Schema-Version",
+        "in": "header",
+        "required": true,
+        "schema": { "const": "1.0.0" }
+      }
+    },
+    "headers": {
+      "ResponseRequestId": {
+        "description": "Echoes X-Request-Id for the current HTTP attempt.",
+        "schema": { "type": "string", "pattern": "^req_[A-Za-z0-9_-]{8,96}$" }
+      },
+      "ResponseTraceId": {
+        "description": "Echoes X-Trace-Id for the current HTTP attempt.",
+        "schema": { "type": "string", "pattern": "^trace_[A-Za-z0-9_-]{8,96}$" }
+      },
+      "ResponseCorrelationId": {
+        "description": "Echoes X-Correlation-Id for the current HTTP attempt.",
+        "schema": { "type": "string", "pattern": "^corr_[A-Za-z0-9_-]{8,96}$" }
+      },
+      "RetryAfter": {
+        "description": "Minimum retry delay in seconds when the error is retryable.",
+        "schema": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "responses": {
+      "Error400": {
+        "description": "Request contract or header validation failed.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+        },
+        "content": { "application/json": { "schema": { "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status400" } } }
+      },
+      "Error401": {
+        "description": "Authentication failed.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+        },
+        "content": { "application/json": { "schema": { "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status401" } } }
+      },
+      "Error403": {
+        "description": "The actor is not authorized.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+        },
+        "content": { "application/json": { "schema": { "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status403" } } }
+      },
+      "Error409": {
+        "description": "Schema or content version conflict.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+        },
+        "content": { "application/json": { "schema": { "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status409" } } }
+      },
+      "Error429": {
+        "description": "Rate limit exceeded.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" },
+          "Retry-After": { "$ref": "#/components/headers/RetryAfter" }
+        },
+        "content": { "application/json": { "schema": { "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status429" } } }
+      },
+      "Error500": {
+        "description": "Unexpected internal failure.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+        },
+        "content": { "application/json": { "schema": { "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status500" } } }
+      },
+      "Error503": {
+        "description": "A required dependency is unavailable.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" },
+          "Retry-After": { "$ref": "#/components/headers/RetryAfter" }
+        },
+        "content": { "application/json": { "schema": { "$ref": "../schemas/common/error-responses-by-status.schema.json#/$defs/status503" } } }
+      }
+    }
+  }
+}

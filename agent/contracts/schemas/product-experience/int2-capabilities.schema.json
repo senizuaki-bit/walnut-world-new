@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/product-experience/int2-capabilities.schema.json",
+  "title": "INT2Capabilities",
+  "description": "Read-only Product Gateway capability projection for staged INT2 rollout. A false flag keeps its mutation entry points unavailable.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_context",
+    "api_version",
+    "contract_version",
+    "world_presentation_enabled",
+    "skill_patch_enabled",
+    "skill_patch_constraints"
+  ],
+  "properties": {
+    "request_context": { "$ref": "../common/request-context.schema.json" },
+    "api_version": { "const": "1.2.0" },
+    "contract_version": { "const": "0.6.0" },
+    "world_presentation_enabled": { "type": "boolean" },
+    "skill_patch_enabled": { "type": "boolean" },
+    "skill_patch_constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "request_mode",
+        "selection_target",
+        "agent_role",
+        "scenario",
+        "required_hint_level",
+        "operation",
+        "target",
+        "max_files",
+        "max_operations",
+        "requires_failed_evidence",
+        "cas_required",
+        "requires_student_confirmation",
+        "auto_build",
+        "auto_activate",
+        "auto_run"
+      ],
+      "properties": {
+        "request_mode": { "const": "EXPLICIT_UI_ACTION" },
+        "selection_target": { "const": "FAILED_INTERACTION" },
+        "agent_role": { "const": "teaching_agent" },
+        "scenario": { "const": "RECTIFICATION" },
+        "required_hint_level": { "const": 4 },
+        "operation": { "const": "UPSERT_FILE" },
+        "target": { "const": "CURRENT_ENTRYPOINT" },
+        "max_files": { "const": 1 },
+        "max_operations": { "const": 1 },
+        "requires_failed_evidence": { "const": true },
+        "cas_required": { "const": true },
+        "requires_student_confirmation": { "const": true },
+        "auto_build": { "const": false },
+        "auto_activate": { "const": false },
+        "auto_run": { "const": false }
+      }
+    }
+  },
+  "x-invariants": [
+    "request_context is the immutable authenticated origin context of this capability read",
+    "skill_patch_enabled=false means every Skill Patch request/decision mutation entry point is unavailable even though this GET remains readable",
+    "world_presentation_enabled=false means clients do not enter authoritative presentation playback",
+    "for UI_ACTION action_id=request_ai_patch, selection_id is the currently visible failed interaction_id selected by the student; it is never a Draft or Run identity",
+    "Skill Patch is explicit-only, evidence-gated, CAS-gated, single-file, single-operation and never auto-builds, auto-activates or auto-runs"
+  ]
+}

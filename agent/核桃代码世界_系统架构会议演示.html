@@ -1,0 +1,992 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#07111d">
+  <title>核桃代码世界｜系统架构会议演示</title>
+  <style>
+    :root {
+      --bg: #07111d;
+      --panel: #0d1b2a;
+      --panel-2: #122538;
+      --text: #f4f8fb;
+      --muted: #a8b8c8;
+      --line: rgba(255,255,255,.12);
+      --contract: #56a8ff;
+      --application: #3dd6c6;
+      --agent: #b79aff;
+      --execution: #ff9d5c;
+      --state: #f1cb58;
+      --good: #62d49c;
+      --warn: #ffca6b;
+      --danger: #ff7d84;
+      --radius: 22px;
+      --shadow: 0 24px 80px rgba(0,0,0,.32);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); }
+    body {
+      overflow: hidden;
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", system-ui, sans-serif;
+      background:
+        radial-gradient(circle at 12% 8%, rgba(86,168,255,.13), transparent 28%),
+        radial-gradient(circle at 88% 86%, rgba(183,154,255,.12), transparent 30%),
+        linear-gradient(145deg, #07111d 0%, #081522 54%, #06101a 100%);
+    }
+
+    button { font: inherit; }
+    button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+
+    .deck { position: relative; width: 100vw; height: 100dvh; overflow: hidden; }
+    .deck::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .16;
+      background-image:
+        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, #000, transparent 86%);
+    }
+
+    .topbar {
+      position: fixed;
+      z-index: 30;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 0 28px;
+      color: var(--muted);
+      background: rgba(5,14,24,.76);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(16px);
+    }
+    .brand { color: var(--text); font-weight: 800; letter-spacing: .04em; white-space: nowrap; }
+    .brand-dot { display: inline-block; width: 10px; height: 10px; margin-right: 9px; border-radius: 50%; background: var(--execution); box-shadow: 0 0 20px rgba(255,157,92,.8); }
+    .top-section { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .top-spacer { flex: 1; }
+    .timer { color: var(--text); font-variant-numeric: tabular-nums; letter-spacing: .08em; }
+    .page-readout { min-width: 76px; text-align: right; color: var(--text); font-variant-numeric: tabular-nums; }
+
+    .progress { position: fixed; z-index: 40; top: 56px; left: 0; right: 0; height: 3px; background: rgba(255,255,255,.06); }
+    .progress > span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--contract), var(--agent), var(--execution)); transition: width .28s ease; }
+
+    #slides { position: absolute; inset: 58px 0 64px; }
+    .slide {
+      --accent: var(--contract);
+      position: absolute;
+      inset: 0;
+      display: none;
+      overflow-y: auto;
+      padding: clamp(34px, 5vh, 68px) clamp(42px, 6vw, 112px);
+      opacity: 0;
+      transform: translateX(22px);
+    }
+    .slide.active { display: block; opacity: 1; transform: translateX(0); animation: slideIn .28s ease both; }
+    .slide.contract { --accent: var(--contract); }
+    .slide.application { --accent: var(--application); }
+    .slide.agent { --accent: var(--agent); }
+    .slide.execution { --accent: var(--execution); }
+    .slide.state { --accent: var(--state); }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(22px); } to { opacity: 1; transform: translateX(0); } }
+
+    .eyebrow { margin: 0 0 12px; color: var(--accent); font-size: clamp(15px, 1.3vw, 20px); font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 22px; max-width: 1100px; font-size: clamp(46px, 6.4vw, 94px); line-height: 1.06; letter-spacing: -.045em; }
+    h2 { margin-bottom: 28px; font-size: clamp(34px, 4.3vw, 64px); line-height: 1.12; letter-spacing: -.035em; }
+    h3 { margin-bottom: 10px; font-size: clamp(20px, 2vw, 29px); line-height: 1.25; }
+    p, li { font-size: clamp(18px, 1.55vw, 25px); line-height: 1.62; }
+    p { color: #dce7ef; }
+    .lead { max-width: 1100px; color: #dce7ef; font-size: clamp(24px, 2.3vw, 36px); line-height: 1.5; }
+    .muted { color: var(--muted); }
+    .accent { color: var(--accent); }
+    .small { font-size: clamp(14px, 1.1vw, 18px); }
+    .mono { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; }
+    .no-wrap { white-space: nowrap; }
+
+    .hero {
+      min-height: 100%;
+      display: grid;
+      align-content: center;
+      position: relative;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: 1%;
+      top: 8%;
+      width: min(29vw, 460px);
+      aspect-ratio: 1;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 50%;
+      box-shadow:
+        inset 0 0 0 34px rgba(86,168,255,.03),
+        inset 0 0 0 70px rgba(183,154,255,.025),
+        0 0 100px rgba(86,168,255,.10);
+      pointer-events: none;
+    }
+    .hero .lead { max-width: 880px; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 34px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.055);
+      color: #dfeaf2;
+      font-size: clamp(13px, 1vw, 16px);
+      font-weight: 700;
+    }
+    .pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+    .pill.done { color: var(--good); }
+    .pill.partial { color: var(--warn); }
+    .pill.planned { color: var(--danger); }
+
+    .quote {
+      position: relative;
+      margin: 28px 0;
+      padding: 22px 26px 22px 30px;
+      max-width: 1180px;
+      border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+      border-left: 5px solid var(--accent);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 11%, transparent), rgba(255,255,255,.025));
+      color: #f7fbff;
+      font-size: clamp(23px, 2.25vw, 35px);
+      line-height: 1.5;
+      font-weight: 700;
+    }
+
+    .grid { display: grid; gap: clamp(14px, 1.5vw, 24px); }
+    .cols-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .cols-3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    .cols-4 { grid-template-columns: repeat(4, minmax(0,1fr)); }
+    .cols-5 { grid-template-columns: repeat(5, minmax(0,1fr)); }
+    .span-2 { grid-column: span 2; }
+
+    .card {
+      position: relative;
+      min-width: 0;
+      padding: clamp(18px, 2vw, 28px);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(160deg, rgba(255,255,255,.065), rgba(255,255,255,.025));
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+    }
+    .card::before { content: ""; position: absolute; left: 20px; right: 20px; top: 0; height: 2px; background: linear-gradient(90deg, var(--accent), transparent); opacity: .8; }
+    .card p:last-child, .card ul:last-child { margin-bottom: 0; }
+    .card p { font-size: clamp(16px, 1.32vw, 21px); line-height: 1.52; }
+    .card ul { margin: 12px 0 0; padding-left: 1.2em; }
+    .card li { margin: 5px 0; font-size: clamp(15px, 1.23vw, 20px); line-height: 1.45; color: #d8e3eb; }
+    .card .kicker { margin-bottom: 9px; color: var(--accent); font-size: 14px; font-weight: 900; letter-spacing: .12em; }
+    .card.contract-card { --accent: var(--contract); }
+    .card.application-card { --accent: var(--application); }
+    .card.agent-card { --accent: var(--agent); }
+    .card.execution-card { --accent: var(--execution); }
+    .card.state-card { --accent: var(--state); }
+    .card.good-card { --accent: var(--good); }
+    .card.warn-card { --accent: var(--warn); }
+
+    .module-map { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 15px; margin-top: 30px; }
+    .module {
+      min-height: 220px;
+      padding: 22px 18px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: rgba(255,255,255,.04);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .module .num { font-size: 15px; color: var(--muted); font-weight: 900; }
+    .module h3 { font-size: clamp(20px, 1.8vw, 28px); }
+    .module p { margin: 0; font-size: clamp(15px, 1.17vw, 19px); line-height: 1.5; color: #cddae4; }
+    .module.contract-m { border-top: 4px solid var(--contract); }
+    .module.application-m { border-top: 4px solid var(--application); }
+    .module.agent-m { border-top: 4px solid var(--agent); }
+    .module.execution-m { border-top: 4px solid var(--execution); }
+    .module.state-m { border-top: 4px solid var(--state); }
+
+    .flow-row { display: flex; align-items: stretch; gap: 10px; margin: 24px 0; }
+    .flow-node {
+      flex: 1;
+      min-width: 0;
+      min-height: 118px;
+      padding: 18px 15px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.05);
+      display: grid;
+      place-content: center;
+      text-align: center;
+      font-size: clamp(16px, 1.25vw, 21px);
+      line-height: 1.35;
+      font-weight: 800;
+    }
+    .flow-node small { display: block; margin-top: 8px; color: var(--muted); font-size: 13px; font-weight: 500; }
+    .flow-arrow { flex: 0 0 24px; display: grid; place-items: center; color: var(--accent); font-size: 28px; }
+
+    .phase-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 16px; margin-top: 22px; }
+    .phase { min-height: 200px; padding: 22px; border: 1px solid var(--line); border-radius: 22px; background: rgba(255,255,255,.04); }
+    .phase strong { display: block; margin-bottom: 12px; font-size: clamp(22px, 1.8vw, 29px); }
+    .phase p { margin-bottom: 0; font-size: clamp(15px, 1.2vw, 20px); line-height: 1.5; }
+    .phase.review { border-top: 4px solid var(--contract); }
+    .phase.heuristic { border-top: 4px solid var(--application); }
+    .phase.rectification { border-top: 4px solid var(--execution); }
+    .phase.summary { border-top: 4px solid var(--agent); }
+
+    .rule-line {
+      display: grid;
+      grid-template-columns: minmax(180px,.8fr) minmax(220px,1fr) 1.3fr;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      font-size: clamp(15px,1.25vw,20px);
+    }
+    .rule-line:last-child { border-bottom: 0; }
+    .rule-line .level { color: var(--accent); font-weight: 900; }
+
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(18px, 3vw, 42px); align-items: stretch; }
+    .vs { display: grid; grid-template-columns: 1fr auto 1fr; gap: 18px; align-items: center; }
+    .vs-mark { width: 62px; height: 62px; display: grid; place-items: center; border-radius: 50%; background: var(--accent); color: #07111d; font-size: 20px; font-weight: 900; }
+
+    .codebox {
+      margin: 16px 0 0;
+      padding: 18px 20px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 16px;
+      background: #06101a;
+      color: #d9eefc;
+      font: 600 clamp(14px, 1.15vw, 19px)/1.6 ui-monospace, "Cascadia Code", Consolas, monospace;
+      white-space: pre-wrap;
+    }
+
+    .step-list { counter-reset: steps; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 15px; }
+    .step-card { counter-increment: steps; min-height: 154px; padding: 20px 20px 18px; border: 1px solid var(--line); border-radius: 20px; background: rgba(255,255,255,.04); }
+    .step-card::before { content: counter(steps, decimal-leading-zero); display: block; margin-bottom: 10px; color: var(--accent); font-size: 15px; font-weight: 900; letter-spacing: .12em; }
+    .step-card strong { display: block; margin-bottom: 8px; font-size: clamp(18px,1.55vw,24px); }
+    .step-card p { margin: 0; color: #cbd8e3; font-size: clamp(14px,1.1vw,18px); line-height: 1.48; }
+
+    .transaction-row { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 16px; }
+    .transaction { min-height: 270px; padding: 22px; border: 1px solid var(--line); border-radius: 22px; background: rgba(255,255,255,.04); }
+    .transaction .tx { display: inline-grid; place-items: center; width: 52px; height: 52px; margin-bottom: 16px; border-radius: 15px; background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--accent); font-weight: 900; }
+    .transaction h3 { font-size: clamp(19px,1.55vw,25px); }
+    .transaction p { font-size: clamp(14px,1.1vw,18px); line-height: 1.48; }
+
+    .status-board { display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: 18px; }
+    .status-col { padding: 22px; border-radius: 22px; border: 1px solid var(--line); background: rgba(255,255,255,.04); }
+    .status-col.done-col { border-top: 4px solid var(--good); }
+    .status-col.partial-col { border-top: 4px solid var(--warn); }
+    .status-col.planned-col { border-top: 4px solid var(--danger); }
+    .status-col h3 { margin-bottom: 14px; }
+    .status-col ul { margin: 0; padding-left: 1.2em; }
+    .status-col li { margin: 7px 0; font-size: clamp(14px,1.1vw,18px); line-height: 1.45; }
+
+    .footer-note { margin-top: 18px; color: var(--muted); font-size: clamp(13px, 1vw, 16px); }
+    .speaker-note { display: none; }
+
+    .controls {
+      position: fixed;
+      z-index: 35;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 0 18px;
+      background: rgba(5,14,24,.82);
+      border-top: 1px solid var(--line);
+      backdrop-filter: blur(16px);
+    }
+    .controls button {
+      min-width: 42px;
+      height: 40px;
+      padding: 0 13px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,.055);
+      color: var(--text);
+      cursor: pointer;
+    }
+    .controls button:hover { background: rgba(255,255,255,.11); }
+    .controls .primary { background: color-mix(in srgb, var(--contract) 22%, transparent); border-color: color-mix(in srgb, var(--contract) 44%, transparent); }
+    .control-gap { width: 12px; }
+    .key-hint { position: absolute; right: 24px; color: var(--muted); font-size: 13px; }
+
+    .overlay {
+      position: fixed;
+      z-index: 80;
+      inset: 0;
+      display: none;
+      padding: 72px clamp(24px,6vw,100px);
+      background: rgba(3,10,18,.92);
+      backdrop-filter: blur(18px);
+      overflow-y: auto;
+    }
+    .overlay.open { display: block; animation: fadeIn .18s ease both; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .overlay-head { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 28px; }
+    .overlay-head h2 { margin: 0; }
+    .close-btn { width: 46px; height: 46px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.06); color: var(--text); cursor: pointer; }
+    .toc-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; }
+    .toc-item { min-height: 90px; padding: 15px 17px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.04); color: var(--text); text-align: left; cursor: pointer; }
+    .toc-item:hover, .toc-item.current { border-color: var(--contract); background: rgba(86,168,255,.10); }
+    .toc-item span { display: block; color: var(--muted); font-size: 13px; margin-bottom: 6px; }
+    .toc-item strong { font-size: 17px; line-height: 1.35; }
+
+    .notes-panel {
+      position: fixed;
+      z-index: 75;
+      top: 72px;
+      right: 24px;
+      width: min(430px, calc(100vw - 48px));
+      max-height: calc(100vh - 150px);
+      display: none;
+      overflow-y: auto;
+      padding: 24px;
+      border: 1px solid rgba(183,154,255,.45);
+      border-radius: 22px;
+      background: rgba(10,18,31,.96);
+      box-shadow: var(--shadow);
+    }
+    .notes-panel.open { display: block; }
+    .notes-panel h3 { color: var(--agent); }
+    .notes-panel p { font-size: 17px; line-height: 1.65; white-space: pre-line; }
+    .next-title { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+
+    .help-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; max-width: 900px; }
+    .help-key { display: flex; justify-content: space-between; gap: 20px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+    kbd { min-width: 64px; padding: 4px 8px; border: 1px solid var(--line); border-bottom-width: 3px; border-radius: 8px; background: rgba(255,255,255,.06); color: var(--text); text-align: center; font: 700 14px ui-monospace, monospace; }
+
+    @media (max-width: 1050px) {
+      .cols-4, .cols-5, .module-map, .phase-grid, .transaction-row { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .cols-3, .step-list, .status-board { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .toc-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .hero::after { opacity: .45; }
+    }
+    @media (max-width: 720px) {
+      .slide { padding: 28px 22px 38px; }
+      .cols-2, .cols-3, .cols-4, .cols-5, .module-map, .phase-grid, .transaction-row, .status-board, .step-list, .split, .vs { grid-template-columns: 1fr; }
+      .span-2 { grid-column: auto; }
+      .flow-row { display: grid; grid-template-columns: 1fr; }
+      .flow-arrow { transform: rotate(90deg); min-height: 24px; }
+      .module { min-height: 160px; }
+      .vs-mark { margin: auto; }
+      .rule-line { grid-template-columns: 1fr; }
+      .toc-grid { grid-template-columns: 1fr; }
+      .top-section, .key-hint { display: none; }
+      .controls { justify-content: flex-start; overflow-x: auto; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+    }
+
+    @page { size: 13.333in 7.5in; margin: 0; }
+    @media print {
+      html, body { background: #07111d !important; overflow: visible; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .deck { width: auto; height: auto; overflow: visible; }
+      .topbar, .progress, .controls, .overlay, .notes-panel { display: none !important; }
+      #slides { position: static; }
+      .slide, .slide.active {
+        position: relative;
+        inset: auto;
+        display: block !important;
+        width: 13.333in;
+        height: 7.5in;
+        overflow: hidden;
+        padding: .48in .7in;
+        opacity: 1 !important;
+        transform: none !important;
+        animation: none !important;
+        page-break-after: always;
+        background: #07111d !important;
+      }
+      .slide:last-child { page-break-after: auto; }
+      .speaker-note { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="deck" id="deck">
+    <header class="topbar" aria-label="演示状态栏">
+      <div class="brand"><span class="brand-dot"></span>核桃代码世界</div>
+      <div class="top-section" id="sectionLabel">系统架构会议演示</div>
+      <div class="top-spacer"></div>
+      <div class="timer" id="timer" title="本次演示已用时间">00:00</div>
+      <div class="page-readout" id="pageReadout">01 / 19</div>
+    </header>
+    <div class="progress" aria-hidden="true"><span id="progressFill"></span></div>
+
+    <main id="slides" aria-live="polite">
+      <section class="slide active" data-title="封面" data-section="开场">
+        <div class="hero">
+          <p class="eyebrow">SYSTEM ARCHITECTURE · v1.2</p>
+          <h1>核桃代码世界<br><span class="accent">系统架构与实现思路</span></h1>
+          <p class="lead">让学生写出的 C++ 代码，真正成为游戏角色可以调用的能力。</p>
+          <div class="meta-row">
+            <span class="pill">会议讲解版</span>
+            <span class="pill">约 12–15 分钟</span>
+            <span class="pill">交付快照：2026-08-09</span>
+          </div>
+          <p class="footer-note">方向键或空格翻页 · N 查看讲者提示 · O 打开目录 · F 全屏</p>
+        </div>
+        <aside class="speaker-note">今天不从复杂名词开始。我们只回答一个问题：学生写下一段代码以后，它怎样变成世界变化、教学反馈和学习记录。</aside>
+      </section>
+
+      <section class="slide" data-title="这套系统到底在做什么" data-section="开场">
+        <p class="eyebrow">01 · 核心价值</p>
+        <h2>不是“提交代码后打分”，而是让代码<span class="accent">真实改变世界</span></h2>
+        <div class="flow-row">
+          <div class="flow-node">学生接到任务</div><div class="flow-arrow">→</div>
+          <div class="flow-node">编写 C++ Skill</div><div class="flow-arrow">→</div>
+          <div class="flow-node">小核桃真实调用</div><div class="flow-arrow">→</div>
+          <div class="flow-node">世界发生变化</div><div class="flow-arrow">→</div>
+          <div class="flow-node">AI 基于结果教学</div><div class="flow-arrow">→</div>
+          <div class="flow-node">沉淀学习证据</div>
+        </div>
+        <div class="grid cols-3" style="margin-top:28px">
+          <article class="card contract-card"><p class="kicker">学生入口</p><h3>Godot 学生端</h3><p>写代码、编译运行、观察世界、接收反馈。</p></article>
+          <article class="card agent-card"><p class="kicker">教师入口</p><h3>飞书智能助手</h3><p>权限化查询学生和班级情况，生成报告草稿。</p></article>
+          <article class="card execution-card"><p class="kicker">贯穿原则</p><h3>事实先于表达</h3><p>AI 只能根据已经产生的真实结果进行教学。</p></article>
+        </div>
+        <aside class="speaker-note">这里强调产品区别：学生代码不是一份静态作业，而是一个可以被小核桃调用的 Skill。教学反馈也不是泛泛聊天，而是基于这次真实运行。</aside>
+      </section>
+
+      <section class="slide" data-title="五大模块概览" data-section="总体架构">
+        <p class="eyebrow">02 · 总体架构</p>
+        <h2>把系统看成一条五段式的<span class="accent">编程学习流水线</span></h2>
+        <div class="module-map">
+          <article class="module contract-m"><span class="num">01 / 统一语言</span><h3>机器合同边界</h3><p>统一请求格式、返回格式和错误规则。</p></article>
+          <article class="module application-m"><span class="num">02 / 接单调度</span><h3>后端应用层</h3><p>接收、排队、查询，并把任务交给正确模块。</p></article>
+          <article class="module agent-m"><span class="num">03 / 教学导演</span><h3>智能体编排</h3><p>决定谁回答、看什么事实、这一轮怎么教。</p></article>
+          <article class="module execution-m"><span class="num">04 / 客观裁判</span><h3>客观执行链</h3><p>运行学生代码，判断世界实际发生了什么。</p></article>
+          <article class="module state-m"><span class="num">05 / 档案总账</span><h3>状态与异步投影</h3><p>保存原始事实，并整理成当前学习画像。</p></article>
+        </div>
+        <div class="quote">程序负责客观事实、教学门禁和状态提交；Agent 负责受约束的解释、提问和总结。</div>
+        <aside class="speaker-note">这五层可以用五个大白话角色记住：合同像统一表格，应用层像业务前台，Agent 像教学导演，执行链像实验室加裁判，状态层像档案室。</aside>
+      </section>
+
+      <section class="slide contract" data-title="机器合同边界" data-section="机器合同边界">
+        <p class="eyebrow">03 · 机器合同边界</p>
+        <h2>先约定大家怎么说话，再分别开发</h2>
+        <div class="grid cols-4">
+          <article class="card contract-card">
+            <p class="kicker">PRODUCT REST</p><h3>产品体验接口</h3>
+            <p>任务、工作区、代码草稿、Agent 交互和代码修改确认。</p>
+            <p class="small muted">实现：从数据库组装页面需要的数据。</p>
+          </article>
+          <article class="card contract-card">
+            <p class="kicker">GAME REST</p><h3>游戏命令与查询</h3>
+            <p>编译、激活、Agent Turn、Command、Run、世界和 Evidence。</p>
+            <p class="small muted">实现：写操作先建任务，查询操作读取结果。</p>
+          </article>
+          <article class="card contract-card">
+            <p class="kicker">WORLD WSS</p><h3>世界实时通道</h3>
+            <p>只推送已经提交的移动、浇水、资源变化等世界事件。</p>
+            <p class="small muted">实现：按序推送，断线后从上次序号补发。</p>
+          </article>
+          <article class="card contract-card">
+            <p class="kicker">FEISHU REST</p><h3>飞书集成接口</h3>
+            <p>学生与班级查询、脱敏证据、内容候选、审批和报告草稿。</p>
+            <p class="small muted">实现：先验权限，再脱敏查询并记录审计。</p>
+          </article>
+        </div>
+        <div class="split" style="margin-top:24px">
+          <div class="quote" style="margin:0">合同画好 = 施工图完成<br><span class="muted small">不等于对应功能已经全部建好</span></div>
+          <div class="card warn-card"><h3><span class="mono">202 Accepted</span> 的含义</h3><p>只表示后端已经可靠接单。前端还要拿着 <span class="mono">command_id</span> 和查询地址继续看最终结果。</p></div>
+        </div>
+        <aside class="speaker-note">四类接口分工必须讲清。尤其是 202 不是成功；WSS 只播已提交世界事件，Command、Run 和恢复仍以 HTTP 查询为准。</aside>
+      </section>
+
+      <section class="slide application" data-title="后端应用层" data-section="后端应用层">
+        <p class="eyebrow">04 · 后端应用层</p>
+        <h2>负责把事情<span class="accent">接住、排好、交出去</span></h2>
+        <div class="grid cols-3">
+          <article class="card application-card"><p class="kicker">页面整理员</p><h3>产品应用服务</h3><p>组合任务、会话、代码和交互记录，提供页面视图；负责草稿与 Patch 决定等产品能力。</p></article>
+          <article class="card application-card"><p class="kicker">游戏入口</p><h3>命令受理 / 查询处理器</h3><p>接收编译和运行请求；查询 Command、Run、世界状态和 Evidence。</p></article>
+          <article class="card application-card"><p class="kicker">可靠任务表</p><h3>命令存储 + 执行作业</h3><p>把请求和稳定编号写入数据库；同一请求重复提交，不新建第二个任务。</p></article>
+          <article class="card application-card"><p class="kicker">后台工作人员</p><h3>持久化命令 Worker</h3><p>领取待处理任务，调用 Agent、Sandbox 和 WorldEngine，记录最终状态。</p></article>
+          <article class="card application-card"><p class="kicker">教师服务</p><h3>飞书应用服务</h3><p>统一处理教师权限、数据脱敏、审计、内容候选与报告草稿。</p></article>
+          <article class="card application-card"><p class="kicker">实时广播员</p><h3>世界事件发布器</h3><p>从“待发送箱”读取已提交世界事件，发送给在线 Godot 客户端。</p></article>
+        </div>
+        <div class="quote">应用层负责调度，但它自己不运行 C++，也不临场决定应该怎么教。</div>
+        <aside class="speaker-note">命令存储和 Worker 是这里的主链：入口先把任务可靠写下，再由后台处理。飞书服务和实时发布器属于两条对外支线。</aside>
+      </section>
+
+      <section class="slide agent" data-title="智能体编排总览" data-section="智能体编排">
+        <p class="eyebrow">05 · 智能体编排</p>
+        <h2>先决定<span class="accent">谁来说</span>，再决定<span class="accent">这一轮怎么教</span></h2>
+        <div class="flow-row">
+          <div class="flow-node">Agent Hub<small>一轮教学的总导演</small></div><div class="flow-arrow">→</div>
+          <div class="flow-node">Role Router<small>选择角色或不响应</small></div><div class="flow-arrow">→</div>
+          <div class="flow-node">Context Builder<small>准备可信材料</small></div><div class="flow-arrow">→</div>
+          <div class="flow-node">教学策略<small>决定阶段与上限</small></div><div class="flow-arrow">→</div>
+          <div class="flow-node">Shared Runtime<small>让角色完成本轮回答</small></div><div class="flow-arrow">→</div>
+          <div class="flow-node">校验并提交<small>合格后才正式保存</small></div>
+        </div>
+        <div class="grid cols-3" style="margin-top:25px">
+          <article class="card agent-card"><h3>Agent Hub</h3><p>防止同一事件重复处理，串起选角色、准备材料、执行和保存。</p></article>
+          <article class="card agent-card"><h3>角色路由器</h3><p>任务开始找芽芽；运行找小核桃；失败找教学或 Bug；完成找书书。</p></article>
+          <article class="card agent-card"><h3>上下文构建器</h3><p>精确读取当前任务、代码、Run、世界、Evidence、画像和最近对话。</p></article>
+        </div>
+        <aside class="speaker-note">角色路由器只回答“谁说话”，不回答“教到什么程度”。上下文也不是把数据库全塞给模型，而是只拿本轮精确绑定的事实。</aside>
+      </section>
+
+      <section class="slide agent" data-title="确定性的教学策略" data-section="智能体编排">
+        <p class="eyebrow">06 · PedagogyPolicy</p>
+        <h2>确定性规则：相同事实，得到相同教学决定</h2>
+        <div class="phase-grid">
+          <article class="phase review"><strong>回顾 REVIEW</strong><p>没有画像、先修证据不足、复习到期，或之前得到的帮助过多。</p></article>
+          <article class="phase heuristic"><strong>启发 HEURISTIC</strong><p>学生具备基础，正在早期探索，但还没有明确失败证据。</p></article>
+          <article class="phase rectification"><strong>纠错 RECTIFICATION</strong><p>编译、测试、运行或世界证据已经证明具体偏差。</p></article>
+          <article class="phase summary"><strong>总结 SUMMARIZATION</strong><p>任务完成事件和当前有效成功证据同时存在。</p></article>
+        </div>
+        <div class="quote">任务客观完成 → 总结　｜　有失败证据 → 纠错　｜　需要唤起旧知识 → 回顾　｜　其他探索 → 启发</div>
+        <div class="grid cols-2">
+          <article class="card agent-card"><h3>知识点怎么选？</h3><p>根据任务配置和本轮 Evidence 对应：少浇一块 → 循环边界；一直不结束 → 终止条件；移动越界 → 边界判断。</p></article>
+          <article class="card agent-card"><h3>为什么不交给模型？</h3><p>阶段、权限和提示上限需要稳定、可测试、可回放；模型只负责在边界内组织语言。</p></article>
+        </div>
+        <aside class="speaker-note">“确定性”不是死写很多任务 ID，而是底线规则写在代码里，知识点、阈值和先修关系放在带版本的教学配置里。角色和阶段仍是两条独立轴。</aside>
+      </section>
+
+      <section class="slide agent" data-title="提示等级与代码修改门禁" data-section="智能体编排">
+        <p class="eyebrow">07 · 提示阶梯</p>
+        <h2>先少说一点，再根据连续失败逐步增加帮助</h2>
+        <div class="grid cols-2">
+          <article class="card agent-card">
+            <div class="rule-line"><span class="level">等级 0</span><strong>失败 0～1 次</strong><span>只描述现象并提问</span></div>
+            <div class="rule-line"><span class="level">等级 1</span><strong>连续失败 2 次</strong><span>指出应检查的代码区域</span></div>
+            <div class="rule-line"><span class="level">等级 2</span><strong>连续失败 3～4 次</strong><span>解释相关概念或边界条件</span></div>
+            <div class="rule-line"><span class="level">等级 3</span><strong>连续失败 5 次以上</strong><span>给局部修改方向或伪代码</span></div>
+            <p class="footer-note">学生明确请求提示时，原始等级加 1；再受任务和当前教学阶段的上限约束。</p>
+          </article>
+          <article class="card warn-card">
+            <p class="kicker">后续能力：等级 4 / Skill Patch</p>
+            <h3>不是到等级就自动改代码</h3>
+            <ul>
+              <li>必须处于纠错阶段，且角色有教学权限</li>
+              <li>任务规则允许，并有直接相关的失败 Evidence</li>
+              <li>代码基线固定，学生主动请求或达到有效阈值</li>
+              <li>只提出结构化修改，最终仍需学生确认</li>
+            </ul>
+            <p class="footer-note">当前运行时仍强制关闭 Patch 与完整答案资格。</p>
+          </article>
+        </div>
+        <div class="quote">提示等级是“最多可以透露多少”，不是要求模型一定把信息全部说满。</div>
+        <aside class="speaker-note">这里要说“同一 failure_key 的连续失败”，不是所有失败总数。当前阶段最高只开放到等级 3；等级 4 和 Patch 是目标设计，不要说成现有功能。</aside>
+      </section>
+
+      <section class="slide agent" data-title="教学指令与上下文" data-section="智能体编排">
+        <p class="eyebrow">08 · TeachingDirective × TurnContext</p>
+        <h2>上下文是<span class="accent">学生材料包</span>，教学指令是里面的<span class="accent">本轮任务单</span></h2>
+        <div class="flow-row">
+          <div class="flow-node">读取可信事实<small>任务、代码、Run、Evidence、画像</small></div><div class="flow-arrow">→</div>
+          <div class="flow-node">教学策略判断<small>阶段、知识点、提示上限</small></div><div class="flow-arrow">→</div>
+          <div class="flow-node">生成教学指令<small>本轮不可变约束</small></div><div class="flow-arrow">→</div>
+          <div class="flow-node">固化为本轮上下文<small>事实 + 指令一起交给 Runtime</small></div>
+        </div>
+        <div class="vs" style="margin-top:25px">
+          <article class="card agent-card">
+            <p class="kicker">CONTEXT · 发生了什么</p><h3>八块土地只浇了七块</h3>
+            <p>代码包含 <span class="mono">i &lt; length - 1</span>；连续失败 2 次；最后一块仍是干的；Evidence 为本次 Run。</p>
+          </article>
+          <div class="vs-mark">→</div>
+          <article class="card agent-card">
+            <p class="kicker">DIRECTIVE · 这一轮怎么教</p><h3>纠错 · 循环边界 · 等级 1</h3>
+            <p>只允许问题和低等级提示；不允许 Patch；必须引用本次运行 Evidence。</p>
+          </article>
+        </div>
+        <div class="split" style="margin-top:22px">
+          <div class="card good-card"><h3>✓ 可以说</h3><p>“最后一块没有被浇到，可以检查循环条件决定了它在哪里停止。”</p></div>
+          <div class="card warn-card"><h3>× 不能直接说</h3><p>“把 <span class="mono">length - 1</span> 改成 <span class="mono">length</span>。”</p></div>
+        </div>
+        <aside class="speaker-note">上下文回答“发生了什么”，教学指令回答“面对这些事实怎么教”。顺序是先取事实，再算指令，最后把二者固化成同一个 TurnContext。</aside>
+      </section>
+
+      <section class="slide agent" data-title="共享智能体运行时" data-section="智能体编排">
+        <p class="eyebrow">09 · Shared Agent Runtime</p>
+        <h2>一套统一执行器，加载不同“角色卡”完成不同任务</h2>
+        <div class="step-list">
+          <article class="step-card"><strong>接收角色和资料包</strong><p>角色已经选好，阶段也已经确定。</p></article>
+          <article class="step-card"><strong>加载角色配置</strong><p>人设、语气、可用工具、回答长度和格式。</p></article>
+          <article class="step-card"><strong>整理给模型的材料</strong><p>真实事实、教学指令和固定返回格式。</p></article>
+          <article class="step-card"><strong>调用模型</strong><p>模型负责理解、解释和组织语言。</p></article>
+          <article class="step-card"><strong>必要时调用工具</strong><p>先检查权限和参数，再执行真实工具。</p></article>
+          <article class="step-card"><strong>把结果交回模型</strong><p>没有真实工具回执，不能声称世界已改变。</p></article>
+          <article class="step-card"><strong>获得固定格式回答</strong><p>回复、问题、Evidence 引用和候选推断。</p></article>
+          <article class="step-card"><strong>进行质检</strong><p>检查角色、阶段、提示上限、证据和 Patch 权限。</p></article>
+          <article class="step-card"><strong>返回正式结果</strong><p>合格后交给 Agent Hub 统一保存。</p></article>
+        </div>
+        <div class="quote">一轮只运行一个角色；输出不合格只修正一次，仍失败就用基于真实 Evidence 的固定兜底回复。</div>
+        <aside class="speaker-note">Runtime 不选角色、不定教学阶段、不判断任务成功，也不直接改世界、代码或画像。它只是按已经给定的角色卡和任务单执行这一轮。</aside>
+      </section>
+
+      <section class="slide agent" data-title="智能体质量与提交" data-section="智能体编排">
+        <p class="eyebrow">10 · 运行时配套模块</p>
+        <h2>模型回答还不是正式结果，必须先过质检</h2>
+        <div class="grid cols-4">
+          <article class="card agent-card"><p class="kicker">ROLE CONFIG</p><h3>角色配置</h3><p>长期角色卡：身份、语气、工具权限、输出限制。</p></article>
+          <article class="card agent-card"><p class="kicker">LLM ADAPTER</p><h3>大模型适配器</h3><p>把统一请求翻译给具体供应商，便于未来替换模型。</p></article>
+          <article class="card agent-card"><p class="kicker">VALIDATOR</p><h3>回答质检员</h3><p>检查格式、角色、教学指令、Evidence 和代码修改权限。</p></article>
+          <article class="card agent-card"><p class="kicker">TURN COMMIT</p><h3>轮次提交接口</h3><p>把消息、交互、推断候选和后续事件一次性保存。</p></article>
+        </div>
+        <div class="split" style="margin-top:28px">
+          <article class="card good-card"><h3>模型可以做</h3><ul><li>解释、提问和角色化表达</li><li>引用 Evidence 提出学习推断候选</li><li>在未来门禁允许时提出 Patch 候选</li></ul></article>
+          <article class="card warn-card"><h3>模型不能做</h3><ul><li>决定任务是否成功</li><li>提高提示等级或改变教学阶段</li><li>直接修改世界、代码或学生画像</li></ul></article>
+        </div>
+        <aside class="speaker-note">校验失败不会回滚已经完成的代码运行和世界结果。模型不可用时，学生仍能看到编译、运行、世界轨迹和基础模板反馈。</aside>
+      </section>
+
+      <section class="slide execution" data-title="客观执行链" data-section="客观执行链">
+        <p class="eyebrow">11 · 客观执行链</p>
+        <h2>学生代码想做什么，与世界实际发生什么，分开判断</h2>
+        <div class="flow-row">
+          <div class="flow-node">工具注册表<small>绑定学生、Skill 版本和参数</small></div><div class="flow-arrow">→</div>
+          <div class="flow-node">C++ Sandbox<small>编译、测试、隔离运行</small></div><div class="flow-arrow">→</div>
+          <div class="flow-node">动作意图<small>移动、浇水、扫描……</small></div><div class="flow-arrow">→</div>
+          <div class="flow-node">WorldEngine<small>按固定规则判断结果</small></div><div class="flow-arrow">→</div>
+          <div class="flow-node">世界工作单元<small>一次性提交全部事实</small></div><div class="flow-arrow">→</div>
+          <div class="flow-node">正式事实包<small>Run + Event + Evidence + 回执</small></div>
+        </div>
+        <div class="grid cols-3" style="margin-top:24px">
+          <article class="card execution-card"><h3>工具注册表 / Skill 调用</h3><p>规定角色能用哪些工具，并固定准确的学生、代码版本、输入和世界版本。</p></article>
+          <article class="card execution-card"><h3>固定镜像 C++ Sandbox</h3><p>限制运行时间、资源、动作数量和输出；死循环只终止本次运行。</p></article>
+          <article class="card execution-card"><h3>确定性 WorldEngine</h3><p>判断越界、障碍、资源、动作结果和任务是否完成；相同输入得到相同结果。</p></article>
+          <article class="card execution-card"><h3>世界工作单元</h3><p>检查世界版本，一次性保存新状态、事件、Run、Evidence、回执和待发送记录。</p></article>
+          <article class="card execution-card span-2"><h3>FACT：已经正式确认的事实包</h3><p>返回给 Runtime 做教学、供 Godot 播动画、供教师查询，也触发学习画像更新。只有世界提交回执才能证明世界真正改变。</p></article>
+        </div>
+        <div class="quote">Sandbox 只说“代码想做什么”；WorldEngine 才决定“世界实际上发生了什么”。</div>
+        <aside class="speaker-note">不要把 ActionIntent 直接当动画或世界事实。Sandbox 成功只代表得到了合法动作列表，只有世界原子提交成功才算真正改变世界。</aside>
+      </section>
+
+      <section class="slide state" data-title="版本化状态" data-section="版本化状态与异步投影">
+        <p class="eyebrow">12 · 版本化状态</p>
+        <h2>数据库不仅存“最后结果”，还保存完整过程和版本</h2>
+        <div class="grid cols-4">
+          <article class="card state-card"><p class="kicker">TASK / CONTENT</p><h3>任务与内容版本</h3><p>学生开始后绑定固定任务版本，后续编辑不会突然改变正在进行的会话。</p></article>
+          <article class="card state-card"><p class="kicker">TEACHING SPEC</p><h3>内部教学规范</h3><p>知识点、先修关系、提示规则和 Patch 权限的版本化配置。</p></article>
+          <article class="card state-card"><p class="kicker">AGENT INTERACTION</p><h3>产品智能体交互</h3><p>保存角色回复、教学问题、成长总结和未来的 Patch 决定。</p></article>
+          <article class="card state-card"><p class="kicker">POSTGRESQL</p><h3>系统总账本</h3><p>保存任务、代码、命令、运行、世界、Evidence、交互、画像与审计。</p></article>
+        </div>
+        <div class="grid cols-2" style="margin-top:24px">
+          <article class="card state-card"><h3>事件存储 / 投影发件箱</h3><p>保存事实时，同时写下“后续还要处理”的待办。即使服务重启，事件也不会永久丢失。</p></article>
+          <article class="card state-card"><h3>为什么要带版本？</h3><p>写入前先确认当前版本没有被别人改变，避免旧结果把新状态静默覆盖。</p></article>
+        </div>
+        <div class="quote">原始事实保留下来，页面视图和学习画像都可以重新整理、重新计算。</div>
+        <aside class="speaker-note">TeachingSpec 目前仍是需要继续完善的可配置能力。Product AgentInteraction 的 list/get 已经正式交付，但其余 Product 能力不能一起算作完成。</aside>
+      </section>
+
+      <section class="slide state" data-title="异步学习画像投影" data-section="版本化状态与异步投影">
+        <p class="eyebrow">13 · 异步投影</p>
+        <h2>原始 Evidence 像银行流水，学习画像像当前余额</h2>
+        <div class="flow-row">
+          <div class="flow-node">客观 Evidence<small>编译、测试、运行、世界结果</small></div>
+          <div class="flow-arrow">＋</div>
+          <div class="flow-node">Agent 推断候选<small>必须引用 Evidence 和置信度</small></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node">学习证据发件箱<small>不可变、可重试、按序号排列</small></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node">投影 Worker<small>去重、连续消费、应用规则</small></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node">学习画像快照<small>阶段、帮助程度、复习时间、版本</small></div>
+        </div>
+        <div class="grid cols-3" style="margin-top:25px">
+          <article class="card state-card"><h3>学习证据发件箱</h3><p>把客观事实和模型候选分开记录；模型推断不能直接变成画像。</p></article>
+          <article class="card state-card"><h3>学习画像投影 Worker</h3><p>按每个学生的连续序号处理；重复证据不重复计算，缺一条不能直接跳过。</p></article>
+          <article class="card state-card"><h3>投影接口与画像快照</h3><p>统一更新入口；每次有效更新版本精确加一，新画像参与下一轮教学。</p></article>
+        </div>
+        <div class="quote">Agent 可以说“这个学生可能理解了循环边界”；是否写进画像，仍由程序根据 Evidence 判断。</div>
+        <aside class="speaker-note">这一条链当前已经有持久化 Worker、版本校验、重建和下一轮画像读取。投影失败只影响画像新鲜度，不回滚已提交的 Run、World 或 Agent 回复。</aside>
+      </section>
+
+      <section class="slide" data-title="四道事务保险" data-section="可靠性设计">
+        <p class="eyebrow">14 · 四道保险</p>
+        <h2>每一步分别提交事实，失败后靠回执对账</h2>
+        <div class="transaction-row">
+          <article class="transaction" style="--accent:var(--application)"><div class="tx">A</div><h3>命令耐久受理</h3><p>保存 Command、Job、原请求和幂等编号。服务重启任务不丢，重复请求不新建。</p><span class="pill partial">202 只是接单</span></article>
+          <article class="transaction" style="--accent:var(--execution)"><div class="tx">B</div><h3>客观事实提交</h3><p>一次保存世界、Event、Run、Evidence、调用回执和发件箱。</p><span class="pill done">世界事实全或无</span></article>
+          <article class="transaction" style="--accent:var(--agent)"><div class="tx">C</div><h3>Agent 轮次提交</h3><p>一次保存回复、交互、Evidence 关联、推断候选和后续事件。</p><span class="pill done">防重复与旧结果覆盖</span></article>
+          <article class="transaction" style="--accent:var(--state)"><div class="tx">D</div><h3>学习画像投影</h3><p>按连续序号和当前版本更新，版本精确加一，重复证据不重复晋级。</p><span class="pill done">可重建、可追溯</span></article>
+        </div>
+        <div class="quote">不把 Sandbox、模型调用和四个提交阶段包成一个超长操作；每阶段留下可查询的正式回执。</div>
+        <aside class="speaker-note">用“保险”比“事务”更好讲。A 防丢单和重复；B 防世界只改一半；C 防回复与记录不一致；D 防画像重复计算和版本混乱。</aside>
+      </section>
+
+      <section class="slide" data-title="一次运行的完整链路" data-section="端到端链路">
+        <p class="eyebrow">15 · 从点击运行到下一轮教学</p>
+        <h2>一次学生操作，怎样走完整个系统</h2>
+        <div class="step-list">
+          <article class="step-card"><strong>Godot 点击运行</strong><p>游戏接口创建 Command，返回任务编号。</p></article>
+          <article class="step-card"><strong>Worker 领取任务</strong><p>Agent Hub 选角色，Context Builder 准备事实。</p></article>
+          <article class="step-card"><strong>确定教学边界</strong><p>PedagogyPolicy 生成本轮 TeachingDirective。</p></article>
+          <article class="step-card"><strong>调用学生 Skill</strong><p>小核桃通过白名单工具触发真实代码运行。</p></article>
+          <article class="step-card"><strong>Sandbox 产出意图</strong><p>C++ 运行得到移动、浇水等动作列表。</p></article>
+          <article class="step-card"><strong>WorldEngine 判定</strong><p>按固定世界规则计算真实结果。</p></article>
+          <article class="step-card"><strong>提交世界事实</strong><p>状态、Run、Event 和 Evidence 一次性保存。</p></article>
+          <article class="step-card"><strong>播放与教学</strong><p>Godot 播放已提交事件；Agent 基于结果反馈。</p></article>
+          <article class="step-card"><strong>更新学习画像</strong><p>Evidence 异步投影，新画像进入下一轮上下文。</p></article>
+        </div>
+        <aside class="speaker-note">这里把前面所有模块串起来。可以提醒：系统不是让 AI 一步做完，而是每个模块只负责一件容易验证的事情。</aside>
+      </section>
+
+      <section class="slide" data-title="五份文档与当前状态" data-section="交付状态">
+        <p class="eyebrow">16 · 文档地图与交付快照</p>
+        <h2>目标架构已经清楚，但不能把“设计完成”讲成“产品全部上线”</h2>
+        <div class="status-board">
+          <article class="status-col done-col">
+            <h3>当前已验证</h3>
+            <ul>
+              <li>后端 Agent Turn 垂直闭环</li>
+              <li>确定性 PedagogyPolicy 与 TeachingDirective</li>
+              <li>Evidence-backed 学习推断</li>
+              <li>持久化 LearnerProjectionWorker、重建与下一轮画像消费</li>
+              <li>部分 Game 查询与 Product AgentInteraction list/get</li>
+            </ul>
+          </article>
+          <article class="status-col partial-col">
+            <h3>下一批交付</h3>
+            <ul>
+              <li>Bug / 书书真实端到端</li>
+              <li>Product Draft 版本校验</li>
+              <li>Game Build / Certification / Activation / Session 生产入口</li>
+              <li>完整可配置 TeachingSpec</li>
+            </ul>
+          </article>
+          <article class="status-col planned-col">
+            <h3>合同有、尚未完整交付</h3>
+            <ul>
+              <li>其余 Product REST</li>
+              <li>结构化 SkillPatch 与 PatchDecision</li>
+              <li>World WSS</li>
+              <li>飞书 Adapter</li>
+              <li>Godot 前端 UI</li>
+            </ul>
+          </article>
+        </div>
+        <div class="grid cols-5" style="margin-top:18px">
+          <article class="card contract-card"><h3>01</h3><p>总体蓝图</p></article>
+          <article class="card contract-card"><h3>02</h3><p>Godot 前端</p></article>
+          <article class="card application-card"><h3>03</h3><p>后端实现</p></article>
+          <article class="card agent-card"><h3>04</h3><p>Agent 与教学</p></article>
+          <article class="card state-card"><h3>05</h3><p>接口对齐联调</p></article>
+        </div>
+        <p class="footer-note">当前为仓库级验证；发布环境仍需配置真实模型并重新执行 live E2E，不能表述为完整产品已上线。</p>
+        <aside class="speaker-note">这页使用的是最新 05 文档与 README 的状态，修正了旧架构图里“教学策略和 LearnerProjector 待实现”的标记。关键口径：已验证的是仓库链路，不是完整产品上线。</aside>
+      </section>
+
+      <section class="slide" data-title="三句话总结" data-section="总结">
+        <div class="hero">
+          <p class="eyebrow">17 · TAKEAWAYS</p>
+          <h2>最后记住三句话</h2>
+          <div class="grid cols-3">
+            <article class="card application-card"><p class="kicker">01 · 接单</p><h3><span class="mono">202</span> 只代表后端已经接单</h3><p>不代表代码运行成功，客户端还要继续查询最终结果。</p></article>
+            <article class="card execution-card"><p class="kicker">02 · 事实</p><h3>Sandbox 产生动作意图</h3><p>WorldEngine 才决定真实世界结果，只有提交回执能证明世界改变。</p></article>
+            <article class="card agent-card"><p class="kicker">03 · 教学</p><h3>Agent 负责受约束的表达</h3><p>最终阶段、权限、代码、世界和画像都由程序校验并提交。</p></article>
+          </div>
+          <div class="quote">先保证代码真实改变世界、世界结果可以验证、AI 教学有事实依据，再按真实需求逐步扩展。</div>
+        </div>
+        <aside class="speaker-note">收尾后停顿，邀请提问。如果时间紧，整场只讲第 2、3、4、6、8、9、11、13、16、17 页也能形成完整主线。</aside>
+      </section>
+
+      <section class="slide" data-title="问答" data-section="总结">
+        <div class="hero" style="text-align:center; justify-items:center">
+          <p class="eyebrow">Q &amp; A</p>
+          <h1>谢谢</h1>
+          <p class="lead">问题可以从一次真实学生操作出发，我们沿着链路逐层定位。</p>
+          <div class="meta-row" style="justify-content:center">
+            <span class="pill">合同边界</span><span class="pill">应用层</span><span class="pill">Agent</span><span class="pill">执行链</span><span class="pill">学习画像</span>
+          </div>
+        </div>
+        <aside class="speaker-note">常见问题：为什么不拆微服务？为什么阶段不用模型决定？模型挂了怎么办？如何避免重复运行？为什么 Agent 不能直接写画像？都可以回到五层分工回答。</aside>
+      </section>
+    </main>
+
+    <nav class="controls" aria-label="演示控制">
+      <button id="tocBtn" title="目录（O）" aria-label="打开目录">☰</button>
+      <button id="prevBtn" title="上一页（←）" aria-label="上一页">←</button>
+      <button id="nextBtn" class="primary" title="下一页（→ / 空格）" aria-label="下一页">→</button>
+      <span class="control-gap"></span>
+      <button id="notesBtn" title="讲者提示（N）" aria-label="显示讲者提示">N</button>
+      <button id="fullBtn" title="全屏（F）" aria-label="进入全屏">⛶</button>
+      <button id="printBtn" title="打印或导出 PDF" aria-label="打印演示稿">打印</button>
+      <button id="helpBtn" title="快捷键帮助（?）" aria-label="查看快捷键">?</button>
+      <span class="key-hint">← → 翻页 · N 提示 · O 目录</span>
+    </nav>
+  </div>
+
+  <section class="overlay" id="tocOverlay" role="dialog" aria-modal="true" aria-labelledby="tocTitle">
+    <div class="overlay-head"><h2 id="tocTitle">演示目录</h2><button class="close-btn" data-close="tocOverlay" aria-label="关闭目录">×</button></div>
+    <div class="toc-grid" id="tocGrid"></div>
+  </section>
+
+  <section class="overlay" id="helpOverlay" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="overlay-head"><h2 id="helpTitle">快捷键</h2><button class="close-btn" data-close="helpOverlay" aria-label="关闭帮助">×</button></div>
+    <div class="help-grid">
+      <div class="help-key"><span>上一页 / 下一页</span><kbd>← / →</kbd></div>
+      <div class="help-key"><span>下一页</span><kbd>Space</kbd></div>
+      <div class="help-key"><span>第一页 / 最后一页</span><kbd>Home / End</kbd></div>
+      <div class="help-key"><span>目录</span><kbd>O</kbd></div>
+      <div class="help-key"><span>讲者提示</span><kbd>N</kbd></div>
+      <div class="help-key"><span>全屏</span><kbd>F</kbd></div>
+      <div class="help-key"><span>关闭浮层</span><kbd>Esc</kbd></div>
+      <div class="help-key"><span>打印 / 导出 PDF</span><kbd>Ctrl+P</kbd></div>
+    </div>
+  </section>
+
+  <aside class="notes-panel" id="notesPanel" aria-live="polite">
+    <h3>讲者提示</h3>
+    <p id="notesBody"></p>
+    <div class="next-title" id="nextTitle"></div>
+  </aside>
+
+  <script>
+    (() => {
+      const slides = [...document.querySelectorAll('.slide')];
+      const total = slides.length;
+      const pageReadout = document.getElementById('pageReadout');
+      const progressFill = document.getElementById('progressFill');
+      const sectionLabel = document.getElementById('sectionLabel');
+      const notesPanel = document.getElementById('notesPanel');
+      const notesBody = document.getElementById('notesBody');
+      const nextTitle = document.getElementById('nextTitle');
+      const tocOverlay = document.getElementById('tocOverlay');
+      const helpOverlay = document.getElementById('helpOverlay');
+      const tocGrid = document.getElementById('tocGrid');
+      let current = 0;
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let startedAt = Date.now();
+
+      const pad = n => String(n).padStart(2, '0');
+      const indexFromHash = () => {
+        const match = location.hash.match(/slide-(\d+)/);
+        return match ? Math.min(total - 1, Math.max(0, Number(match[1]) - 1)) : 0;
+      };
+
+      slides.forEach((slide, index) => {
+        slide.id = `slide-${index + 1}`;
+        slide.setAttribute('aria-hidden', index === 0 ? 'false' : 'true');
+        const button = document.createElement('button');
+        button.className = 'toc-item';
+        button.innerHTML = `<span>${pad(index + 1)} · ${slide.dataset.section || '演示'}</span><strong>${slide.dataset.title}</strong>`;
+        button.addEventListener('click', () => { show(index); closeOverlay(tocOverlay); });
+        tocGrid.appendChild(button);
+      });
+
+      const tocItems = [...tocGrid.children];
+
+      function updateNotes() {
+        const note = slides[current].querySelector('.speaker-note');
+        notesBody.textContent = note ? note.textContent.trim() : '本页暂无讲者提示。';
+        nextTitle.textContent = current < total - 1 ? `下一页：${slides[current + 1].dataset.title}` : '已经是最后一页';
+      }
+
+      function show(index, push = true) {
+        const next = Math.min(total - 1, Math.max(0, index));
+        slides[current].classList.remove('active');
+        slides[current].setAttribute('aria-hidden', 'true');
+        current = next;
+        slides[current].classList.add('active');
+        slides[current].setAttribute('aria-hidden', 'false');
+        slides[current].scrollTop = 0;
+        pageReadout.textContent = `${pad(current + 1)} / ${pad(total)}`;
+        progressFill.style.width = `${((current + 1) / total) * 100}%`;
+        sectionLabel.textContent = `${slides[current].dataset.section} · ${slides[current].dataset.title}`;
+        tocItems.forEach((item, i) => item.classList.toggle('current', i === current));
+        updateNotes();
+        const hash = `#slide-${current + 1}`;
+        if (push && location.hash !== hash) history.pushState({ slide: current }, '', hash);
+        else if (!location.hash) history.replaceState({ slide: current }, '', hash);
+      }
+
+      function next() { show(current + 1); }
+      function prev() { show(current - 1); }
+      function openOverlay(el) { closeAll(); el.classList.add('open'); const focusable = el.querySelector('button'); if (focusable) focusable.focus(); }
+      function closeOverlay(el) { el.classList.remove('open'); }
+      function closeAll() { closeOverlay(tocOverlay); closeOverlay(helpOverlay); }
+      function toggleNotes() { notesPanel.classList.toggle('open'); }
+      async function toggleFullscreen() {
+        try {
+          if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
+          else await document.exitFullscreen();
+        } catch (_) { /* file:// or browser policy can deny fullscreen */ }
+      }
+
+      document.getElementById('prevBtn').addEventListener('click', prev);
+      document.getElementById('nextBtn').addEventListener('click', next);
+      document.getElementById('tocBtn').addEventListener('click', () => openOverlay(tocOverlay));
+      document.getElementById('helpBtn').addEventListener('click', () => openOverlay(helpOverlay));
+      document.getElementById('notesBtn').addEventListener('click', toggleNotes);
+      document.getElementById('fullBtn').addEventListener('click', toggleFullscreen);
+      document.getElementById('printBtn').addEventListener('click', () => window.print());
+      document.querySelectorAll('[data-close]').forEach(btn => btn.addEventListener('click', () => closeOverlay(document.getElementById(btn.dataset.close))));
+
+      document.addEventListener('keydown', event => {
+        const tag = event.target.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || event.target.isContentEditable) return;
+        const overlayOpen = tocOverlay.classList.contains('open') || helpOverlay.classList.contains('open');
+        if (event.key === 'Escape') { closeAll(); return; }
+        if (overlayOpen) return;
+        if (['ArrowRight', 'PageDown', ' '].includes(event.key)) { event.preventDefault(); next(); }
+        else if (['ArrowLeft', 'PageUp'].includes(event.key)) { event.preventDefault(); prev(); }
+        else if (event.key === 'Home') { event.preventDefault(); show(0); }
+        else if (event.key === 'End') { event.preventDefault(); show(total - 1); }
+        else if (event.key.toLowerCase() === 'o') openOverlay(tocOverlay);
+        else if (event.key.toLowerCase() === 'n') toggleNotes();
+        else if (event.key.toLowerCase() === 'f') toggleFullscreen();
+        else if (event.key === '?') openOverlay(helpOverlay);
+      });
+
+      document.getElementById('deck').addEventListener('click', event => {
+        if (event.target.closest('button, a, .notes-panel, .overlay')) return;
+        const x = event.clientX / window.innerWidth;
+        if (x < .12) prev();
+        else if (x > .88) next();
+      });
+
+      document.addEventListener('touchstart', event => {
+        if (!event.touches[0]) return;
+        touchStartX = event.touches[0].clientX;
+        touchStartY = event.touches[0].clientY;
+      }, { passive: true });
+      document.addEventListener('touchend', event => {
+        if (!event.changedTouches[0]) return;
+        const dx = event.changedTouches[0].clientX - touchStartX;
+        const dy = event.changedTouches[0].clientY - touchStartY;
+        if (Math.abs(dx) > 65 && Math.abs(dx) > Math.abs(dy) * 1.4) dx < 0 ? next() : prev();
+      }, { passive: true });
+
+      window.addEventListener('popstate', () => show(indexFromHash(), false));
+      window.addEventListener('hashchange', () => {
+        const idx = indexFromHash();
+        if (idx !== current) show(idx, false);
+      });
+
+      setInterval(() => {
+        const seconds = Math.floor((Date.now() - startedAt) / 1000);
+        document.getElementById('timer').textContent = `${pad(Math.floor(seconds / 60))}:${pad(seconds % 60)}`;
+      }, 1000);
+
+      current = indexFromHash();
+      slides.forEach((slide, i) => slide.classList.toggle('active', i === current));
+      show(current, false);
+    })();
+  </script>
+</body>
+</html>

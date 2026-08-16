@@ -1,0 +1,109 @@
+[gd_scene load_steps=15 format=3]
+
+[ext_resource type="Script" path="res://scripts/terrain/terrain_manager.gd" id="1_manager"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/terrain/grass_plot.png" id="2_grass_plot"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/terrain/tilled_soil.png" id="3_tilled_soil"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/terrain/watered_soil.png" id="4_watered_soil"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/terrain/dirt_road.png" id="5_dirt_road"]
+
+[sub_resource type="StandardMaterial3D" id="GroundMaterial"]
+transparency = 2
+cull_mode = 2
+shading_mode = 0
+albedo_texture = ExtResource("2_grass_plot")
+roughness = 0.94
+alpha_scissor_threshold = 0.02
+
+[sub_resource type="StandardMaterial3D" id="FallbackGroundMaterial"]
+shading_mode = 0
+albedo_color = Color(0.556863, 0.847059, 0.772549, 1)
+
+[sub_resource type="PlaneMesh" id="GroundPlaneMesh"]
+material = SubResource("GroundMaterial")
+size = Vector2(20, 20)
+
+[sub_resource type="BoxShape3D" id="GroundCollisionShape"]
+size = Vector3(20, 0.2, 20)
+
+[sub_resource type="BoxShape3D" id="BoundsVerticalShape"]
+size = Vector3(0.3, 2, 20)
+
+[sub_resource type="BoxShape3D" id="BoundsHorizontalShape"]
+size = Vector3(20, 2, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="DebugDirtMaterial"]
+transparency = 2
+cull_mode = 2
+shading_mode = 0
+albedo_texture = ExtResource("3_tilled_soil")
+alpha_scissor_threshold = 0.01
+
+[sub_resource type="StandardMaterial3D" id="DebugFarmlandMaterial"]
+transparency = 2
+cull_mode = 2
+shading_mode = 0
+albedo_texture = ExtResource("4_watered_soil")
+alpha_scissor_threshold = 0.01
+
+[sub_resource type="StandardMaterial3D" id="DebugPathMaterial"]
+transparency = 2
+cull_mode = 2
+shading_mode = 0
+albedo_texture = ExtResource("5_dirt_road")
+alpha_scissor_threshold = 0.01
+
+[sub_resource type="StandardMaterial3D" id="DebugStoneMaterial"]
+resource_name = "TEMP_DEBUG_STONE_ALPHA_SCISSOR"
+transparency = 2
+cull_mode = 2
+shading_mode = 0
+albedo_color = Color(0.42, 0.46, 0.48, 0.88)
+alpha_scissor_threshold = 0.01
+
+[node name="TerrainManager" type="Node3D"]
+script = ExtResource("1_manager")
+terrain_materials = [SubResource("DebugDirtMaterial"), SubResource("DebugFarmlandMaterial"), SubResource("DebugPathMaterial"), SubResource("DebugStoneMaterial")]
+
+[node name="BaseGround" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.001, 0)
+mesh = SubResource("GroundPlaneMesh")
+
+[node name="BaseGrassFallback" type="MeshInstance3D" parent="."]
+mesh = SubResource("GroundPlaneMesh")
+material_override = SubResource("FallbackGroundMaterial")
+
+[node name="GroundBody" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GroundBody"]
+position = Vector3(0, -0.1, 0)
+shape = SubResource("GroundCollisionShape")
+
+[node name="Chunks" type="Node3D" parent="."]
+
+[node name="Buildings" type="Node3D" parent="."]
+
+[node name="WorldBounds" type="Node3D" parent="."]
+
+[node name="LeftWall" type="StaticBody3D" parent="WorldBounds"]
+position = Vector3(-10.15, 1, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WorldBounds/LeftWall"]
+shape = SubResource("BoundsVerticalShape")
+
+[node name="RightWall" type="StaticBody3D" parent="WorldBounds"]
+position = Vector3(10.15, 1, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WorldBounds/RightWall"]
+shape = SubResource("BoundsVerticalShape")
+
+[node name="TopWall" type="StaticBody3D" parent="WorldBounds"]
+position = Vector3(0, 1, -10.15)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WorldBounds/TopWall"]
+shape = SubResource("BoundsHorizontalShape")
+
+[node name="BottomWall" type="StaticBody3D" parent="WorldBounds"]
+position = Vector3(0, 1, 10.15)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WorldBounds/BottomWall"]
+shape = SubResource("BoundsHorizontalShape")

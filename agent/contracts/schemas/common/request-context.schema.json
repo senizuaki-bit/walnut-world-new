@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/common/request-context.schema.json",
+  "title": "RequestContext",
+  "description": "Domain context captured when an operation originates a resource. Persisted resources retain this origin context; it is not rewritten to identify a later HTTP polling attempt. Current HTTP attempt identity is carried by the required Game API headers X-Request-Id, X-Trace-Id, X-Correlation-Id, and X-Schema-Version.",
+  "x-invariants": [
+    "persisted resource request_context is immutable origin context",
+    "current HTTP attempt identity is transported separately and never overwrites origin context"
+  ],
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "request_id",
+    "correlation_id",
+    "trace_id",
+    "requested_at",
+    "actor",
+    "content_ref"
+  ],
+  "$defs": {
+    "wireAttemptContext": {
+      "title": "WireAttemptContext",
+      "description": "Transport-only identity available before authentication/bootstrap resolves actor and content context.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "request_id", "trace_id", "correlation_id"],
+      "properties": {
+        "schema_version": { "const": "1.0.0" },
+        "request_id": { "type": "string", "pattern": "^req_[A-Za-z0-9_-]{8,96}$" },
+        "trace_id": { "type": "string", "pattern": "^trace_[A-Za-z0-9_-]{8,96}$" },
+        "correlation_id": { "type": "string", "pattern": "^corr_[A-Za-z0-9_-]{8,96}$" }
+      }
+    }
+  },
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "request_id": { "type": "string", "pattern": "^req_[A-Za-z0-9_-]{8,96}$" },
+    "correlation_id": { "type": "string", "pattern": "^corr_[A-Za-z0-9_-]{8,96}$" },
+    "trace_id": { "type": "string", "pattern": "^trace_[A-Za-z0-9_-]{8,96}$" },
+    "requested_at": { "type": "string", "format": "date-time" },
+    "actor": { "$ref": "./actor-ref.schema.json" },
+    "content_ref": { "$ref": "./content-ref.schema.json" }
+  }
+}

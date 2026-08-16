@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/learner/learner-inference-recorded-payload.schema.json",
+  "title": "LearnerInferenceRecordedPayload",
+  "description": "Immutable, source-bound learner inference emitted from one committed Agent turn.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "actor",
+    "learner_id",
+    "session_id",
+    "turn_id",
+    "command_id",
+    "run_id",
+    "source_event_id",
+    "source_event_sha256",
+    "turn_commit_sha256",
+    "task_id",
+    "teaching_spec_version",
+    "role",
+    "concept",
+    "score_delta",
+    "confidence",
+    "reason",
+    "evidence_refs",
+    "inferred_at",
+    "inference_sha256"
+  ],
+  "properties": {
+    "actor": { "$ref": "../common/actor-ref.schema.json" },
+    "learner_id": { "$ref": "#/$defs/identifier" },
+    "session_id": { "$ref": "#/$defs/identifier" },
+    "turn_id": { "$ref": "#/$defs/identifier" },
+    "command_id": { "$ref": "../common/command-id.schema.json" },
+    "run_id": {
+      "oneOf": [
+        { "$ref": "#/$defs/identifier" },
+        { "type": "null" }
+      ]
+    },
+    "source_event_id": { "type": "string", "pattern": "^evt_[A-Za-z0-9_-]{8,128}$" },
+    "source_event_sha256": { "$ref": "#/$defs/sha256" },
+    "turn_commit_sha256": { "$ref": "#/$defs/sha256" },
+    "task_id": { "$ref": "#/$defs/identifier" },
+    "teaching_spec_version": { "type": "string", "minLength": 1, "maxLength": 96 },
+    "role": {
+      "type": "string",
+      "enum": ["teaching_agent", "bug_agent", "book_agent"]
+    },
+    "concept": { "type": "string", "pattern": "^[a-z][a-z0-9_.:-]{1,127}$" },
+    "score_delta": {
+      "type": "number",
+      "minimum": -0.3,
+      "maximum": 0.3,
+      "x-decimal-places-max": 6
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "x-decimal-places-max": 6
+    },
+    "reason": { "type": "string", "minLength": 1, "maxLength": 1000 },
+    "evidence_refs": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {
+        "allOf": [
+          { "$ref": "../common/evidence-ref.schema.json" },
+          { "type": "object", "required": ["sha256"] }
+        ]
+      },
+      "x-invariants": [
+        "items are strictly sorted by evidence_id",
+        "evidence_id values are unique",
+        "every item carries sha256"
+      ]
+    },
+    "inferred_at": { "type": "string", "format": "date-time" },
+    "inference_sha256": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "identifier": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$" },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "x-hash-contract": {
+    "$ref": "../../learner-inference-hash-v1.json"
+  },
+  "x-invariants": [
+    "actor.actor_id == learner_id",
+    "score_delta and confidence have at most six decimal places",
+    "inference_sha256 equals YAYA_LEARNER_INFERENCE_HASH_V1 over this payload"
+  ]
+}

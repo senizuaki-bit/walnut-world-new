@@ -1,0 +1,437 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/game/run.schema.json",
+  "title": "Skill invocation run",
+  "x-invariants": [
+    "A committed world receipt advances exactly one revision: world_revision = previous_revision + 1.",
+    "A committed world receipt has first_event_sequence <= last_event_sequence.",
+    "When agent_feedback is non-null, its session_id, turn_id, command_id and run_id equal the owning Run fields.",
+    "Run evidence_refs and agent_feedback.evidence_refs identify the same evidence set when agent_feedback is non-null."
+  ],
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_context",
+    "run_id",
+    "session_id",
+    "turn_id",
+    "command_id",
+    "status",
+    "terminal",
+    "skill",
+    "sandbox",
+    "world_application",
+    "agent_feedback",
+    "created_at",
+    "updated_at",
+    "evidence_refs",
+    "versions"
+  ],
+  "properties": {
+    "request_context": { "$ref": "../common/request-context.schema.json" },
+    "run_id": { "$ref": "#/$defs/identifier" },
+    "session_id": {
+      "description": "Agent session that owns this run, or null for a non-Agent invocation.",
+      "oneOf": [
+        { "$ref": "#/$defs/identifier" },
+        { "type": "null" }
+      ]
+    },
+    "turn_id": {
+      "description": "Client-supplied turn that owns this run, or null for a non-Agent invocation.",
+      "oneOf": [
+        { "$ref": "#/$defs/identifier" },
+        { "type": "null" }
+      ]
+    },
+    "command_id": { "$ref": "../common/command-id.schema.json" },
+    "status": {
+      "type": "string",
+      "enum": ["QUEUED", "RUNNING_SANDBOX", "APPLYING_WORLD", "SUCCEEDED", "REJECTED", "FAILED", "UNKNOWN"]
+    },
+    "terminal": { "type": "boolean" },
+    "skill": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["skill_id", "skill_version_id", "artifact_sha256", "certification_id"],
+      "properties": {
+        "skill_id": { "$ref": "#/$defs/identifier" },
+        "skill_version_id": { "$ref": "#/$defs/identifier" },
+        "artifact_sha256": { "$ref": "#/$defs/sha256" },
+        "certification_id": { "$ref": "#/$defs/identifier" }
+      }
+    },
+    "sandbox": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["invocation_id", "status", "started_at", "finished_at", "limits", "usage", "action_intents", "failure"],
+      "properties": {
+        "invocation_id": { "$ref": "#/$defs/identifier" },
+        "status": { "type": "string", "enum": ["QUEUED", "RUNNING", "SUCCEEDED", "REJECTED", "TIMED_OUT", "FAILED"] },
+        "started_at": { "oneOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }] },
+        "finished_at": { "oneOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }] },
+        "limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["cpu_ms", "wall_ms", "memory_bytes", "max_intents"],
+          "properties": {
+            "cpu_ms": { "type": "integer", "minimum": 1 },
+            "wall_ms": { "type": "integer", "minimum": 1 },
+            "memory_bytes": { "type": "integer", "minimum": 1 },
+            "max_intents": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "usage": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["cpu_ms", "wall_ms", "peak_memory_bytes"],
+              "properties": {
+                "cpu_ms": { "type": "integer", "minimum": 0 },
+                "wall_ms": { "type": "integer", "minimum": 0 },
+                "peak_memory_bytes": { "type": "integer", "minimum": 0 }
+              }
+            },
+            { "type": "null" }
+          ]
+        },
+        "action_intents": {
+          "type": "array",
+          "items": { "$ref": "action-intent.schema.json" }
+        },
+        "failure": { "$ref": "#/$defs/failureOrNull" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "status": { "enum": ["QUEUED", "RUNNING", "SUCCEEDED"] } },
+            "required": ["status"]
+          },
+          "then": { "properties": { "failure": { "type": "null" } } }
+        },
+        {
+          "if": {
+            "properties": { "status": { "const": "QUEUED" } },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "started_at": { "type": "null" },
+              "finished_at": { "type": "null" },
+              "usage": { "type": "null" },
+              "action_intents": { "maxItems": 0 }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "status": { "const": "RUNNING" } },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "started_at": { "type": "string", "format": "date-time" },
+              "finished_at": { "type": "null" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "status": { "const": "SUCCEEDED" } },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "started_at": { "type": "string", "format": "date-time" },
+              "finished_at": { "type": "string", "format": "date-time" },
+              "usage": { "type": "object" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "status": { "enum": ["REJECTED", "TIMED_OUT", "FAILED"] } },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "finished_at": { "type": "string", "format": "date-time" },
+              "failure": {
+                "allOf": [
+                  { "$ref": "../common/error.schema.json" },
+                  { "properties": { "stage": { "const": "SANDBOX" } } }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "world_application": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "receipt", "failure"],
+      "properties": {
+        "status": { "type": "string", "enum": ["NOT_ATTEMPTED", "VALIDATING", "COMMITTED", "REJECTED", "FAILED", "UNKNOWN"] },
+        "receipt": {
+          "oneOf": [
+            { "$ref": "#/$defs/worldReceipt" },
+            { "type": "null" }
+          ]
+        },
+        "failure": { "$ref": "#/$defs/failureOrNull" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "status": { "enum": ["NOT_ATTEMPTED", "VALIDATING"] } },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "receipt": { "type": "null" },
+              "failure": { "type": "null" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "status": { "const": "COMMITTED" } },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "receipt": { "$ref": "#/$defs/worldReceipt" },
+              "failure": { "type": "null" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "status": { "enum": ["REJECTED", "FAILED", "UNKNOWN"] } },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "receipt": { "type": "null" },
+              "failure": {
+                "allOf": [
+                  { "$ref": "../common/error.schema.json" },
+                  { "properties": { "stage": { "enum": ["WORLD_VALIDATE", "WORLD_COMMIT"] } } }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "agent_feedback": {
+      "description": "Reconciled, user-displayable feedback for the Agent turn that produced this run. Null until feedback exists or when this run is not associated with an Agent turn.",
+      "oneOf": [
+        { "$ref": "agent-turn-feedback.schema.json" },
+        { "type": "null" }
+      ]
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "evidence_refs": {
+      "type": "array",
+      "maxItems": 64,
+      "uniqueItems": true,
+      "x-invariants": ["evidence_id values are unique"],
+      "items": { "$ref": "../common/evidence-ref.schema.json" }
+    },
+    "versions": { "$ref": "../common/version-set.schema.json" }
+  },
+  "allOf": [
+    {
+      "oneOf": [
+        {
+          "properties": {
+            "session_id": { "$ref": "#/$defs/identifier" },
+            "turn_id": { "$ref": "#/$defs/identifier" }
+          }
+        },
+        {
+          "properties": {
+            "session_id": { "type": "null" },
+            "turn_id": { "type": "null" }
+          }
+        }
+      ]
+    },
+    {
+      "if": {
+        "properties": { "agent_feedback": { "type": "object" } },
+        "required": ["agent_feedback"]
+      },
+      "then": {
+        "properties": {
+          "session_id": { "$ref": "#/$defs/identifier" },
+          "turn_id": { "$ref": "#/$defs/identifier" },
+          "agent_feedback": {
+            "properties": {
+              "run_id": { "$ref": "#/$defs/identifier" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "status": { "enum": ["QUEUED", "RUNNING_SANDBOX", "APPLYING_WORLD"] } },
+        "required": ["status"]
+      },
+      "then": { "properties": { "terminal": { "const": false } } }
+    },
+    {
+      "if": {
+        "properties": { "status": { "enum": ["SUCCEEDED", "REJECTED", "FAILED", "UNKNOWN"] } },
+        "required": ["status"]
+      },
+      "then": { "properties": { "terminal": { "const": true } } }
+    },
+    {
+      "if": { "properties": { "status": { "const": "QUEUED" } }, "required": ["status"] },
+      "then": {
+        "properties": {
+          "sandbox": { "properties": { "status": { "const": "QUEUED" } } },
+          "world_application": { "properties": { "status": { "const": "NOT_ATTEMPTED" } } },
+          "agent_feedback": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "status": { "const": "RUNNING_SANDBOX" } }, "required": ["status"] },
+      "then": {
+        "properties": {
+          "sandbox": { "properties": { "status": { "const": "RUNNING" } } },
+          "world_application": { "properties": { "status": { "const": "NOT_ATTEMPTED" } } },
+          "agent_feedback": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "status": { "const": "APPLYING_WORLD" } }, "required": ["status"] },
+      "then": {
+        "properties": {
+          "sandbox": { "properties": { "status": { "const": "SUCCEEDED" } } },
+          "world_application": { "properties": { "status": { "const": "VALIDATING" } } },
+          "agent_feedback": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "status": { "const": "SUCCEEDED" } }, "required": ["status"] },
+      "then": {
+        "properties": {
+          "sandbox": { "properties": { "status": { "const": "SUCCEEDED" } } },
+          "world_application": { "properties": { "status": { "const": "COMMITTED" } } }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "status": { "const": "REJECTED" } }, "required": ["status"] },
+      "then": {
+        "oneOf": [
+          {
+            "properties": {
+              "sandbox": { "properties": { "status": { "const": "REJECTED" } } },
+              "world_application": { "properties": { "status": { "const": "NOT_ATTEMPTED" } } }
+            }
+          },
+          {
+            "properties": {
+              "sandbox": { "properties": { "status": { "const": "SUCCEEDED" } } },
+              "world_application": { "properties": { "status": { "const": "REJECTED" } } }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "if": { "properties": { "status": { "const": "FAILED" } }, "required": ["status"] },
+      "then": {
+        "oneOf": [
+          {
+            "properties": {
+              "sandbox": { "properties": { "status": { "enum": ["TIMED_OUT", "FAILED"] } } },
+              "world_application": { "properties": { "status": { "const": "NOT_ATTEMPTED" } } }
+            }
+          },
+          {
+            "properties": {
+              "sandbox": { "properties": { "status": { "const": "SUCCEEDED" } } },
+              "world_application": { "properties": { "status": { "const": "FAILED" } } }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "if": { "properties": { "status": { "const": "UNKNOWN" } }, "required": ["status"] },
+      "then": {
+        "properties": {
+          "sandbox": { "properties": { "status": { "const": "SUCCEEDED" } } },
+          "world_application": {
+            "properties": {
+              "status": { "const": "UNKNOWN" },
+              "failure": {
+                "allOf": [
+                  { "$ref": "../common/error.schema.json" },
+                  {
+                    "properties": {
+                      "code": { "const": "UNKNOWN_COMMIT_STATE" },
+                      "stage": { "const": "WORLD_COMMIT" }
+                    },
+                    "required": ["code", "stage"]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "failureOrNull": {
+      "oneOf": [
+        {
+          "allOf": [
+            { "$ref": "../common/error.schema.json" },
+            { "properties": { "stage": { "enum": ["SANDBOX", "WORLD_VALIDATE", "WORLD_COMMIT"] } } }
+          ]
+        },
+        { "type": "null" }
+      ]
+    },
+    "worldReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "x-invariants": [
+        "world_revision == previous_revision + 1",
+        "first_event_sequence <= last_event_sequence"
+      ],
+      "required": ["world_id", "previous_revision", "world_revision", "first_event_sequence", "last_event_sequence", "state_hash", "committed_at"],
+      "properties": {
+        "world_id": { "$ref": "#/$defs/identifier" },
+        "previous_revision": { "type": "integer", "minimum": 0 },
+        "world_revision": { "type": "integer", "minimum": 1 },
+        "first_event_sequence": { "type": "integer", "minimum": 1 },
+        "last_event_sequence": { "type": "integer", "minimum": 1 },
+        "state_hash": { "$ref": "#/$defs/sha256" },
+        "committed_at": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

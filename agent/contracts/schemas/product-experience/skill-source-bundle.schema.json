@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/product-experience/skill-source-bundle.schema.json",
+  "title": "Product canonical Skill source bundle",
+  "description": "The existing Game SkillSourceBundle narrowed to host-portable canonical logical paths for recoverable product drafts and patches.",
+  "allOf": [
+    { "$ref": "../game/skill-build-create-request.schema.json#/properties/source_bundle" },
+    {
+      "type": "object",
+      "properties": {
+        "entrypoint": { "$ref": "#/$defs/canonicalSourcePath" },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": { "$ref": "#/$defs/canonicalSourcePath" }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "x-invariants": [
+    "entrypoint and every file path are canonical slash-separated logical identifiers with no empty, dot, dot-dot or trailing-dot segment",
+    "file path identity uses ASCII case folding for collision detection; no two paths collide after folding",
+    "entrypoint equals exactly one file path with the same spelling and case",
+    "paths are logical identifiers and must never be normalized by a host filesystem"
+  ],
+  "$defs": {
+    "canonicalSourcePath": {
+      "type": "string",
+      "pattern": "^(?=.{1,240}$)[A-Za-z0-9_](?:[A-Za-z0-9_.-]*[A-Za-z0-9_-])?(?:/[A-Za-z0-9_](?:[A-Za-z0-9_.-]*[A-Za-z0-9_-])?)*$"
+    }
+  }
+}

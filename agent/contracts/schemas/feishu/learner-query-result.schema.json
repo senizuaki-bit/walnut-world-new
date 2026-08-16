@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/feishu/learner-query-result.schema.json",
+  "title": "Learner read query result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "query_id",
+    "learner_ref",
+    "as_of",
+    "data_freshness",
+    "redaction",
+    "trace_id"
+  ],
+  "properties": {
+    "query_id": {
+      "type": "string",
+      "pattern": "^lqry_[A-Za-z0-9_-]{8,128}$"
+    },
+    "learner_ref": {
+      "type": "string",
+      "pattern": "^lrn_[A-Za-z0-9_-]{8,128}$"
+    },
+    "as_of": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "data_freshness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "projected_through_event_at",
+        "projection_lag_seconds"
+      ],
+      "properties": {
+        "projected_through_event_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "projection_lag_seconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "is_stale": {
+          "type": "boolean"
+        }
+      }
+    },
+    "mastery_summary": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {
+        "$ref": "#/$defs/masteryItem"
+      }
+    },
+    "recent_evidence": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "$ref": "../common/evidence-ref.schema.json"
+      }
+    },
+    "support_needs": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "string",
+        "maxLength": 500
+      }
+    },
+    "activity_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sessions": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "completed_tasks": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "active_minutes": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "recommended_next_steps": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "string",
+        "maxLength": 1000
+      }
+    },
+    "redaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "direct_identifiers_removed",
+        "fields_omitted"
+      ],
+      "properties": {
+        "direct_identifiers_removed": {
+          "const": true
+        },
+        "fields_omitted": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        }
+      }
+    },
+    "trace_id": {
+      "type": "string",
+      "pattern": "^trace_[A-Za-z0-9_-]{8,96}$"
+    }
+  },
+  "$defs": {
+    "masteryItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "concept_ref",
+        "state",
+        "confidence",
+        "evidence_refs",
+        "updated_at"
+      ],
+      "properties": {
+        "concept_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "NOT_OBSERVED",
+            "EMERGING",
+            "DEVELOPING",
+            "PROFICIENT",
+            "REVIEW_NEEDED"
+          ]
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "../common/evidence-ref.schema.json"
+          }
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

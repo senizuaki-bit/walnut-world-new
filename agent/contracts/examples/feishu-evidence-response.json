@@ -1,0 +1,38 @@
+{
+  "schema_ref": "../schemas/feishu/evidence-view.schema.json",
+  "value": {
+    "evidence_ref": {
+      "evidence_id": "evidence_world_00000001",
+      "evidence_type": "WORLD_COMMIT",
+      "created_at": "2026-08-06T09:58:00Z",
+      "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    },
+    "learner_ref": "lrn_00000001",
+    "observed_at": "2026-08-06T09:58:00Z",
+    "summary": "学生通过已认证浇水 Skill 完成世界提交。",
+    "facts": [
+      {
+        "name": "world_revision",
+        "value": 185
+      },
+      {
+        "name": "skill_result",
+        "value": "APPLIED"
+      }
+    ],
+    "provenance": {
+      "event_id": "evt_world_00000001",
+      "command_id": "cmd_00000002",
+      "source_module": "WORLD_ENGINE"
+    },
+    "redaction": {
+      "direct_identifiers_removed": true,
+      "policy_version": "policy-38",
+      "fields_omitted": [
+        "raw_source_code",
+        "raw_chat_text"
+      ]
+    },
+    "trace_id": "trace_feishu_00000006"
+  }
+}

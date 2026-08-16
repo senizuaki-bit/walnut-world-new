@@ -1,0 +1,698 @@
+{
+  "openapi": "3.1.0",
+  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
+  "info": {
+    "title": "Yaya Product Experience Projection API",
+    "version": "1.0.0",
+    "description": "Product-facing version-pinned content, recoverable session workspaces, CAS skill drafts and structured Agent interactions. This API is additive and does not change the existing Game v1 or Feishu v1 contracts. It has no build, activation, sandbox execution or WorldEngine mutation route."
+  },
+  "servers": [
+    {
+      "url": "https://api.yaya.example",
+      "description": "Environment placeholder; deployed client configuration is authoritative."
+    }
+  ],
+  "tags": [
+    { "name": "Content", "description": "Immutable version-pinned learner content projections." },
+    { "name": "Workspace", "description": "Actor-scoped session recovery projections." },
+    { "name": "Drafts", "description": "Recoverable Skill source drafts with revision-and-hash CAS." },
+    { "name": "Interactions", "description": "Recoverable product Agent interactions and patch decisions." }
+  ],
+  "security": [
+    { "bearerAuth": [] }
+  ],
+  "paths": {
+    "/product-experience/v1/content-units/{unit_id}/versions/{content_version}": {
+      "get": {
+        "tags": ["Content"],
+        "operationId": "getProductContentUnit",
+        "summary": "Get one exact published product content unit",
+        "description": "Returns only the immutable content whose unit_id, semantic version and content hash all match. There is intentionally no latest alias or candidate-content response.",
+        "parameters": [
+          { "$ref": "#/components/parameters/RequestId" },
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/CorrelationId" },
+          { "$ref": "#/components/parameters/SchemaVersion" },
+          { "$ref": "#/components/parameters/UnitId" },
+          { "$ref": "#/components/parameters/ContentVersion" },
+          { "$ref": "#/components/parameters/ContentHash" }
+        ],
+        "responses": {
+          "200": { "$ref": "#/components/responses/ContentUnitOk" },
+          "400": { "$ref": "#/components/responses/Error400" },
+          "401": { "$ref": "#/components/responses/Error401" },
+          "403": { "$ref": "#/components/responses/Error403" },
+          "404": { "$ref": "#/components/responses/Error404" },
+          "409": { "$ref": "#/components/responses/Error409" },
+          "429": { "$ref": "#/components/responses/Error429" },
+          "500": { "$ref": "#/components/responses/Error500" },
+          "503": { "$ref": "#/components/responses/ReadError503" }
+        },
+        "x-resource-identity": [
+          "path unit_id equals response.content_ref.unit_id",
+          "path content_version equals response.content_ref.version",
+          "query content_hash equals response.content_ref.content_hash",
+          "authenticated tenant and actor are authorized for the requested content and one response audience",
+          "response representation is reader-neutral and contains no tenant, actor or current-attempt identity"
+        ]
+      }
+    },
+    "/product-experience/v1/sessions/{session_id}/workspace": {
+      "get": {
+        "tags": ["Workspace"],
+        "operationId": "getProductSessionWorkspace",
+        "summary": "Get the recoverable product workspace for one Agent session",
+        "parameters": [
+          { "$ref": "#/components/parameters/RequestId" },
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/CorrelationId" },
+          { "$ref": "#/components/parameters/SchemaVersion" },
+          { "$ref": "#/components/parameters/SessionId" }
+        ],
+        "responses": {
+          "200": { "$ref": "#/components/responses/SessionWorkspaceOk" },
+          "400": { "$ref": "#/components/responses/Error400" },
+          "401": { "$ref": "#/components/responses/Error401" },
+          "403": { "$ref": "#/components/responses/Error403" },
+          "404": { "$ref": "#/components/responses/Error404" },
+          "409": { "$ref": "#/components/responses/Error409" },
+          "429": { "$ref": "#/components/responses/Error429" },
+          "500": { "$ref": "#/components/responses/Error500" },
+          "503": { "$ref": "#/components/responses/ReadError503" }
+        },
+        "x-resource-identity": [
+          "path session_id equals response.session.session_id",
+          "authenticated tenant and actor equal both workspace and embedded session origin actors",
+          "workspace content, session content and world identities agree"
+        ]
+      }
+    },
+    "/product-experience/v1/sessions/{session_id}/skill-drafts/{draft_id}": {
+      "get": {
+        "tags": ["Drafts"],
+        "operationId": "getProductSkillDraft",
+        "summary": "Get one recoverable Skill draft",
+        "parameters": [
+          { "$ref": "#/components/parameters/RequestId" },
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/CorrelationId" },
+          { "$ref": "#/components/parameters/SchemaVersion" },
+          { "$ref": "#/components/parameters/SessionId" },
+          { "$ref": "#/components/parameters/DraftId" }
+        ],
+        "responses": {
+          "200": { "$ref": "#/components/responses/SkillDraftOk" },
+          "400": { "$ref": "#/components/responses/Error400" },
+          "401": { "$ref": "#/components/responses/Error401" },
+          "403": { "$ref": "#/components/responses/Error403" },
+          "404": { "$ref": "#/components/responses/Error404" },
+          "409": { "$ref": "#/components/responses/Error409" },
+          "429": { "$ref": "#/components/responses/Error429" },
+          "500": { "$ref": "#/components/responses/Error500" },
+          "503": { "$ref": "#/components/responses/ReadError503" }
+        },
+        "x-resource-identity": [
+          "path session_id and draft_id equal the response fields and self link",
+          "authenticated tenant and actor equal response.request_context.actor"
+        ]
+      },
+      "put": {
+        "tags": ["Drafts"],
+        "operationId": "upsertProductSkillDraft",
+        "summary": "Create or CAS-replace one Skill draft",
+        "description": "base_revision=0 with a null base hash creates revision 1 and returns 201. A matching positive revision plus draft hash replaces the resource, advances exactly once and returns 200. Compilation is still submitted through the existing Game createSkillBuild operation.",
+        "parameters": [
+          { "$ref": "#/components/parameters/RequestId" },
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/CorrelationId" },
+          { "$ref": "#/components/parameters/SchemaVersion" },
+          { "$ref": "#/components/parameters/IdempotencyKey" },
+          { "$ref": "#/components/parameters/SessionId" },
+          { "$ref": "#/components/parameters/DraftId" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "../schemas/product-experience/skill-draft-upsert-request.schema.json" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "$ref": "#/components/responses/SkillDraftUpdated" },
+          "201": { "$ref": "#/components/responses/SkillDraftCreated" },
+          "400": { "$ref": "#/components/responses/Error400" },
+          "401": { "$ref": "#/components/responses/Error401" },
+          "403": { "$ref": "#/components/responses/Error403" },
+          "404": { "$ref": "#/components/responses/Error404" },
+          "409": { "$ref": "#/components/responses/Error409" },
+          "413": { "$ref": "#/components/responses/Error413" },
+          "429": { "$ref": "#/components/responses/Error429" },
+          "500": { "$ref": "#/components/responses/Error500" },
+          "503": { "$ref": "#/components/responses/WriteError503" }
+        },
+        "x-idempotency-scope": ["tenant_id", "actor_id", "operationId", "canonical_path", "Idempotency-Key"],
+        "x-atomicity": "CAS draft mutation and the exact first response receipt commit together.",
+        "x-reconciliation": {
+          "resource_type": "SKILL_DRAFT",
+          "method": "GET",
+          "operationId": "getProductSkillDraft",
+          "rule": "On a durable-write response-delivery failure, Location names this exact draft GET. Reconcile it before any same-key replay; never issue a new key."
+        }
+      }
+    },
+    "/product-experience/v1/sessions/{session_id}/agent-interactions": {
+      "get": {
+        "tags": ["Interactions"],
+        "operationId": "listProductAgentInteractions",
+        "summary": "List one gap-free page of session Agent interactions",
+        "parameters": [
+          { "$ref": "#/components/parameters/RequestId" },
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/CorrelationId" },
+          { "$ref": "#/components/parameters/SchemaVersion" },
+          { "$ref": "#/components/parameters/SessionId" },
+          { "$ref": "#/components/parameters/AfterInteractionSequence" },
+          { "$ref": "#/components/parameters/PageLimit" }
+        ],
+        "responses": {
+          "200": { "$ref": "#/components/responses/AgentInteractionPageOk" },
+          "400": { "$ref": "#/components/responses/Error400" },
+          "401": { "$ref": "#/components/responses/Error401" },
+          "403": { "$ref": "#/components/responses/Error403" },
+          "404": { "$ref": "#/components/responses/Error404" },
+          "409": { "$ref": "#/components/responses/Error409" },
+          "429": { "$ref": "#/components/responses/Error429" },
+          "500": { "$ref": "#/components/responses/Error500" },
+          "503": { "$ref": "#/components/responses/ReadError503" }
+        },
+        "x-pagination": {
+          "ordering": "strictly increasing, gap-free interaction sequence within session_id",
+          "cursor": "after_sequence is the last durably applied interaction sequence",
+          "echo": "response.requested_after_sequence equals after_sequence; response.requested_limit equals limit or the default 50; X-Interaction-High-Watermark equals response.high_watermark_sequence",
+          "limit": "response.interactions length is no greater than requested_limit",
+          "more": "has_more is true exactly when the final returned sequence is below high_watermark_sequence",
+          "empty_page": "does not advance next_after_sequence",
+          "ahead_of_tip": "after_sequence above the authoritative high watermark is rejected with 400 INVALID_REQUEST rather than fabricating a cursor",
+          "snapshot": "one stable high-watermark is used to construct each page"
+        }
+      }
+    },
+    "/product-experience/v1/sessions/{session_id}/agent-interactions/{interaction_id}": {
+      "get": {
+        "tags": ["Interactions"],
+        "operationId": "getProductAgentInteraction",
+        "summary": "Get one Agent interaction and its patch decision projection",
+        "parameters": [
+          { "$ref": "#/components/parameters/RequestId" },
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/CorrelationId" },
+          { "$ref": "#/components/parameters/SchemaVersion" },
+          { "$ref": "#/components/parameters/SessionId" },
+          { "$ref": "#/components/parameters/InteractionId" }
+        ],
+        "responses": {
+          "200": { "$ref": "#/components/responses/AgentInteractionOk" },
+          "400": { "$ref": "#/components/responses/Error400" },
+          "401": { "$ref": "#/components/responses/Error401" },
+          "403": { "$ref": "#/components/responses/Error403" },
+          "404": { "$ref": "#/components/responses/Error404" },
+          "409": { "$ref": "#/components/responses/Error409" },
+          "429": { "$ref": "#/components/responses/Error429" },
+          "500": { "$ref": "#/components/responses/Error500" },
+          "503": { "$ref": "#/components/responses/ReadError503" }
+        },
+        "x-resource-identity": [
+          "path session_id and interaction_id equal the response fields and self link",
+          "embedded feedback, patch and decision identities agree with the interaction",
+          "authenticated tenant and actor equal response.request_context.actor"
+        ]
+      }
+    },
+    "/product-experience/v1/sessions/{session_id}/agent-interactions/{interaction_id}/patches/{patch_id}/decision": {
+      "post": {
+        "tags": ["Interactions"],
+        "operationId": "recordProductPatchDecision",
+        "summary": "Accept or reject one exact structured Skill patch",
+        "description": "Records one immutable terminal decision. ACCEPT atomically CAS-updates only the SkillDraft; it does not build, activate, run or mutate the world. REJECT never changes the draft.",
+        "parameters": [
+          { "$ref": "#/components/parameters/RequestId" },
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/CorrelationId" },
+          { "$ref": "#/components/parameters/SchemaVersion" },
+          { "$ref": "#/components/parameters/IdempotencyKey" },
+          { "$ref": "#/components/parameters/SessionId" },
+          { "$ref": "#/components/parameters/InteractionId" },
+          { "$ref": "#/components/parameters/PatchId" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "../schemas/product-experience/patch-decision-request.schema.json" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "$ref": "#/components/responses/PatchDecisionRecorded" },
+          "400": { "$ref": "#/components/responses/Error400" },
+          "401": { "$ref": "#/components/responses/Error401" },
+          "403": { "$ref": "#/components/responses/Error403" },
+          "404": { "$ref": "#/components/responses/Error404" },
+          "409": { "$ref": "#/components/responses/Error409" },
+          "429": { "$ref": "#/components/responses/Error429" },
+          "500": { "$ref": "#/components/responses/Error500" },
+          "503": { "$ref": "#/components/responses/WriteError503" }
+        },
+        "x-idempotency-scope": ["tenant_id", "actor_id", "operationId", "canonical_path", "Idempotency-Key"],
+        "x-atomicity": "Decision, interaction revision, optional ACCEPT draft mutation and first idempotency receipt commit in one transaction.",
+        "x-reconciliation": {
+          "resource_type": "AGENT_INTERACTION",
+          "method": "GET",
+          "operationId": "getProductAgentInteraction",
+          "rule": "On a durable-write response-delivery failure, Location names this exact interaction GET, whose patch_decision embeds the receipt. Reconcile before any same-key replay; never issue a new key."
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Production tenant-scoped JWT. The authenticated tenant_id and actor_id are authoritative and must match every returned or mutated resource; path or body identities never override the token."
+      }
+    },
+    "parameters": {
+      "RequestId": {
+        "name": "X-Request-Id",
+        "in": "header",
+        "required": true,
+        "schema": { "type": "string", "pattern": "^req_[A-Za-z0-9_-]{8,96}$" },
+        "description": "Identity of this HTTP attempt. Polls and idempotent replays use new attempt IDs."
+      },
+      "TraceId": {
+        "name": "X-Trace-Id",
+        "in": "header",
+        "required": true,
+        "schema": { "type": "string", "pattern": "^trace_[A-Za-z0-9_-]{8,96}$" },
+        "description": "Trace identity of this HTTP attempt, distinct from a resource origin trace."
+      },
+      "CorrelationId": {
+        "name": "X-Correlation-Id",
+        "in": "header",
+        "required": true,
+        "schema": { "type": "string", "pattern": "^corr_[A-Za-z0-9_-]{8,96}$" },
+        "description": "Correlation identity of this HTTP attempt."
+      },
+      "SchemaVersion": {
+        "name": "X-Schema-Version",
+        "in": "header",
+        "required": true,
+        "schema": { "const": "1.0.0" }
+      },
+      "IdempotencyKey": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "schema": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{15,127}$" },
+        "description": "Reuse only with the byte-equivalent body and canonical path. A different body returns 409 IDEMPOTENCY_KEY_REUSED."
+      },
+      "UnitId": {
+        "name": "unit_id",
+        "in": "path",
+        "required": true,
+        "schema": { "$ref": "../schemas/common/content-ref.schema.json#/properties/unit_id" }
+      },
+      "ContentVersion": {
+        "name": "content_version",
+        "in": "path",
+        "required": true,
+        "schema": { "$ref": "../schemas/common/content-ref.schema.json#/properties/version" }
+      },
+      "ContentHash": {
+        "name": "content_hash",
+        "in": "query",
+        "required": true,
+        "schema": { "$ref": "../schemas/common/content-ref.schema.json#/properties/content_hash" },
+        "description": "Completes the exact immutable ContentRef; the server never resolves a mutable latest alias."
+      },
+      "SessionId": {
+        "name": "session_id",
+        "in": "path",
+        "required": true,
+        "schema": { "$ref": "#/components/schemas/Identifier" }
+      },
+      "DraftId": {
+        "name": "draft_id",
+        "in": "path",
+        "required": true,
+        "schema": { "$ref": "#/components/schemas/Identifier" }
+      },
+      "InteractionId": {
+        "name": "interaction_id",
+        "in": "path",
+        "required": true,
+        "schema": { "$ref": "#/components/schemas/Identifier" }
+      },
+      "PatchId": {
+        "name": "patch_id",
+        "in": "path",
+        "required": true,
+        "schema": { "$ref": "#/components/schemas/Identifier" }
+      },
+      "AfterInteractionSequence": {
+        "name": "after_sequence",
+        "in": "query",
+        "required": true,
+        "schema": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+        "description": "Return interactions strictly after this last durably applied session interaction sequence."
+      },
+      "PageLimit": {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 50 }
+      }
+    },
+    "headers": {
+      "ResponseRequestId": {
+        "description": "Echoes the current HTTP attempt X-Request-Id.",
+        "schema": { "type": "string", "pattern": "^req_[A-Za-z0-9_-]{8,96}$" }
+      },
+      "ResponseTraceId": {
+        "description": "Echoes the current HTTP attempt X-Trace-Id.",
+        "schema": { "type": "string", "pattern": "^trace_[A-Za-z0-9_-]{8,96}$" }
+      },
+      "ResponseCorrelationId": {
+        "description": "Echoes the current HTTP attempt X-Correlation-Id.",
+        "schema": { "type": "string", "pattern": "^corr_[A-Za-z0-9_-]{8,96}$" }
+      },
+      "IdempotencyReplayed": {
+        "description": "false for the first committed response and true for a replay of that exact receipt.",
+        "schema": { "type": "string", "enum": ["false", "true"] }
+      },
+      "StrongHashEtag": {
+        "description": "Quoted lowercase SHA-256 strong validator for immutable content or one exact resource projection.",
+        "schema": { "type": "string", "pattern": "^\"[a-f0-9]{64}\"$" }
+      },
+      "ProjectionEtag": {
+        "description": "Strong quoted validator that changes whenever the closed projection changes.",
+        "schema": { "type": "string", "pattern": "^\"[A-Za-z0-9:_-]{8,200}\"$" }
+      },
+      "DraftEtag": {
+        "description": "Strong quoted validator over the authoritative draft revision and canonical draft hash.",
+        "schema": {
+          "type": "string",
+          "pattern": "^\"draft:[1-9][0-9]*:[a-f0-9]{64}\"$"
+        }
+      },
+      "PrivateImmutableCacheControl": {
+        "description": "Authenticated immutable content may be cached only by a private client cache.",
+        "schema": { "const": "private, max-age=31536000, immutable" }
+      },
+      "AuthorizationVary": {
+        "description": "Prevents authorization-bearing responses from sharing an unsafe cache entry.",
+        "schema": { "const": "Authorization, X-Schema-Version" }
+      },
+      "DraftRevision": {
+        "description": "Authoritative SkillDraft revision represented by the response.",
+        "schema": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 }
+      },
+      "InteractionRevision": {
+        "description": "Authoritative AgentInteraction revision represented by the response.",
+        "schema": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 }
+      },
+      "InteractionHighWatermark": {
+        "description": "Highest interaction sequence in the stable page snapshot.",
+        "schema": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 }
+      },
+      "Location": {
+        "description": "Canonical GET resource URL used for response-loss reconciliation.",
+        "schema": { "type": "string", "format": "uri-reference", "minLength": 1, "maxLength": 2048 }
+      },
+      "OptionalLocation": {
+        "description": "Present and equal to the reconciliation resource URL after a durable write whose success response could not be delivered.",
+        "schema": { "type": "string", "format": "uri-reference", "minLength": 1, "maxLength": 2048 }
+      },
+      "RetryAfter": {
+        "description": "Seconds before the same operation may be retried.",
+        "schema": { "type": "integer", "minimum": 1 }
+      },
+      "OptionalRetryAfter": {
+        "description": "Seconds before a dependency retry; omitted for resource-first reconciliation.",
+        "schema": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "responses": {
+      "ContentUnitOk": {
+        "description": "Exact immutable published content unit.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" },
+          "ETag": { "$ref": "#/components/headers/StrongHashEtag" },
+          "Cache-Control": { "$ref": "#/components/headers/PrivateImmutableCacheControl" },
+          "Vary": { "$ref": "#/components/headers/AuthorizationVary" }
+        },
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "../schemas/product-experience/content-unit.schema.json" }
+          }
+        }
+      },
+      "SessionWorkspaceOk": {
+        "description": "Current actor-scoped session recovery projection.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" },
+          "ETag": { "$ref": "#/components/headers/ProjectionEtag" }
+        },
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "../schemas/product-experience/session-workspace.schema.json" }
+          }
+        }
+      },
+      "SkillDraftOk": {
+        "description": "Current canonical SkillDraft.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" },
+          "ETag": { "$ref": "#/components/headers/DraftEtag" },
+          "X-Draft-Revision": { "$ref": "#/components/headers/DraftRevision" }
+        },
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "../schemas/product-experience/skill-draft.schema.json" }
+          }
+        }
+      },
+      "SkillDraftCreated": {
+        "description": "Draft created at revision 1. Location is its canonical GET URL.",
+        "headers": {
+          "Location": { "$ref": "#/components/headers/Location" },
+          "Idempotency-Replayed": { "$ref": "#/components/headers/IdempotencyReplayed" },
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" },
+          "ETag": { "$ref": "#/components/headers/DraftEtag" },
+          "X-Draft-Revision": { "$ref": "#/components/headers/DraftRevision" }
+        },
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "../schemas/product-experience/skill-draft.schema.json" }
+          }
+        }
+      },
+      "SkillDraftUpdated": {
+        "description": "Draft replaced by successful revision-and-hash CAS. Location is its canonical GET URL.",
+        "headers": {
+          "Location": { "$ref": "#/components/headers/Location" },
+          "Idempotency-Replayed": { "$ref": "#/components/headers/IdempotencyReplayed" },
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" },
+          "ETag": { "$ref": "#/components/headers/DraftEtag" },
+          "X-Draft-Revision": { "$ref": "#/components/headers/DraftRevision" }
+        },
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "../schemas/product-experience/skill-draft.schema.json" }
+          }
+        }
+      },
+      "AgentInteractionPageOk": {
+        "description": "Gap-free interaction page after the requested durable sequence.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" },
+          "X-Interaction-High-Watermark": { "$ref": "#/components/headers/InteractionHighWatermark" }
+        },
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "../schemas/product-experience/agent-interaction-page.schema.json" }
+          }
+        }
+      },
+      "AgentInteractionOk": {
+        "description": "Canonical interaction including an immutable patch decision when one exists.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" },
+          "ETag": { "$ref": "#/components/headers/ProjectionEtag" },
+          "X-Interaction-Revision": { "$ref": "#/components/headers/InteractionRevision" }
+        },
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "../schemas/product-experience/agent-interaction.schema.json" }
+          }
+        }
+      },
+      "PatchDecisionRecorded": {
+        "description": "Immutable decision receipt. Location identifies the canonical interaction GET that embeds this receipt.",
+        "headers": {
+          "Location": { "$ref": "#/components/headers/Location" },
+          "Idempotency-Replayed": { "$ref": "#/components/headers/IdempotencyReplayed" },
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" },
+          "ETag": { "$ref": "#/components/headers/ProjectionEtag" },
+          "X-Interaction-Revision": { "$ref": "#/components/headers/InteractionRevision" }
+        },
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "../schemas/product-experience/patch-decision-receipt.schema.json" }
+          }
+        }
+      },
+      "Error400": { "$ref": "#/components/responses/BadRequest" },
+      "Error401": { "$ref": "#/components/responses/Unauthorized" },
+      "Error403": { "$ref": "#/components/responses/Forbidden" },
+      "Error404": { "$ref": "#/components/responses/NotFound" },
+      "Error409": { "$ref": "#/components/responses/Conflict" },
+      "Error413": { "$ref": "#/components/responses/PayloadTooLarge" },
+      "Error429": { "$ref": "#/components/responses/RateLimited" },
+      "Error500": { "$ref": "#/components/responses/InternalError" },
+      "ReadError503": { "$ref": "#/components/responses/Unavailable" },
+      "WriteError503": {
+        "description": "Dependency unavailable before commit, or a durable product write requiring GET reconciliation.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" },
+          "Location": { "$ref": "#/components/headers/OptionalLocation" },
+          "Retry-After": { "$ref": "#/components/headers/OptionalRetryAfter" }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "oneOf": [
+                { "$ref": "../schemas/product-experience/product-error-responses-by-status.schema.json#/$defs/status503" },
+                { "$ref": "../schemas/product-experience/product-write-reconciliation.schema.json" }
+              ]
+            }
+          }
+        }
+      },
+      "BadRequest": {
+        "description": "Request contract, attempt header or resource-identity validation failed.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+        },
+        "content": { "application/json": { "schema": { "$ref": "../schemas/product-experience/product-error-responses-by-status.schema.json#/$defs/status400" } } }
+      },
+      "Unauthorized": {
+        "description": "Authentication failed.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+        },
+        "content": { "application/json": { "schema": { "$ref": "../schemas/product-experience/product-error-responses-by-status.schema.json#/$defs/status401" } } }
+      },
+      "Forbidden": {
+        "description": "Authenticated actor is not authorized for this tenant, session, resource or decision.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+        },
+        "content": { "application/json": { "schema": { "$ref": "../schemas/product-experience/product-error-responses-by-status.schema.json#/$defs/status403" } } }
+      },
+      "NotFound": {
+        "description": "Resource is absent or intentionally hidden across tenant, actor or session boundaries.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+        },
+        "content": { "application/json": { "schema": { "$ref": "../schemas/product-experience/product-error-responses-by-status.schema.json#/$defs/status404" } } }
+      },
+      "Conflict": {
+        "description": "Unsupported schema, stale revision/hash, path/body identity mismatch, immutable decision conflict or idempotency-key reuse.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+        },
+        "content": { "application/json": { "schema": { "$ref": "../schemas/product-experience/product-error-responses-by-status.schema.json#/$defs/status409" } } }
+      },
+      "PayloadTooLarge": {
+        "description": "The raw HTTP request body exceeds the 8 MiB transport limit. A source-bundle business limit violation is 400 INVALID_REQUEST.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+        },
+        "content": { "application/json": { "schema": { "$ref": "../schemas/product-experience/product-error-responses-by-status.schema.json#/$defs/status413" } } }
+      },
+      "RateLimited": {
+        "description": "Rate limit exceeded. A write retries only with the same body and Idempotency-Key.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" },
+          "Retry-After": { "$ref": "#/components/headers/RetryAfter" }
+        },
+        "content": { "application/json": { "schema": { "$ref": "../schemas/product-experience/product-error-responses-by-status.schema.json#/$defs/status429" } } }
+      },
+      "InternalError": {
+        "description": "Unexpected invariant failure; never converted to a success payload.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+        },
+        "content": { "application/json": { "schema": { "$ref": "../schemas/product-experience/product-error-responses-by-status.schema.json#/$defs/status500" } } }
+      },
+      "Unavailable": {
+        "description": "Required dependency is temporarily unavailable.",
+        "headers": {
+          "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+          "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+          "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" },
+          "Retry-After": { "$ref": "#/components/headers/OptionalRetryAfter" }
+        },
+        "content": { "application/json": { "schema": { "$ref": "../schemas/product-experience/product-error-responses-by-status.schema.json#/$defs/status503" } } }
+      }
+    },
+    "schemas": {
+      "Identifier": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+      },
+      "Sha256": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      }
+    }
+  }
+}

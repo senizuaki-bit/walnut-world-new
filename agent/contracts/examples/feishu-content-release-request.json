@@ -1,0 +1,47 @@
+{
+  "schema_ref": "../schemas/feishu/content-release.schema.json",
+  "value": {
+    "context": {
+      "schema_version": "1.0.0",
+      "request_id": "req_feishu_00000001",
+      "correlation_id": "corr_feishu_00000001",
+      "trace_id": "trace_feishu_00000001",
+      "requested_at": "2026-08-06T10:05:00Z",
+      "actor": {
+        "tenant_id": "tenant_yaya",
+        "actor_id": "feishu_teacher_001",
+        "actor_type": "teacher",
+        "roles": [
+          "teacher",
+          "content:submitter"
+        ]
+      },
+      "content_ref": {
+        "unit_id": "YAYA_FARM_001",
+        "version": "1.4.0",
+        "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    "operation": "CREATE_RELEASE_CANDIDATE",
+    "source": {
+      "provider": "FEISHU",
+      "document_token": "doccnTeachingSpec0001",
+      "revision": "42",
+      "content_ref": {
+        "unit_id": "YAYA_FARM_001",
+        "version": "1.4.0",
+        "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    "candidate": {
+      "content_type": "TEACHING_SPEC",
+      "schema_version": "1.0.0",
+      "manifest_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "artifact_refs": [
+        "feishu://doccnTeachingSpec0001/revisions/42"
+      ],
+      "change_summary": "增加浇水技能的分层提示，等待自动验证与灰度检查。"
+    },
+    "target_environment": "VALIDATION"
+  }
+}

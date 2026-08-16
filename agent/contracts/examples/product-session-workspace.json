@@ -1,0 +1,108 @@
+{
+  "schema_ref": "../schemas/product-experience/session-workspace.schema.json",
+  "value": {
+    "request_context": {
+      "schema_version": "1.0.0",
+      "request_id": "req_game_00000003",
+      "correlation_id": "corr_game_00000003",
+      "trace_id": "trace_game_00000003",
+      "requested_at": "2026-08-06T10:02:00Z",
+      "actor": {
+        "tenant_id": "tenant_yaya",
+        "actor_id": "student_0001",
+        "actor_type": "student",
+        "roles": ["game:player"]
+      },
+      "content_ref": {
+        "unit_id": "YAYA_FARM_001",
+        "version": "1.4.0",
+        "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    "workspace_id": "workspace_water_001",
+    "workspace_revision": 12,
+    "session": {
+      "request_context": {
+        "schema_version": "1.0.0",
+        "request_id": "req_game_00000003",
+        "correlation_id": "corr_game_00000003",
+        "trace_id": "trace_game_00000003",
+        "requested_at": "2026-08-06T10:02:00Z",
+        "actor": {
+          "tenant_id": "tenant_yaya",
+          "actor_id": "student_0001",
+          "actor_type": "student",
+          "roles": ["game:player"]
+        },
+        "content_ref": {
+          "unit_id": "YAYA_FARM_001",
+          "version": "1.4.0",
+          "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      },
+      "session_id": "session_agent_001",
+      "world_id": "world_demo_001",
+      "learner_id": "learner_0001",
+      "agent_profile_id": "agent_farmer_001",
+      "channel": "GAME",
+      "status": "ACTIVE",
+      "created_at": "2026-08-06T10:01:50Z",
+      "updated_at": "2026-08-06T10:02:54Z",
+      "last_turn_sequence": 1,
+      "content": {
+        "unit_id": "YAYA_FARM_001",
+        "version": "1.4.0",
+        "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "versions": {
+        "api_version": "1.0.0",
+        "event_version": "1",
+        "policy_version": "policy-38",
+        "world_rules_version": "farm-rules-12",
+        "teaching_spec_version": "teaching-7",
+        "prompt_version": "farmer-agent-9",
+        "model_version": "fake-llm-contract-v1"
+      },
+      "links": {
+        "self": "/v1/agent-sessions/session_agent_001",
+        "turns": "/v1/agent-sessions/session_agent_001/turns",
+        "world_snapshot": "/v1/worlds/world_demo_001/snapshot"
+      }
+    },
+    "content_ref": {
+      "unit_id": "YAYA_FARM_001",
+      "version": "1.4.0",
+      "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "current_task": {
+      "task_id": "watering_001",
+      "status": "IN_PROGRESS",
+      "started_at": "2026-08-06T10:02:00Z",
+      "completed_at": null
+    },
+    "world_checkpoint": {
+      "world_id": "world_demo_001",
+      "world_revision": 185,
+      "last_event_sequence": 733,
+      "state_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    "skill_draft_refs": [
+      {
+        "draft_id": "draft_water_001",
+        "skill_id": "skill_water_001",
+        "revision": 8,
+        "draft_sha256": "73afbbfff968ca4bf1c8af845cbbe4ce77ecb9c858601273ae14c0afe6a60453",
+        "url": "/product-experience/v1/sessions/session_agent_001/skill-drafts/draft_water_001"
+      }
+    ],
+    "last_interaction_sequence": 1,
+    "created_at": "2026-08-06T10:02:00Z",
+    "updated_at": "2026-08-08T01:02:00Z",
+    "links": {
+      "self": "/product-experience/v1/sessions/session_agent_001/workspace",
+      "content_unit": "/product-experience/v1/content-units/YAYA_FARM_001/versions/1.4.0?content_hash=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "agent_interactions": "/product-experience/v1/sessions/session_agent_001/agent-interactions?after_sequence=0",
+      "world_snapshot": "/v1/worlds/world_demo_001/snapshot"
+    }
+  }
+}

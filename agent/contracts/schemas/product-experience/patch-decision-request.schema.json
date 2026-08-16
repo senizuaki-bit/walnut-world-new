@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/product-experience/patch-decision-request.schema.json",
+  "title": "Record product skill patch decision request",
+  "description": "Immutable ACCEPT or REJECT decision bound to one exact interaction, patch and base draft. Request-attempt identity is carried only in HTTP headers for safe replay with new attempt IDs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "decision_id",
+    "session_id",
+    "turn_id",
+    "interaction_id",
+    "expected_interaction_revision",
+    "patch_id",
+    "patch_sha256",
+    "draft_id",
+    "skill_id",
+    "base_draft_revision",
+    "base_draft_sha256",
+    "result_draft_sha256",
+    "decision",
+    "reason_code",
+    "decided_at"
+  ],
+  "properties": {
+    "decision_id": { "$ref": "#/$defs/identifier" },
+    "session_id": { "$ref": "#/$defs/identifier" },
+    "turn_id": { "$ref": "#/$defs/identifier" },
+    "interaction_id": { "$ref": "#/$defs/identifier" },
+    "expected_interaction_revision": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+    "patch_id": { "$ref": "#/$defs/identifier" },
+    "patch_sha256": { "$ref": "#/$defs/sha256" },
+    "draft_id": { "$ref": "#/$defs/identifier" },
+    "skill_id": { "$ref": "#/$defs/identifier" },
+    "base_draft_revision": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+    "base_draft_sha256": { "$ref": "#/$defs/sha256" },
+    "result_draft_sha256": { "$ref": "#/$defs/sha256" },
+    "decision": { "type": "string", "enum": ["ACCEPT", "REJECT"] },
+    "reason_code": {
+      "oneOf": [
+        { "type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,95}$" },
+        { "type": "null" }
+      ]
+    },
+    "decided_at": { "type": "string", "format": "date-time" }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "decision": { "const": "ACCEPT" } },
+        "required": ["decision"]
+      },
+      "then": {
+        "properties": { "reason_code": { "type": "null" } }
+      },
+      "else": {
+        "properties": {
+          "reason_code": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,95}$" }
+        }
+      }
+    }
+  ],
+  "x-invariants": [
+    "path session_id, interaction_id and patch_id equal the request fields",
+    "interaction session_id and turn_id equal the request and embedded AgentTurnFeedback identities",
+    "interaction skill_patch patch_id, patch_sha256, draft_id, skill_id, base revision, base hash and result hash equal the request",
+    "expected_interaction_revision equals the current undecided interaction revision",
+    "one patch has at most one immutable terminal decision",
+    "ACCEPT atomically validates and applies the patch, advances the draft exactly once, records the decision, advances interaction_revision exactly once and persists the idempotency receipt",
+    "REJECT atomically records the decision and advances interaction_revision exactly once without changing the draft",
+    "any identity, revision, hash, policy or patch-application failure writes nothing",
+    "one idempotency scope is tenant_id plus actor_id plus operationId plus canonical path plus Idempotency-Key",
+    "same key and byte-equivalent body replays the original status and receipt; different body returns 409 IDEMPOTENCY_KEY_REUSED"
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/game/action-intent.schema.json",
+  "title": "Sandbox action intent",
+  "description": "A validated intent returned by the sandbox. It is not proof that the world mutation committed.",
+  "oneOf": [
+    { "$ref": "#/$defs/move" },
+    { "$ref": "#/$defs/plant" },
+    { "$ref": "#/$defs/water" },
+    { "$ref": "#/$defs/harvest" },
+    { "$ref": "#/$defs/interact" },
+    { "$ref": "#/$defs/speak" }
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "position": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y"],
+      "properties": {
+        "x": { "type": "integer", "minimum": -100000, "maximum": 100000 },
+        "y": { "type": "integer", "minimum": -100000, "maximum": 100000 }
+      }
+    },
+    "move": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intent_id", "action_type", "actor_entity_id", "expected_world_revision", "destination"],
+      "properties": {
+        "intent_id": { "$ref": "#/$defs/identifier" },
+        "action_type": { "const": "MOVE" },
+        "actor_entity_id": { "$ref": "#/$defs/identifier" },
+        "expected_world_revision": { "type": "integer", "minimum": 0 },
+        "destination": { "$ref": "#/$defs/position" }
+      }
+    },
+    "plant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intent_id", "action_type", "actor_entity_id", "expected_world_revision", "plot_id", "crop_type"],
+      "properties": {
+        "intent_id": { "$ref": "#/$defs/identifier" },
+        "action_type": { "const": "PLANT" },
+        "actor_entity_id": { "$ref": "#/$defs/identifier" },
+        "expected_world_revision": { "type": "integer", "minimum": 0 },
+        "plot_id": { "$ref": "#/$defs/identifier" },
+        "crop_type": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{1,63}$" }
+      }
+    },
+    "water": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intent_id", "action_type", "actor_entity_id", "expected_world_revision", "plot_id", "amount_ml"],
+      "properties": {
+        "intent_id": { "$ref": "#/$defs/identifier" },
+        "action_type": { "const": "WATER" },
+        "actor_entity_id": { "$ref": "#/$defs/identifier" },
+        "expected_world_revision": { "type": "integer", "minimum": 0 },
+        "plot_id": { "$ref": "#/$defs/identifier" },
+        "amount_ml": { "type": "integer", "minimum": 1, "maximum": 10000 }
+      }
+    },
+    "harvest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intent_id", "action_type", "actor_entity_id", "expected_world_revision", "plot_id"],
+      "properties": {
+        "intent_id": { "$ref": "#/$defs/identifier" },
+        "action_type": { "const": "HARVEST" },
+        "actor_entity_id": { "$ref": "#/$defs/identifier" },
+        "expected_world_revision": { "type": "integer", "minimum": 0 },
+        "plot_id": { "$ref": "#/$defs/identifier" }
+      }
+    },
+    "interact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intent_id", "action_type", "actor_entity_id", "expected_world_revision", "target_entity_id", "interaction"],
+      "properties": {
+        "intent_id": { "$ref": "#/$defs/identifier" },
+        "action_type": { "const": "INTERACT" },
+        "actor_entity_id": { "$ref": "#/$defs/identifier" },
+        "expected_world_revision": { "type": "integer", "minimum": 0 },
+        "target_entity_id": { "$ref": "#/$defs/identifier" },
+        "interaction": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{1,63}$" }
+      }
+    },
+    "speak": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intent_id", "action_type", "actor_entity_id", "expected_world_revision", "text", "audience"],
+      "properties": {
+        "intent_id": { "$ref": "#/$defs/identifier" },
+        "action_type": { "const": "SPEAK" },
+        "actor_entity_id": { "$ref": "#/$defs/identifier" },
+        "expected_world_revision": { "type": "integer", "minimum": 0 },
+        "text": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "audience": { "type": "string", "enum": ["LEARNER", "NEARBY_ENTITIES"] }
+      }
+    }
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/feishu/class-insights-query.schema.json",
+  "title": "Class insights read query",
+  "description": "Read-only aggregate query. Individual learner identifiers and row-level evidence are intentionally not representable.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "context",
+    "class_ref",
+    "purpose",
+    "time_range",
+    "dimensions",
+    "privacy"
+  ],
+  "properties": {
+    "context": {
+      "$ref": "../common/request-context.schema.json"
+    },
+    "class_ref": {
+      "type": "string",
+      "pattern": "^cls_[A-Za-z0-9_-]{8,128}$"
+    },
+    "purpose": {
+      "type": "string",
+      "enum": [
+        "TEACHER_PLANNING",
+        "CURRICULUM_REVIEW",
+        "PROGRAM_EVALUATION"
+      ]
+    },
+    "time_range": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "from",
+        "to"
+      ],
+      "properties": {
+        "from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "dimensions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 5,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "CONCEPT_MASTERY",
+          "COMMON_ERRORS",
+          "SUPPORT_NEEDS",
+          "ENGAGEMENT",
+          "COMPLETION"
+        ]
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "minimum_cohort_size",
+        "suppress_small_cells"
+      ],
+      "properties": {
+        "minimum_cohort_size": {
+          "type": "integer",
+          "minimum": 5,
+          "maximum": 1000
+        },
+        "suppress_small_cells": {
+          "const": true
+        }
+      }
+    }
+  }
+}

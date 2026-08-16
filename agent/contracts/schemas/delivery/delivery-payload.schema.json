@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/delivery/delivery-payload.schema.json",
+  "title": "External delivery payload",
+  "oneOf": [
+    { "$ref": "#/$defs/feishuReportDraft" }
+  ],
+  "$defs": {
+    "feishuReportDraft": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "delivery_id",
+        "operation",
+        "deduplication_key",
+        "attempt",
+        "body"
+      ],
+      "properties": {
+        "delivery_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+        },
+        "operation": { "const": "FEISHU_REPORT_DRAFT" },
+        "deduplication_key": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{15,127}$"
+        },
+        "attempt": { "type": "integer", "minimum": 1 },
+        "body": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["report_id"],
+          "properties": {
+            "report_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+            }
+          }
+        }
+      }
+    }
+  }
+}

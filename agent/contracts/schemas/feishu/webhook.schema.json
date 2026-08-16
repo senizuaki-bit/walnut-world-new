@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/feishu/webhook.schema.json",
+  "title": "Feishu webhook request",
+  "description": "Raw Feishu callback body. The adapter MUST verify timestamp, nonce and signature against the exact raw request bytes before parsing this object. Unknown event types are accepted only into quarantine and must never be silently ignored.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/urlVerification"
+    },
+    {
+      "$ref": "#/$defs/eventV2"
+    }
+  ],
+  "$defs": {
+    "urlVerification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "challenge",
+        "token"
+      ],
+      "properties": {
+        "type": {
+          "const": "url_verification"
+        },
+        "challenge": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "token": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        }
+      }
+    },
+    "eventV2": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "header",
+        "event"
+      ],
+      "properties": {
+        "schema": {
+          "const": "2.0"
+        },
+        "header": {
+          "$ref": "#/$defs/eventHeader"
+        },
+        "event": {
+          "type": "object",
+          "description": "Provider-owned payload. It is preserved byte-for-byte for audit and validated against an event-type-specific schema after signature verification.",
+          "additionalProperties": true
+        }
+      }
+    },
+    "eventHeader": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event_id",
+        "event_type",
+        "create_time",
+        "token",
+        "app_id",
+        "tenant_key"
+      ],
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "event_type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "create_time": {
+          "type": "string",
+          "pattern": "^[0-9]{10,16}$"
+        },
+        "token": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "tenant_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    }
+  }
+}

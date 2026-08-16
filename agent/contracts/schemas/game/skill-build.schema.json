@@ -1,0 +1,210 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/game/skill-build.schema.json",
+  "title": "Skill build",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_context",
+    "build_id",
+    "skill_id",
+    "skill_version_id",
+    "status",
+    "terminal",
+    "created_at",
+    "updated_at",
+    "artifact",
+    "certification",
+    "phases",
+    "failure",
+    "evidence_refs",
+    "versions"
+  ],
+  "properties": {
+    "request_context": {
+      "$ref": "../common/request-context.schema.json"
+    },
+    "build_id": { "$ref": "#/$defs/identifier" },
+    "skill_id": { "$ref": "#/$defs/identifier" },
+    "skill_version_id": {
+      "oneOf": [
+        { "$ref": "#/$defs/identifier" },
+        { "type": "null" }
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ACCEPTED",
+        "QUEUED",
+        "COMPILING",
+        "TESTING",
+        "CERTIFYING",
+        "CERTIFIED",
+        "REJECTED",
+        "FAILED"
+      ]
+    },
+    "terminal": { "type": "boolean" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "artifact": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "artifact_sha256",
+            "source_sha256",
+            "compiler_profile",
+            "compiler_version",
+            "test_suite_version"
+          ],
+          "properties": {
+            "artifact_sha256": { "$ref": "#/$defs/sha256" },
+            "source_sha256": { "$ref": "#/$defs/sha256" },
+            "compiler_profile": { "type": "string", "minLength": 1, "maxLength": 64 },
+            "compiler_version": { "type": "string", "minLength": 1, "maxLength": 64 },
+            "test_suite_version": { "type": "string", "minLength": 1, "maxLength": 64 }
+          }
+        },
+        { "type": "null" }
+      ]
+    },
+    "certification": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["certification_id", "issued_at", "capabilities"],
+          "properties": {
+            "certification_id": { "$ref": "#/$defs/identifier" },
+            "issued_at": { "type": "string", "format": "date-time" },
+            "capabilities": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "type": "string", "minLength": 1, "maxLength": 64 }
+            }
+          }
+        },
+        { "type": "null" }
+      ]
+    },
+    "phases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "status"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": ["VALIDATE_SOURCE", "COMPILE", "PUBLIC_TEST", "HIDDEN_TEST", "CERTIFY"]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["PENDING", "RUNNING", "PASSED", "FAILED", "SKIPPED"]
+          },
+          "started_at": {
+            "oneOf": [
+              { "type": "string", "format": "date-time" },
+              { "type": "null" }
+            ]
+          },
+          "finished_at": {
+            "oneOf": [
+              { "type": "string", "format": "date-time" },
+              { "type": "null" }
+            ]
+          },
+          "diagnostic_codes": {
+            "type": "array",
+            "maxItems": 100,
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 1, "maxLength": 96 }
+          }
+        }
+      }
+    },
+    "failure": {
+      "oneOf": [
+        {
+          "allOf": [
+            { "$ref": "../common/error.schema.json" },
+            {
+              "properties": {
+                "stage": {
+                  "enum": ["VALIDATE_SOURCE", "COMPILE", "PUBLIC_TEST", "HIDDEN_TEST", "CERTIFY"]
+                }
+              }
+            }
+          ]
+        },
+        { "type": "null" }
+      ]
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": { "$ref": "../common/evidence-ref.schema.json" }
+    },
+    "versions": { "$ref": "../common/version-set.schema.json" }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "status": { "const": "CERTIFIED" } },
+        "required": ["status"]
+      },
+      "then": {
+        "required": ["skill_version_id", "artifact", "certification"],
+        "properties": {
+          "terminal": { "const": true },
+          "skill_version_id": { "$ref": "#/$defs/identifier" },
+          "artifact": { "type": "object" },
+          "certification": { "type": "object" },
+          "failure": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": { "enum": ["REJECTED", "FAILED"] }
+        },
+        "required": ["status"]
+      },
+      "then": {
+        "required": ["failure"],
+        "properties": {
+          "terminal": { "const": true },
+          "failure": { "type": "object" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": { "enum": ["ACCEPTED", "QUEUED", "COMPILING", "TESTING", "CERTIFYING"] }
+        },
+        "required": ["status"]
+      },
+      "then": {
+        "properties": {
+          "terminal": { "const": false },
+          "failure": { "type": "null" }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

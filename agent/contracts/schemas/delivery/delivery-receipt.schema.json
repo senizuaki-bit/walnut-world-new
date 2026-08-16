@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/delivery/delivery-receipt.schema.json",
+  "title": "External delivery receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "delivery_id",
+    "operation",
+    "deduplication_key",
+    "report_id",
+    "remote_object_id",
+    "sent_at",
+    "attempt",
+    "status"
+  ],
+  "properties": {
+    "delivery_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "operation": { "const": "FEISHU_REPORT_DRAFT" },
+    "deduplication_key": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{15,127}$"
+    },
+    "report_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "remote_object_id": { "type": "string", "minLength": 1, "maxLength": 512 },
+    "sent_at": { "type": "string", "format": "date-time" },
+    "attempt": { "type": "integer", "minimum": 1 },
+    "status": { "const": "SENT" }
+  }
+}

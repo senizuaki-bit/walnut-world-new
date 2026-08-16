@@ -1,0 +1,45 @@
+{
+  "schema_ref": "../schemas/product-experience/patch-decision-receipt.schema.json",
+  "value": {
+    "request_context": {
+      "schema_version": "1.0.0",
+      "request_id": "req_product_reject_0001",
+      "correlation_id": "corr_product_reject_0001",
+      "trace_id": "trace_product_reject_0001",
+      "requested_at": "2026-08-08T01:04:00Z",
+      "actor": {
+        "tenant_id": "tenant_yaya",
+        "actor_id": "student_0001",
+        "actor_type": "student",
+        "roles": ["game:player"]
+      },
+      "content_ref": {
+        "unit_id": "YAYA_FARM_001",
+        "version": "1.4.0",
+        "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    "decision_id": "decision_water_reject_001",
+    "session_id": "session_agent_001",
+    "turn_id": "turn_agent_reject_001",
+    "interaction_id": "interaction_reject_001",
+    "interaction_revision_before": 1,
+    "interaction_revision_after": 2,
+    "patch_id": "patch_water_reject_001",
+    "patch_sha256": "259ba8f6e796205d1b6090cf0372707e164b2188314ac6ac564a0ce99b4f0f70",
+    "draft_id": "draft_water_001",
+    "skill_id": "skill_water_001",
+    "decision": "REJECT",
+    "reason_code": "STUDENT_DECLINED_PATCH",
+    "draft_updated": false,
+    "draft_revision_before": 7,
+    "draft_sha256_before": "53c203ad61eb09d45d0ca946b2d751cdca5eac9a029baceb8103cb740cc7226c",
+    "draft_revision_after": 7,
+    "draft_sha256_after": "53c203ad61eb09d45d0ca946b2d751cdca5eac9a029baceb8103cb740cc7226c",
+    "decided_at": "2026-08-08T01:04:00Z",
+    "links": {
+      "interaction": "/product-experience/v1/sessions/session_agent_001/agent-interactions/interaction_reject_001",
+      "skill_draft": "/product-experience/v1/sessions/session_agent_001/skill-drafts/draft_water_001"
+    }
+  }
+}

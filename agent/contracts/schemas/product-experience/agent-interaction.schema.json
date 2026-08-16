@@ -1,0 +1,234 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/product-experience/agent-interaction.schema.json",
+  "title": "Product agent interaction projection",
+  "description": "Recoverable product-facing projection around the existing immutable AgentTurnFeedback. Structured questions, hints and patches live here rather than changing the closed Game v1 feedback DTO.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_context",
+    "interaction_id",
+    "session_id",
+    "turn_id",
+    "sequence",
+    "interaction_revision",
+    "projection_source",
+    "role",
+    "response_type",
+    "question",
+    "hint_level",
+    "feedback",
+    "feedback_event",
+    "skill_patch",
+    "patch_decision",
+    "created_at",
+    "updated_at",
+    "links"
+  ],
+  "properties": {
+    "request_context": { "$ref": "../common/request-context.schema.json" },
+    "interaction_id": { "$ref": "#/$defs/identifier" },
+    "session_id": { "$ref": "#/$defs/identifier" },
+    "turn_id": { "$ref": "#/$defs/identifier" },
+    "sequence": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+    "interaction_revision": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+    "projection_source": {
+      "$ref": "./agent-interaction-source-receipt.schema.json",
+      "description": "Canonical Product projection receipt that makes the structured decision fields independently hash-verifiable without extending AgentTurnFeedback."
+    },
+    "role": {
+      "type": "string",
+      "enum": ["world_agent", "xiaohutao", "teaching_agent", "bug_agent", "book_agent", "system"]
+    },
+    "response_type": {
+      "type": "string",
+      "enum": ["message", "question", "hint", "skill_patch", "growth_summary"]
+    },
+    "question": {
+      "oneOf": [
+        { "type": "string", "minLength": 1, "maxLength": 1000 },
+        { "type": "null" }
+      ]
+    },
+    "hint_level": {
+      "oneOf": [
+        { "type": "integer", "minimum": 0, "maximum": 4 },
+        { "type": "null" }
+      ]
+    },
+    "feedback": { "$ref": "../game/agent-turn-feedback.schema.json" },
+    "feedback_event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event_id",
+        "event_type",
+        "event_version",
+        "schema_version",
+        "stream_id",
+        "sequence",
+        "occurred_at",
+        "producer",
+        "trace_id",
+        "command_id",
+        "correlation_id",
+        "causation_id",
+        "content_ref",
+        "feedback_sha256"
+      ],
+      "properties": {
+        "event_id": { "$ref": "../common/event-envelope.schema.json#/properties/event_id" },
+        "event_type": { "const": "agent.turn.feedback_ready" },
+        "event_version": { "const": 1 },
+        "schema_version": { "const": "1.0.0" },
+        "stream_id": { "$ref": "../common/event-envelope.schema.json#/properties/stream_id" },
+        "sequence": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+        "occurred_at": { "type": "string", "format": "date-time" },
+        "producer": { "$ref": "../common/event-envelope.schema.json#/properties/producer" },
+        "trace_id": { "$ref": "../common/event-envelope.schema.json#/properties/trace_id" },
+        "command_id": { "$ref": "../common/command-id.schema.json" },
+        "correlation_id": { "$ref": "../common/event-envelope.schema.json#/properties/correlation_id" },
+        "causation_id": { "$ref": "../common/event-envelope.schema.json#/properties/causation_id" },
+        "content_ref": { "$ref": "../common/content-ref.schema.json" },
+        "feedback_sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "skill_patch": {
+      "oneOf": [
+        { "$ref": "./skill-patch.schema.json" },
+        { "type": "null" }
+      ]
+    },
+    "patch_decision": {
+      "oneOf": [
+        { "$ref": "./patch-decision-receipt.schema.json" },
+        { "type": "null" }
+      ]
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "links": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["self", "session_workspace", "skill_draft"],
+      "properties": {
+        "self": { "$ref": "#/$defs/link" },
+        "session_workspace": { "$ref": "#/$defs/link" },
+        "skill_draft": {
+          "oneOf": [
+            { "$ref": "#/$defs/link" },
+            { "type": "null" }
+          ]
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "response_type": { "const": "question" } },
+        "required": ["response_type"]
+      },
+      "then": {
+        "properties": {
+          "question": { "type": "string", "minLength": 1, "maxLength": 1000 },
+          "hint_level": { "type": "null" },
+          "skill_patch": { "type": "null" },
+          "patch_decision": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "response_type": { "const": "hint" } },
+        "required": ["response_type"]
+      },
+      "then": {
+        "properties": {
+          "question": { "type": "null" },
+          "hint_level": { "type": "integer", "minimum": 0, "maximum": 3 },
+          "skill_patch": { "type": "null" },
+          "patch_decision": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "response_type": { "const": "skill_patch" } },
+        "required": ["response_type"]
+      },
+      "then": {
+        "properties": {
+          "role": { "const": "teaching_agent" },
+          "question": { "type": "null" },
+          "hint_level": { "const": 4 },
+          "skill_patch": { "$ref": "./skill-patch.schema.json" },
+          "links": {
+            "properties": { "skill_draft": { "$ref": "#/$defs/link" } }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "skill_patch": { "type": "null" },
+          "patch_decision": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "response_type": { "enum": ["message", "growth_summary"] }
+        },
+        "required": ["response_type"]
+      },
+      "then": {
+        "properties": {
+          "question": { "type": "null" },
+          "hint_level": { "type": "null" }
+        }
+      }
+    }
+  ],
+  "x-feedback-hash-contract": {
+    "algorithm": "SHA-256",
+    "encoding": "UTF-8",
+    "canonicalization": "YAYA_CANONICAL_JSON_V1",
+    "projection": "the complete feedback property, which is the existing closed Game AgentTurnFeedback DTO"
+  },
+  "x-invariants": [
+    "authenticated actor tenant_id and actor_id equal request_context.actor tenant_id and actor_id",
+    "path session_id and interaction_id equal the resource fields and links.self identities",
+    "feedback.session_id equals session_id and feedback.turn_id equals turn_id",
+    "feedback_event contains every immutable agent.turn.feedback_ready EventEnvelope field except payload; feedback is that exact payload",
+    "the server resolves feedback_event.event_id from the authoritative runtime event store and requires every retained envelope field and the feedback payload to be byte-equivalent",
+    "feedback_event command_id equals feedback.command_id and content_ref equals request_context.content_ref; stream_id is retained byte-for-byte from the canonical runtime event",
+    "feedback_event.feedback_sha256 equals SHA-256 of feedback under YAYA_CANONICAL_JSON_V1, preventing same-ID message or evidence substitution",
+    "feedback.command_id and run_id retain the accepted Game turn identities and are authorized against the canonical Command and Run when present",
+    "projection_source is byte-equivalent to the canonical receipt resolved by receipt_id; its actor, content, interaction, session, turn, sequence, command, feedback event and feedback hash equal this projection",
+    "role, response_type, question and hint_level equal projection_source byte-for-byte; projection_source.skill_patch_sha256 equals skill_patch.patch_sha256 or null",
+    "skill_patch interaction_id, session_id, turn_id equal this interaction and its draft belongs to the same actor, session and skill",
+    "patch_decision, when present, identifies this interaction and exactly the embedded skill_patch",
+    "interaction_revision equals 1 before a patch decision and advances exactly once when the immutable decision is recorded",
+    "request_context, identities, sequence, projection_source, role, response fields, feedback, feedback_event, skill_patch, created_at and links are byte-equivalent across interaction revisions; only patch_decision, interaction_revision and updated_at change",
+    "hint_level never exceeds the pinned ContentUnit task.hint_policy.max_level",
+    "updated_at is not earlier than created_at",
+    "ETag identifies interaction_revision and the full byte-equivalent projection"
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "link": {
+      "type": "string",
+      "format": "uri-reference",
+      "minLength": 1,
+      "maxLength": 2048
+    }
+  }
+}

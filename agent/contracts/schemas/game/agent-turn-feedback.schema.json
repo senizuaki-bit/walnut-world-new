@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/game/agent-turn-feedback.schema.json",
+  "title": "Agent turn feedback",
+  "description": "Public, user-displayable feedback produced for one agent turn. The containing runtime event supplies ordered delivery; command_id MUST equal the event envelope command_id.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "session_id",
+    "turn_id",
+    "command_id",
+    "run_id",
+    "message_key",
+    "message",
+    "source",
+    "degraded",
+    "fallback_reason",
+    "evidence_refs",
+    "completed_at"
+  ],
+  "properties": {
+    "session_id": {
+      "$ref": "#/$defs/identifier",
+      "description": "Agent session from POST /v1/agent-sessions/{session_id}/turns."
+    },
+    "turn_id": {
+      "$ref": "#/$defs/identifier",
+      "description": "Client-supplied turn_id from the accepted turn request."
+    },
+    "command_id": {
+      "$ref": "../common/command-id.schema.json",
+      "description": "Accepted EXECUTE_AGENT_TURN command. This value MUST equal the containing event envelope command_id."
+    },
+    "run_id": {
+      "description": "Sandbox run created for this turn, or null when the turn produced feedback without starting a run.",
+      "oneOf": [
+        { "$ref": "#/$defs/identifier" },
+        { "type": "null" }
+      ]
+    },
+    "message_key": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.-]{2,127}$",
+      "description": "Stable localization and telemetry key."
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000,
+      "description": "Already policy-filtered text that the game client may display to the learner."
+    },
+    "source": {
+      "type": "string",
+      "enum": ["provider", "provider_fallback"]
+    },
+    "degraded": { "type": "boolean" },
+    "fallback_reason": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]{2,95}$"
+        },
+        { "type": "null" }
+      ]
+    },
+    "evidence_refs": {
+      "type": "array",
+      "maxItems": 64,
+      "uniqueItems": true,
+      "x-invariants": ["evidence_id values are unique"],
+      "items": { "$ref": "../common/evidence-ref.schema.json" }
+    },
+    "completed_at": { "type": "string", "format": "date-time" }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "degraded": { "const": false } },
+        "required": ["degraded"]
+      },
+      "then": {
+        "properties": {
+          "source": { "const": "provider" },
+          "fallback_reason": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "degraded": { "const": true } },
+        "required": ["degraded"]
+      },
+      "then": {
+        "properties": {
+          "source": { "const": "provider_fallback" },
+          "fallback_reason": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]{2,95}$"
+          }
+        }
+      }
+    }
+  ],
+  "x-invariants": [
+    "command_id == containing event envelope command_id",
+    "degraded == false iff source == provider and fallback_reason == null",
+    "degraded == true iff source == provider_fallback and fallback_reason is a non-empty machine-readable code",
+    "session_id + turn_id identifies the accepted client turn; run_id identifies its sandbox run when one exists",
+    "evidence_refs contains at most one immutable reference for each evidence_id"
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    }
+  }
+}

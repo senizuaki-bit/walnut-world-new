@@ -1,0 +1,31 @@
+{
+  "catalog_version": "1.0.0",
+  "errors": [
+    { "code": "INVALID_REQUEST", "http_status": 400, "category": "VALIDATION", "retryable": false, "user_message_key": "request.invalid" },
+    { "code": "SCHEMA_VERSION_UNSUPPORTED", "http_status": 409, "category": "VALIDATION", "retryable": false, "user_message_key": "schema.version_unsupported" },
+    { "code": "CONTENT_VERSION_MISMATCH", "http_status": 409, "category": "VALIDATION", "retryable": false, "user_message_key": "content.version_mismatch" },
+    { "code": "AUTHENTICATION_REQUIRED", "http_status": 401, "category": "AUTHENTICATION", "retryable": false, "user_message_key": "auth.login_required" },
+    { "code": "AUTHORIZATION_DENIED", "http_status": 403, "category": "AUTHORIZATION", "retryable": false, "user_message_key": "auth.permission_denied" },
+    { "code": "POLICY_DENIED", "http_status": 403, "category": "POLICY", "retryable": false, "user_message_key": "policy.action_denied" },
+    { "code": "NOT_FOUND", "http_status": 404, "category": "VALIDATION", "retryable": false, "user_message_key": "resource.not_found" },
+    { "code": "PAYLOAD_TOO_LARGE", "http_status": 413, "category": "VALIDATION", "retryable": false, "user_message_key": "request.payload_too_large" },
+    { "code": "IDEMPOTENCY_KEY_REUSED", "http_status": 409, "category": "CONCURRENCY", "retryable": false, "user_message_key": "request.idempotency_conflict" },
+    { "code": "WORLD_REVISION_CONFLICT", "http_status": 409, "category": "CONCURRENCY", "retryable": true, "user_message_key": "world.changed_retry" },
+    { "code": "EVENT_SEQUENCE_GAP", "http_status": 409, "category": "CONCURRENCY", "retryable": true, "user_message_key": "event.resync_required" },
+    { "code": "SKILL_NOT_CERTIFIED", "http_status": 422, "category": "SKILL", "retryable": false, "user_message_key": "skill.not_certified" },
+    { "code": "SKILL_VERSION_MISMATCH", "http_status": 409, "category": "SKILL", "retryable": false, "user_message_key": "skill.version_mismatch" },
+    { "code": "ACTIVE_SKILL_ARTIFACT_MISMATCH", "http_status": 500, "category": "INVARIANT", "retryable": false, "user_message_key": "skill.artifact_mismatch" },
+    { "code": "SANDBOX_COMPILE_ERROR", "http_status": 422, "category": "SANDBOX", "retryable": false, "user_message_key": "sandbox.compile_error" },
+    { "code": "SANDBOX_RUNTIME_ERROR", "http_status": 422, "category": "SANDBOX", "retryable": false, "user_message_key": "sandbox.runtime_error" },
+    { "code": "SANDBOX_RESOURCE_LIMIT", "http_status": 422, "category": "SANDBOX", "retryable": false, "user_message_key": "sandbox.resource_limit" },
+    { "code": "WORLD_RULE_REJECTED", "http_status": 422, "category": "WORLD_RULE", "retryable": false, "user_message_key": "world.rule_rejected" },
+    { "code": "DEPENDENCY_UNAVAILABLE", "http_status": 503, "category": "DEPENDENCY", "retryable": true, "user_message_key": "dependency.temporarily_unavailable" },
+    { "code": "FEISHU_SIGNATURE_INVALID", "http_status": 401, "category": "AUTHENTICATION", "retryable": false, "user_message_key": "feishu.signature_invalid" },
+    { "code": "FEISHU_REPLAY_DETECTED", "http_status": 409, "category": "AUTHENTICATION", "retryable": false, "user_message_key": "feishu.replay_detected" },
+    { "code": "FEISHU_SYNC_FAILED", "http_status": 503, "category": "DEPENDENCY", "retryable": true, "user_message_key": "feishu.sync_delayed" },
+    { "code": "RATE_LIMITED", "http_status": 429, "category": "RATE_LIMIT", "retryable": true, "user_message_key": "request.rate_limited" },
+    { "code": "UNKNOWN_COMMIT_STATE", "http_status": 503, "category": "DEPENDENCY", "retryable": false, "user_message_key": "command.reconciling" },
+    { "code": "INVARIANT_VIOLATION", "http_status": 500, "category": "INVARIANT", "retryable": false, "user_message_key": "system.invariant_violation" },
+    { "code": "INTERNAL_ERROR", "http_status": 500, "category": "INTERNAL", "retryable": false, "user_message_key": "system.internal_error" }
+  ]
+}

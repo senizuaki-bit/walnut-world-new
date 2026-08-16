@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/feishu/content-release-receipt.schema.json",
+  "title": "Content release candidate receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "release_id",
+    "candidate_id",
+    "candidate_revision",
+    "validation_job",
+    "status",
+    "activation_status",
+    "trace_id",
+    "created_at"
+  ],
+  "properties": {
+    "release_id": {
+      "type": "string",
+      "pattern": "^rel_[A-Za-z0-9_-]{8,128}$"
+    },
+    "candidate_id": {
+      "type": "string",
+      "pattern": "^cand_[A-Za-z0-9_-]{8,128}$"
+    },
+    "candidate_revision": {
+      "const": 1,
+      "description": "Authoritative initial revision used by the first optimistic approval decision."
+    },
+    "validation_job": {
+      "$ref": "../common/async-job.schema.json"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "CANDIDATE_CREATED",
+        "VALIDATION_QUEUED"
+      ]
+    },
+    "activation_status": {
+      "const": "NOT_ACTIVATED",
+      "description": "A successful Feishu submission is never proof that content is active."
+    },
+    "trace_id": {
+      "type": "string",
+      "pattern": "^trace_[A-Za-z0-9_-]{8,96}$"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

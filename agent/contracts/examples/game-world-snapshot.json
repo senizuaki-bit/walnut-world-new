@@ -1,0 +1,65 @@
+{
+  "schema_ref": "../schemas/game/world-snapshot.schema.json",
+  "value": {
+    "request_context": {
+      "schema_version": "1.0.0",
+      "request_id": "req_game_00000006",
+      "correlation_id": "corr_game_00000006",
+      "trace_id": "trace_game_00000006",
+      "requested_at": "2026-08-06T10:04:00Z",
+      "actor": {
+        "tenant_id": "tenant_yaya",
+        "actor_id": "student_0001",
+        "actor_type": "student",
+        "roles": ["game:player"]
+      },
+      "content_ref": {
+        "unit_id": "YAYA_FARM_001",
+        "version": "1.4.0",
+        "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    "world_id": "world_demo_001",
+    "revision": 185,
+    "last_event_sequence": 733,
+    "state_schema_version": "1.0.0",
+    "state_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "generated_at": "2026-08-06T10:04:00Z",
+    "world_rules_version": "farm-rules-12",
+    "state": {
+      "clock": { "day": 3, "minute_of_day": 540, "tick": 8640 },
+      "avatar": {
+        "entity_id": "avatar_0001",
+        "position": { "x": 10, "y": 8 },
+        "energy": 9200
+      },
+      "inventory": [
+        { "item_id": "seed.tomato", "quantity": 4 },
+        { "item_id": "water", "quantity": 800 }
+      ],
+      "plots": [
+        {
+          "plot_id": "farm_plot_0001",
+          "position": { "x": 12, "y": 8 },
+          "soil_state": "TILLED",
+          "hydration": 7000,
+          "crop": {
+            "crop_type": "tomato",
+            "growth_stage": 2,
+            "planted_at_tick": 8200,
+            "ready_to_harvest": false
+          },
+          "last_updated_event_sequence": 733
+        }
+      ],
+      "agents": [
+        {
+          "entity_id": "agent_entity_001",
+          "agent_profile_id": "agent_farmer_001",
+          "position": { "x": 11, "y": 8 },
+          "activity": "IDLE"
+        }
+      ]
+    }
+  }
+}

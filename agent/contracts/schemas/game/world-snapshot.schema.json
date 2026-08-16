@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/game/world-snapshot.schema.json",
+  "title": "Authoritative world snapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_context",
+    "world_id",
+    "revision",
+    "last_event_sequence",
+    "state_schema_version",
+    "state_hash",
+    "generated_at",
+    "world_rules_version",
+    "state"
+  ],
+  "properties": {
+    "request_context": { "$ref": "../common/request-context.schema.json" },
+    "world_id": { "$ref": "#/$defs/identifier" },
+    "revision": { "type": "integer", "minimum": 0 },
+    "last_event_sequence": { "type": "integer", "minimum": 0 },
+    "state_schema_version": { "const": "1.0.0" },
+    "state_hash": { "$ref": "#/$defs/sha256" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "world_rules_version": { "type": "string", "minLength": 1, "maxLength": 96 },
+    "state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["clock", "avatar", "inventory", "plots", "agents"],
+      "properties": {
+        "clock": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["day", "minute_of_day", "tick"],
+          "properties": {
+            "day": { "type": "integer", "minimum": 1 },
+            "minute_of_day": { "type": "integer", "minimum": 0, "maximum": 1439 },
+            "tick": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "avatar": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["entity_id", "position", "energy"],
+          "properties": {
+            "entity_id": { "$ref": "#/$defs/identifier" },
+            "position": { "$ref": "#/$defs/position" },
+            "energy": { "type": "integer", "minimum": 0, "maximum": 10000 }
+          }
+        },
+        "inventory": {
+          "type": "array",
+          "maxItems": 1000,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["item_id", "quantity"],
+            "properties": {
+              "item_id": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{1,63}$" },
+              "quantity": { "type": "integer", "minimum": 0, "maximum": 1000000 }
+            }
+          }
+        },
+        "plots": {
+          "type": "array",
+          "maxItems": 10000,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["plot_id", "position", "soil_state", "hydration", "crop", "last_updated_event_sequence"],
+            "properties": {
+              "plot_id": { "$ref": "#/$defs/identifier" },
+              "position": { "$ref": "#/$defs/position" },
+              "soil_state": { "type": "string", "enum": ["UNTILLED", "TILLED"] },
+              "hydration": { "type": "integer", "minimum": 0, "maximum": 10000 },
+              "crop": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["crop_type", "growth_stage", "planted_at_tick", "ready_to_harvest"],
+                    "properties": {
+                      "crop_type": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{1,63}$" },
+                      "growth_stage": { "type": "integer", "minimum": 0, "maximum": 100 },
+                      "planted_at_tick": { "type": "integer", "minimum": 0 },
+                      "ready_to_harvest": { "type": "boolean" }
+                    }
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "last_updated_event_sequence": { "type": "integer", "minimum": 0 }
+            }
+          }
+        },
+        "agents": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["entity_id", "agent_profile_id", "position", "activity"],
+            "properties": {
+              "entity_id": { "$ref": "#/$defs/identifier" },
+              "agent_profile_id": { "$ref": "#/$defs/identifier" },
+              "position": { "$ref": "#/$defs/position" },
+              "activity": { "type": "string", "enum": ["IDLE", "THINKING", "EXECUTING", "BLOCKED"] }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "position": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y"],
+      "properties": {
+        "x": { "type": "integer", "minimum": -100000, "maximum": 100000 },
+        "y": { "type": "integer", "minimum": -100000, "maximum": 100000 }
+      }
+    }
+  }
+}

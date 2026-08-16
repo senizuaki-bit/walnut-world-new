@@ -1,0 +1,142 @@
+{
+  "schema_ref": "../schemas/product-experience/agent-interaction.schema.json",
+  "value": {
+    "request_context": {
+      "schema_version": "1.0.0",
+      "request_id": "req_product_interaction_01",
+      "correlation_id": "corr_product_interaction_01",
+      "trace_id": "trace_product_interaction_01",
+      "requested_at": "2026-08-08T01:01:30Z",
+      "actor": {
+        "tenant_id": "tenant_yaya",
+        "actor_id": "student_0001",
+        "actor_type": "student",
+        "roles": ["game:player"]
+      },
+      "content_ref": {
+        "unit_id": "YAYA_FARM_001",
+        "version": "1.4.0",
+        "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    "interaction_id": "interaction_water_001",
+    "session_id": "session_agent_001",
+    "turn_id": "turn_agent_0001",
+    "sequence": 1,
+    "interaction_revision": 1,
+    "projection_source": {
+      "receipt_id": "projection_water_001",
+      "source_type": "AGENT_TURN_PRODUCT_PROJECTION",
+      "source_revision": 1,
+      "actor": {
+        "tenant_id": "tenant_yaya",
+        "actor_id": "student_0001",
+        "actor_type": "student",
+        "roles": ["game:player"]
+      },
+      "content_ref": {
+        "unit_id": "YAYA_FARM_001",
+        "version": "1.4.0",
+        "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "interaction_id": "interaction_water_001",
+      "session_id": "session_agent_001",
+      "turn_id": "turn_agent_0001",
+      "sequence": 1,
+      "command_id": "cmd_game_00000001",
+      "feedback_event_id": "evt_feedback_game_00000001",
+      "feedback_sha256": "348ffbfa805523b9c369bcbf121e2984c41896891750325ebe9ba9f200304fda",
+      "role": "teaching_agent",
+      "response_type": "skill_patch",
+      "question": null,
+      "hint_level": 4,
+      "skill_patch_sha256": "806740a08623272f3a7b5036cdf5a7163dd6f4719d37bedd7f30ca708aa4a8ca",
+      "committed_at": "2026-08-08T01:01:30Z",
+      "source_sha256": "b73b0ec8cea15507c3100bb0e94c5b19f6980489bdeab693bdb009e21e793f60"
+    },
+    "role": "teaching_agent",
+    "response_type": "skill_patch",
+    "question": null,
+    "hint_level": 4,
+    "feedback": {
+      "session_id": "session_agent_001",
+      "turn_id": "turn_agent_0001",
+      "command_id": "cmd_game_00000001",
+      "run_id": "run_water_0001",
+      "message_key": "agent.turn.completed",
+      "message": "已经使用认证 Skill 完成浇水，土地湿度已更新。",
+      "source": "provider",
+      "degraded": false,
+      "fallback_reason": null,
+      "evidence_refs": [
+        {
+          "evidence_id": "evidence_world_00000001",
+          "evidence_type": "WORLD_COMMIT",
+          "created_at": "2026-08-06T10:02:54Z",
+          "sha256": "9552b9e9c089a955fa26f2395573e636c93c466191020506937954283dc7863e"
+        }
+      ],
+      "completed_at": "2026-08-06T10:02:54Z"
+    },
+    "feedback_event": {
+      "event_id": "evt_feedback_game_00000001",
+      "event_type": "agent.turn.feedback_ready",
+      "event_version": 1,
+      "schema_version": "1.0.0",
+      "stream_id": "agent-session:session_agent_001",
+      "sequence": 18,
+      "occurred_at": "2026-08-06T10:02:54Z",
+      "producer": "agent_hub",
+      "trace_id": "trace_game_00000004",
+      "command_id": "cmd_game_00000001",
+      "correlation_id": "corr_game_00000004",
+      "causation_id": "evt_world_00000001",
+      "content_ref": {
+        "unit_id": "YAYA_FARM_001",
+        "version": "1.4.0",
+        "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "feedback_sha256": "348ffbfa805523b9c369bcbf121e2984c41896891750325ebe9ba9f200304fda"
+    },
+    "skill_patch": {
+      "patch_id": "patch_water_001",
+      "interaction_id": "interaction_water_001",
+      "session_id": "session_agent_001",
+      "turn_id": "turn_agent_0001",
+      "draft_id": "draft_water_001",
+      "skill_id": "skill_water_001",
+      "base_draft_revision": 7,
+      "base_draft_sha256": "53c203ad61eb09d45d0ca946b2d751cdca5eac9a029baceb8103cb740cc7226c",
+      "operations": [
+        {
+          "operation": "UPSERT_FILE",
+          "path": "src/main.cpp",
+          "previous_content_sha256": "5e7b1c8414988b8dbde4e72f3bd9d3db0a01c6c33ef32e69be263156a04b4075",
+          "content": "#include <yaya/skill.hpp>\nint main() { yaya::water(\"plot_1\", 500); return 0; }\n",
+          "content_sha256": "5c981f3d08a2395ad35cedd1afdb582c5068c03fdacad93ef0f401051f4d8f0c"
+        }
+      ],
+      "result_draft_sha256": "73afbbfff968ca4bf1c8af845cbbe4ce77ecb9c858601273ae14c0afe6a60453",
+      "patch_sha256": "806740a08623272f3a7b5036cdf5a7163dd6f4719d37bedd7f30ca708aa4a8ca",
+      "rationale": "Use the bounded watering action and keep the existing entrypoint.",
+      "requires_student_confirmation": true,
+      "evidence_refs": [
+        {
+          "evidence_id": "evidence_world_00000001",
+          "evidence_type": "WORLD_COMMIT",
+          "created_at": "2026-08-06T10:02:54Z",
+          "sha256": "9552b9e9c089a955fa26f2395573e636c93c466191020506937954283dc7863e"
+        }
+      ],
+      "created_at": "2026-08-08T01:01:30Z"
+    },
+    "patch_decision": null,
+    "created_at": "2026-08-08T01:01:30Z",
+    "updated_at": "2026-08-08T01:01:30Z",
+    "links": {
+      "self": "/product-experience/v1/sessions/session_agent_001/agent-interactions/interaction_water_001",
+      "session_workspace": "/product-experience/v1/sessions/session_agent_001/workspace",
+      "skill_draft": "/product-experience/v1/sessions/session_agent_001/skill-drafts/draft_water_001"
+    }
+  }
+}

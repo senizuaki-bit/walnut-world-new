@@ -1,0 +1,106 @@
+{
+  "schema_ref": "../schemas/game/world-presentation-event-page.schema.json",
+  "value": {
+    "request_context": {
+      "schema_version": "1.0.0",
+      "request_id": "req_game_00000008",
+      "correlation_id": "corr_game_00000008",
+      "trace_id": "trace_game_00000008",
+      "requested_at": "2026-08-14T10:03:00Z",
+      "actor": {
+        "tenant_id": "tenant_yaya",
+        "actor_id": "student_0001",
+        "actor_type": "student",
+        "roles": ["game:player"]
+      },
+      "content_ref": {
+        "unit_id": "YAYA_FARM_001",
+        "version": "1.4.0",
+        "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    "world_id": "world_demo_001",
+    "snapshot_revision": 186,
+    "snapshot_last_event_sequence": 741,
+    "snapshot_state_hash": "3333333333333333333333333333333333333333333333333333333333333333",
+    "presentation_high_watermark": 2,
+    "from_sequence": 1,
+    "to_sequence": 2,
+    "has_more": false,
+    "next_after_sequence": 2,
+    "events": [
+      {
+        "event_id": "presentation_0c157495c7b085330271f82b321e3f38",
+        "event_type": "world.action.harvested",
+        "event_version": 1,
+        "schema_version": "1.0.0",
+        "stream_id": "world-presentation:world_demo_001",
+        "sequence": 1,
+        "occurred_at": "2026-08-14T10:02:54Z",
+        "producer": "walnut_world_engine",
+        "tenant_id": "tenant_yaya",
+        "session_id": "session_demo_001",
+        "turn_id": "turn_demo_0001",
+        "command_id": "cmd_game_00000001",
+        "run_id": "run_game_00000001",
+        "world_id": "world_demo_001",
+        "commit_id": "commit_world_00000001",
+        "world_revision": 186,
+        "action_index": 0,
+        "action_count": 2,
+        "intent_id": "intent_harvest_0001",
+        "state_hash_before": "1111111111111111111111111111111111111111111111111111111111111111",
+        "state_hash_after": "2222222222222222222222222222222222222222222222222222222222222222",
+        "final_snapshot_revision": 186,
+        "final_world_event_sequence": 741,
+        "final_snapshot_state_hash": "3333333333333333333333333333333333333333333333333333333333333333",
+        "payload": {
+          "actor_entity_id": "agent_entity_001",
+          "plot_id": "farm_plot_0001",
+          "position": { "x": 12, "y": 8 },
+          "crop_type": "tomato",
+          "growth_stage": 3,
+          "ready_to_harvest": true
+        },
+        "payload_sha256": "33763d5208fee9dca8f626fe5d588b95bbd5250c8d2286b730ddeb673fc3130d",
+        "integrity_sha256": "0c157495c7b085330271f82b321e3f38443083616f24d9aba493b2d2e46dc97c"
+      },
+      {
+        "event_id": "presentation_67f97c3cb795c503f7a38390184e8255",
+        "event_type": "world.action.harvested",
+        "event_version": 1,
+        "schema_version": "1.0.0",
+        "stream_id": "world-presentation:world_demo_001",
+        "sequence": 2,
+        "occurred_at": "2026-08-14T10:02:54Z",
+        "producer": "walnut_world_engine",
+        "tenant_id": "tenant_yaya",
+        "session_id": "session_demo_001",
+        "turn_id": "turn_demo_0001",
+        "command_id": "cmd_game_00000001",
+        "run_id": "run_game_00000001",
+        "world_id": "world_demo_001",
+        "commit_id": "commit_world_00000001",
+        "world_revision": 186,
+        "action_index": 1,
+        "action_count": 2,
+        "intent_id": "intent_harvest_0002",
+        "state_hash_before": "2222222222222222222222222222222222222222222222222222222222222222",
+        "state_hash_after": "3333333333333333333333333333333333333333333333333333333333333333",
+        "final_snapshot_revision": 186,
+        "final_world_event_sequence": 741,
+        "final_snapshot_state_hash": "3333333333333333333333333333333333333333333333333333333333333333",
+        "payload": {
+          "actor_entity_id": "agent_entity_001",
+          "plot_id": "farm_plot_0002",
+          "position": { "x": 13, "y": 8 },
+          "crop_type": "tomato",
+          "growth_stage": 3,
+          "ready_to_harvest": true
+        },
+        "payload_sha256": "e919463813a22925dca87592d8d13897e2c4cf9dda085c9c0ffd37aeb0665bbb",
+        "integrity_sha256": "67f97c3cb795c503f7a38390184e82557998516a552477bbddeef0c9ab01289c"
+      }
+    ]
+  }
+}

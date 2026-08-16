@@ -1,0 +1,118 @@
+{
+  "schema_ref": "../schemas/game/run.schema.json",
+  "value": {
+    "request_context": {
+      "schema_version": "1.0.0",
+      "request_id": "req_game_00000005",
+      "correlation_id": "corr_game_00000004",
+      "trace_id": "trace_game_00000004",
+      "requested_at": "2026-08-06T10:03:05Z",
+      "actor": {
+        "tenant_id": "tenant_yaya",
+        "actor_id": "student_0001",
+        "actor_type": "student",
+        "roles": ["game:player"]
+      },
+      "content_ref": {
+        "unit_id": "YAYA_FARM_001",
+        "version": "1.4.0",
+        "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    "run_id": "run_water_0001",
+    "session_id": "session_agent_001",
+    "turn_id": "turn_agent_0001",
+    "command_id": "cmd_game_00000001",
+    "status": "SUCCEEDED",
+    "terminal": true,
+    "skill": {
+      "skill_id": "skill_water_001",
+      "skill_version_id": "skillver_water_001",
+      "artifact_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "certification_id": "cert_water_001"
+    },
+    "sandbox": {
+      "invocation_id": "invoke_water_001",
+      "status": "SUCCEEDED",
+      "started_at": "2026-08-06T10:02:51Z",
+      "finished_at": "2026-08-06T10:02:53Z",
+      "limits": {
+        "cpu_ms": 500,
+        "wall_ms": 2000,
+        "memory_bytes": 67108864,
+        "max_intents": 32
+      },
+      "usage": {
+        "cpu_ms": 31,
+        "wall_ms": 46,
+        "peak_memory_bytes": 4194304
+      },
+      "action_intents": [
+        {
+          "intent_id": "intent_water_001",
+          "action_type": "WATER",
+          "actor_entity_id": "agent_entity_001",
+          "expected_world_revision": 184,
+          "plot_id": "farm_plot_0001",
+          "amount_ml": 200
+        }
+      ],
+      "failure": null
+    },
+    "world_application": {
+      "status": "COMMITTED",
+      "receipt": {
+        "world_id": "world_demo_001",
+        "previous_revision": 184,
+        "world_revision": 185,
+        "first_event_sequence": 732,
+        "last_event_sequence": 733,
+        "state_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "committed_at": "2026-08-06T10:02:54Z"
+      },
+      "failure": null
+    },
+    "agent_feedback": {
+      "session_id": "session_agent_001",
+      "turn_id": "turn_agent_0001",
+      "command_id": "cmd_game_00000001",
+      "run_id": "run_water_0001",
+      "message_key": "agent.turn.completed",
+      "message": "已经使用认证 Skill 完成浇水，土地湿度已更新。",
+      "source": "provider",
+      "degraded": false,
+      "fallback_reason": null,
+      "evidence_refs": [
+        {
+          "evidence_id": "evidence_world_00000001",
+          "evidence_type": "WORLD_COMMIT",
+          "created_at": "2026-08-06T10:02:54Z",
+          "sha256": "9552b9e9c089a955fa26f2395573e636c93c466191020506937954283dc7863e"
+        }
+      ],
+      "completed_at": "2026-08-06T10:02:54Z"
+    },
+    "created_at": "2026-08-06T10:02:50Z",
+    "updated_at": "2026-08-06T10:02:54Z",
+    "evidence_refs": [
+      {
+        "evidence_id": "evidence_world_00000001",
+        "evidence_type": "WORLD_COMMIT",
+        "created_at": "2026-08-06T10:02:54Z",
+        "sha256": "9552b9e9c089a955fa26f2395573e636c93c466191020506937954283dc7863e"
+      }
+    ],
+    "versions": {
+      "api_version": "1.0.0",
+      "event_version": "1",
+      "policy_version": "policy-38",
+      "world_rules_version": "farm-rules-12",
+      "teaching_spec_version": "teaching-7",
+      "skill_version": "skillver_water_001",
+      "artifact_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "compiler_version": "clang-20.1.0",
+      "sandbox_image_digest": "sha256:yaya-sandbox-image-v1",
+      "test_suite_version": "farm-water-v3"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "id": "book_agent",
+  "display_name": "书书",
+  "purpose": "只基于本 Session 的 Skill 版本、运行和提示记录生成成长总结。",
+  "allowed_events": ["task_completed"],
+  "allowed_tools": ["get_skill_history", "get_session_runs", "get_learner_profile"],
+  "response_schema": "AgentDecisionV1",
+  "temperature": 0.5,
+  "max_output_tokens": 700,
+  "timeout_ms": 15000,
+  "prompt": "只总结本 Session 中有证据的经历，指出一项具体进步和一个可迁移问题。不要夸大为永久掌握，也不要补写不存在的失败或修改。",
+  "limits": {
+    "max_tool_calls": 3,
+    "max_message_chars": 420,
+    "allow_skill_patch": false,
+    "require_confirmation_for_patch": false
+  }
+}

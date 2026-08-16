@@ -1,0 +1,33 @@
+{
+  "schema_ref": "../schemas/feishu/class-insights-result.schema.json",
+  "value": {
+    "query_id": "ciq_00000001",
+    "class_ref": "cls_00000001",
+    "as_of": "2026-08-06T10:25:01Z",
+    "cohort_size": 28,
+    "privacy": {
+      "minimum_cohort_size": 5,
+      "effective_minimum_cohort_size": 5,
+      "policy_version": "class-privacy-v1",
+      "small_cells_suppressed": true,
+      "contains_learner_identifiers": false
+    },
+    "insights": [
+      {
+        "dimension": "COMMON_ERRORS",
+        "key": "cpp.loop.off_by_one",
+        "learner_count": 9,
+        "ratio": 0.3214,
+        "suppressed": false
+      },
+      {
+        "dimension": "SUPPORT_NEEDS",
+        "key": "rare_pattern_suppressed",
+        "learner_count": null,
+        "ratio": null,
+        "suppressed": true
+      }
+    ],
+    "trace_id": "trace_feishu_00000004"
+  }
+}

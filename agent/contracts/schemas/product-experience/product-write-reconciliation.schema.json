@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/product-experience/product-write-reconciliation.schema.json",
+  "title": "Product write reconciliation required response",
+  "description": "Returned only when a product write and its idempotency receipt are durable but the success response cannot be safely delivered. The client reconciles through the canonical GET resource before considering any replay.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_id",
+    "trace_id",
+    "correlation_id",
+    "status",
+    "data",
+    "error",
+    "reconciliation"
+  ],
+  "properties": {
+    "request_id": { "type": "string", "pattern": "^req_[A-Za-z0-9_-]{8,96}$" },
+    "trace_id": { "type": "string", "pattern": "^trace_[A-Za-z0-9_-]{8,96}$" },
+    "correlation_id": { "type": "string", "pattern": "^corr_[A-Za-z0-9_-]{8,96}$" },
+    "status": { "const": "RECONCILE" },
+    "data": { "type": "null" },
+    "error": {
+      "allOf": [
+        { "$ref": "../common/error.schema.json" },
+        {
+          "type": "object",
+          "required": ["code", "category", "retryable", "user_message_key", "stage", "details"],
+          "properties": {
+            "code": { "const": "DEPENDENCY_UNAVAILABLE" },
+            "category": { "const": "DEPENDENCY" },
+            "retryable": { "const": true },
+            "user_message_key": { "const": "dependency.temporarily_unavailable" },
+            "stage": {
+              "type": "string",
+              "enum": ["PRODUCT_DRAFT_COMMIT", "PRODUCT_PATCH_DECISION_COMMIT"]
+            },
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["operation_was_durably_accepted"],
+              "properties": {
+                "operation_was_durably_accepted": { "const": true }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "reconciliation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["resource_type", "session_id", "resource_id", "resource_url", "original_trace_id"],
+      "properties": {
+        "resource_type": { "type": "string", "enum": ["SKILL_DRAFT", "AGENT_INTERACTION"] },
+        "session_id": { "$ref": "#/$defs/identifier" },
+        "resource_id": { "$ref": "#/$defs/identifier" },
+        "resource_url": { "$ref": "#/$defs/link" },
+        "original_trace_id": { "type": "string", "pattern": "^trace_[A-Za-z0-9_-]{8,96}$" }
+      }
+    }
+  },
+  "x-invariants": [
+    "request_id, trace_id and correlation_id identify the current failed HTTP response attempt",
+    "original_trace_id identifies the first durable product write and remains stable across reconciliation attempts",
+    "Location equals reconciliation.resource_url and names the canonical GET operation for resource_type",
+    "resource_url is a credential-free canonical Product GET path whose session and final identities equal session_id and resource_id and whose route matches resource_type",
+    "the client GETs resource_url before replaying; any replay uses the original body and Idempotency-Key and cannot create a second mutation",
+    "this response never replaces the already durable success receipt",
+    "PRODUCT_DRAFT_COMMIT pairs only with SKILL_DRAFT and PRODUCT_PATCH_DECISION_COMMIT pairs only with AGENT_INTERACTION"
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "link": {
+      "type": "string",
+      "format": "uri-reference",
+      "minLength": 1,
+      "maxLength": 2048
+    }
+  }
+}

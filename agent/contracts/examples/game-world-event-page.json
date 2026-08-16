@@ -1,0 +1,79 @@
+{
+  "schema_ref": "../schemas/game/world-event-page.schema.json",
+  "value": {
+    "request_context": {
+      "schema_version": "1.0.0",
+      "request_id": "req_game_00000007",
+      "correlation_id": "corr_game_00000004",
+      "trace_id": "trace_game_00000004",
+      "requested_at": "2026-08-06T10:04:05Z",
+      "actor": {
+        "tenant_id": "tenant_yaya",
+        "actor_id": "student_0001",
+        "actor_type": "student",
+        "roles": ["game:player"]
+      },
+      "content_ref": {
+        "unit_id": "YAYA_FARM_001",
+        "version": "1.4.0",
+        "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    "world_id": "world_demo_001",
+    "snapshot_revision": 185,
+    "from_sequence": 732,
+    "to_sequence": 733,
+    "has_more": false,
+    "next_after_sequence": 733,
+    "events": [
+      {
+        "event_id": "evt_world_00000001",
+        "event_type": "world.plot_watered",
+        "event_version": 1,
+        "schema_version": "1.0.0",
+        "stream_id": "world:world_demo_001",
+        "sequence": 732,
+        "occurred_at": "2026-08-06T10:02:54Z",
+        "producer": "world_engine",
+        "trace_id": "trace_game_00000004",
+        "command_id": "cmd_game_00000001",
+        "correlation_id": "corr_game_00000004",
+        "causation_id": "cmd_game_00000001",
+        "content_ref": {
+          "unit_id": "YAYA_FARM_001",
+          "version": "1.4.0",
+          "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "payload": {
+          "plot_id": "farm_plot_0001",
+          "amount_ml": 200,
+          "world_revision": 185
+        }
+      },
+      {
+        "event_id": "evt_world_00000002",
+        "event_type": "world.agent_energy_changed",
+        "event_version": 1,
+        "schema_version": "1.0.0",
+        "stream_id": "world:world_demo_001",
+        "sequence": 733,
+        "occurred_at": "2026-08-06T10:02:54Z",
+        "producer": "world_engine",
+        "trace_id": "trace_game_00000004",
+        "command_id": "cmd_game_00000001",
+        "correlation_id": "corr_game_00000004",
+        "causation_id": "evt_world_00000001",
+        "content_ref": {
+          "unit_id": "YAYA_FARM_001",
+          "version": "1.4.0",
+          "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "payload": {
+          "entity_id": "agent_entity_001",
+          "energy_delta": -1,
+          "world_revision": 185
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "schema_ref": "../schemas/product-experience/skill-patch.schema.json",
+  "value": {
+    "patch_id": "patch_water_reject_001",
+    "interaction_id": "interaction_reject_001",
+    "session_id": "session_agent_001",
+    "turn_id": "turn_agent_reject_001",
+    "draft_id": "draft_water_001",
+    "skill_id": "skill_water_001",
+    "base_draft_revision": 7,
+    "base_draft_sha256": "53c203ad61eb09d45d0ca946b2d751cdca5eac9a029baceb8103cb740cc7226c",
+    "operations": [
+      {
+        "operation": "UPSERT_FILE",
+        "path": "src/main.cpp",
+        "previous_content_sha256": "5e7b1c8414988b8dbde4e72f3bd9d3db0a01c6c33ef32e69be263156a04b4075",
+        "content": "#include <yaya/skill.hpp>\nint main() { yaya::water(\"plot_1\", 250); return 0; }\n",
+        "content_sha256": "734b0ea818cc430d17bc847526db48337c450a63ecdcbc86728249adff3cd7ff"
+      }
+    ],
+    "result_draft_sha256": "7ca9375e5ab9fdf0718aee94c82a4bf179ec6c86488e99207139359abd02b55e",
+    "patch_sha256": "259ba8f6e796205d1b6090cf0372707e164b2188314ac6ac564a0ce99b4f0f70",
+    "rationale": "Use a smaller bounded watering amount; keep the existing entrypoint.",
+    "requires_student_confirmation": true,
+    "evidence_refs": [],
+    "created_at": "2026-08-08T01:03:30Z"
+  }
+}

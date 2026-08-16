@@ -1,0 +1,10 @@
+{
+  "schema_ref": "../asyncapi/runtime-events.asyncapi.json#/components/schemas/HeartbeatAckFrame",
+  "value": {
+    "frame_type": "heartbeat_ack",
+    "protocol_version": "1.0.0",
+    "subscription_id": "sub_realtime_00000001",
+    "nonce": "hb_realtime_00000001",
+    "received_at": "2026-08-07T10:00:30Z"
+  }
+}

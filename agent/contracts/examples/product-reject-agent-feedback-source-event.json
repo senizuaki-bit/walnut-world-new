@@ -1,0 +1,35 @@
+{
+  "schema_ref": "../schemas/game/agent-turn-feedback-ready-event.schema.json",
+  "value": {
+    "event_id": "evt_feedback_game_reject_001",
+    "event_type": "agent.turn.feedback_ready",
+    "event_version": 1,
+    "schema_version": "1.0.0",
+    "stream_id": "agent-session:session_agent_001",
+    "sequence": 19,
+    "occurred_at": "2026-08-08T01:03:30Z",
+    "producer": "agent_hub",
+    "trace_id": "trace_game_reject_0001",
+    "command_id": "cmd_game_reject_0001",
+    "correlation_id": "corr_game_reject_0001",
+    "causation_id": "evt_agent_input_reject_001",
+    "content_ref": {
+      "unit_id": "YAYA_FARM_001",
+      "version": "1.4.0",
+      "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "payload": {
+      "session_id": "session_agent_001",
+      "turn_id": "turn_agent_reject_001",
+      "command_id": "cmd_game_reject_0001",
+      "run_id": null,
+      "message_key": "agent.turn.patch_proposed",
+      "message": "I prepared a bounded watering change for you to review.",
+      "source": "provider",
+      "degraded": false,
+      "fallback_reason": null,
+      "evidence_refs": [],
+      "completed_at": "2026-08-08T01:03:29Z"
+    }
+  }
+}

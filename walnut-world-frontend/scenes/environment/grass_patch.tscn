@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/art/environment/grass_patch.png" id="1_grass"]
+
+[node name="GrassPatch" type="Node3D"]
+
+[node name="Billboard" type="Sprite3D" parent="."]
+position = Vector3(0, 1.0, 0)
+texture = ExtResource("1_grass")
+billboard = 1
+pixel_size = 0.0016
+transparent = true
+shaded = false

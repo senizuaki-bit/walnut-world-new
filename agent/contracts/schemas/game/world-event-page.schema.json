@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/game/world-event-page.schema.json",
+  "title": "World event page",
+  "x-invariants": [
+    "events are ordered by sequence, contain no duplicate event_id, and are gap-free.",
+    "For a non-empty page, from_sequence equals events[0].sequence, to_sequence equals the last event sequence, and next_after_sequence equals to_sequence.",
+    "Every event stream_id equals 'world:' plus world_id.",
+    "A consumer must reject the entire page and fetch a fresh snapshot when any invariant is violated."
+  ],
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_context",
+    "world_id",
+    "snapshot_revision",
+    "from_sequence",
+    "to_sequence",
+    "has_more",
+    "next_after_sequence",
+    "events"
+  ],
+  "properties": {
+    "request_context": { "$ref": "../common/request-context.schema.json" },
+    "world_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "snapshot_revision": { "type": "integer", "minimum": 0 },
+    "from_sequence": { "type": "integer", "minimum": 0 },
+    "to_sequence": { "type": "integer", "minimum": 0 },
+    "has_more": { "type": "boolean" },
+    "next_after_sequence": { "type": "integer", "minimum": 0 },
+    "events": {
+      "type": "array",
+      "maxItems": 500,
+      "uniqueItems": true,
+      "items": { "$ref": "../common/event-envelope.schema.json" }
+    }
+  }
+}

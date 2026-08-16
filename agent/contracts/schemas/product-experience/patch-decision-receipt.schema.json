@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/product-experience/patch-decision-receipt.schema.json",
+  "title": "Product skill patch decision receipt",
+  "description": "Immutable decision receipt also embedded in the canonical AgentInteraction so a lost response can be reconciled by GET.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_context",
+    "decision_id",
+    "session_id",
+    "turn_id",
+    "interaction_id",
+    "interaction_revision_before",
+    "interaction_revision_after",
+    "patch_id",
+    "patch_sha256",
+    "draft_id",
+    "skill_id",
+    "decision",
+    "reason_code",
+    "draft_updated",
+    "draft_revision_before",
+    "draft_sha256_before",
+    "draft_revision_after",
+    "draft_sha256_after",
+    "decided_at",
+    "links"
+  ],
+  "properties": {
+    "request_context": { "$ref": "../common/request-context.schema.json" },
+    "decision_id": { "$ref": "#/$defs/identifier" },
+    "session_id": { "$ref": "#/$defs/identifier" },
+    "turn_id": { "$ref": "#/$defs/identifier" },
+    "interaction_id": { "$ref": "#/$defs/identifier" },
+    "interaction_revision_before": { "type": "integer", "minimum": 1, "maximum": 9007199254740990 },
+    "interaction_revision_after": { "type": "integer", "minimum": 2, "maximum": 9007199254740991 },
+    "patch_id": { "$ref": "#/$defs/identifier" },
+    "patch_sha256": { "$ref": "#/$defs/sha256" },
+    "draft_id": { "$ref": "#/$defs/identifier" },
+    "skill_id": { "$ref": "#/$defs/identifier" },
+    "decision": { "type": "string", "enum": ["ACCEPT", "REJECT"] },
+    "reason_code": {
+      "oneOf": [
+        { "type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,95}$" },
+        { "type": "null" }
+      ]
+    },
+    "draft_updated": { "type": "boolean" },
+    "draft_revision_before": { "type": "integer", "minimum": 1, "maximum": 9007199254740990 },
+    "draft_sha256_before": { "$ref": "#/$defs/sha256" },
+    "draft_revision_after": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+    "draft_sha256_after": { "$ref": "#/$defs/sha256" },
+    "decided_at": { "type": "string", "format": "date-time" },
+    "links": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["interaction", "skill_draft"],
+      "properties": {
+        "interaction": { "$ref": "#/$defs/link" },
+        "skill_draft": { "$ref": "#/$defs/link" }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "decision": { "const": "ACCEPT" } },
+        "required": ["decision"]
+      },
+      "then": {
+        "properties": {
+          "reason_code": { "type": "null" },
+          "draft_updated": { "const": true }
+        }
+      },
+      "else": {
+        "properties": {
+          "reason_code": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,95}$" },
+          "draft_updated": { "const": false }
+        }
+      }
+    }
+  ],
+  "x-invariants": [
+    "interaction_revision_after equals interaction_revision_before plus 1",
+    "decision_id, decision, reason_code, decided_at and every resource identity equal the original PatchDecision request retained by its idempotency receipt",
+    "request_context actor equals the authenticated decision actor and request_context.content_ref equals the interaction content_ref",
+    "ACCEPT requires draft_revision_after equals draft_revision_before plus 1 and draft_sha256_after equals the accepted patch result_draft_sha256",
+    "REJECT requires draft_revision_after equals draft_revision_before and draft_sha256_after equals draft_sha256_before",
+    "links identify the same session_id, interaction_id and draft_id",
+    "GET of links.interaction exposes this byte-equivalent receipt in AgentInteraction.patch_decision"
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "link": {
+      "type": "string",
+      "format": "uri-reference",
+      "minLength": 1,
+      "maxLength": 2048
+    }
+  }
+}

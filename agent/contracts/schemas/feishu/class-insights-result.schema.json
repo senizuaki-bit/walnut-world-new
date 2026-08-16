@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/feishu/class-insights-result.schema.json",
+  "title": "Class insights result",
+  "x-invariants": [
+    "privacy.effective_minimum_cohort_size is the enforced server-side threshold and must be greater than or equal to the requested minimum_cohort_size.",
+    "Every cell whose true learner count is below privacy.effective_minimum_cohort_size must set suppressed=true and return null learner_count and ratio.",
+    "If cohort_size is below privacy.effective_minimum_cohort_size, every insight must be suppressed."
+  ],
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "query_id",
+    "class_ref",
+    "as_of",
+    "cohort_size",
+    "privacy",
+    "insights",
+    "trace_id"
+  ],
+  "properties": {
+    "query_id": {
+      "type": "string",
+      "pattern": "^ciq_[A-Za-z0-9_-]{8,128}$"
+    },
+    "class_ref": {
+      "type": "string",
+      "pattern": "^cls_[A-Za-z0-9_-]{8,128}$"
+    },
+    "as_of": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "cohort_size": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "minimum_cohort_size",
+        "effective_minimum_cohort_size",
+        "policy_version",
+        "small_cells_suppressed",
+        "contains_learner_identifiers"
+      ],
+      "properties": {
+        "minimum_cohort_size": {
+          "type": "integer",
+          "minimum": 5
+        },
+        "effective_minimum_cohort_size": {
+          "type": "integer",
+          "minimum": 5,
+          "maximum": 1000,
+          "description": "Actual server-enforced threshold; it may be higher than the caller-requested minimum."
+        },
+        "policy_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "small_cells_suppressed": {
+          "const": true
+        },
+        "contains_learner_identifiers": {
+          "const": false
+        }
+      }
+    },
+    "insights": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {
+        "$ref": "#/$defs/insight"
+      }
+    },
+    "trace_id": {
+      "type": "string",
+      "pattern": "^trace_[A-Za-z0-9_-]{8,96}$"
+    }
+  },
+  "$defs": {
+    "insight": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dimension",
+        "key",
+        "learner_count",
+        "ratio",
+        "suppressed"
+      ],
+      "properties": {
+        "dimension": {
+          "type": "string",
+          "enum": [
+            "CONCEPT_MASTERY",
+            "COMMON_ERRORS",
+            "SUPPORT_NEEDS",
+            "ENGAGEMENT",
+            "COMPLETION"
+          ]
+        },
+        "key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "learner_count": {
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ratio": {
+          "oneOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "suppressed": {
+          "type": "boolean"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "suppressed": {
+                "const": true
+              }
+            },
+            "required": [
+              "suppressed"
+            ]
+          },
+          "then": {
+            "properties": {
+              "learner_count": {
+                "type": "null"
+              },
+              "ratio": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "learner_count": {
+                "type": "integer",
+                "minimum": 5
+              },
+              "ratio": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

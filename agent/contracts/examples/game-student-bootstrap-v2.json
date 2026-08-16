@@ -1,0 +1,95 @@
+{
+  "schema_ref": "../schemas/game/student-bootstrap-v2.schema.json",
+  "value": {
+    "request_context": {
+      "schema_version": "1.0.0",
+      "request_id": "req_student_bootstrap_0001",
+      "correlation_id": "corr_student_bootstrap_0001",
+      "trace_id": "trace_student_bootstrap_0001",
+      "requested_at": "2026-08-11T10:00:00Z",
+      "actor": {
+        "tenant_id": "tenant_yaya",
+        "actor_id": "student_0001",
+        "actor_type": "student",
+        "roles": ["game:player"]
+      },
+      "content_ref": {
+        "unit_id": "YAYA_FARM_001",
+        "version": "1.4.0",
+        "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    "api_version": "1.1.0",
+    "contract_version": "0.4.0",
+    "server_time": "2026-08-11T10:00:00Z",
+    "actor": {
+      "tenant_id": "tenant_yaya",
+      "actor_id": "student_0001",
+      "actor_type": "student",
+      "roles": ["game:player"]
+    },
+    "content": {
+      "unit_id": "YAYA_FARM_001",
+      "version": "1.4.0",
+      "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "capabilities": {
+      "skill_builds": true,
+      "skill_activations": true,
+      "agent_sessions": true,
+      "http_world_recovery": true,
+      "evidence_query": true
+    },
+    "session": {
+      "current_session_id": "session_student_0001",
+      "teaching_spec_version": "agent-teaching-v1",
+      "create_request": {
+        "world_id": "world_demo_001",
+        "learner_id": "student_0001",
+        "agent_profile_id": "profile_sprout_001",
+        "channel": "GAME",
+        "locale": "zh-CN",
+        "content": {
+          "unit_id": "YAYA_FARM_001",
+          "version": "1.4.0",
+          "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "expected_world_revision": 184
+      }
+    },
+    "build": {
+      "build_policy_id": "student-cpp-v1",
+      "compiler_profile": "cpp20-restricted-v1",
+      "compiler_version": "gcc-14.2.0",
+      "sandbox_image_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "test_suite_version": "student-skill-v1",
+      "allowed_capabilities": ["WORLD_READ", "MOVE", "PLANT", "WATER", "HARVEST", "INTERACT", "SPEAK"],
+      "max_source_files": 32,
+      "max_source_bytes": 1048576
+    },
+    "activation": {
+      "scope": {
+        "world_id": "world_demo_001",
+        "agent_profile_id": "profile_sprout_001"
+      },
+      "registry_revision": 7,
+      "active": {
+        "activation_id": "activation_demo_0001",
+        "skill_id": "skill_watering_001",
+        "skill_version_id": "skillver_demo_0001",
+        "artifact_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "certification_id": "cert_demo_00000001",
+        "registry_revision": 7,
+        "activated_at": "2026-08-11T09:55:00Z"
+      }
+    },
+    "world": {
+      "world_id": "world_demo_001",
+      "revision": 184,
+      "last_event_sequence": 731,
+      "state_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "snapshot_url": "/v1/worlds/world_demo_001/snapshot",
+      "events_url": "/v1/worlds/world_demo_001/events"
+    }
+  }
+}

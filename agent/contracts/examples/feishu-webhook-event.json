@@ -1,0 +1,19 @@
+{
+  "schema_ref": "../schemas/feishu/webhook.schema.json",
+  "value": {
+    "schema": "2.0",
+    "header": {
+      "event_id": "evt_feishu_00000001",
+      "event_type": "approval_instance",
+      "create_time": "1786010400000",
+      "token": "verification-token-redacted",
+      "app_id": "cli_yaya_agent",
+      "tenant_key": "tenant_yaya"
+    },
+    "event": {
+      "approval_code": "teaching_content_release",
+      "instance_code": "approval_instance_00000001",
+      "status": "APPROVED"
+    }
+  }
+}

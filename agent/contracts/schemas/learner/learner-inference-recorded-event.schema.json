@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/learner/learner-inference-recorded-event.schema.json",
+  "title": "Learner inference recorded event",
+  "description": "Version 2 envelope carrying one immutable, replayable learner inference from a committed Agent turn.",
+  "allOf": [
+    { "$ref": "../common/event-envelope-v2.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "event_type": { "const": "learner.inference.recorded" },
+        "event_version": { "const": 1 },
+        "payload": { "$ref": "./learner-inference-recorded-payload.schema.json" }
+      }
+    }
+  ],
+  "x-invariants": [
+    "schema_version == '2.0.0'",
+    "stream_id == 'learner:' + payload.learner_id",
+    "command_id == payload.command_id",
+    "causation_id == payload.source_event_id",
+    "payload.actor.actor_id == payload.learner_id",
+    "payload.inference_sha256 equals YAYA_LEARNER_INFERENCE_HASH_V1 over payload"
+  ]
+}

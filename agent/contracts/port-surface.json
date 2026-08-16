@@ -1,0 +1,1406 @@
+{
+  "schema_version": "2.0.0",
+  "contract_package_version": "0.3.0",
+  "authority": "Python Protocols are the backend authority; TypeScript interfaces are checked projections with idiomatic camelCase names.",
+  "python_file": "python/yaya_agent_contracts/ports.py",
+  "typescript_index_file": "src/ports/index.d.ts",
+  "typescript_port_aliases": [
+    {
+      "name": "FeishuPort",
+      "target": "DeliveryPort",
+      "typescript_file": "src/ports/feishu.port.d.ts"
+    },
+    {
+      "name": "SkillRegistryPort",
+      "target": "RegistryPort",
+      "typescript_file": "src/ports/registry.port.d.ts"
+    }
+  ],
+  "ports": [
+    {
+      "python": "AuditPort",
+      "typescript": "AuditPort",
+      "typescript_file": "src/ports/audit.port.d.ts",
+      "methods": [
+        {
+          "python": "append",
+          "typescript": "append",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "record",
+                "type": "AuditRecord"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[AuditRecord]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "record",
+                "type": "AuditRecord"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<AuditRecord,ContractError>",
+            "async_result": true,
+            "success_type": "AuditRecord",
+            "error_type": "ContractError"
+          }
+        },
+        {
+          "python": "query",
+          "typescript": "query",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "query",
+                "type": "AuditQuery"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[CursorPage[AuditRecord]]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "query",
+                "type": "AuditQuery"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<CursorPage<AuditRecord>,ContractError>",
+            "async_result": true,
+            "success_type": "CursorPage<AuditRecord>",
+            "error_type": "ContractError"
+          }
+        }
+      ]
+    },
+    {
+      "python": "PolicyPort",
+      "typescript": "PolicyPort",
+      "typescript_file": "src/ports/policy.port.d.ts",
+      "methods": [
+        {
+          "python": "authorize",
+          "typescript": "authorize",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "request",
+                "type": "PolicyInput"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[PolicyGrant]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "input",
+                "type": "PolicyInput"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<PolicyGrant,ContractError>",
+            "async_result": true,
+            "success_type": "PolicyGrant",
+            "error_type": "ContractError"
+          }
+        }
+      ]
+    },
+    {
+      "python": "RegistryPort",
+      "typescript": "RegistryPort",
+      "typescript_file": "src/ports/registry.port.d.ts",
+      "methods": [
+        {
+          "python": "certify",
+          "typescript": "certify",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "evidence",
+                "type": "CertificationEvidence"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[CertifiedSkill]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "evidence",
+                "type": "CertificationEvidence"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<CertifiedSkill,ContractError>",
+            "async_result": true,
+            "success_type": "CertifiedSkill",
+            "error_type": "ContractError"
+          }
+        },
+        {
+          "python": "reject_certification",
+          "typescript": "rejectCertification",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "evidence",
+                "type": "CertificationEvidence"
+              },
+              {
+                "name": "reason",
+                "type": "ContractError"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[None]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "evidence",
+                "type": "CertificationEvidence"
+              },
+              {
+                "name": "reason",
+                "type": "ContractError"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<void,ContractError>",
+            "async_result": true,
+            "success_type": "void",
+            "error_type": "ContractError"
+          }
+        },
+        {
+          "python": "get_certified_version",
+          "typescript": "getCertifiedVersion",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "ref",
+                "type": "SkillRef"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[CertifiedSkill]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "ref",
+                "type": "SkillRef"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<CertifiedSkill,ContractError>",
+            "async_result": true,
+            "success_type": "CertifiedSkill",
+            "error_type": "ContractError"
+          }
+        },
+        {
+          "python": "get_active_skill",
+          "typescript": "getActiveSkill",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "skill_id",
+                "type": "str"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[ActiveSkill]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "skillId",
+                "type": "SkillId"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<ActiveSkill,ContractError>",
+            "async_result": true,
+            "success_type": "ActiveSkill",
+            "error_type": "ContractError"
+          }
+        },
+        {
+          "python": "activate",
+          "typescript": "activate",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "request",
+                "type": "ActivateSkillInput"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[ActiveSkill]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "input",
+                "type": "ActivateSkillInput"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<ActiveSkill,ContractError>",
+            "async_result": true,
+            "success_type": "ActiveSkill",
+            "error_type": "ContractError"
+          }
+        },
+        {
+          "python": "snapshot",
+          "typescript": "snapshot",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[RegistrySnapshot]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<RegistrySnapshot,ContractError>",
+            "async_result": true,
+            "success_type": "RegistrySnapshot",
+            "error_type": "ContractError"
+          }
+        }
+      ]
+    },
+    {
+      "python": "SandboxPort",
+      "typescript": "SandboxPort",
+      "typescript_file": "src/ports/sandbox.port.d.ts",
+      "methods": [
+        {
+          "python": "compile_and_test",
+          "typescript": "compileAndTest",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "request",
+                "type": "CompileAndTestRequest"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[CertificationEvidence]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "request",
+                "type": "CompileAndTestRequest"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<CompileAndTestResult,ContractError>",
+            "async_result": true,
+            "success_type": "CompileAndTestResult",
+            "error_type": "ContractError"
+          }
+        },
+        {
+          "python": "run",
+          "typescript": "run",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "request",
+                "type": "SandboxRunRequest"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[SandboxRunResult]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "request",
+                "type": "SandboxRunRequest"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<SandboxRunResult,ContractError>",
+            "async_result": true,
+            "success_type": "SandboxRunResult",
+            "error_type": "ContractError"
+          }
+        },
+        {
+          "python": "cancel",
+          "typescript": "cancel",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "run_id",
+                "type": "str"
+              },
+              {
+                "name": "reason_code",
+                "type": "str"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[None]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "runId",
+                "type": "RunId"
+              },
+              {
+                "name": "reasonCode",
+                "type": "string"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<void,ContractError>",
+            "async_result": true,
+            "success_type": "void",
+            "error_type": "ContractError"
+          }
+        }
+      ]
+    },
+    {
+      "python": "WorldPort",
+      "typescript": "WorldPort",
+      "typescript_file": "src/ports/world.port.d.ts",
+      "methods": [
+        {
+          "python": "get_snapshot",
+          "typescript": "getSnapshot",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "world_id",
+                "type": "str"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[WorldSnapshot]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "worldId",
+                "type": "WorldId"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<WorldSnapshot,ContractError>",
+            "async_result": true,
+            "success_type": "WorldSnapshot",
+            "error_type": "ContractError"
+          }
+        }
+      ]
+    },
+    {
+      "python": "WorldUnitOfWorkPort",
+      "typescript": "WorldUnitOfWorkPort",
+      "typescript_file": "src/ports/world-unit-of-work.port.d.ts",
+      "methods": [
+        {
+          "python": "commit",
+          "typescript": "commit",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "request",
+                "type": "WorldAtomicCommit"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[WorldAtomicCommitReceipt]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "request",
+                "type": "WorldAtomicCommit"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<WorldAtomicCommitReceipt,ContractError>",
+            "async_result": true,
+            "success_type": "WorldAtomicCommitReceipt",
+            "error_type": "ContractError"
+          }
+        }
+      ]
+    },
+    {
+      "python": "EventStorePort",
+      "typescript": "EventStorePort",
+      "typescript_file": "src/ports/event-store.port.d.ts",
+      "methods": [
+        {
+          "python": "append",
+          "typescript": "append",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "stream_id",
+                "type": "str"
+              },
+              {
+                "name": "expected_sequence",
+                "type": "ExpectedStreamSequence"
+              },
+              {
+                "name": "events",
+                "type": "tuple[UncommittedEvent,...]"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[EventAppendReceipt]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "streamId",
+                "type": "StreamId"
+              },
+              {
+                "name": "expectedSequence",
+                "type": "ExpectedStreamSequence"
+              },
+              {
+                "name": "events",
+                "type": "readonly UncommittedEvent[]"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<EventAppendReceipt,ContractError>",
+            "async_result": true,
+            "success_type": "EventAppendReceipt",
+            "error_type": "ContractError"
+          }
+        },
+        {
+          "python": "read_stream",
+          "typescript": "readStream",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "stream_id",
+                "type": "str"
+              },
+              {
+                "name": "after_sequence",
+                "type": "int"
+              },
+              {
+                "name": "limit",
+                "type": "int"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[CursorPage[DomainEvent[Mapping[str,Any]]]]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "streamId",
+                "type": "StreamId"
+              },
+              {
+                "name": "afterSequence",
+                "type": "number"
+              },
+              {
+                "name": "limit",
+                "type": "number"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<CursorPage<DomainEvent>,ContractError>",
+            "async_result": true,
+            "success_type": "CursorPage<DomainEvent>",
+            "error_type": "ContractError"
+          }
+        },
+        {
+          "python": "get_by_id",
+          "typescript": "getById",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "event_id",
+                "type": "str"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[DomainEvent[Mapping[str,Any]]]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "eventId",
+                "type": "EventId"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<DomainEvent,ContractError>",
+            "async_result": true,
+            "success_type": "DomainEvent",
+            "error_type": "ContractError"
+          }
+        }
+      ]
+    },
+    {
+      "python": "LearnerPort",
+      "typescript": "LearnerPort",
+      "typescript_file": "src/ports/learner.port.d.ts",
+      "methods": [
+        {
+          "python": "project",
+          "typescript": "project",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "event",
+                "type": "RuntimeEvent"
+              },
+              {
+                "name": "expected_learner_revision",
+                "type": "int"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[LearnerUpdate]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "event",
+                "type": "RuntimeEvent"
+              },
+              {
+                "name": "expectedLearnerRevision",
+                "type": "number"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<LearnerUpdate,ContractError>",
+            "async_result": true,
+            "success_type": "LearnerUpdate",
+            "error_type": "ContractError"
+          }
+        },
+        {
+          "python": "get_snapshot",
+          "typescript": "getSnapshot",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "learner_id",
+                "type": "str"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[LearnerModelSnapshot]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "learnerId",
+                "type": "LearnerId"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<LearnerModelSnapshot,ContractError>",
+            "async_result": true,
+            "success_type": "LearnerModelSnapshot",
+            "error_type": "ContractError"
+          }
+        },
+        {
+          "python": "rebuild",
+          "typescript": "rebuild",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "learner_id",
+                "type": "str"
+              },
+              {
+                "name": "through_sequence",
+                "type": "int"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[LearnerModelSnapshot]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "learnerId",
+                "type": "LearnerId"
+              },
+              {
+                "name": "throughSequence",
+                "type": "number"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<LearnerModelSnapshot,ContractError>",
+            "async_result": true,
+            "success_type": "LearnerModelSnapshot",
+            "error_type": "ContractError"
+          }
+        }
+      ]
+    },
+    {
+      "python": "LlmPort",
+      "typescript": "LLMPort",
+      "typescript_file": "src/ports/llm.port.d.ts",
+      "methods": [
+        {
+          "python": "generate",
+          "typescript": "generate",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "request",
+                "type": "LlmRequest"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[LlmReply]"
+          },
+          "typescript_contract": {
+            "type_parameters": [
+              "Output extends JsonObject"
+            ],
+            "parameters": [
+              {
+                "name": "request",
+                "type": "LLMRequest"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<LLMResponse<Output>,ContractError>",
+            "async_result": true,
+            "success_type": "LLMResponse<Output>",
+            "error_type": "ContractError"
+          }
+        }
+      ]
+    },
+    {
+      "python": "DeliveryPort",
+      "typescript": "DeliveryPort",
+      "typescript_file": "src/ports/feishu.port.d.ts",
+      "methods": [
+        {
+          "python": "deliver",
+          "typescript": "deliver",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "payload",
+                "type": "DeliveryPayload"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[DeliveryReceipt]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "payload",
+                "type": "DeliveryPayload"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<DeliveryReceipt,DeliveryFailure>",
+            "async_result": true,
+            "success_type": "DeliveryReceipt",
+            "error_type": "DeliveryFailure"
+          }
+        }
+      ]
+    },
+    {
+      "python": "CommandStorePort",
+      "typescript": "CommandStorePort",
+      "typescript_file": "src/ports/command-store.port.d.ts",
+      "idempotency_scope": {
+        "components": [
+          "context.actor.tenant_id",
+          "context.actor.actor_id",
+          "operation",
+          "idempotency_key"
+        ],
+        "actor_boundary": "required",
+        "hash_field": "command.request_sha256"
+      },
+      "methods": [
+        {
+          "python": "get",
+          "typescript": "get",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "command_id",
+                "type": "str"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[CommandRecord]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "commandId",
+                "type": "CommandId"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<CommandRecord,ContractError>",
+            "async_result": true,
+            "success_type": "CommandRecord",
+            "error_type": "ContractError"
+          }
+        },
+        {
+          "python": "get_by_idempotency_key",
+          "typescript": "getByIdempotencyKey",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "operation",
+                "type": "CommandType"
+              },
+              {
+                "name": "idempotency_key",
+                "type": "str"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[CommandRecord]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "operation",
+                "type": "CommandRecord[\"command_type\"]"
+              },
+              {
+                "name": "idempotencyKey",
+                "type": "string"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<CommandRecord,ContractError>",
+            "async_result": true,
+            "success_type": "CommandRecord",
+            "error_type": "ContractError"
+          }
+        },
+        {
+          "python": "accept_once",
+          "typescript": "acceptOnce",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "command",
+                "type": "NewCommand"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[CommandCreateReceipt]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "command",
+                "type": "NewCommand"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<CommandCreateReceipt,ContractError>",
+            "async_result": true,
+            "success_type": "CommandCreateReceipt",
+            "error_type": "ContractError"
+          }
+        },
+        {
+          "python": "transition",
+          "typescript": "transition",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "transition",
+                "type": "CommandTransition"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[CommandRecord]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "transition",
+                "type": "CommandTransition"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<CommandRecord,ContractError>",
+            "async_result": true,
+            "success_type": "CommandRecord",
+            "error_type": "ContractError"
+          }
+        },
+        {
+          "python": "find_non_terminal_before",
+          "typescript": "findNonTerminalBefore",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "updated_before",
+                "type": "datetime"
+              },
+              {
+                "name": "cursor",
+                "type": "str|None"
+              },
+              {
+                "name": "limit",
+                "type": "int"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[CursorPage[CommandRecord]]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "updatedBefore",
+                "type": "ISODateTime"
+              },
+              {
+                "name": "cursor",
+                "type": "string|null"
+              },
+              {
+                "name": "limit",
+                "type": "number"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<CursorPage<CommandRecord>,ContractError>",
+            "async_result": true,
+            "success_type": "CursorPage<CommandRecord>",
+            "error_type": "ContractError"
+          }
+        }
+      ]
+    },
+    {
+      "python": "OutboxPort",
+      "typescript": "OutboxPort",
+      "typescript_file": "src/ports/outbox.port.d.ts",
+      "idempotency_scope": {
+        "components": [
+          "message.operation_context.actor.tenant_id",
+          "message.destination",
+          "message.idempotency_key"
+        ],
+        "actor_boundary": "service_delivery_exception",
+        "hash_field": "message.payload_sha256"
+      },
+      "methods": [
+        {
+          "python": "enqueue",
+          "typescript": "enqueue",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "message",
+                "type": "OutboxMessage"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[OutboxMessage]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "message",
+                "type": "OutboxMessage"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<OutboxMessage,ContractError>",
+            "async_result": true,
+            "success_type": "OutboxMessage",
+            "error_type": "ContractError"
+          }
+        },
+        {
+          "python": "claim_ready",
+          "typescript": "claimReady",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "worker_id",
+                "type": "str"
+              },
+              {
+                "name": "limit",
+                "type": "int"
+              },
+              {
+                "name": "lease_seconds",
+                "type": "int"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[tuple[OutboxMessage,...]]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "workerId",
+                "type": "string"
+              },
+              {
+                "name": "limit",
+                "type": "number"
+              },
+              {
+                "name": "leaseSeconds",
+                "type": "number"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<readonly OutboxMessage[],ContractError>",
+            "async_result": true,
+            "success_type": "readonly OutboxMessage[]",
+            "error_type": "ContractError"
+          }
+        },
+        {
+          "python": "mark_sent",
+          "typescript": "markSent",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "message_id",
+                "type": "str"
+              },
+              {
+                "name": "lease_id",
+                "type": "str"
+              },
+              {
+                "name": "receipt",
+                "type": "DeliveryReceipt"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[OutboxMessage]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "messageId",
+                "type": "string"
+              },
+              {
+                "name": "leaseId",
+                "type": "string"
+              },
+              {
+                "name": "receipt",
+                "type": "DeliveryReceipt"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<OutboxMessage,ContractError>",
+            "async_result": true,
+            "success_type": "OutboxMessage",
+            "error_type": "ContractError"
+          }
+        },
+        {
+          "python": "mark_retry",
+          "typescript": "markRetry",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "message_id",
+                "type": "str"
+              },
+              {
+                "name": "lease_id",
+                "type": "str"
+              },
+              {
+                "name": "error",
+                "type": "ContractError"
+              },
+              {
+                "name": "next_attempt_at",
+                "type": "datetime"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[OutboxMessage]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "messageId",
+                "type": "string"
+              },
+              {
+                "name": "leaseId",
+                "type": "string"
+              },
+              {
+                "name": "error",
+                "type": "ContractError"
+              },
+              {
+                "name": "nextAttemptAt",
+                "type": "ISODateTime"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<OutboxMessage,ContractError>",
+            "async_result": true,
+            "success_type": "OutboxMessage",
+            "error_type": "ContractError"
+          }
+        },
+        {
+          "python": "mark_dead_letter",
+          "typescript": "markDeadLetter",
+          "python_contract": {
+            "is_async": true,
+            "parameters": [
+              {
+                "name": "message_id",
+                "type": "str"
+              },
+              {
+                "name": "lease_id",
+                "type": "str"
+              },
+              {
+                "name": "error",
+                "type": "ContractError"
+              },
+              {
+                "name": "dead_lettered_at",
+                "type": "datetime"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "Result[OutboxMessage]"
+          },
+          "typescript_contract": {
+            "type_parameters": [],
+            "parameters": [
+              {
+                "name": "messageId",
+                "type": "string"
+              },
+              {
+                "name": "leaseId",
+                "type": "string"
+              },
+              {
+                "name": "error",
+                "type": "ContractError"
+              },
+              {
+                "name": "deadLetteredAt",
+                "type": "ISODateTime"
+              },
+              {
+                "name": "context",
+                "type": "OperationContext"
+              }
+            ],
+            "return_type": "AsyncResult<OutboxMessage,ContractError>",
+            "async_result": true,
+            "success_type": "OutboxMessage",
+            "error_type": "ContractError"
+          }
+        }
+      ]
+    }
+  ]
+}

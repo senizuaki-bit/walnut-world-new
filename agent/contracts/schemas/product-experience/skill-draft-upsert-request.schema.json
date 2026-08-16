@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/product-experience/skill-draft-upsert-request.schema.json",
+  "title": "CAS upsert product skill draft request",
+  "description": "Creates revision 1 or replaces one exact current draft revision and hash. Request identity is carried in HTTP attempt headers so a byte-identical idempotent replay may use new attempt IDs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "session_id",
+    "draft_id",
+    "skill_id",
+    "content_ref",
+    "base_revision",
+    "base_draft_sha256",
+    "display_name",
+    "source_bundle",
+    "client_saved_at"
+  ],
+  "properties": {
+    "session_id": { "$ref": "#/$defs/identifier" },
+    "draft_id": { "$ref": "#/$defs/identifier" },
+    "skill_id": { "$ref": "#/$defs/identifier" },
+    "content_ref": { "$ref": "../common/content-ref.schema.json" },
+    "base_revision": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+    "base_draft_sha256": {
+      "oneOf": [
+        { "$ref": "#/$defs/sha256" },
+        { "type": "null" }
+      ]
+    },
+    "display_name": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "source_bundle": {
+      "$ref": "./skill-source-bundle.schema.json"
+    },
+    "client_saved_at": { "type": "string", "format": "date-time" }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "base_revision": { "const": 0 } },
+        "required": ["base_revision"]
+      },
+      "then": {
+        "properties": { "base_draft_sha256": { "type": "null" } }
+      },
+      "else": {
+        "properties": { "base_draft_sha256": { "$ref": "#/$defs/sha256" } }
+      }
+    }
+  ],
+  "x-invariants": [
+    "path session_id and draft_id equal the request fields",
+    "base_revision equals 0 if and only if base_draft_sha256 is null and the draft does not exist",
+    "for an update, base_revision and base_draft_sha256 both exactly equal the current draft",
+    "successful response revision equals base_revision plus 1",
+    "session_id, draft_id, skill_id and content_ref cannot change after creation",
+    "stale revision or hash returns 409 CONTENT_VERSION_MISMATCH and changes nothing",
+    "one idempotency scope is tenant_id plus actor_id plus operationId plus canonical path plus Idempotency-Key",
+    "same key and byte-equivalent body replays the original status, resource, Location and ETag; different body returns 409 IDEMPOTENCY_KEY_REUSED",
+    "draft mutation and the original idempotency receipt are persisted atomically"
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

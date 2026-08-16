@@ -1,0 +1,35 @@
+{
+  "schema_ref": "../schemas/game/skill-activation.schema.json",
+  "value": {
+    "request_context": {
+      "schema_version": "1.0.0",
+      "request_id": "req_game_00000007",
+      "correlation_id": "corr_game_00000007",
+      "trace_id": "trace_game_00000007",
+      "requested_at": "2026-08-06T10:03:00Z",
+      "actor": {
+        "tenant_id": "tenant_yaya",
+        "actor_id": "student_0001",
+        "actor_type": "student",
+        "roles": ["game:player"]
+      },
+      "content_ref": {
+        "unit_id": "YAYA_FARM_001",
+        "version": "1.4.0",
+        "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    "activation_id": "activation_water_001",
+    "skill_id": "skill_water_001",
+    "skill_version_id": "skillver_water_001",
+    "certification_id": "cert_water_001",
+    "artifact_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "activation_scope": {
+      "world_id": "world_demo_001",
+      "agent_profile_id": "agent_farmer_001"
+    },
+    "previous_registry_revision": 17,
+    "registry_revision": 18,
+    "activated_at": "2026-08-06T10:03:00Z"
+  }
+}

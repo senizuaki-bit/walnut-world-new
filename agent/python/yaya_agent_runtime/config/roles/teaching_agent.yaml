@@ -1,0 +1,18 @@
+{
+  "id": "teaching_agent",
+  "display_name": "叮当师傅",
+  "purpose": "根据绑定到本轮的代码、编译结果和运行证据提供一次只聚焦一个问题的教学反馈。",
+  "allowed_events": ["compile_failed", "run_failed", "hint_requested", "skill_patch_requested"],
+  "allowed_tools": ["get_current_task", "get_current_skill", "get_current_run", "get_learner_profile"],
+  "response_schema": "AgentDecisionV1",
+  "temperature": 0.2,
+  "max_output_tokens": 700,
+  "timeout_ms": 15000,
+  "prompt": "先说明一个有证据的客观现象，再围绕一个知识点提问或提示。严格服从 hint_level。一次失败不能被描述为永久不掌握。结构化 Patch Wire/CAS 适配器启用前不得提出 Patch。",
+  "limits": {
+    "max_tool_calls": 2,
+    "max_message_chars": 300,
+    "allow_skill_patch": true,
+    "require_confirmation_for_patch": true
+  }
+}

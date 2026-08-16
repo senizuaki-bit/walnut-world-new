@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/common/error-responses-by-status.schema.json",
+  "title": "Error response bodies bound to HTTP status",
+  "$defs": {
+    "status400": {
+      "allOf": [
+        { "$ref": "error-response.schema.json" },
+        { "$ref": "#/$defs/codes400" }
+      ]
+    },
+    "status401": {
+      "allOf": [
+        { "$ref": "error-response.schema.json" },
+        { "$ref": "#/$defs/codes401" }
+      ]
+    },
+    "status403": {
+      "allOf": [
+        { "$ref": "error-response.schema.json" },
+        { "$ref": "#/$defs/codes403" }
+      ]
+    },
+    "status404": {
+      "allOf": [
+        { "$ref": "error-response.schema.json" },
+        { "$ref": "#/$defs/codes404" }
+      ]
+    },
+    "status409": {
+      "allOf": [
+        { "$ref": "error-response.schema.json" },
+        { "$ref": "#/$defs/codes409" }
+      ]
+    },
+    "status413": {
+      "allOf": [
+        { "$ref": "error-response.schema.json" },
+        { "$ref": "#/$defs/codes413" }
+      ]
+    },
+    "status422": {
+      "allOf": [
+        { "$ref": "error-response.schema.json" },
+        { "$ref": "#/$defs/codes422" }
+      ]
+    },
+    "status429": {
+      "allOf": [
+        { "$ref": "error-response.schema.json" },
+        { "$ref": "#/$defs/codes429" }
+      ]
+    },
+    "status500": {
+      "allOf": [
+        { "$ref": "error-response.schema.json" },
+        { "$ref": "#/$defs/codes500" }
+      ]
+    },
+    "status503": {
+      "allOf": [
+        { "$ref": "error-response.schema.json" },
+        { "$ref": "#/$defs/codes503" }
+      ]
+    },
+    "codes400": { "$ref": "#/$defs/codeConstraint400" },
+    "codes401": { "$ref": "#/$defs/codeConstraint401" },
+    "codes403": { "$ref": "#/$defs/codeConstraint403" },
+    "codes404": { "$ref": "#/$defs/codeConstraint404" },
+    "codes409": { "$ref": "#/$defs/codeConstraint409" },
+    "codes413": { "$ref": "#/$defs/codeConstraint413" },
+    "codes422": { "$ref": "#/$defs/codeConstraint422" },
+    "codes429": { "$ref": "#/$defs/codeConstraint429" },
+    "codes500": { "$ref": "#/$defs/codeConstraint500" },
+    "codes503": { "$ref": "#/$defs/codeConstraint503" },
+    "codeConstraint400": {
+      "type": "object",
+      "required": ["error"],
+      "properties": { "error": { "$ref": "#/$defs/error400" } }
+    },
+    "codeConstraint401": {
+      "type": "object",
+      "required": ["error"],
+      "properties": { "error": { "$ref": "#/$defs/error401" } }
+    },
+    "codeConstraint403": {
+      "type": "object",
+      "required": ["error"],
+      "properties": { "error": { "$ref": "#/$defs/error403" } }
+    },
+    "codeConstraint404": {
+      "type": "object",
+      "required": ["error"],
+      "properties": { "error": { "$ref": "#/$defs/error404" } }
+    },
+    "codeConstraint409": {
+      "type": "object",
+      "required": ["error"],
+      "properties": { "error": { "$ref": "#/$defs/error409" } }
+    },
+    "codeConstraint413": {
+      "type": "object",
+      "required": ["error"],
+      "properties": { "error": { "$ref": "#/$defs/error413" } }
+    },
+    "codeConstraint422": {
+      "type": "object",
+      "required": ["error"],
+      "properties": { "error": { "$ref": "#/$defs/error422" } }
+    },
+    "codeConstraint429": {
+      "type": "object",
+      "required": ["error"],
+      "properties": { "error": { "$ref": "#/$defs/error429" } }
+    },
+    "codeConstraint500": {
+      "type": "object",
+      "required": ["error"],
+      "properties": { "error": { "$ref": "#/$defs/error500" } }
+    },
+    "codeConstraint503": {
+      "type": "object",
+      "required": ["error"],
+      "properties": { "error": { "$ref": "#/$defs/error503" } }
+    },
+    "error400": {
+      "type": "object",
+      "required": ["code"],
+      "properties": { "code": { "enum": ["INVALID_REQUEST"] } }
+    },
+    "error401": {
+      "type": "object",
+      "required": ["code"],
+      "properties": { "code": { "enum": ["AUTHENTICATION_REQUIRED", "FEISHU_SIGNATURE_INVALID"] } }
+    },
+    "error403": {
+      "type": "object",
+      "required": ["code"],
+      "properties": { "code": { "enum": ["AUTHORIZATION_DENIED", "POLICY_DENIED"] } }
+    },
+    "error404": {
+      "type": "object",
+      "required": ["code"],
+      "properties": { "code": { "enum": ["NOT_FOUND"] } }
+    },
+    "error409": {
+      "type": "object",
+      "required": ["code"],
+      "properties": {
+        "code": {
+          "enum": [
+            "SCHEMA_VERSION_UNSUPPORTED",
+            "CONTENT_VERSION_MISMATCH",
+            "IDEMPOTENCY_KEY_REUSED",
+            "WORLD_REVISION_CONFLICT",
+            "EVENT_SEQUENCE_GAP",
+            "SKILL_VERSION_MISMATCH",
+            "FEISHU_REPLAY_DETECTED"
+          ]
+        }
+      }
+    },
+    "error413": {
+      "type": "object",
+      "required": ["code"],
+      "properties": { "code": { "enum": ["PAYLOAD_TOO_LARGE"] } }
+    },
+    "error422": {
+      "type": "object",
+      "required": ["code"],
+      "properties": {
+        "code": {
+          "enum": [
+            "SKILL_NOT_CERTIFIED",
+            "SANDBOX_COMPILE_ERROR",
+            "SANDBOX_RUNTIME_ERROR",
+            "SANDBOX_RESOURCE_LIMIT",
+            "WORLD_RULE_REJECTED"
+          ]
+        }
+      }
+    },
+    "error429": {
+      "type": "object",
+      "required": ["code"],
+      "properties": { "code": { "enum": ["RATE_LIMITED"] } }
+    },
+    "error500": {
+      "type": "object",
+      "required": ["code"],
+      "properties": {
+        "code": { "enum": ["ACTIVE_SKILL_ARTIFACT_MISMATCH", "INVARIANT_VIOLATION", "INTERNAL_ERROR"] }
+      }
+    },
+    "error503": {
+      "type": "object",
+      "required": ["code"],
+      "properties": {
+        "code": { "enum": ["DEPENDENCY_UNAVAILABLE", "FEISHU_SYNC_FAILED", "UNKNOWN_COMMIT_STATE"] }
+      }
+    }
+  }
+}

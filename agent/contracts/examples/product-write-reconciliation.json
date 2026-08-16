@@ -1,0 +1,29 @@
+{
+  "schema_ref": "../schemas/product-experience/product-write-reconciliation.schema.json",
+  "value": {
+    "request_id": "req_product_reconcile_01",
+    "trace_id": "trace_product_reconcile_01",
+    "correlation_id": "corr_product_reconcile_01",
+    "status": "RECONCILE",
+    "data": null,
+    "error": {
+      "code": "DEPENDENCY_UNAVAILABLE",
+      "category": "DEPENDENCY",
+      "retryable": true,
+      "user_message_key": "dependency.temporarily_unavailable",
+      "stage": "PRODUCT_PATCH_DECISION_COMMIT",
+      "message": "The decision is durable; read the interaction before retrying.",
+      "details": {
+        "operation_was_durably_accepted": true
+      },
+      "evidence_ids": []
+    },
+    "reconciliation": {
+      "resource_type": "AGENT_INTERACTION",
+      "session_id": "session_agent_001",
+      "resource_id": "interaction_water_001",
+      "resource_url": "/product-experience/v1/sessions/session_agent_001/agent-interactions/interaction_water_001",
+      "original_trace_id": "trace_product_decision_01"
+    }
+  }
+}

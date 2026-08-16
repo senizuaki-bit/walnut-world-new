@@ -1,0 +1,310 @@
+[gd_scene load_steps=32 format=3 uid="uid://nc388a8tw85q"]
+
+[ext_resource type="Texture2D" uid="uid://dw8sg2ymxc333" path="res://assets/art/generated/facilities/seed_station_counter.png" id="1"]
+[ext_resource type="Texture2D" uid="uid://ct5ft4rt0c3g0" path="res://assets/art/generated/facilities/farm_market_stall.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://bhn0ugthxhv6g" path="res://assets/art/generated/facilities/farm_weather_station.png" id="3"]
+[ext_resource type="Texture2D" uid="uid://d3bn8xt8socnk" path="res://assets/art/generated/facilities/automatic_watering_cart.png" id="4"]
+[ext_resource type="Texture2D" uid="uid://brl7ep2acf8e2" path="res://assets/art/generated/facilities/farm_water_pump_station.png" id="5"]
+[ext_resource type="Texture2D" uid="uid://d0moqhiflee25" path="res://assets/art/generated/facilities/seed_planter_machine.png" id="6"]
+[ext_resource type="Texture2D" uid="uid://ddsnbkai6ev1r" path="res://assets/art/generated/facilities/farm_patrol_drone.png" id="7"]
+[ext_resource type="Texture2D" uid="uid://bnbykkga3k3hd" path="res://assets/art/generated/facilities/orchard_fruit_tree.png" id="8"]
+[ext_resource type="Texture2D" uid="uid://bpgnsx15xjwfo" path="res://assets/art/generated/facilities/blueprint_crafting_bench.png" id="9"]
+[ext_resource type="Texture2D" uid="uid://dcvg6rv83igs8" path="res://assets/art/generated/facilities/cozy_archive_library.png" id="10"]
+[ext_resource type="Texture2D" uid="uid://cd22okncxm46a" path="res://assets/art/generated/facilities/farm_warehouse.png" id="11"]
+[ext_resource type="Texture2D" uid="uid://bjvtpwjvwbpxe" path="res://assets/art/generated/facilities/order_delivery_station.png" id="12"]
+[ext_resource type="Texture2D" uid="uid://do2ni7k2noqes" path="res://assets/art/generated/facilities/greenhouse.png" id="13"]
+[ext_resource type="Texture2D" uid="uid://xo4pye2nn334" path="res://assets/art/generated/facilities/greenhouse_control_lock.png" id="14"]
+[ext_resource type="Texture2D" uid="uid://bblt2rvjdq4sx" path="res://assets/art/generated/facilities/ancient_magic_tree.png" id="15"]
+[ext_resource type="Texture2D" uid="uid://d0k876t4v4amx" path="res://assets/art/generated/facilities/algorithm_trial_stone.png" id="16"]
+[ext_resource type="Texture2D" uid="uid://h0h142v3o00p" path="res://assets/art/generated/facilities/starlight_portal.png" id="17"]
+[ext_resource type="Texture2D" uid="uid://bq1vs23vajb62" path="res://assets/art/generated/crops/carrot.png" id="18"]
+[ext_resource type="Texture2D" uid="uid://ci7i2vhkgnmhc" path="res://assets/art/generated/crops/tomato.png" id="19"]
+[ext_resource type="Texture2D" uid="uid://dqxxxmlqtj1qc" path="res://assets/art/generated/crops/strawberry.png" id="20"]
+[ext_resource type="Texture2D" uid="uid://ddwkeqo520frp" path="res://assets/art/generated/crops/pumpkin.png" id="21"]
+[ext_resource type="Texture2D" uid="uid://dhdab1pi8iybh" path="res://assets/art/generated/crops/fruit_tree_sapling.png" id="22"]
+[ext_resource type="Texture2D" uid="uid://c333o4lp2ctc6" path="res://assets/art/generated/characters/little_explorer.png" id="23"]
+[ext_resource type="Texture2D" uid="uid://c80i5ytwf0hul" path="res://assets/art/generated/characters/yaya_sprout.png" id="24"]
+[ext_resource type="Texture2D" uid="uid://h5gyvsseaquq" path="res://assets/art/generated/characters/little_walnut.png" id="25"]
+[ext_resource type="Texture2D" uid="uid://cln54w12obdpk" path="res://assets/art/generated/characters/ding_dang.png" id="26"]
+[ext_resource type="Texture2D" uid="uid://cw3seeeugrui7" path="res://assets/art/generated/characters/master_ding_dang.png" id="27"]
+[ext_resource type="Texture2D" uid="uid://dntkfd8abyyuy" path="res://assets/art/generated/characters/shu_shu.png" id="28"]
+[ext_resource type="Texture2D" uid="uid://c85ecyyj0qfmi" path="res://assets/art/generated/characters/pest_bug.png" id="29"]
+[ext_resource type="Texture2D" uid="uid://csed2v3sayr4r" path="res://assets/art/generated/characters/weed_sprout.png" id="30"]
+[ext_resource type="Script" uid="uid://l8576e0b8r52" path="res://scripts/terrain/building_footprint.gd" id="31_footprint"]
+
+[node name="ArtGallery" type="Node3D"]
+
+[node name="BuildingFootprint" type="Node" parent="."]
+script = ExtResource("31_footprint")
+occupies_cells = false
+persistent = false
+
+[node name="SeedStationCounter" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, 7)
+
+[node name="Billboard" type="Sprite3D" parent="SeedStationCounter"]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0.86959934, 1.6276731, -10.645624)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("1")
+
+[node name="FarmMarketStall" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 7)
+
+[node name="Billboard" type="Sprite3D" parent="FarmMarketStall"]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 10.346077, 1.5751266, -11.943095)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("2")
+
+[node name="FarmWeatherStation" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, 7)
+
+[node name="Billboard" type="Sprite3D" parent="FarmWeatherStation"]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -5.830188, 1.6479204, -5.872833)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("3")
+
+[node name="AutomaticWateringCart" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 7)
+
+[node name="Billboard" type="Sprite3D" parent="AutomaticWateringCart"]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, -9.268425, 1.167707, -1.4384661)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("4")
+
+[node name="FarmWaterPumpStation" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 7)
+
+[node name="Billboard" type="Sprite3D" parent="FarmWaterPumpStation"]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, -12, 1.1417322, -3.4970074)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("5")
+
+[node name="SeedPlanterMachine" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, 4)
+
+[node name="Billboard" type="Sprite3D" parent="SeedPlanterMachine"]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 2.4120903, 1.1888595, -0.8221903)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("6")
+
+[node name="FarmPatrolDrone" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 4)
+
+[node name="Billboard" type="Sprite3D" parent="FarmPatrolDrone"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3505607, 1, 1.9753718)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("7")
+
+[node name="OrchardFruitTree" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, 4)
+
+[node name="Billboard" type="Sprite3D" parent="OrchardFruitTree"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0690694, 1, 0.9068394)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("8")
+
+[node name="BlueprintCraftingBench" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 4)
+
+[node name="Billboard" type="Sprite3D" parent="BlueprintCraftingBench"]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -8.403485, 1.4755857, -10.470825)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("9")
+
+[node name="CozyArchiveLibrary" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 4)
+
+[node name="Billboard" type="Sprite3D" parent="CozyArchiveLibrary"]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 1.1102309, 1.4691141, 2.3146305)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("10")
+
+[node name="FarmWarehouse" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, 1)
+
+[node name="Billboard" type="Sprite3D" parent="FarmWarehouse"]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 13.355949, 1.4762409, 1.6421206)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("11")
+
+[node name="OrderDeliveryStation" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 1)
+
+[node name="Billboard" type="Sprite3D" parent="OrderDeliveryStation"]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -2, 1.4859407, -2)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("12")
+
+[node name="Greenhouse" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, 1)
+
+[node name="Billboard" type="Sprite3D" parent="Greenhouse"]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 7.6691923, 1.5506532, -2.2816966)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("13")
+
+[node name="GreenhouseControlLock" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 1)
+
+[node name="Billboard" type="Sprite3D" parent="GreenhouseControlLock"]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, -5, 1.3539243, -4)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("14")
+
+[node name="AncientMagicTree" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 1)
+
+[node name="Billboard" type="Sprite3D" parent="AncientMagicTree"]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, -5.4548597, 2.277153, -2.0292163)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("15")
+
+[node name="AlgorithmTrialStone" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, -2)
+
+[node name="Billboard" type="Sprite3D" parent="AlgorithmTrialStone"]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 4, 1.2133452, 2)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("16")
+
+[node name="StarlightPortal" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, -2)
+
+[node name="Billboard" type="Sprite3D" parent="StarlightPortal"]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 6, 1.5215249, 4)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("17")
+
+[node name="Carrot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -2)
+
+[node name="Billboard" type="Sprite3D" parent="Carrot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("18")
+
+[node name="Tomato" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -2)
+
+[node name="Billboard" type="Sprite3D" parent="Tomato"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 7)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("19")
+
+[node name="Strawberry" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, -2)
+
+[node name="Billboard" type="Sprite3D" parent="Strawberry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.8, 7)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("20")
+
+[node name="Pumpkin" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, -5)
+
+[node name="Billboard" type="Sprite3D" parent="Pumpkin"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("21")
+
+[node name="FruitTreeSapling" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, -5)
+
+[node name="Billboard" type="Sprite3D" parent="FruitTreeSapling"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 10)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("22")
+
+[node name="LittleExplorer" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -5)
+
+[node name="Billboard" type="Sprite3D" parent="LittleExplorer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("23")
+
+[node name="YayaSprout" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -5)
+
+[node name="Billboard" type="Sprite3D" parent="YayaSprout"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("24")
+
+[node name="LittleWalnut" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, -5)
+
+[node name="Billboard" type="Sprite3D" parent="LittleWalnut"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.9, 4)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("25")
+
+[node name="DingDang" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, -8)
+
+[node name="Billboard" type="Sprite3D" parent="DingDang"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("26")
+
+[node name="MasterDingDang" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, -8)
+
+[node name="Billboard" type="Sprite3D" parent="MasterDingDang"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0.9, 11)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("27")
+
+[node name="ShuShu" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -8)
+
+[node name="Billboard" type="Sprite3D" parent="ShuShu"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.9, 2)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("28")
+
+[node name="PestBug" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -8)
+
+[node name="Billboard" type="Sprite3D" parent="PestBug"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("29")
+
+[node name="WeedSprout" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, -8)
+
+[node name="Billboard" type="Sprite3D" parent="WeedSprout"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.7, 13)
+pixel_size = 0.0016
+billboard = 1
+texture = ExtResource("30")

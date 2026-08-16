@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/common/command-status.schema.json",
+  "title": "CommandStatus",
+  "type": "string",
+  "enum": [
+    "ACCEPTED",
+    "VALIDATING",
+    "RUNNING_SANDBOX",
+    "APPLYING_WORLD",
+    "APPLIED",
+    "REJECTED",
+    "FAILED",
+    "UNKNOWN",
+    "CANCELLED"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "schema_ref": "../asyncapi/runtime-events.asyncapi.json#/components/schemas/HeartbeatFrame",
+  "value": {
+    "frame_type": "heartbeat",
+    "protocol_version": "1.0.0",
+    "subscription_id": "sub_realtime_00000001",
+    "stream_id": "world:world_demo_001",
+    "nonce": "hb_realtime_00000001",
+    "server_time": "2026-08-07T10:00:30Z",
+    "high_watermark_sequence": 733
+  }
+}

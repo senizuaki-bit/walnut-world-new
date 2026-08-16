@@ -1,0 +1,1 @@
+yaya_agent_contracts==0.6.0

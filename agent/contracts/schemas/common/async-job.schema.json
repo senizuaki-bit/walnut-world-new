@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/common/async-job.schema.json",
+  "title": "AsyncJob",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["job_id", "job_type", "status", "created_at", "updated_at", "error"],
+  "properties": {
+    "job_id": { "type": "string", "pattern": "^job_[A-Za-z0-9_-]{8,96}$" },
+    "job_type": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$" },
+    "status": {
+      "type": "string",
+      "enum": ["ACCEPTED", "QUEUED", "RUNNING", "SUCCEEDED", "FAILED", "CANCELLED"]
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "command_id": { "$ref": "./command-id.schema.json" },
+    "trace_id": { "type": "string", "pattern": "^trace_[A-Za-z0-9_-]{8,96}$" },
+    "error": {
+      "oneOf": [
+        { "$ref": "./error.schema.json" },
+        { "type": "null" }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "status": { "enum": ["ACCEPTED", "QUEUED", "RUNNING", "SUCCEEDED"] } },
+        "required": ["status"]
+      },
+      "then": { "properties": { "error": { "type": "null" } } }
+    },
+    {
+      "if": {
+        "properties": { "status": { "const": "FAILED" } },
+        "required": ["status"]
+      },
+      "then": { "properties": { "error": { "$ref": "./error.schema.json" } } }
+    }
+  ]
+}

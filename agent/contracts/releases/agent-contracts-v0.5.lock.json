@@ -1,0 +1,732 @@
+{
+  "schema_version": "1.0.0",
+  "package_name": "@yaya/agent-contracts",
+  "package_version": "0.5.0",
+  "git_release": "refs/tags/agent-contracts-v0.5.0",
+  "baseline_commit": null,
+  "manifest_path": "contracts/manifest.json",
+  "manifest_bytes": 27087,
+  "manifest_sha256": "e90eed36e7e9c003e033884e05f19d858b0ca0b44f88660e11c8e4d7fa8a6c8b",
+  "file_count": 144,
+  "manifest_entry_count": 143,
+  "base_entries_digest_format": "json-array[path,bytes,sha256]",
+  "base_entries_sha256": "fa1d18988cb61cd4370a22b5396778b66d1f54866e30144392c06e9a9ee062b1",
+  "release_status": "WORKTREE_CANDIDATE_NOT_TAGGED",
+  "files": [
+    {
+      "path": "contracts/asyncapi/runtime-events.asyncapi.json",
+      "bytes": 59795,
+      "sha256": "1c99f818ac2af138e86ed229ad826ce9871a7b3111a400ca2df433c26c6d55bc"
+    },
+    {
+      "path": "contracts/canonical-json-v1.json",
+      "bytes": 1313,
+      "sha256": "26a99c287acda30e23dbcd1db82259c2458123a84df51097156aaa6a59e4daf3"
+    },
+    {
+      "path": "contracts/error-catalog.json",
+      "bytes": 3981,
+      "sha256": "90923e95899ba4197b37c4d1d4802cff88f12304c08f9af5bad22984e712c3af"
+    },
+    {
+      "path": "contracts/examples/audit-record.json",
+      "bytes": 921,
+      "sha256": "73bede6d856d77b4f09b85f7f8b72a0544342d1a410b565121026c9b6aee8e5b"
+    },
+    {
+      "path": "contracts/examples/feishu-approval-decision-request.json",
+      "bytes": 1025,
+      "sha256": "364a31460926230b8afacd05b731d7aec2b417c3032e2154e46ce67450a8656d"
+    },
+    {
+      "path": "contracts/examples/feishu-approval-decision-response.json",
+      "bytes": 429,
+      "sha256": "5e5983dfc28f2f3931861b23786ff1b00389f1800504f42fe7b9e692975c282e"
+    },
+    {
+      "path": "contracts/examples/feishu-class-insights-request.json",
+      "bytes": 1088,
+      "sha256": "e0e80ebe04194d4c775824e25ac6a6bef31f8b40c35cc6e796d28a95c2af7b8f"
+    },
+    {
+      "path": "contracts/examples/feishu-class-insights-response.json",
+      "bytes": 857,
+      "sha256": "5a1a39a9a90d84fddaf55cfc1dcfdbf26ee1ad0ba056d51d4f7e8e2f22331db8"
+    },
+    {
+      "path": "contracts/examples/feishu-content-release-request.json",
+      "bytes": 1498,
+      "sha256": "f48c8ebee5b6a1b558235ea7aec0bca4b0d8b7d80d0c5d5410bc59b2afb1d551"
+    },
+    {
+      "path": "contracts/examples/feishu-content-release-response.json",
+      "bytes": 669,
+      "sha256": "1458651cd7386e2249754ad1476b2ad4648a702723259c14c8f457212fa5b8d5"
+    },
+    {
+      "path": "contracts/examples/feishu-content-release-status-response.json",
+      "bytes": 1529,
+      "sha256": "a8f2c7e633da7a3a1627f0e37a8ac84e1acb1c8069daec64ccda6609976a22aa"
+    },
+    {
+      "path": "contracts/examples/feishu-evidence-response.json",
+      "bytes": 1019,
+      "sha256": "ece674c909225932c3cffd09c2cedb94e37672b3bf82fc2b36711773ecc78095"
+    },
+    {
+      "path": "contracts/examples/feishu-learner-query-request.json",
+      "bytes": 1060,
+      "sha256": "186d3fe09363e54fd11258bf5aa193b361bc7ff1adbd8eac5e6ae68e40b7a0a3"
+    },
+    {
+      "path": "contracts/examples/feishu-learner-query-response.json",
+      "bytes": 1384,
+      "sha256": "216e734e046173a6500a025516ab886249e6eb9804eb50d15e6d14233615d2be"
+    },
+    {
+      "path": "contracts/examples/feishu-report-job-request.json",
+      "bytes": 1434,
+      "sha256": "af0c64739e94d7d04e3c2ca1aebc327bfd46a1e4f73d97100996a8918e95a46c"
+    },
+    {
+      "path": "contracts/examples/feishu-report-job-response.json",
+      "bytes": 522,
+      "sha256": "2504bbd4fed125cdb2c8cac6cfe7c08554a3f8b1667a7d8c93f93691517c8aa4"
+    },
+    {
+      "path": "contracts/examples/feishu-webhook-event.json",
+      "bytes": 508,
+      "sha256": "5baa3ce9005a16c15b454cc44b7039ae24f696b64d352c899667c3067786cc90"
+    },
+    {
+      "path": "contracts/examples/feishu-webhook-response.json",
+      "bytes": 274,
+      "sha256": "f3d0058afcb15cb4b8d58eba57634b47b5994d98295171fbd1b57e95f620f65c"
+    },
+    {
+      "path": "contracts/examples/game-action-intent.json",
+      "bytes": 280,
+      "sha256": "8dd83a9ec5ef2fac7db3e79780a01b288ab54affed2a515e08fe19bc43f40066"
+    },
+    {
+      "path": "contracts/examples/game-agent-session-create-request.json",
+      "bytes": 463,
+      "sha256": "71eb9dafdbe46f4a513c7705a65cba74e8eac7404d9974a1e462f4c680183e26"
+    },
+    {
+      "path": "contracts/examples/game-agent-session.json",
+      "bytes": 1651,
+      "sha256": "29e1346b87bd84832fa8562d5e8a42f8abeba58afc227af655f29ac2c0552899"
+    },
+    {
+      "path": "contracts/examples/game-agent-turn-create-request.json",
+      "bytes": 675,
+      "sha256": "a0de59451da1db3429f956fc8a6bd8e763e0af10ac31e12745d26a31ca92a5a3"
+    },
+    {
+      "path": "contracts/examples/game-bootstrap-response.json",
+      "bytes": 1793,
+      "sha256": "74495d1237d39579af88440361ad855939f47801f15fb8f004d340498c183577"
+    },
+    {
+      "path": "contracts/examples/game-client-event-batch-request.json",
+      "bytes": 1032,
+      "sha256": "4a03d372f34daf438855ba4979c50543241a99f2509affa4641233d403ed72d2"
+    },
+    {
+      "path": "contracts/examples/game-command.json",
+      "bytes": 1952,
+      "sha256": "1a94497e5e4f3ad0b8a6a206adae20c4f7cb4c9c52804b725266f68dab4cb0d6"
+    },
+    {
+      "path": "contracts/examples/game-evidence.json",
+      "bytes": 2068,
+      "sha256": "aadb5bd089fccb255d8933486062b2ae93fa75ac3d5fbd94c2464de1f93d012f"
+    },
+    {
+      "path": "contracts/examples/game-run.json",
+      "bytes": 3836,
+      "sha256": "5a7f0642d3d455d5a456f34ff4314d46e407b63f84d7223dfa4b4d1b2cb96a58"
+    },
+    {
+      "path": "contracts/examples/game-skill-activation-request.json",
+      "bytes": 325,
+      "sha256": "bcc12072fa101f0afa8a0fd466974d2c2fb9428226a78e2e6be985de2c5c8d26"
+    },
+    {
+      "path": "contracts/examples/game-skill-activation.json",
+      "bytes": 1157,
+      "sha256": "0ed571eec3b2a3c162365a2b2a29dbab173a6f54109e9f1a92b4c39a0ad8e51f"
+    },
+    {
+      "path": "contracts/examples/game-skill-build-create-request.json",
+      "bytes": 686,
+      "sha256": "3e2eeb8077bac3b4648bd6d67ba11eace3e8d3867b1d766892876be2977de5eb"
+    },
+    {
+      "path": "contracts/examples/game-skill-build.json",
+      "bytes": 2933,
+      "sha256": "32d3479eeb744a60dec8d308903e1b1a9d5c76b8f17b59759e6466417040b63b"
+    },
+    {
+      "path": "contracts/examples/game-student-bootstrap-v2.json",
+      "bytes": 3245,
+      "sha256": "ea2a60dd01ed80a091722c77e38534786faeddb89c023d24b5b19cb3a65c52f4"
+    },
+    {
+      "path": "contracts/examples/game-world-event-page.json",
+      "bytes": 2529,
+      "sha256": "3c7fd896dfaa9ff70c496b28700eb5d33cabf2665850686d3af2e124eb2bae06"
+    },
+    {
+      "path": "contracts/examples/game-world-presentation-event-page.json",
+      "bytes": 4261,
+      "sha256": "7a55d07ea6d046b385c777a0e739966f4334d7bd63e09b17166945cffc1d43b9"
+    },
+    {
+      "path": "contracts/examples/game-world-snapshot.json",
+      "bytes": 1935,
+      "sha256": "1e7142b749ca318c9dac149771058bd98b40bdf501d00124a0ef9a5e5b87b869"
+    },
+    {
+      "path": "contracts/examples/product-agent-feedback-source-event.json",
+      "bytes": 1451,
+      "sha256": "5ff5f6ea0ea8339471f484482c126f4e91ee2bb1dd2e7bc371dac37b9e779268"
+    },
+    {
+      "path": "contracts/examples/product-agent-interaction-page.json",
+      "bytes": 7038,
+      "sha256": "05594fbcb12777a07cac6d80216124fadc5cea63ea1fd631febcf428e16e7c3d"
+    },
+    {
+      "path": "contracts/examples/product-agent-interaction-patch-accepted.json",
+      "bytes": 7335,
+      "sha256": "51a7117503a8be7e5cdc8b685a415c71dd71fef2b909be37a33aa96bd95ad1d5"
+    },
+    {
+      "path": "contracts/examples/product-agent-interaction-patch-pending.json",
+      "bytes": 5606,
+      "sha256": "e9f7399880d8555980b82648a4322da203ebb3cafd5978f0890d6f95b3ba94ee"
+    },
+    {
+      "path": "contracts/examples/product-agent-interaction-patch-reject-pending.json",
+      "bytes": 5172,
+      "sha256": "0898b471e7005c53b21a05915955620570f61060c1aff0a82397adfb61b0fbcd"
+    },
+    {
+      "path": "contracts/examples/product-agent-interaction-patch-rejected.json",
+      "bytes": 6944,
+      "sha256": "1e88eb2fc6be8765d250117fa20d9a03f60cd66b48f85a0fff84204976c260a9"
+    },
+    {
+      "path": "contracts/examples/product-agent-interaction-source-receipt-reject.json",
+      "bytes": 1242,
+      "sha256": "8d33caea814bb38a06bfc088e5e0de2aaa1bb84314fca3e48550f75c602b092c"
+    },
+    {
+      "path": "contracts/examples/product-agent-interaction-source-receipt.json",
+      "bytes": 1223,
+      "sha256": "97b6c4cbb197aab6d08b485773c4448ea75f85bbef5737ba835f3a7a85bb7c88"
+    },
+    {
+      "path": "contracts/examples/product-content-unit.json",
+      "bytes": 2239,
+      "sha256": "d62d34e9dfc598bd85a2931f3927cca069b52f5ec006b84a450d06c32c03916b"
+    },
+    {
+      "path": "contracts/examples/product-patch-decision-reject-request.json",
+      "bytes": 850,
+      "sha256": "68f0083da274d2efc2bb743f71a9a97b305e09ca2b3edc093121739039048920"
+    },
+    {
+      "path": "contracts/examples/product-patch-decision-reject-response.json",
+      "bytes": 1794,
+      "sha256": "add82be41419f0c306040594244e7b60c0738f9b5950d664bffa82236749f8ee"
+    },
+    {
+      "path": "contracts/examples/product-patch-decision-request.json",
+      "bytes": 809,
+      "sha256": "996a6fb15a451d1049e1053302cb9b0f53bb8136b420232f66f3c307a227de99"
+    },
+    {
+      "path": "contracts/examples/product-patch-decision-response.json",
+      "bytes": 1751,
+      "sha256": "98a41385a66c4d1ac8abd029bab4cfc057cd65c5f659f91588b093b0512588f5"
+    },
+    {
+      "path": "contracts/examples/product-reject-agent-feedback-source-event.json",
+      "bytes": 1206,
+      "sha256": "44431782fadff7bfca8ef9c13e30b9a6889c6b88137f91dad39b140c208c447f"
+    },
+    {
+      "path": "contracts/examples/product-reject-game-command-source.json",
+      "bytes": 1492,
+      "sha256": "1fb6f841d2914d854e183b92ecae158ae9b53dcd75e79b7ceb5c19f1d83c3419"
+    },
+    {
+      "path": "contracts/examples/product-session-workspace.json",
+      "bytes": 3910,
+      "sha256": "5eb372fc2662396090c0920af346f5fd7ba59af6635f69d75a564f8102c2e179"
+    },
+    {
+      "path": "contracts/examples/product-skill-draft-base.json",
+      "bytes": 1827,
+      "sha256": "cac98a9cfe3e3797bbfb474baacc635b90f0893da3b2e84c23b36e2050e2bbd9"
+    },
+    {
+      "path": "contracts/examples/product-skill-draft-upsert-request.json",
+      "bytes": 969,
+      "sha256": "2574d4b3597af74853523ab44c3eebba76ab221219ab78ced18ab4ad705fb917"
+    },
+    {
+      "path": "contracts/examples/product-skill-draft.json",
+      "bytes": 1870,
+      "sha256": "d05a1e2ac0a529bc58935ab4df66921a47acc7d97a289bbaf64866db17a8d5ea"
+    },
+    {
+      "path": "contracts/examples/product-skill-patch-reject.json",
+      "bytes": 1250,
+      "sha256": "1d516dcb78c6c11a307227eae809e22c3db802dbb4758db00c6f849b8f7735a1"
+    },
+    {
+      "path": "contracts/examples/product-skill-patch.json",
+      "bytes": 1476,
+      "sha256": "47511edc37e0ae344d9e8286eb3f99040c91a246358cc485769d636f39502d76"
+    },
+    {
+      "path": "contracts/examples/product-write-reconciliation.json",
+      "bytes": 1045,
+      "sha256": "f335172ff3ba3fadf3201a969f3d442a68490712f1c7695e5b093b41414c826f"
+    },
+    {
+      "path": "contracts/examples/realtime-ack-frame.json",
+      "bytes": 315,
+      "sha256": "ccf4d5a128eb3f4021be0135319e4088e112e3bc5f097872ccfb0d40d000140e"
+    },
+    {
+      "path": "contracts/examples/realtime-error-frame.json",
+      "bytes": 831,
+      "sha256": "8999437ba4f979c686c47185514ff331393e04d0662c124b750523cb485289b7"
+    },
+    {
+      "path": "contracts/examples/realtime-heartbeat-ack-frame.json",
+      "bytes": 314,
+      "sha256": "3eb7d5f89663368192ce9d7153efd681c43912964ea85d86fba8137e10c0eb8f"
+    },
+    {
+      "path": "contracts/examples/realtime-heartbeat-frame.json",
+      "bytes": 384,
+      "sha256": "083496a6ba38d6c1260f82acf6988c5c2d26bb752063042698546409e65d06d3"
+    },
+    {
+      "path": "contracts/examples/realtime-resume-frame.json",
+      "bytes": 332,
+      "sha256": "7e53ea886a837d613a34c8e36019cd38f5ab31ecac6995a068fb6f179eec0bb7"
+    },
+    {
+      "path": "contracts/examples/realtime-subscribe-frame.json",
+      "bytes": 290,
+      "sha256": "7ba78a87927a77c184eabbfa9ba7111c10744044b821c1e16ecf295426619fea"
+    },
+    {
+      "path": "contracts/examples/realtime-subscribed-frame.json",
+      "bytes": 452,
+      "sha256": "4de04ed5edd084ed0aaea127d4acc7751790cc2f33494f1b6c87c56d11b76d9a"
+    },
+    {
+      "path": "contracts/examples/runtime-agent-turn-feedback-ready.json",
+      "bytes": 1484,
+      "sha256": "0de558aa574a56c6ad5b1cdac47383a2510c65662c08ab036bca71b2e9126c9c"
+    },
+    {
+      "path": "contracts/examples/runtime-learner-inference-recorded.json",
+      "bytes": 2386,
+      "sha256": "aba1fac0bf59ccfe7e3c0e31e5590a7d65dfa425c09334a761aefa37ed2fbe44"
+    },
+    {
+      "path": "contracts/learner-inference-hash-v1.json",
+      "bytes": 1490,
+      "sha256": "4895542ae7f7a21732f7518e97f38bcd49ec9e17da3e64f8e43998d77b339e19"
+    },
+    {
+      "path": "contracts/openapi/feishu-integration.openapi.json",
+      "bytes": 38311,
+      "sha256": "ca3af526fb62a2c1390ef7db225986eca63a764fd2ccd3ddc7652e27cc5be969"
+    },
+    {
+      "path": "contracts/openapi/game-api.openapi.json",
+      "bytes": 39779,
+      "sha256": "508d3cc99bec6f0697ee8c4a3ef694da56cffb1c0bf95cda82050ccc00ff5838"
+    },
+    {
+      "path": "contracts/openapi/int2-world-presentation.openapi.json",
+      "bytes": 5428,
+      "sha256": "2caaef295adb7e85ef1a1835cb9b01c543d45c11ce696ed89e5f6612c051de04"
+    },
+    {
+      "path": "contracts/openapi/product-experience.openapi.json",
+      "bytes": 35544,
+      "sha256": "e20ab4a0afb2c0d9d571f8944914c5848cda693bf2d648324a669080211f6271"
+    },
+    {
+      "path": "contracts/openapi/student-bootstrap-v2.openapi.json",
+      "bytes": 7689,
+      "sha256": "e7dd7ef8a717dd6ddd8f15c66a3c5eb08731618dc7f0936ea0af1b0589258120"
+    },
+    {
+      "path": "contracts/port-surface.json",
+      "bytes": 40098,
+      "sha256": "11e14ed160226df27b797f65046f7698ab252e38711779ef0c44809d27db0aae"
+    },
+    {
+      "path": "contracts/releases/agent-contracts-v0.3.lock.json",
+      "bytes": 767,
+      "sha256": "c58a091f8f4c90f0d317448e846db79ffffafe64790f027a97a14f38e437ed7a"
+    },
+    {
+      "path": "contracts/releases/agent-contracts-v0.4.lock.json",
+      "bytes": 26534,
+      "sha256": "423b2a0c11bc1a9760306ef10172cb827b89de8002b97575874105d82eaae544"
+    },
+    {
+      "path": "contracts/schemas/common/actor-ref.schema.json",
+      "bytes": 749,
+      "sha256": "894c0c0c6c141d897c346f746d6b9549060e17bda21c0420864ae991a6b20cb6"
+    },
+    {
+      "path": "contracts/schemas/common/async-job.schema.json",
+      "bytes": 1429,
+      "sha256": "f9e13b28132b5818d0e57d9e6539cfeca0ca5a10cc99035193c21770af9305f0"
+    },
+    {
+      "path": "contracts/schemas/common/audit-record.schema.json",
+      "bytes": 2034,
+      "sha256": "2018f50cf32a9bbf66d6d60fd6b882b750ac0bc2863a4a60ad2dc4335068486e"
+    },
+    {
+      "path": "contracts/schemas/common/command-id.schema.json",
+      "bytes": 221,
+      "sha256": "65fcc02bd3bf6616efecfacf808fe84730ac225fe0acc23886cb8eb08d125a9c"
+    },
+    {
+      "path": "contracts/schemas/common/command-status.schema.json",
+      "bytes": 359,
+      "sha256": "d170d8d1d819e6afc8225cd2f2404b46541e677f2a5c86d0942de21eb2c796c9"
+    },
+    {
+      "path": "contracts/schemas/common/command-type.schema.json",
+      "bytes": 337,
+      "sha256": "b5f6274194a6b34d71baeac192229f97ca1f46769d62619c06e75d1582b81094"
+    },
+    {
+      "path": "contracts/schemas/common/content-ref.schema.json",
+      "bytes": 537,
+      "sha256": "25e876a4eeedb917f69cbfc4ff6d42a0ee6b3453a1ab382432d32f8633945320"
+    },
+    {
+      "path": "contracts/schemas/common/error-code.schema.json",
+      "bytes": 926,
+      "sha256": "46ce52742ad41556df555938fdbbfd6504ccf9f090aecae960b29384a74408e3"
+    },
+    {
+      "path": "contracts/schemas/common/error-response.schema.json",
+      "bytes": 1710,
+      "sha256": "ef4803ed39b67d71b50f2f04a4cc71bd03895b996b6ffb27dec01020ab6e70c7"
+    },
+    {
+      "path": "contracts/schemas/common/error-responses-by-status.schema.json",
+      "bytes": 5803,
+      "sha256": "a20d84fa2fd9c8b178a45995d90596c9171040856c0e5bd7ca148ab25e780f48"
+    },
+    {
+      "path": "contracts/schemas/common/error.schema.json",
+      "bytes": 8478,
+      "sha256": "fb5e2c0756396f1b18c708fca060c084e35189b364939bdd8c36d20a2707cb7f"
+    },
+    {
+      "path": "contracts/schemas/common/event-envelope-v2.schema.json",
+      "bytes": 1700,
+      "sha256": "df1d6914c654d177e348c347115dec4a218709ac863bbebb18f18a5c703ddc58"
+    },
+    {
+      "path": "contracts/schemas/common/event-envelope.schema.json",
+      "bytes": 1566,
+      "sha256": "1314d12ff5b5231163572b97b9d02182a79740bd5d0ac01e3f544dd93ba126f6"
+    },
+    {
+      "path": "contracts/schemas/common/evidence-ref.schema.json",
+      "bytes": 850,
+      "sha256": "533a7e676e77dce30904621aef3d7fd716e515a700619d3ad98cbc822cbd5979"
+    },
+    {
+      "path": "contracts/schemas/common/request-context.schema.json",
+      "bytes": 2080,
+      "sha256": "f10c41ec7bd32166dde491427760a8b451ede591ad999eaf946312d31e07567d"
+    },
+    {
+      "path": "contracts/schemas/common/version-set.schema.json",
+      "bytes": 1397,
+      "sha256": "c3f1ac1e14591cb3633578e00c0729b0cbf67b640ea1d5ef66a0f9a96c45c318"
+    },
+    {
+      "path": "contracts/schemas/delivery/delivery-payload.schema.json",
+      "bytes": 1193,
+      "sha256": "14a8922418b42865a46d12dc61f587907e230dbc906e2251b35354e8b1720996"
+    },
+    {
+      "path": "contracts/schemas/delivery/delivery-receipt.schema.json",
+      "bytes": 1026,
+      "sha256": "db8965e6c1be97deb88b3f14a8de791fc1a69f8d46b0af40a5aace42723594cc"
+    },
+    {
+      "path": "contracts/schemas/feishu/approval-decision-receipt.schema.json",
+      "bytes": 1769,
+      "sha256": "3babc1a103e4b2fb8eab2a9b5c770a4e1e356e1e633db585f90141c7139e0a5c"
+    },
+    {
+      "path": "contracts/schemas/feishu/approval-decision.schema.json",
+      "bytes": 1998,
+      "sha256": "da523f914a399308a8440d946932852f99006e3e06c6ba9a5c9f5e93787fab72"
+    },
+    {
+      "path": "contracts/schemas/feishu/class-insights-query.schema.json",
+      "bytes": 1924,
+      "sha256": "d826dfa2afee7716ff7bfe7542accb58436eb67eccf5fa5c920d89e58afe43ef"
+    },
+    {
+      "path": "contracts/schemas/feishu/class-insights-result.schema.json",
+      "bytes": 4248,
+      "sha256": "35901136d6455df96c807c5cdcc05524e93e9fc49dd45e7f1ac5345175905f6b"
+    },
+    {
+      "path": "contracts/schemas/feishu/content-release-receipt.schema.json",
+      "bytes": 1343,
+      "sha256": "42692c18717de65209d2a288371077ddf41f47800a0a27345ae3221abcedc961"
+    },
+    {
+      "path": "contracts/schemas/feishu/content-release-status.schema.json",
+      "bytes": 4324,
+      "sha256": "db4d834233a98e9b8e1677282949ab8af57c23f495e8933373ac6db21f7f85b5"
+    },
+    {
+      "path": "contracts/schemas/feishu/content-release.schema.json",
+      "bytes": 2681,
+      "sha256": "8b754a334473a8f8b4f0cc98a23bcfbaf0152c1142d7e321ff4cb9a9445fb319"
+    },
+    {
+      "path": "contracts/schemas/feishu/evidence-view.schema.json",
+      "bytes": 2902,
+      "sha256": "491faae1b595964c8858b93cf3a1e58d11d43d103499ea1698c48e9e02b9547b"
+    },
+    {
+      "path": "contracts/schemas/feishu/learner-query-result.schema.json",
+      "bytes": 3710,
+      "sha256": "b0aa54a37d87f8bd17a08c98b13c5e10fe95cb95614f158705f8856336e11199"
+    },
+    {
+      "path": "contracts/schemas/feishu/learner-query.schema.json",
+      "bytes": 1968,
+      "sha256": "4fe1c16a548cfc2d3b3764d23f23a1fc20395834f0bf8ffe1f991fea7370fe3a"
+    },
+    {
+      "path": "contracts/schemas/feishu/report-job-request.schema.json",
+      "bytes": 2296,
+      "sha256": "2e28af4a73d79a57a4abc0178e7929425a0631ed1258c0f6fd7b5e772d20947a"
+    },
+    {
+      "path": "contracts/schemas/feishu/report-job.schema.json",
+      "bytes": 3044,
+      "sha256": "7f952789cd692956b9db79be8a6764a9394a5e1386a3e52c1beb89f5e23b4822"
+    },
+    {
+      "path": "contracts/schemas/feishu/webhook-response.schema.json",
+      "bytes": 1810,
+      "sha256": "ba7cde99a95fede18270ff2bcc1a8cb80963490a9ffae197ed8a7508ec51f978"
+    },
+    {
+      "path": "contracts/schemas/feishu/webhook.schema.json",
+      "bytes": 2586,
+      "sha256": "e05e4eb5f03a2d46a9f757fe646a7cf8ca6f0c5db89a0be59f7a531c66890db4"
+    },
+    {
+      "path": "contracts/schemas/game/accepted-game-job.schema.json",
+      "bytes": 930,
+      "sha256": "443c23ca4d62790760a83c4c4a772249f2750298bac370dcfaf84cf280113742"
+    },
+    {
+      "path": "contracts/schemas/game/action-intent.schema.json",
+      "bytes": 4365,
+      "sha256": "d7a217138bce7413142c1edd65b0a0d1238fcef576bba243b1481389286ad19a"
+    },
+    {
+      "path": "contracts/schemas/game/agent-session-create-request.schema.json",
+      "bytes": 1013,
+      "sha256": "1b362be3b63d164c79e21685eeaa926f478574614d2d1e31fff0ee3485a19a6c"
+    },
+    {
+      "path": "contracts/schemas/game/agent-session.schema.json",
+      "bytes": 1859,
+      "sha256": "beee8cc19a6d046eff955433d02aaa0e29a65483abe8259b6875392176939c6b"
+    },
+    {
+      "path": "contracts/schemas/game/agent-turn-create-request.schema.json",
+      "bytes": 2788,
+      "sha256": "d38e9458868b4b7f797418dce0b27f43d27da331c70104d79ca9f38a9937cbdf"
+    },
+    {
+      "path": "contracts/schemas/game/agent-turn-feedback-ready-event.schema.json",
+      "bytes": 888,
+      "sha256": "75eecc159bdd07d40bf2723f57f99056272c678b905bbd28cba849529b2097b5"
+    },
+    {
+      "path": "contracts/schemas/game/agent-turn-feedback.schema.json",
+      "bytes": 3586,
+      "sha256": "8379b9f1b832250ebc00e0c61c82e7e574641483a93a9578dbd40df6caf79367"
+    },
+    {
+      "path": "contracts/schemas/game/bootstrap-response.schema.json",
+      "bytes": 3626,
+      "sha256": "cba22045a8a898f727e76bac7c03da1dec7fe067edfcca18e86e071c31f44d33"
+    },
+    {
+      "path": "contracts/schemas/game/client-event-batch-request.schema.json",
+      "bytes": 6980,
+      "sha256": "e080a2958a4217b1607da61eab7d240b9a896208f149d250a285604ba4a38b5c"
+    },
+    {
+      "path": "contracts/schemas/game/command.schema.json",
+      "bytes": 10125,
+      "sha256": "5760c5fede732ef1948b368e09fc4b08f16b0c181687b806f36827e3e4a793c1"
+    },
+    {
+      "path": "contracts/schemas/game/evidence.schema.json",
+      "bytes": 5847,
+      "sha256": "3334e9d33937997006896188fa57761ad282da87bff0c4c120c34d5295c7ee95"
+    },
+    {
+      "path": "contracts/schemas/game/run.schema.json",
+      "bytes": 14680,
+      "sha256": "e389c9f1492ec8e219329061d21e1600aa2a780a274ff69d7c70efeefd2baf23"
+    },
+    {
+      "path": "contracts/schemas/game/skill-activation-request.schema.json",
+      "bytes": 934,
+      "sha256": "eaf5b18c982c4adff55d2a726bac3bd3919c101c9757c04de159a8184deb397c"
+    },
+    {
+      "path": "contracts/schemas/game/skill-activation.schema.json",
+      "bytes": 1676,
+      "sha256": "5d695351eadd4a6b56ba97bd06ed990fd7b44ba07375af3a07c4010e879e1bdc"
+    },
+    {
+      "path": "contracts/schemas/game/skill-build-create-request.schema.json",
+      "bytes": 2847,
+      "sha256": "63917799283bbe48fbd40bc72f634b72b07b0bd9e37bd854d871dfa1960cda2f"
+    },
+    {
+      "path": "contracts/schemas/game/skill-build.schema.json",
+      "bytes": 5634,
+      "sha256": "55dc1ebf76bfd3bdff9678a66e2f5ae3b5c4577fdd717c99c3a1a6403de4fc7d"
+    },
+    {
+      "path": "contracts/schemas/game/student-bootstrap-v2.schema.json",
+      "bytes": 7732,
+      "sha256": "b5b2a7e5231eb4f4bdd11283e99d8c90dea37b61c26acbd10bb2b15e097a727d"
+    },
+    {
+      "path": "contracts/schemas/game/world-event-page.schema.json",
+      "bytes": 1480,
+      "sha256": "8552647efab98f2ae28e8209ef52a2ba730bbe14275753fe9eb0ffdf4817a7cd"
+    },
+    {
+      "path": "contracts/schemas/game/world-presentation-event-page.schema.json",
+      "bytes": 3654,
+      "sha256": "a5847fe595ff9f6a8b058293d1928ddc7e344daf867e1b18e6ddc257ce5759df"
+    },
+    {
+      "path": "contracts/schemas/game/world-presentation-event.schema.json",
+      "bytes": 5663,
+      "sha256": "8e8a755922923bdebc440836729b36d973622c95ad9228ba8b4a4e7defba8edc"
+    },
+    {
+      "path": "contracts/schemas/game/world-snapshot.schema.json",
+      "bytes": 4918,
+      "sha256": "378dd7f22154e177b9a5e131e77ec244ba5694a5348dd774e14db8f4f563d697"
+    },
+    {
+      "path": "contracts/schemas/learner/learner-inference-recorded-event.schema.json",
+      "bytes": 988,
+      "sha256": "f7ba9eeca5237a63e616fbb09ae1115f6ab2650011d83f53910e52d56031f22d"
+    },
+    {
+      "path": "contracts/schemas/learner/learner-inference-recorded-payload.schema.json",
+      "bytes": 3021,
+      "sha256": "a7c80eacde3fc4e850701a9f5c4a4d0cb5a5cc059d20b5241e531c03c4c3c945"
+    },
+    {
+      "path": "contracts/schemas/product-experience/agent-interaction-page.schema.json",
+      "bytes": 3555,
+      "sha256": "af3afe82a9cd0b9730068b204db76d21e25c4716117f0ac412d8a994013f4a4e"
+    },
+    {
+      "path": "contracts/schemas/product-experience/agent-interaction-source-receipt.schema.json",
+      "bytes": 5467,
+      "sha256": "4329edd389de0feca9c9a9abb320d3bbac1a96afbcc7b62e8b7a9cef0e4d4c6e"
+    },
+    {
+      "path": "contracts/schemas/product-experience/agent-interaction.schema.json",
+      "bytes": 9240,
+      "sha256": "f7901329098c42a3f67b9d4afed8a900493275050ae002b8b06de050e0000249"
+    },
+    {
+      "path": "contracts/schemas/product-experience/content-unit.schema.json",
+      "bytes": 5265,
+      "sha256": "96527aeee9e7cc19dab6747586caa9413b6d18cab6218e150876beb5590daaca"
+    },
+    {
+      "path": "contracts/schemas/product-experience/patch-decision-receipt.schema.json",
+      "bytes": 4103,
+      "sha256": "bbe74349a082cb990e61beaea237af265eb3031f3ee31803c3e3ecbf12a50bfa"
+    },
+    {
+      "path": "contracts/schemas/product-experience/patch-decision-request.schema.json",
+      "bytes": 3531,
+      "sha256": "131ea8a1a6c0bf52a1db27bf821b8b49b6b61e3f2ead778bd8f210f1294fcf9b"
+    },
+    {
+      "path": "contracts/schemas/product-experience/product-error-responses-by-status.schema.json",
+      "bytes": 5074,
+      "sha256": "711638a4447ecdc0a28206034597b65d53377f510a35ca3d8794ad356091bf67"
+    },
+    {
+      "path": "contracts/schemas/product-experience/product-write-reconciliation.schema.json",
+      "bytes": 3631,
+      "sha256": "3c75c5f893d6058e835491210c7a51041df8de9c27da844f063e5b8e69895c17"
+    },
+    {
+      "path": "contracts/schemas/product-experience/session-workspace.schema.json",
+      "bytes": 6243,
+      "sha256": "28091d64b379caecd08ec890d62592eef8913418c4c07273fe55279441d3ce64"
+    },
+    {
+      "path": "contracts/schemas/product-experience/skill-draft-upsert-request.schema.json",
+      "bytes": 2757,
+      "sha256": "98ba4e54ae91b4b041aff8522cf4102ac557f96df4a3ff75526ea676d61482ed"
+    },
+    {
+      "path": "contracts/schemas/product-experience/skill-draft.schema.json",
+      "bytes": 3706,
+      "sha256": "5d7f3e0742cc5a29515bbc360b0b84b411278be11477a981382af520cd90faa9"
+    },
+    {
+      "path": "contracts/schemas/product-experience/skill-patch.schema.json",
+      "bytes": 5335,
+      "sha256": "d4a54a20dafee79612c3731e30db54d20dfdb23a15852c5a8ecdb23da4bd501f"
+    },
+    {
+      "path": "contracts/schemas/product-experience/skill-source-bundle.schema.json",
+      "bytes": 1472,
+      "sha256": "624d2468e3926f292492c50657e968a294858b22b17cfa6dd0f883dd987579ef"
+    }
+  ]
+}

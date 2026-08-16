@@ -1,0 +1,22 @@
+{
+  "schema_ref": "../schemas/game/skill-build-create-request.schema.json",
+  "value": {
+    "skill_id": "skill_water_001",
+    "display_name": "自动浇水",
+    "client_draft_revision": 7,
+    "source_bundle": {
+      "language": "CPP20",
+      "entrypoint": "src/main.cpp",
+      "files": [
+        {
+          "path": "src/main.cpp",
+          "content": "#include <yaya/skill.hpp>\nint main() { return 0; }\n",
+          "content_sha256": "5e7b1c8414988b8dbde4e72f3bd9d3db0a01c6c33ef32e69be263156a04b4075"
+        }
+      ]
+    },
+    "compiler_profile": "YAYA_CPP20_SAFE_V1",
+    "test_suite_version": "farm-water-v3",
+    "requested_capabilities": ["WORLD_READ", "WATER"]
+  }
+}

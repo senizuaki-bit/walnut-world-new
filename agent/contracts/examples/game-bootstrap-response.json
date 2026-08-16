@@ -1,0 +1,59 @@
+{
+  "schema_ref": "../schemas/game/bootstrap-response.schema.json",
+  "value": {
+    "request_context": {
+      "schema_version": "1.0.0",
+      "request_id": "req_game_00000001",
+      "correlation_id": "corr_game_00000001",
+      "trace_id": "trace_game_00000001",
+      "requested_at": "2026-08-06T10:00:00Z",
+      "actor": {
+        "tenant_id": "tenant_yaya",
+        "actor_id": "student_0001",
+        "actor_type": "student",
+        "roles": ["game:player"]
+      },
+      "content_ref": {
+        "unit_id": "YAYA_FARM_001",
+        "version": "1.4.0",
+        "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    "api_version": "1.0.0",
+    "server_time": "2026-08-06T10:00:00Z",
+    "actor": {
+      "tenant_id": "tenant_yaya",
+      "actor_id": "student_0001",
+      "actor_type": "student",
+      "roles": ["game:player"]
+    },
+    "content": {
+      "unit_id": "YAYA_FARM_001",
+      "version": "1.4.0",
+      "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "capabilities": {
+      "skill_builds": true,
+      "agent_sessions": true,
+      "world_event_stream": true,
+      "client_event_batch": true,
+      "evidence_query": true
+    },
+    "limits": {
+      "max_source_files": 32,
+      "max_source_bytes": 1048576,
+      "max_client_events_per_batch": 500,
+      "max_agent_turn_chars": 4000
+    },
+    "world": {
+      "world_id": "world_demo_001",
+      "revision": 184,
+      "stream_id": "world:world_demo_001",
+      "last_event_sequence": 731,
+      "stream_protocol_version": "1.0.0",
+      "snapshot_url": "/v1/worlds/world_demo_001/snapshot",
+      "events_url": "/v1/worlds/world_demo_001/events",
+      "stream_url": "wss://api.yaya.example/v1/realtime"
+    }
+  }
+}

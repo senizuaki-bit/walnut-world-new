@@ -1,0 +1,214 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/game/student-bootstrap-v2.schema.json",
+  "title": "Public student bootstrap v2",
+  "description": "One authoritative read model for a public Godot client to enter the student skill-build, activation, session, and recoverable world flow.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_context",
+    "api_version",
+    "contract_version",
+    "server_time",
+    "actor",
+    "content",
+    "capabilities",
+    "session",
+    "build",
+    "activation",
+    "world"
+  ],
+  "x-invariants": [
+    "request_context.actor equals actor and request_context.content_ref equals content",
+    "session.create_request.world_id equals world.world_id",
+    "session.create_request.learner_id equals actor.actor_id and actor.actor_type is student",
+    "session.create_request.content equals content",
+    "session.create_request.expected_world_revision equals world.revision",
+    "session.create_request is the exact closed request body accepted by frozen createAgentSession",
+    "activation.scope.world_id equals world.world_id",
+    "activation.scope.agent_profile_id equals session.create_request.agent_profile_id",
+    "when activation.active is non-null its registry_revision equals activation.registry_revision",
+    "world.snapshot_url equals '/v1/worlds/' plus world.world_id plus '/snapshot'",
+    "world.events_url equals '/v1/worlds/' plus world.world_id plus '/events'"
+  ],
+  "properties": {
+    "request_context": { "$ref": "../common/request-context.schema.json" },
+    "api_version": { "const": "1.1.0" },
+    "contract_version": { "const": "0.4.0" },
+    "server_time": { "type": "string", "format": "date-time" },
+    "actor": { "$ref": "../common/actor-ref.schema.json" },
+    "content": { "$ref": "../common/content-ref.schema.json" },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "skill_builds",
+        "skill_activations",
+        "agent_sessions",
+        "http_world_recovery",
+        "evidence_query"
+      ],
+      "properties": {
+        "skill_builds": { "type": "boolean" },
+        "skill_activations": { "type": "boolean" },
+        "agent_sessions": { "type": "boolean" },
+        "http_world_recovery": { "type": "boolean" },
+        "evidence_query": { "type": "boolean" }
+      }
+    },
+    "session": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["current_session_id", "teaching_spec_version", "create_request"],
+      "properties": {
+        "current_session_id": {
+          "oneOf": [
+            { "$ref": "#/$defs/identifier" },
+            { "type": "null" }
+          ]
+        },
+        "teaching_spec_version": { "$ref": "#/$defs/versionIdentifier" },
+        "create_request": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "world_id",
+            "learner_id",
+            "agent_profile_id",
+            "channel",
+            "locale",
+            "content",
+            "expected_world_revision"
+          ],
+          "properties": {
+            "world_id": { "$ref": "#/$defs/identifier" },
+            "learner_id": { "$ref": "#/$defs/identifier" },
+            "agent_profile_id": { "$ref": "#/$defs/identifier" },
+            "channel": { "const": "GAME" },
+            "locale": {
+              "type": "string",
+              "pattern": "^[a-z]{2,3}(?:-[A-Z]{2})?$"
+            },
+            "content": { "$ref": "../common/content-ref.schema.json" },
+            "expected_world_revision": { "type": "integer", "minimum": 0 }
+          }
+        }
+      }
+    },
+    "build": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "build_policy_id",
+        "compiler_profile",
+        "compiler_version",
+        "sandbox_image_digest",
+        "test_suite_version",
+        "allowed_capabilities",
+        "max_source_files",
+        "max_source_bytes"
+      ],
+      "properties": {
+        "build_policy_id": { "$ref": "#/$defs/versionIdentifier" },
+        "compiler_profile": { "$ref": "#/$defs/versionIdentifier" },
+        "compiler_version": { "$ref": "#/$defs/versionIdentifier" },
+        "sandbox_image_digest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "test_suite_version": { "$ref": "#/$defs/versionIdentifier" },
+        "allowed_capabilities": {
+          "type": "array",
+          "maxItems": 7,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["WORLD_READ", "MOVE", "PLANT", "WATER", "HARVEST", "INTERACT", "SPEAK"]
+          }
+        },
+        "max_source_files": {
+          "const": 32,
+          "description": "Maximum number of files in one SkillSourceBundle."
+        },
+        "max_source_bytes": {
+          "const": 1048576,
+          "description": "Maximum UTF-8 content bytes in one SkillSourceBundle."
+        }
+      }
+    },
+    "activation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope", "registry_revision", "active"],
+      "properties": {
+        "scope": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["world_id", "agent_profile_id"],
+          "properties": {
+            "world_id": { "$ref": "#/$defs/identifier" },
+            "agent_profile_id": { "$ref": "#/$defs/identifier" }
+          }
+        },
+        "registry_revision": { "type": "integer", "minimum": 0 },
+        "active": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "activation_id",
+                "skill_id",
+                "skill_version_id",
+                "artifact_sha256",
+                "certification_id",
+                "registry_revision",
+                "activated_at"
+              ],
+              "properties": {
+                "activation_id": { "type": "string", "pattern": "^activation_[A-Za-z0-9_-]{8,118}$" },
+                "skill_id": { "$ref": "#/$defs/identifier" },
+                "skill_version_id": { "type": "string", "pattern": "^skillver_[A-Za-z0-9_-]{8,118}$" },
+                "artifact_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+                "certification_id": { "type": "string", "pattern": "^cert_[A-Za-z0-9_-]{8,122}$" },
+                "registry_revision": { "type": "integer", "minimum": 1 },
+                "activated_at": { "type": "string", "format": "date-time" }
+              }
+            },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+    "world": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "world_id",
+        "revision",
+        "last_event_sequence",
+        "state_hash",
+        "snapshot_url",
+        "events_url"
+      ],
+      "properties": {
+        "world_id": { "$ref": "#/$defs/identifier" },
+        "revision": { "type": "integer", "minimum": 0 },
+        "last_event_sequence": { "type": "integer", "minimum": 0 },
+        "state_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "snapshot_url": { "type": "string", "format": "uri-reference", "minLength": 1, "maxLength": 2048 },
+        "events_url": { "type": "string", "format": "uri-reference", "minLength": 1, "maxLength": 2048 }
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "versionIdentifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    }
+  }
+}

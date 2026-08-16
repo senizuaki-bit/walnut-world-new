@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0.0",
+  "package_name": "@yaya/agent-contracts",
+  "package_version": "0.3.0",
+  "git_release": "refs/tags/agent-contracts-v0.3.0",
+  "baseline_commit": "7841120",
+  "manifest_path": "contracts/manifest.json",
+  "manifest_bytes": 25384,
+  "manifest_sha256": "f1898f70642c2387965ca8b15c32df611eb92cd69c3f42de61fa7c6fb242917e",
+  "file_count": 135,
+  "manifest_entry_count": 134,
+  "base_entries_digest_format": "json-array[path,bytes,sha256]",
+  "base_entries_sha256": "c4f10d841d72d6d6888aa95343845a89d5688909aa42df92491bcec589dddbf9",
+  "additive_paths": [
+    "contracts/examples/game-student-bootstrap-v2.json",
+    "contracts/openapi/student-bootstrap-v2.openapi.json",
+    "contracts/schemas/game/student-bootstrap-v2.schema.json"
+  ]
+}

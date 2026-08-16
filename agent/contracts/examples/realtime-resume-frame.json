@@ -1,0 +1,11 @@
+{
+  "schema_ref": "../asyncapi/runtime-events.asyncapi.json#/components/schemas/ResumeFrame",
+  "value": {
+    "frame_type": "resume",
+    "protocol_version": "1.0.0",
+    "request_id": "req_realtime_00000002",
+    "subscription_id": "sub_realtime_00000001",
+    "stream_id": "world:world_demo_001",
+    "after_sequence": 732
+  }
+}

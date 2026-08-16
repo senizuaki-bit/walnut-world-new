@@ -1,0 +1,24 @@
+{
+  "schema_ref": "../schemas/game/agent-turn-create-request.schema.json",
+  "value": {
+    "turn_id": "turn_agent_0001",
+    "expected_world_revision": 184,
+    "input": {
+      "type": "MESSAGE",
+      "text": "请调用我刚认证的 Skill 给一号地浇水。",
+      "locale": "zh-CN"
+    },
+    "skill_bindings": [
+      {
+        "skill_id": "skill_water_001",
+        "skill_version_id": "skillver_water_001",
+        "artifact_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "certification_id": "cert_water_001"
+      }
+    ],
+    "client_state": {
+      "last_event_sequence": 731,
+      "client_turn_sequence": 1
+    }
+  }
+}

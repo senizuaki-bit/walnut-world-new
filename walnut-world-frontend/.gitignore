@@ -1,0 +1,25 @@
+# Godot editor cache and imports
+.godot/
+
+# Export artifacts
+export/
+*.exe
+*.pck
+*.zip
+
+# C# / Mono output
+.mono/
+bin/
+obj/
+
+# Editor and OS metadata
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+
+# Local intermediate image-generation sources
+tmp/
+
+# Design images are documentation, not runtime Godot textures
+docs/design/**/*.import

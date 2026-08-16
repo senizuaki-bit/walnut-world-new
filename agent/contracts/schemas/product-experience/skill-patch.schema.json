@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/product-experience/skill-patch.schema.json",
+  "title": "Structured product skill patch",
+  "description": "A reviewable proposal against one exact draft revision and hash. It cannot build, activate or mutate a world, and it is never applied without a PatchDecision ACCEPT command.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "patch_id",
+    "interaction_id",
+    "session_id",
+    "turn_id",
+    "draft_id",
+    "skill_id",
+    "base_draft_revision",
+    "base_draft_sha256",
+    "operations",
+    "result_draft_sha256",
+    "patch_sha256",
+    "rationale",
+    "requires_student_confirmation",
+    "evidence_refs",
+    "created_at"
+  ],
+  "properties": {
+    "patch_id": { "$ref": "#/$defs/identifier" },
+    "interaction_id": { "$ref": "#/$defs/identifier" },
+    "session_id": { "$ref": "#/$defs/identifier" },
+    "turn_id": { "$ref": "#/$defs/identifier" },
+    "draft_id": { "$ref": "#/$defs/identifier" },
+    "skill_id": { "$ref": "#/$defs/identifier" },
+    "base_draft_revision": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+    "base_draft_sha256": { "$ref": "#/$defs/sha256" },
+    "operations": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 35,
+      "uniqueItems": true,
+      "items": {
+        "oneOf": [
+          { "$ref": "#/$defs/upsertFile" },
+          { "$ref": "#/$defs/deleteFile" },
+          { "$ref": "#/$defs/setEntrypoint" },
+          { "$ref": "#/$defs/setDisplayName" }
+        ]
+      }
+    },
+    "result_draft_sha256": { "$ref": "#/$defs/sha256" },
+    "patch_sha256": {
+      "$ref": "#/$defs/sha256",
+      "description": "Server-computed immutable proposal identity; PatchDecision must echo it exactly."
+    },
+    "rationale": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "requires_student_confirmation": { "const": true },
+    "evidence_refs": {
+      "type": "array",
+      "maxItems": 64,
+      "uniqueItems": true,
+      "x-invariants": ["evidence_refs contains at most one immutable reference for each evidence_id"],
+      "items": { "$ref": "../common/evidence-ref.schema.json" }
+    },
+    "created_at": { "type": "string", "format": "date-time" }
+  },
+  "x-patch-hash-contract": {
+    "algorithm": "SHA-256",
+    "encoding": "UTF-8",
+    "canonicalization": "YAYA_CANONICAL_JSON_V1",
+    "excluded_fields": ["patch_sha256"]
+  },
+  "x-invariants": [
+    "patch_sha256 equals the hash defined by x-patch-hash-contract",
+    "source paths are canonical slash-separated logical identifiers: no empty, dot, dot-dot or trailing-dot segment is allowed",
+    "source path identity uses ASCII case folding for collision detection and never delegates normalization to a host filesystem",
+    "at most one UPSERT_FILE or DELETE_FILE targets a given canonical path",
+    "at most one SET_ENTRYPOINT and one SET_DISPLAY_NAME operation are present",
+    "UPSERT_FILE.content_sha256 equals lowercase SHA-256 of the UTF-8 bytes of content",
+    "operations apply in array order to the exact base draft after every previous_content_sha256 precondition succeeds",
+    "the resulting display name and source bundle satisfy SkillDraft schema constraints and hash to result_draft_sha256",
+    "DELETE_FILE cannot remove the final source file and the resulting entrypoint identifies exactly one remaining file",
+    "operations contain no build, activation, sandbox execution or world mutation instruction"
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "sourcePath": {
+      "$ref": "./skill-source-bundle.schema.json#/$defs/canonicalSourcePath"
+    },
+    "upsertFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operation", "path", "previous_content_sha256", "content", "content_sha256"],
+      "properties": {
+        "operation": { "const": "UPSERT_FILE" },
+        "path": { "$ref": "#/$defs/sourcePath" },
+        "previous_content_sha256": {
+          "oneOf": [
+            { "$ref": "#/$defs/sha256" },
+            { "type": "null" }
+          ]
+        },
+        "content": { "type": "string", "maxLength": 1048576 },
+        "content_sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "deleteFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operation", "path", "previous_content_sha256"],
+      "properties": {
+        "operation": { "const": "DELETE_FILE" },
+        "path": { "$ref": "#/$defs/sourcePath" },
+        "previous_content_sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "setEntrypoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operation", "path"],
+      "properties": {
+        "operation": { "const": "SET_ENTRYPOINT" },
+        "path": { "$ref": "#/$defs/sourcePath" }
+      }
+    },
+    "setDisplayName": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operation", "display_name"],
+      "properties": {
+        "operation": { "const": "SET_DISPLAY_NAME" },
+        "display_name": { "type": "string", "minLength": 1, "maxLength": 80 }
+      }
+    }
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/common/error.schema.json",
+  "title": "ContractError",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["code", "category", "retryable", "user_message_key", "stage"],
+  "properties": {
+    "code": { "$ref": "./error-code.schema.json" },
+    "category": {
+      "type": "string",
+      "enum": [
+        "VALIDATION",
+        "AUTHENTICATION",
+        "AUTHORIZATION",
+        "POLICY",
+        "CONCURRENCY",
+        "SKILL",
+        "SANDBOX",
+        "WORLD_RULE",
+        "DEPENDENCY",
+        "INVARIANT",
+        "RATE_LIMIT",
+        "INTERNAL"
+      ]
+    },
+    "retryable": { "type": "boolean" },
+    "user_message_key": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{2,127}$" },
+    "stage": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$" },
+    "message": { "type": "string", "minLength": 1, "maxLength": 512 },
+    "details": { "type": "object", "additionalProperties": true },
+    "evidence_ids": {
+      "type": "array",
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^evidence_[A-Za-z0-9_-]{8,128}$" }
+    }
+  },
+  "allOf": [
+    {
+      "oneOf": [
+        { "$ref": "#/$defs/INVALID_REQUEST" },
+        { "$ref": "#/$defs/SCHEMA_VERSION_UNSUPPORTED" },
+        { "$ref": "#/$defs/CONTENT_VERSION_MISMATCH" },
+        { "$ref": "#/$defs/AUTHENTICATION_REQUIRED" },
+        { "$ref": "#/$defs/AUTHORIZATION_DENIED" },
+        { "$ref": "#/$defs/POLICY_DENIED" },
+        { "$ref": "#/$defs/NOT_FOUND" },
+        { "$ref": "#/$defs/PAYLOAD_TOO_LARGE" },
+        { "$ref": "#/$defs/IDEMPOTENCY_KEY_REUSED" },
+        { "$ref": "#/$defs/WORLD_REVISION_CONFLICT" },
+        { "$ref": "#/$defs/EVENT_SEQUENCE_GAP" },
+        { "$ref": "#/$defs/SKILL_NOT_CERTIFIED" },
+        { "$ref": "#/$defs/SKILL_VERSION_MISMATCH" },
+        { "$ref": "#/$defs/ACTIVE_SKILL_ARTIFACT_MISMATCH" },
+        { "$ref": "#/$defs/SANDBOX_COMPILE_ERROR" },
+        { "$ref": "#/$defs/SANDBOX_RUNTIME_ERROR" },
+        { "$ref": "#/$defs/SANDBOX_RESOURCE_LIMIT" },
+        { "$ref": "#/$defs/WORLD_RULE_REJECTED" },
+        { "$ref": "#/$defs/DEPENDENCY_UNAVAILABLE" },
+        { "$ref": "#/$defs/FEISHU_SIGNATURE_INVALID" },
+        { "$ref": "#/$defs/FEISHU_REPLAY_DETECTED" },
+        { "$ref": "#/$defs/FEISHU_SYNC_FAILED" },
+        { "$ref": "#/$defs/RATE_LIMITED" },
+        { "$ref": "#/$defs/UNKNOWN_COMMIT_STATE" },
+        { "$ref": "#/$defs/INVARIANT_VIOLATION" },
+        { "$ref": "#/$defs/INTERNAL_ERROR" }
+      ]
+    }
+  ],
+  "$defs": {
+    "INVALID_REQUEST": { "properties": { "code": { "const": "INVALID_REQUEST" }, "category": { "const": "VALIDATION" }, "retryable": { "const": false }, "user_message_key": { "const": "request.invalid" } } },
+    "SCHEMA_VERSION_UNSUPPORTED": { "properties": { "code": { "const": "SCHEMA_VERSION_UNSUPPORTED" }, "category": { "const": "VALIDATION" }, "retryable": { "const": false }, "user_message_key": { "const": "schema.version_unsupported" } } },
+    "CONTENT_VERSION_MISMATCH": { "properties": { "code": { "const": "CONTENT_VERSION_MISMATCH" }, "category": { "const": "VALIDATION" }, "retryable": { "const": false }, "user_message_key": { "const": "content.version_mismatch" } } },
+    "AUTHENTICATION_REQUIRED": { "properties": { "code": { "const": "AUTHENTICATION_REQUIRED" }, "category": { "const": "AUTHENTICATION" }, "retryable": { "const": false }, "user_message_key": { "const": "auth.login_required" } } },
+    "AUTHORIZATION_DENIED": { "properties": { "code": { "const": "AUTHORIZATION_DENIED" }, "category": { "const": "AUTHORIZATION" }, "retryable": { "const": false }, "user_message_key": { "const": "auth.permission_denied" } } },
+    "POLICY_DENIED": { "properties": { "code": { "const": "POLICY_DENIED" }, "category": { "const": "POLICY" }, "retryable": { "const": false }, "user_message_key": { "const": "policy.action_denied" } } },
+    "NOT_FOUND": { "properties": { "code": { "const": "NOT_FOUND" }, "category": { "const": "VALIDATION" }, "retryable": { "const": false }, "user_message_key": { "const": "resource.not_found" } } },
+    "PAYLOAD_TOO_LARGE": { "properties": { "code": { "const": "PAYLOAD_TOO_LARGE" }, "category": { "const": "VALIDATION" }, "retryable": { "const": false }, "user_message_key": { "const": "request.payload_too_large" } } },
+    "IDEMPOTENCY_KEY_REUSED": { "properties": { "code": { "const": "IDEMPOTENCY_KEY_REUSED" }, "category": { "const": "CONCURRENCY" }, "retryable": { "const": false }, "user_message_key": { "const": "request.idempotency_conflict" } } },
+    "WORLD_REVISION_CONFLICT": { "properties": { "code": { "const": "WORLD_REVISION_CONFLICT" }, "category": { "const": "CONCURRENCY" }, "retryable": { "const": true }, "user_message_key": { "const": "world.changed_retry" } } },
+    "EVENT_SEQUENCE_GAP": { "properties": { "code": { "const": "EVENT_SEQUENCE_GAP" }, "category": { "const": "CONCURRENCY" }, "retryable": { "const": true }, "user_message_key": { "const": "event.resync_required" } } },
+    "SKILL_NOT_CERTIFIED": { "properties": { "code": { "const": "SKILL_NOT_CERTIFIED" }, "category": { "const": "SKILL" }, "retryable": { "const": false }, "user_message_key": { "const": "skill.not_certified" } } },
+    "SKILL_VERSION_MISMATCH": { "properties": { "code": { "const": "SKILL_VERSION_MISMATCH" }, "category": { "const": "SKILL" }, "retryable": { "const": false }, "user_message_key": { "const": "skill.version_mismatch" } } },
+    "ACTIVE_SKILL_ARTIFACT_MISMATCH": { "properties": { "code": { "const": "ACTIVE_SKILL_ARTIFACT_MISMATCH" }, "category": { "const": "INVARIANT" }, "retryable": { "const": false }, "user_message_key": { "const": "skill.artifact_mismatch" } } },
+    "SANDBOX_COMPILE_ERROR": { "properties": { "code": { "const": "SANDBOX_COMPILE_ERROR" }, "category": { "const": "SANDBOX" }, "retryable": { "const": false }, "user_message_key": { "const": "sandbox.compile_error" } } },
+    "SANDBOX_RUNTIME_ERROR": { "properties": { "code": { "const": "SANDBOX_RUNTIME_ERROR" }, "category": { "const": "SANDBOX" }, "retryable": { "const": false }, "user_message_key": { "const": "sandbox.runtime_error" } } },
+    "SANDBOX_RESOURCE_LIMIT": { "properties": { "code": { "const": "SANDBOX_RESOURCE_LIMIT" }, "category": { "const": "SANDBOX" }, "retryable": { "const": false }, "user_message_key": { "const": "sandbox.resource_limit" } } },
+    "WORLD_RULE_REJECTED": { "properties": { "code": { "const": "WORLD_RULE_REJECTED" }, "category": { "const": "WORLD_RULE" }, "retryable": { "const": false }, "user_message_key": { "const": "world.rule_rejected" } } },
+    "DEPENDENCY_UNAVAILABLE": { "properties": { "code": { "const": "DEPENDENCY_UNAVAILABLE" }, "category": { "const": "DEPENDENCY" }, "retryable": { "const": true }, "user_message_key": { "const": "dependency.temporarily_unavailable" } } },
+    "FEISHU_SIGNATURE_INVALID": { "properties": { "code": { "const": "FEISHU_SIGNATURE_INVALID" }, "category": { "const": "AUTHENTICATION" }, "retryable": { "const": false }, "user_message_key": { "const": "feishu.signature_invalid" } } },
+    "FEISHU_REPLAY_DETECTED": { "properties": { "code": { "const": "FEISHU_REPLAY_DETECTED" }, "category": { "const": "AUTHENTICATION" }, "retryable": { "const": false }, "user_message_key": { "const": "feishu.replay_detected" } } },
+    "FEISHU_SYNC_FAILED": { "properties": { "code": { "const": "FEISHU_SYNC_FAILED" }, "category": { "const": "DEPENDENCY" }, "retryable": { "const": true }, "user_message_key": { "const": "feishu.sync_delayed" } } },
+    "RATE_LIMITED": { "properties": { "code": { "const": "RATE_LIMITED" }, "category": { "const": "RATE_LIMIT" }, "retryable": { "const": true }, "user_message_key": { "const": "request.rate_limited" } } },
+    "UNKNOWN_COMMIT_STATE": { "properties": { "code": { "const": "UNKNOWN_COMMIT_STATE" }, "category": { "const": "DEPENDENCY" }, "retryable": { "const": false }, "user_message_key": { "const": "command.reconciling" } } },
+    "INVARIANT_VIOLATION": { "properties": { "code": { "const": "INVARIANT_VIOLATION" }, "category": { "const": "INVARIANT" }, "retryable": { "const": false }, "user_message_key": { "const": "system.invariant_violation" } } },
+    "INTERNAL_ERROR": { "properties": { "code": { "const": "INTERNAL_ERROR" }, "category": { "const": "INTERNAL" }, "retryable": { "const": false }, "user_message_key": { "const": "system.internal_error" } } }
+  }
+}

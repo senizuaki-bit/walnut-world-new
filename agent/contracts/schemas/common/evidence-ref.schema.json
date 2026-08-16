@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/common/evidence-ref.schema.json",
+  "title": "EvidenceRef",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["evidence_id", "evidence_type", "created_at"],
+  "properties": {
+    "evidence_id": { "type": "string", "pattern": "^evidence_[A-Za-z0-9_-]{8,128}$" },
+    "evidence_type": {
+      "type": "string",
+      "enum": [
+        "DOMAIN_EVENT",
+        "ACTION_LOG",
+        "SANDBOX_LOG",
+        "TEST_REPORT",
+        "POLICY_DECISION",
+        "WORLD_COMMIT",
+        "LEARNER_UPDATE",
+        "AUDIT_LOG"
+      ]
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "uri": { "type": "string", "minLength": 1, "maxLength": 1024 }
+  }
+}

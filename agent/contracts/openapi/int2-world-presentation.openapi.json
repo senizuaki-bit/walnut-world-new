@@ -1,0 +1,142 @@
+{
+  "openapi": "3.1.0",
+  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
+  "info": {
+    "title": "YaYa INT2 Authoritative World Presentation API",
+    "version": "0.5.0",
+    "description": "Additive, read-only HTTP projection for replaying committed HARVEST actions. Existing v0.4 Game API bytes remain frozen.",
+    "license": { "name": "Proprietary" }
+  },
+  "servers": [
+    {
+      "url": "https://api.yaya.example",
+      "description": "Environment-specific Product Gateway base URL"
+    }
+  ],
+  "security": [{ "bearerAuth": [] }],
+  "tags": [{ "name": "World presentation" }],
+  "paths": {
+    "/v1/worlds/{world_id}/presentation-events": {
+      "get": {
+        "tags": ["World presentation"],
+        "operationId": "listWorldPresentationEvents",
+        "x-godot-operation": "get_world_presentation_events",
+        "summary": "Read ordered display actions derived from committed world authority",
+        "x-invariants": [
+          "This is a GET-only projection and recovery-only clients issue no mutation.",
+          "The Product Gateway returns events only after the related authoritative world commit and snapshot are durable.",
+          "Clients deduplicate by stable stream_id, sequence, and event_id; repeated GET responses never create business side effects.",
+          "Clients fail closed and restore the authoritative snapshot on gaps, unknown types, corrupt payloads, integrity mismatch, or final snapshot mismatch."
+        ],
+        "parameters": [
+          { "$ref": "#/components/parameters/RequestId" },
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/CorrelationId" },
+          { "$ref": "#/components/parameters/SchemaVersion" },
+          { "$ref": "#/components/parameters/WorldId" },
+          { "$ref": "#/components/parameters/AfterSequence" },
+          { "$ref": "#/components/parameters/PageLimit" }
+        ],
+        "responses": {
+          "200": {
+            "description": "A closed page from the independent authoritative presentation stream.",
+            "headers": {
+              "X-Request-Id": { "$ref": "#/components/headers/ResponseRequestId" },
+              "X-Trace-Id": { "$ref": "#/components/headers/ResponseTraceId" },
+              "X-Correlation-Id": { "$ref": "#/components/headers/ResponseCorrelationId" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "../schemas/game/world-presentation-event-page.schema.json" }
+              }
+            }
+          },
+          "400": { "$ref": "game-api.openapi.json#/components/responses/BadRequest" },
+          "401": { "$ref": "game-api.openapi.json#/components/responses/Unauthorized" },
+          "403": { "$ref": "game-api.openapi.json#/components/responses/Forbidden" },
+          "404": { "$ref": "game-api.openapi.json#/components/responses/NotFound" },
+          "409": { "$ref": "game-api.openapi.json#/components/responses/Conflict" },
+          "429": { "$ref": "game-api.openapi.json#/components/responses/RateLimited" },
+          "500": { "$ref": "game-api.openapi.json#/components/responses/InternalError" },
+          "503": { "$ref": "game-api.openapi.json#/components/responses/Unavailable" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "parameters": {
+      "RequestId": {
+        "name": "X-Request-Id",
+        "in": "header",
+        "required": true,
+        "schema": { "type": "string", "pattern": "^req_[A-Za-z0-9_-]{8,96}$" }
+      },
+      "TraceId": {
+        "name": "X-Trace-Id",
+        "in": "header",
+        "required": true,
+        "schema": { "type": "string", "pattern": "^trace_[A-Za-z0-9_-]{8,96}$" }
+      },
+      "CorrelationId": {
+        "name": "X-Correlation-Id",
+        "in": "header",
+        "required": true,
+        "schema": { "type": "string", "pattern": "^corr_[A-Za-z0-9_-]{8,96}$" }
+      },
+      "SchemaVersion": {
+        "name": "X-Schema-Version",
+        "in": "header",
+        "required": true,
+        "schema": { "const": "1.0.0" }
+      },
+      "WorldId": {
+        "name": "world_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+        }
+      },
+      "AfterSequence": {
+        "name": "after_sequence",
+        "in": "query",
+        "required": true,
+        "description": "Return presentation events strictly after this last successfully applied sequence.",
+        "schema": { "type": "integer", "minimum": 0 }
+      },
+      "PageLimit": {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500,
+          "default": 100
+        }
+      }
+    },
+    "headers": {
+      "ResponseRequestId": {
+        "required": true,
+        "schema": { "type": "string", "pattern": "^req_[A-Za-z0-9_-]{8,96}$" }
+      },
+      "ResponseTraceId": {
+        "required": true,
+        "schema": { "type": "string", "pattern": "^trace_[A-Za-z0-9_-]{8,96}$" }
+      },
+      "ResponseCorrelationId": {
+        "required": true,
+        "schema": { "type": "string", "pattern": "^corr_[A-Za-z0-9_-]{8,96}$" }
+      }
+    }
+  }
+}

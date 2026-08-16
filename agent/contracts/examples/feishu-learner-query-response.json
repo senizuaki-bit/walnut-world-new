@@ -1,0 +1,47 @@
+{
+  "schema_ref": "../schemas/feishu/learner-query-result.schema.json",
+  "value": {
+    "query_id": "lqry_00000001",
+    "learner_ref": "lrn_00000001",
+    "as_of": "2026-08-06T10:20:01Z",
+    "data_freshness": {
+      "projected_through_event_at": "2026-08-06T10:19:58Z",
+      "projection_lag_seconds": 3,
+      "is_stale": false
+    },
+    "mastery_summary": [
+      {
+        "concept_ref": "cpp.loop.for",
+        "state": "DEVELOPING",
+        "confidence": 0.78,
+        "evidence_refs": [
+          {
+            "evidence_id": "evidence_world_00000001",
+            "evidence_type": "WORLD_COMMIT",
+            "created_at": "2026-08-06T09:58:00Z",
+            "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+          }
+        ],
+        "updated_at": "2026-08-06T09:58:02Z"
+      }
+    ],
+    "recent_evidence": [
+      {
+        "evidence_id": "evidence_world_00000001",
+        "evidence_type": "WORLD_COMMIT",
+        "created_at": "2026-08-06T09:58:00Z",
+        "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    ],
+    "support_needs": [
+      "建议让学生解释循环终止条件，再进行一次迁移任务。"
+    ],
+    "redaction": {
+      "direct_identifiers_removed": true,
+      "fields_omitted": [
+        "raw_chat_text"
+      ]
+    },
+    "trace_id": "trace_feishu_00000003"
+  }
+}

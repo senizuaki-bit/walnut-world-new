@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/product-experience/agent-interaction-page.schema.json",
+  "title": "Product agent interaction page",
+  "description": "Gap-free session-scoped interaction projection page for transcript and decision recovery.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_context",
+    "session_id",
+    "requested_after_sequence",
+    "requested_limit",
+    "high_watermark_sequence",
+    "from_sequence",
+    "to_sequence",
+    "has_more",
+    "next_after_sequence",
+    "interactions"
+  ],
+  "properties": {
+    "request_context": { "$ref": "../common/request-context.schema.json" },
+    "session_id": { "$ref": "#/$defs/identifier" },
+    "requested_after_sequence": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+    "requested_limit": { "type": "integer", "minimum": 1, "maximum": 100 },
+    "high_watermark_sequence": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+    "from_sequence": {
+      "oneOf": [
+        { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+        { "type": "null" }
+      ]
+    },
+    "to_sequence": {
+      "oneOf": [
+        { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+        { "type": "null" }
+      ]
+    },
+    "has_more": { "type": "boolean" },
+    "next_after_sequence": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+    "interactions": {
+      "type": "array",
+      "maxItems": 100,
+      "items": { "$ref": "./agent-interaction.schema.json" }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "interactions": { "maxItems": 0 } },
+        "required": ["interactions"]
+      },
+      "then": {
+        "properties": {
+          "from_sequence": { "type": "null" },
+          "to_sequence": { "type": "null" },
+          "has_more": { "const": false }
+        }
+      },
+      "else": {
+        "properties": {
+          "from_sequence": { "type": "integer", "minimum": 1 },
+          "to_sequence": { "type": "integer", "minimum": 1 }
+        }
+      }
+    }
+  ],
+  "x-invariants": [
+    "authenticated actor tenant_id and actor_id equal request_context.actor tenant_id and actor_id",
+    "requested_after_sequence equals the HTTP after_sequence query and requested_limit equals the supplied limit or its default of 50",
+    "path session_id equals the page and every item session_id",
+    "every item request_context.actor and content_ref equal the page request_context actor and content_ref",
+    "interactions are strictly ordered and gap-free by sequence and interaction_id values are unique",
+    "interactions length is at most requested_limit",
+    "for a non-empty page, from_sequence equals requested_after_sequence plus 1, to_sequence equals the final item sequence and next_after_sequence equals to_sequence",
+    "high_watermark_sequence is at least to_sequence; has_more is true exactly when to_sequence is below high_watermark_sequence",
+    "for an empty page, from_sequence and to_sequence are null, has_more is false, high_watermark_sequence equals requested_after_sequence and next_after_sequence equals requested_after_sequence",
+    "X-Interaction-High-Watermark equals high_watermark_sequence",
+    "the server evaluates one stable as-of high-watermark per page and does not duplicate or omit an interaction within that boundary"
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    }
+  }
+}

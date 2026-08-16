@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/game/client-event-batch-request.schema.json",
+  "title": "Client event batch request",
+  "x-invariants": [
+    "events are ordered by sequence, contain no duplicate event_id, and are gap-free.",
+    "first_sequence equals events[0].sequence and last_sequence equals the last event sequence.",
+    "The server rejects the whole batch with EVENT_SEQUENCE_GAP when ordering or boundary invariants fail."
+  ],
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "batch_id",
+    "session_id",
+    "world_id",
+    "first_sequence",
+    "last_sequence",
+    "events"
+  ],
+  "properties": {
+    "batch_id": { "$ref": "#/$defs/identifier" },
+    "session_id": { "$ref": "#/$defs/identifier" },
+    "world_id": { "$ref": "#/$defs/identifier" },
+    "first_sequence": { "type": "integer", "minimum": 1 },
+    "last_sequence": { "type": "integer", "minimum": 1 },
+    "events": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 500,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/clientEvent" }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "clientEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event_id", "sequence", "occurred_at", "event_type", "world_revision", "payload"],
+      "properties": {
+        "event_id": { "type": "string", "pattern": "^client_evt_[A-Za-z0-9_-]{8,128}$" },
+        "sequence": { "type": "integer", "minimum": 1 },
+        "occurred_at": { "type": "string", "format": "date-time" },
+        "event_type": {
+          "type": "string",
+          "enum": [
+            "UI_ACTION",
+            "CODE_EDITED",
+            "BUILD_REQUESTED",
+            "HINT_VIEWED",
+            "FEEDBACK_SHOWN",
+            "ANIMATION_COMPLETED",
+            "CLIENT_ERROR",
+            "SESSION_HEARTBEAT"
+          ]
+        },
+        "world_revision": { "type": "integer", "minimum": 0 },
+        "payload": {
+          "oneOf": [
+            { "$ref": "#/$defs/uiActionPayload" },
+            { "$ref": "#/$defs/codeEditedPayload" },
+            { "$ref": "#/$defs/buildRequestedPayload" },
+            { "$ref": "#/$defs/hintViewedPayload" },
+            { "$ref": "#/$defs/feedbackShownPayload" },
+            { "$ref": "#/$defs/animationCompletedPayload" },
+            { "$ref": "#/$defs/clientErrorPayload" },
+            { "$ref": "#/$defs/heartbeatPayload" }
+          ]
+        }
+      },
+      "allOf": [
+        { "if": { "properties": { "event_type": { "const": "UI_ACTION" } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/uiActionPayload" } } } },
+        { "if": { "properties": { "event_type": { "const": "CODE_EDITED" } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/codeEditedPayload" } } } },
+        { "if": { "properties": { "event_type": { "const": "BUILD_REQUESTED" } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/buildRequestedPayload" } } } },
+        { "if": { "properties": { "event_type": { "const": "HINT_VIEWED" } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/hintViewedPayload" } } } },
+        { "if": { "properties": { "event_type": { "const": "FEEDBACK_SHOWN" } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/feedbackShownPayload" } } } },
+        { "if": { "properties": { "event_type": { "const": "ANIMATION_COMPLETED" } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/animationCompletedPayload" } } } },
+        { "if": { "properties": { "event_type": { "const": "CLIENT_ERROR" } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/clientErrorPayload" } } } },
+        { "if": { "properties": { "event_type": { "const": "SESSION_HEARTBEAT" } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/heartbeatPayload" } } } }
+      ]
+    },
+    "uiActionPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["action_id", "component_id"],
+      "properties": {
+        "action_id": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{1,95}$" },
+        "component_id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{1,95}$" }
+      }
+    },
+    "codeEditedPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["skill_id", "draft_revision", "source_sha256", "changed_file_count"],
+      "properties": {
+        "skill_id": { "$ref": "#/$defs/identifier" },
+        "draft_revision": { "type": "integer", "minimum": 0 },
+        "source_sha256": { "$ref": "#/$defs/sha256" },
+        "changed_file_count": { "type": "integer", "minimum": 1, "maximum": 64 }
+      }
+    },
+    "buildRequestedPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["build_id", "skill_id"],
+      "properties": {
+        "build_id": { "$ref": "#/$defs/identifier" },
+        "skill_id": { "$ref": "#/$defs/identifier" }
+      }
+    },
+    "hintViewedPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hint_id", "hint_level"],
+      "properties": {
+        "hint_id": { "$ref": "#/$defs/identifier" },
+        "hint_level": { "type": "integer", "minimum": 1, "maximum": 10 }
+      }
+    },
+    "feedbackShownPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["message_key", "source", "degraded"],
+      "properties": {
+        "message_key": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{2,127}$" },
+        "source": { "type": "string", "enum": ["AGENT", "POLICY", "SYSTEM"] },
+        "degraded": { "type": "boolean" }
+      }
+    },
+    "animationCompletedPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["action_event_id", "animation_id", "result"],
+      "properties": {
+        "action_event_id": { "type": "string", "pattern": "^evt_[A-Za-z0-9_-]{8,128}$" },
+        "animation_id": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{1,95}$" },
+        "result": { "type": "string", "enum": ["COMPLETED", "SKIPPED", "FAILED"] }
+      }
+    },
+    "clientErrorPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message_sha256", "screen", "handled"],
+      "properties": {
+        "code": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,95}$" },
+        "message_sha256": { "$ref": "#/$defs/sha256" },
+        "screen": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{1,95}$" },
+        "handled": { "type": "boolean" }
+      }
+    },
+    "heartbeatPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["last_received_event_sequence"],
+      "properties": {
+        "last_received_event_sequence": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

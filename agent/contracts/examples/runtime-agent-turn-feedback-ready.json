@@ -1,0 +1,42 @@
+{
+  "schema_ref": "../schemas/game/agent-turn-feedback-ready-event.schema.json",
+  "value": {
+    "event_id": "evt_feedback_00000001",
+    "event_type": "agent.turn.feedback_ready",
+    "event_version": 1,
+    "schema_version": "1.0.0",
+    "stream_id": "agent-session:session_demo_001",
+    "sequence": 18,
+    "occurred_at": "2026-08-07T12:00:04Z",
+    "producer": "agent_hub",
+    "trace_id": "trace_feedback_00000001",
+    "command_id": "cmd_feedback_00000001",
+    "correlation_id": "corr_feedback_00000001",
+    "causation_id": "evt_world_00000001",
+    "content_ref": {
+      "unit_id": "YAYA_FARM_001",
+      "version": "1.4.0",
+      "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "payload": {
+      "session_id": "session_demo_001",
+      "turn_id": "turn_demo_000001",
+      "command_id": "cmd_feedback_00000001",
+      "run_id": "run_water_0001",
+      "message_key": "agent.turn.completed",
+      "message": "我已经帮你给番茄浇水了，我们一起看看土壤湿度有没有变化。",
+      "source": "provider",
+      "degraded": false,
+      "fallback_reason": null,
+      "evidence_refs": [
+        {
+          "evidence_id": "evidence_feedback_00000001",
+          "evidence_type": "WORLD_COMMIT",
+          "created_at": "2026-08-07T12:00:03Z",
+          "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        }
+      ],
+      "completed_at": "2026-08-07T12:00:04Z"
+    }
+  }
+}

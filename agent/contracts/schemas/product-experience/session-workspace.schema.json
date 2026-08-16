@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/product-experience/session-workspace.schema.json",
+  "title": "Product session workspace projection",
+  "description": "Read-only recovery projection joining one version-pinned AgentSession with its world checkpoint, current task, draft references and interaction high-watermark.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_context",
+    "workspace_id",
+    "workspace_revision",
+    "session",
+    "content_ref",
+    "current_task",
+    "world_checkpoint",
+    "skill_draft_refs",
+    "last_interaction_sequence",
+    "created_at",
+    "updated_at",
+    "links"
+  ],
+  "properties": {
+    "request_context": { "$ref": "../common/request-context.schema.json" },
+    "workspace_id": { "$ref": "#/$defs/identifier" },
+    "workspace_revision": { "type": "integer", "minimum": 1 },
+    "session": { "$ref": "../game/agent-session.schema.json" },
+    "content_ref": { "$ref": "../common/content-ref.schema.json" },
+    "current_task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["task_id", "status", "started_at", "completed_at"],
+      "properties": {
+        "task_id": { "$ref": "#/$defs/identifier" },
+        "status": {
+          "type": "string",
+          "enum": ["NOT_STARTED", "IN_PROGRESS", "COMPLETED", "ABANDONED"]
+        },
+        "started_at": {
+          "oneOf": [
+            { "type": "string", "format": "date-time" },
+            { "type": "null" }
+          ]
+        },
+        "completed_at": {
+          "oneOf": [
+            { "type": "string", "format": "date-time" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "status": { "const": "NOT_STARTED" } },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "started_at": { "type": "null" },
+              "completed_at": { "type": "null" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "status": { "const": "IN_PROGRESS" } },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "started_at": { "type": "string", "format": "date-time" },
+              "completed_at": { "type": "null" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "status": { "enum": ["COMPLETED", "ABANDONED"] } },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "started_at": { "type": "string", "format": "date-time" },
+              "completed_at": { "type": "string", "format": "date-time" }
+            }
+          }
+        }
+      ],
+      "x-invariants": [
+        "completed_at is not earlier than started_at when both are present"
+      ]
+    },
+    "world_checkpoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["world_id", "world_revision", "last_event_sequence", "state_hash"],
+      "properties": {
+        "world_id": { "$ref": "#/$defs/identifier" },
+        "world_revision": { "type": "integer", "minimum": 0 },
+        "last_event_sequence": { "type": "integer", "minimum": 0 },
+        "state_hash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "skill_draft_refs": {
+      "type": "array",
+      "maxItems": 32,
+      "uniqueItems": true,
+      "x-invariants": [
+        "draft_id values are unique",
+        "skill_id values are unique within one session workspace"
+      ],
+      "items": { "$ref": "#/$defs/skillDraftRef" }
+    },
+    "last_interaction_sequence": { "type": "integer", "minimum": 0 },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "links": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["self", "content_unit", "agent_interactions", "world_snapshot"],
+      "properties": {
+        "self": { "$ref": "#/$defs/link" },
+        "content_unit": { "$ref": "#/$defs/link" },
+        "agent_interactions": { "$ref": "#/$defs/link" },
+        "world_snapshot": { "$ref": "#/$defs/link" }
+      }
+    }
+  },
+  "x-invariants": [
+    "path session_id equals session.session_id and links.self identifies the same session",
+    "authenticated actor tenant_id and actor_id equal request_context.actor tenant_id and actor_id",
+    "request_context.actor equals session.request_context.actor",
+    "request_context.content_ref equals content_ref and session.content equals content_ref",
+    "world_checkpoint.world_id equals session.world_id",
+    "request_context.requested_at is not later than created_at",
+    "every skill_draft_ref URL is the credential-free canonical Product GET and returns the same actor, content_ref, session_id, draft_id, skill_id, revision and draft_sha256",
+    "last_interaction_sequence equals the high-watermark observed by listProductAgentInteractions",
+    "links.self, content_unit, agent_interactions and world_snapshot are credential-free canonical URLs whose path identities equal the workspace fields",
+    "links.agent_interactions is directly followable at the canonical baseline after_sequence=0",
+    "updated_at is not earlier than created_at",
+    "ETag identifies workspace_revision and changes whenever any projected field changes"
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "link": {
+      "type": "string",
+      "format": "uri-reference",
+      "minLength": 1,
+      "maxLength": 2048
+    },
+    "skillDraftRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["draft_id", "skill_id", "revision", "draft_sha256", "url"],
+      "properties": {
+        "draft_id": { "$ref": "#/$defs/identifier" },
+        "skill_id": { "$ref": "#/$defs/identifier" },
+        "revision": { "type": "integer", "minimum": 1 },
+        "draft_sha256": { "$ref": "#/$defs/sha256" },
+        "url": { "$ref": "#/$defs/link" }
+      }
+    }
+  }
+}

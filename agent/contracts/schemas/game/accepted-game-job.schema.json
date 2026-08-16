@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/game/accepted-game-job.schema.json",
+  "title": "AcceptedGameJob",
+  "description": "Game write acknowledgement. It carries the command and trace identities required for reconciliation and cannot represent execution progress or completion.",
+  "x-invariants": [
+    "trace_id is the immutable original command trace and may differ from the current HTTP attempt trace only when Idempotency-Replayed is true",
+    "X-Request-Id and X-Trace-Id response headers always identify the current HTTP attempt"
+  ],
+  "allOf": [
+    {
+      "$ref": "../common/async-job.schema.json"
+    },
+    {
+      "type": "object",
+      "required": [
+        "command_id",
+        "trace_id"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "ACCEPTED",
+            "QUEUED"
+          ]
+        }
+      }
+    }
+  ]
+}

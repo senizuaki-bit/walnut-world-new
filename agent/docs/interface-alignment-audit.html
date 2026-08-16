@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>芽芽家园｜历史接口审查报告（已由独立接口规范取代）</title>
+  <style>
+    :root {
+      --ink: #16221d;
+      --muted: #627069;
+      --paper: #fbfdf9;
+      --surface: #ffffff;
+      --line: #dce6df;
+      --green: #1b6b4b;
+      --green-soft: #eaf6ef;
+      --amber: #986009;
+      --amber-soft: #fff6df;
+      --red: #a62f32;
+      --red-soft: #fff0ef;
+      --blue: #285d8f;
+      --blue-soft: #eef6ff;
+      --shadow: 0 14px 40px rgba(24, 50, 38, 0.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 3%, rgba(81, 163, 116, 0.11), transparent 27rem),
+        linear-gradient(180deg, #f4f9f4 0, var(--paper) 27rem);
+      font-family: Inter, "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+      font-size: 15px;
+      line-height: 1.75;
+    }
+
+    a { color: var(--blue); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+    a:hover { color: #174873; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { padding: 0.12rem 0.34rem; border-radius: 5px; background: #eef3ef; font-size: 0.92em; }
+
+    .page {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 34px 0 72px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 42px;
+      color: #fff;
+      border-radius: 24px;
+      background: linear-gradient(135deg, #163d2e 0%, #1c6346 62%, #2f7b58 100%);
+      box-shadow: var(--shadow);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -90px;
+      top: -115px;
+      width: 330px;
+      height: 330px;
+      border: 54px solid rgba(255, 255, 255, 0.08);
+      border-radius: 50%;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 13px;
+      font-weight: 750;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3 { margin-top: 0; line-height: 1.3; }
+    h1 { max-width: 880px; margin-bottom: 14px; font-size: clamp(30px, 5vw, 50px); letter-spacing: -0.03em; }
+    h2 { margin-bottom: 18px; font-size: 25px; }
+    h3 { margin-bottom: 9px; font-size: 18px; }
+
+    .hero p { max-width: 820px; margin: 0; color: rgba(255, 255, 255, 0.86); font-size: 16px; }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 24px;
+    }
+
+    .hero-meta span {
+      position: relative;
+      z-index: 1;
+      padding: 7px 11px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.09);
+      color: #fff;
+      font-size: 13px;
+    }
+
+    .toolbar { display: flex; justify-content: flex-end; margin: 14px 0 6px; }
+    .print-button {
+      padding: 8px 13px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      color: var(--ink);
+      background: #fff;
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin: 22px 0;
+    }
+
+    .metric, .panel, .finding {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 7px 24px rgba(24, 50, 38, 0.045);
+    }
+
+    .metric { padding: 20px; border-radius: 15px; }
+    .metric strong { display: block; font-size: 30px; line-height: 1.1; }
+    .metric span { color: var(--muted); font-size: 13px; }
+    .metric.good strong { color: var(--green); }
+    .metric.danger strong { color: var(--red); }
+    .metric.warn strong { color: var(--amber); }
+
+    .verdict {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 15px;
+      align-items: start;
+      margin-bottom: 22px;
+      padding: 20px 22px;
+      border: 1px solid #efc9c7;
+      border-radius: 15px;
+      background: var(--red-soft);
+    }
+
+    .verdict-badge {
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: var(--red);
+      color: #fff;
+      font-weight: 800;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .verdict p { margin: 0; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .toc {
+      position: sticky;
+      top: 18px;
+      padding: 17px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.89);
+      backdrop-filter: blur(10px);
+    }
+
+    .toc strong { display: block; margin-bottom: 8px; font-size: 13px; }
+    .toc a { display: block; padding: 4px 0; color: var(--muted); text-decoration: none; font-size: 13px; }
+    .toc a:hover { color: var(--green); }
+
+    main { min-width: 0; }
+    section { scroll-margin-top: 20px; margin-bottom: 24px; }
+
+    .panel { padding: 26px; border-radius: var(--radius); }
+    .panel > :last-child { margin-bottom: 0; }
+    .section-kicker { margin: 0 0 4px; color: var(--green); font-weight: 800; font-size: 12px; letter-spacing: 0.11em; }
+
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+    table { width: 100%; border-collapse: collapse; background: #fff; font-size: 13.5px; }
+    th, td { padding: 11px 13px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { color: #435149; background: #f3f7f4; font-size: 12px; letter-spacing: 0.03em; }
+    tr:last-child td { border-bottom: 0; }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-weight: 750;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .status.ok { color: var(--green); background: var(--green-soft); }
+    .status.no { color: var(--red); background: var(--red-soft); }
+    .status.partial { color: var(--amber); background: var(--amber-soft); }
+    .status.scope { color: var(--blue); background: var(--blue-soft); }
+
+    .finding-list { display: grid; gap: 14px; }
+    .finding { padding: 21px; border-radius: 14px; }
+    .finding.p0 { border-left: 5px solid var(--red); }
+    .finding.p1 { border-left: 5px solid var(--amber); }
+    .finding-head { display: flex; gap: 9px; align-items: center; margin-bottom: 8px; }
+    .priority { padding: 3px 8px; border-radius: 7px; color: #fff; font-weight: 850; font-size: 11px; }
+    .priority.p0 { background: var(--red); }
+    .priority.p1 { background: var(--amber); }
+    .finding h3 { margin: 0; }
+    .finding p { margin: 7px 0 0; }
+    .finding ul { margin: 8px 0 0; padding-left: 21px; }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .flow-step { position: relative; padding: 14px; border: 1px solid var(--line); border-radius: 11px; background: #f8faf8; }
+    .flow-step:not(:last-child)::after { content: "→"; position: absolute; right: -17px; top: 35%; z-index: 2; color: var(--green); font-size: 20px; }
+    .flow-step strong { display: block; color: var(--green); }
+
+    pre {
+      overflow: auto;
+      margin: 14px 0 0;
+      padding: 17px;
+      border: 1px solid #29483c;
+      border-radius: 12px;
+      color: #dff8e9;
+      background: #11271f;
+      font-size: 12.5px;
+      line-height: 1.65;
+    }
+
+    .checklist { display: grid; gap: 10px; padding: 0; list-style: none; }
+    .checklist li { position: relative; padding: 12px 14px 12px 42px; border: 1px solid var(--line); border-radius: 11px; background: #fff; }
+    .checklist li::before { content: "✓"; position: absolute; left: 15px; top: 11px; color: var(--green); font-weight: 900; }
+
+    .callout { margin-top: 14px; padding: 15px 17px; border-radius: 11px; color: #59400a; background: var(--amber-soft); }
+    .source-list { margin: 0; padding-left: 21px; word-break: break-word; }
+    .small { color: var(--muted); font-size: 12.5px; }
+
+    footer { margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; text-align: center; }
+
+    @media (max-width: 900px) {
+      .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .layout { grid-template-columns: 1fr; }
+      .toc { position: static; display: grid; grid-template-columns: repeat(2, 1fr); }
+      .toc strong { grid-column: 1 / -1; }
+    }
+
+    @media (max-width: 620px) {
+      .page { width: min(100% - 24px, 1180px); padding-top: 12px; }
+      .hero { padding: 28px 22px; border-radius: 17px; }
+      .summary-grid { grid-template-columns: 1fr 1fr; }
+      .metric { padding: 15px; }
+      .panel { padding: 19px; }
+      .verdict { grid-template-columns: 1fr; }
+      .flow { grid-template-columns: 1fr; }
+      .flow-step:not(:last-child)::after { content: "↓"; right: 50%; top: auto; bottom: -22px; }
+    }
+
+    @media print {
+      body { background: #fff; font-size: 11pt; }
+      .page { width: 100%; padding: 0; }
+      .hero { color: #111; background: #fff; border: 2px solid #234d3b; box-shadow: none; }
+      .hero p, .eyebrow { color: #333; }
+      .hero-meta span { color: #111; border-color: #aaa; background: #fff; }
+      .toolbar, .toc { display: none; }
+      .layout { display: block; }
+      .panel, .metric, .finding { break-inside: avoid; box-shadow: none; }
+      section { break-inside: avoid-page; }
+      a { color: #111; text-decoration: none; }
+      a::after { content: " (" attr(href) ")"; color: #666; font-size: 8pt; }
+      pre { white-space: pre-wrap; color: #111; background: #f5f5f5; border-color: #aaa; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="verdict" role="note">
+      <span class="verdict-badge">历史报告</span>
+      <p><strong>此页面保留 2026-08-07 的审查过程，不再作为当前接口清单。</strong>01—04 已恢复为原始开发文档；当前接口、联调流程与自动化门禁请以 <a href="INTERFACE_INTEGRATION_GUIDE.md">独立接口对齐与联调规范</a> 及 <code>../contracts/</code> 的机器合同为准。</p>
+    </div>
+    <header class="hero">
+      <p class="eyebrow">Walnut World · Contract Audit</p>
+      <h1>前端、Python 后端与 Agent 接口对齐审查报告</h1>
+      <p>面向“接口先行、独立迭代、拒绝静默 bug”的开发基线。报告区分文档对齐、Wire Contract 对齐和运行实现对齐，避免把 Mock 通过误判为真实联调可用。</p>
+      <div class="hero-meta">
+        <span>审查日期：2026-08-07</span>
+        <span>核心 Game API：v1.0.0</span>
+        <span>审查方式：三方交叉核对 + 独立终审</span>
+        <span>状态：Agent 合同层已通过交付门禁</span>
+      </div>
+    </header>
+
+    <div class="toolbar"><button class="print-button" type="button" onclick="window.print()">打印 / 导出 PDF</button></div>
+
+    <div class="summary-grid" aria-label="审查摘要">
+      <article class="metric good"><strong>23/23</strong><span>HTTP 操作已冻结（Game 14 + 飞书 9）</span></article>
+      <article class="metric good"><strong>24</strong><span>Runtime 事件已进入闭合 AsyncAPI</span></article>
+      <article class="metric good"><strong>132 + 60</strong><span>Node 与 Python 自动化测试通过</span></article>
+      <article class="metric good"><strong>2/2</strong><span>真实 Godot 合同与 HTTP Runner 通过</span></article>
+    </div>
+
+    <div class="verdict">
+      <span class="verdict-badge">总体结论</span>
+      <p><strong>Agent 合同、适配器边界和防静默门禁已具备独立迭代条件。</strong>原审查发现的 Command、attempt/origin context、Agent feedback、WebSocket、异步 Godot Transport、幂等与证据完整性问题均已关闭。Backend 与 Frontend 仓库仍是 docs-only；下一步不是继续猜字段，而是锁定同一 Contract Release 后分别实现消费者。</p>
+    </div>
+
+    <div class="layout">
+      <nav class="toc" aria-label="目录">
+        <strong>报告目录</strong>
+        <a href="#delivery">1. 本次交付</a>
+        <a href="#baseline">2. 原审查基线</a>
+        <a href="#matrix">3. 当前对齐矩阵</a>
+        <a href="#p0">4. 已关闭 P0</a>
+        <a href="#p1">5. 已关闭 P1</a>
+        <a href="#routes">6. Game API</a>
+        <a href="#wire">7. Wire 规则</a>
+        <a href="#tests">8. 自动化门禁</a>
+        <a href="#plan">9. 后续接入</a>
+        <a href="#scope">10. 管理端与飞书</a>
+        <a href="#sources">11. 证据链接</a>
+      </nav>
+
+      <main>
+        <section class="panel" id="delivery">
+          <p class="section-kicker">01 · DELIVERY STATUS</p>
+          <h2>本次 Agent 接口交付</h2>
+          <ul class="checklist">
+            <li><strong>合同事实源：</strong>Game/飞书 OpenAPI、Runtime AsyncAPI、封闭 JSON Schema、错误目录、TypeScript/Python DTO 与 Godot Validator 同步。</li>
+            <li><strong>防静默响应：</strong>所有 HTTP attempt 必须携带 request/trace/correlation/schema 头；资源保留 origin context，<code>POST A → GET B</code> 使用不同 ID 也能正确对账。</li>
+            <li><strong>Agent 反馈闭环：</strong><code>agent.turn.feedback_ready</code> 与 Run feedback 固定 session、turn、command、run、降级原因和证据引用，错链在出站前失败。</li>
+            <li><strong>真实异步 Godot 边界：</strong>14 条 Game 路由使用 awaitable HTTP Transport，具备 timeout、cancel、并发上限、严格 JSON 与错误显式化。</li>
+            <li><strong>实时恢复：</strong>Bootstrap 发布无凭据 WSS 地址、stream ID 与协议版本；AsyncAPI 固定鉴权、订阅、ACK、心跳、缺口回补和关闭码。</li>
+            <li><strong>完整性与幂等：</strong>幂等作用域包含 tenant + actor；所有出站资源锚定 canonical payload 与 URL；持久化后发送失败返回带 command/Location 的可对账 UNKNOWN；Evidence 使用跨 JS/Python/Godot 一致的安全整数与严格 Unicode 规范化哈希。</li>
+            <li><strong>历史发布锁：</strong>此处记录的是审查当日尚未发布的 <code>refs/tags/agent-contracts-v0.1.0</code> 候选；当前文件数、哈希与目标 release 必须读取 <code>contracts/manifest.json</code>，不得沿用本页快照。</li>
+          </ul>
+          <p class="callout"><strong>模型供应商状态：</strong>当前没有写死或调用 OpenAI API。Agent 只暴露 provider-neutral <code>LlmPort</code>，生产环境后续可独立接 OpenAI 或其他供应商；本次测试不访问外部模型网络。</p>
+          <p class="small">验证结果：Contract files=92、refs=1044、operations=23、events=24、errors=26、examples=38；Node 132/132、Python 60/60、Godot Contract Runner 与真实 HTTP Transport Runner 全部通过，Python wheel 构建与隔离安装通过。</p>
+        </section>
+
+        <section class="panel" id="baseline">
+          <p class="section-kicker">02 · ORIGINAL BASELINE</p>
+          <h2>修复前审查基线与可复现版本</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>组件</th><th>固定版本</th><th>仓库状态</th><th>审查结论</th></tr></thead>
+              <tbody>
+                <tr><td>Python Backend</td><td><code>52409f59a46d…</code></td><td>仅 README + 接口文档</td><td><span class="status partial">仅文档可审</span></td></tr>
+                <tr><td>Godot Frontend</td><td><code>a8a26209715b…</code></td><td>仅 README + 接口文档</td><td><span class="status partial">仅文档可审</span></td></tr>
+                <tr><td>Agent Contract</td><td><code>dbe602f51bcc…</code></td><td>OpenAPI / Schema / AsyncAPI / Mock / Ports</td><td><span class="status ok">合同事实源</span></td></tr>
+                <tr><td>本地 agent 目录</td><td>无独立 Git HEAD</td><td>位于父仓库未跟踪目录</td><td><span class="status no">不可独立复现</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="callout">历史消费者文档曾依赖开发者本机绝对路径，且没有 commit、tag、包版本或逐文件 hash。当前集成必须使用固定的 Wire Contract Release，不能依赖本机路径或浮动的 <code>main</code>。</p>
+        </section>
+
+        <section class="panel" id="matrix">
+          <p class="section-kicker">03 · CURRENT ALIGNMENT</p>
+          <h2>当前跨端对齐矩阵</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>检查面</th><th>状态</th><th>说明</th></tr></thead>
+              <tbody>
+                <tr><td>14 条 Game REST 路由</td><td><span class="status ok">对齐</span></td><td>method/path 完全一致。</td></tr>
+                <tr><td>Bearer、Schema v1、写入幂等</td><td><span class="status ok">已固定</span></td><td>生产 JWT 与本地 Mock 凭据明确隔离，attempt 头和 actor 幂等作用域有机器门禁。</td></tr>
+                <tr><td><code>202 Accepted</code></td><td><span class="status ok">已固定</span></td><td>返回 command/Location；持久化后发送失败进入可对账 UNKNOWN，不会静默提交。</td></tr>
+                <tr><td>Command / RequestContext</td><td><span class="status ok">已对齐</span></td><td>响应头表示 current attempt，资源体保留 origin context，actor 与资源身份继续强绑定。</td></tr>
+                <tr><td>Runtime Events</td><td><span class="status ok">已对齐</span></td><td>HTTP backfill 与 WSS WorldEvent 复用同一封闭事件 item Schema。</td></tr>
+                <tr><td>WebSocket 连接协议</td><td><span class="status ok">已固定</span></td><td>server、WSS、security、binding、控制帧、resume、心跳与 close code 均已入合同。</td></tr>
+                <tr><td>Agent 反馈与降级展示</td><td><span class="status ok">已固定</span></td><td>Run 与 <code>agent.turn.feedback_ready</code> 提供同一可校验反馈、降级和证据身份。</td></tr>
+                <tr><td>世界唯一写路径与 revision +1</td><td><span class="status ok">原则对齐</span></td><td>只有 <code>APPLIED + WORLD_COMMIT</code> 表示永久世界变化。</td></tr>
+                <tr><td>管理端接口</td><td><span class="status scope">扩展草案</span></td><td>5 条管理路由尚无 OpenAPI/Schema/测试。</td></tr>
+                <tr><td>飞书接口</td><td><span class="status scope">延期范围</span></td><td>Agent 已有 9 条，Python Backend 文档明确排除在 v1。</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="p0">
+          <p class="section-kicker">04 · CLOSED BLOCKERS</p>
+          <h2>修复前 P0：现已全部关闭</h2>
+          <p class="callout">以下内容保留为问题复盘；对应修复与正反例测试已经进入当前工作树和全量门禁。</p>
+          <div class="finding-list">
+            <article class="finding p0">
+              <div class="finding-head"><span class="priority p0">P0</span><h3>合法 Command 响应会被 Godot 严格校验器拒绝</h3></div>
+              <p><code>command.schema.json</code> 和 TypeScript 均强制要求正整数 <code>revision</code>，但 Godot <code>validate_command_result()</code> 的封闭字段表遗漏该字段。由于 <code>_require_shape</code> 会拒绝额外字段，符合 Schema 的后端响应反而被判为 <code>LOCAL_CONTRACT_RESPONSE_INVALID</code>。</p>
+              <ul>
+                <li>测试 fixture 同样遗漏 <code>revision</code>，因此 Validator 和测试同时写错时仍显示通过。</li>
+                <li>修复：加入字段与范围校验，并自动比较 JSON Schema 的 <code>required</code> 与 Godot 严格字段表。</li>
+              </ul>
+            </article>
+
+            <article class="finding p0">
+              <div class="finding-head"><span class="priority p0">P0</span><h3>当前 HTTP attempt 与命令原始上下文被混为一体</h3></div>
+              <p>公开 OpenAPI 没有请求 <code>X-Trace-Id</code> 或完整 correlation/content context，但 Gateway 强制响应头和响应体七个上下文字段都与本次调用一致。Command 资源又保存创建时的原始上下文，正常轮询使用新 ID 时必然冲突。</p>
+              <div class="flow" aria-label="上下文冲突流程">
+                <div class="flow-step"><strong>POST A</strong>创建 Command，并保存原始上下文 A。</div>
+                <div class="flow-step"><strong>GET B</strong>新 HTTP attempt 使用请求/Trace B。</div>
+                <div class="flow-step"><strong>错误比较</strong>Gateway 用 B 去比较 Command 中的 A。</div>
+              </div>
+              <p>修复：响应头/meta 只表示当前 attempt；资源中改为 <code>origin_context</code>，不再与当前 GET 完整比较。必须新增 <code>POST A → GET B</code> 测试。</p>
+            </article>
+
+            <article class="finding p0">
+              <div class="finding-head"><span class="priority p0">P0</span><h3>Agent 反馈与 fallback 没有公开 Wire 承载</h3></div>
+              <p>Backend 承诺输出 <code>degraded/source/fallback_reason</code>，Frontend 要求展示解释、反馈和降级状态；但 Command、Run 与 AsyncAPI 都是封闭 Schema，且没有 <code>agent.*</code> 下行事件。内部 <code>LlmReply</code> 字段无法自动成为公开协议。</p>
+              <p>修复：新增版本化 <code>AgentTurnOutcome</code>/<code>AgentFeedback</code> DTO，或增加 <code>agent.turn.completed</code> 事件，并把反馈、降级、证据引用写入同一个可验证 Schema。</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="p1">
+          <p class="section-kicker">05 · CLOSED HIGH PRIORITY</p>
+          <h2>修复前 P1：Agent 范围内已关闭</h2>
+          <p class="callout">WebSocket、异步 Transport、UNKNOWN 对账、状态机、鉴权 profile 和不可变 Manifest 均已实现；消费者仓库只需锁定并实现该发布。</p>
+          <div class="finding-list">
+            <article class="finding p1"><div class="finding-head"><span class="priority p1">P1</span><h3>WebSocket 仅有事件模型，没有连接协议</h3></div><p>Bootstrap 没有明确 <code>stream_id</code>；AsyncAPI 没有 server/protocol/security/binding/握手/订阅帧/resume cursor/心跳/close code。不同团队可各自“正确”地实现出互不兼容的协议。</p></article>
+            <article class="finding p1"><div class="finding-head"><span class="priority p1">P1</span><h3>Godot Transport 仍是同步接口</h3></div><p><code>execute()</code> 立即返回 <code>Dictionary</code>，不能自然表达 Godot 异步 HTTP 的完成信号、超时、取消和重连。生产 Transport 实现前应改为 awaitable/signal 驱动结果。</p></article>
+            <article class="finding p1"><div class="finding-head"><span class="priority p1">P1</span><h3>命令终态与 202 描述不完整</h3></div><p>Backend 文档漏掉 <code>UNKNOWN</code>；它是终态不确定性，只能继续按原 <code>command_id</code> 对账，不能换新幂等键。公开返回 202 的实际是 Build、Activation、Session、Turn、Client Events 五个 POST，而不是“认证/运行/世界提交”内部阶段。</p></article>
+            <article class="finding p1"><div class="finding-head"><span class="priority p1">P1</span><h3>Godot 事件语义校验不足</h3></div><p>客户端只检查 command 状态是否在枚举内，没有完整检查合法状态边；Skill Activation 与 Learner Model 的 revision 只验范围，没有验证严格 <code>previous + 1</code>，错误事件可能静默进入 UI/store。</p></article>
+            <article class="finding p1"><div class="finding-head"><span class="priority p1">P1</span><h3>开发鉴权存在三套约定</h3></div><p>OpenAPI 标注 JWT，文档使用 <code>student-dev/admin-dev</code>，Mock 使用 <code>&lt;tenant&gt;:&lt;actor&gt;</code>。需要固定 dev/prod 两个 profile，并给出精确 token 格式、actor 映射和角色权限。</p></article>
+            <article class="finding p1"><div class="finding-head"><span class="priority p1">P1</span><h3>消费者没有锁定同一契约发布</h3></div><p>Backend/Frontend 未使用 submodule、包锁、release manifest 或 SHA。必须让两个仓库的 CI 固定同一个 Agent Wire Contract Release。</p></article>
+          </div>
+        </section>
+
+        <section class="panel" id="routes">
+          <p class="section-kicker">05 · GAME API</p>
+          <h2>14 条核心 Game API 核对结果</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>类型</th><th>操作</th><th>成功响应</th><th>结论</th></tr></thead>
+              <tbody>
+                <tr><td>启动</td><td><code>GET /v1/bootstrap</code></td><td>200 Bootstrap</td><td><span class="status ok">路径对齐</span></td></tr>
+                <tr><td>Skill</td><td><code>POST /v1/skill-builds</code></td><td>202 Accepted</td><td><span class="status ok">路径对齐</span></td></tr>
+                <tr><td>Skill</td><td><code>GET /v1/skill-builds/{build_id}</code></td><td>200 Build</td><td><span class="status ok">路径对齐</span></td></tr>
+                <tr><td>Skill</td><td><code>POST /v1/skill-versions/{id}/activations</code></td><td>202 Accepted</td><td><span class="status ok">路径对齐</span></td></tr>
+                <tr><td>Skill</td><td><code>GET /v1/skill-activations/{id}</code></td><td>200 Activation</td><td><span class="status ok">路径对齐</span></td></tr>
+                <tr><td>Agent</td><td><code>POST /v1/agent-sessions</code></td><td>202 Accepted</td><td><span class="status ok">路径对齐</span></td></tr>
+                <tr><td>Agent</td><td><code>GET /v1/agent-sessions/{id}</code></td><td>200 Session</td><td><span class="status ok">路径对齐</span></td></tr>
+                <tr><td>Agent</td><td><code>POST /v1/agent-sessions/{id}/turns</code></td><td>202 Accepted</td><td><span class="status ok">路径对齐</span></td></tr>
+                <tr><td>异步对账</td><td><code>GET /v1/commands/{command_id}</code></td><td>200 Command</td><td><span class="status no">Validator 需修</span></td></tr>
+                <tr><td>运行证据</td><td><code>GET /v1/runs/{run_id}</code></td><td>200 Run</td><td><span class="status ok">路径对齐</span></td></tr>
+                <tr><td>世界</td><td><code>GET /v1/worlds/{world_id}/snapshot</code></td><td>200 Snapshot</td><td><span class="status ok">路径对齐</span></td></tr>
+                <tr><td>世界</td><td><code>GET /v1/worlds/{world_id}/events</code></td><td>200 Event Page</td><td><span class="status partial">文档漏 query 细节</span></td></tr>
+                <tr><td>客户端事件</td><td><code>POST /v1/client-events:batch</code></td><td>202 Accepted</td><td><span class="status ok">路径对齐</span></td></tr>
+                <tr><td>证据</td><td><code>GET /v1/evidence/{evidence_id}</code></td><td>200 Evidence</td><td><span class="status ok">路径对齐</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="small">公共规则：全部操作使用 Bearer；全部 GET/POST 都要求 <code>X-Request-Id</code> 与 <code>X-Schema-Version: 1.0.0</code>；五个写操作另要求 <code>Idempotency-Key</code>。<code>GET worlds/{id}/events</code> 必须携带 <code>after_sequence ≥ 0</code>，<code>limit</code> 为 1–500、默认 100。</p>
+        </section>
+
+        <section class="panel" id="wire">
+          <p class="section-kicker">06 · TARGET CONTRACT</p>
+          <h2>建议统一的 Wire 规则</h2>
+          <h3>1. 明确区分当前请求与资源原始上下文</h3>
+          <pre>{
+  "meta": {
+    "request_id": "req_current_attempt",
+    "trace_id": "trace_current_attempt",
+    "correlation_id": "corr_business_flow",
+    "schema_version": "1.0.0"
+  },
+  "data": {
+    "command_id": "cmd_...",
+    "revision": 3,
+    "origin_context": {
+      "request_id": "req_original_post",
+      "trace_id": "trace_original_command"
+    }
+  }
+}</pre>
+          <h3 style="margin-top:22px">2. 为 Agent Feedback 增加公开 DTO</h3>
+          <pre>{
+  "feedback_id": "feedback_...",
+  "turn_id": "turn_...",
+  "message_key": "agent.turn.summary",
+  "message": "已根据认证 Skill 完成浇水操作。",
+  "source": "provider | provider_fallback | policy",
+  "degraded": false,
+  "fallback_reason": null,
+  "evidence_refs": []
+}</pre>
+          <h3 style="margin-top:22px">3. 把 WebSocket 从 prose 升级为机器合同</h3>
+          <ul>
+            <li>Bootstrap 返回明确的 <code>stream_id</code>、<code>stream_url</code>、协议版本及最后确认 sequence。</li>
+            <li>AsyncAPI 增加 <code>servers</code>、<code>wss</code> protocol、Bearer security 与 WebSocket binding。</li>
+            <li>固定订阅/恢复帧：stream、after_sequence、heartbeat、ack、error、close code。</li>
+            <li>HTTP backfill 和实时 WS 使用同一封闭事件 union，避免回放能出现实时客户端不认识的 payload。</li>
+          </ul>
+        </section>
+
+        <section class="panel" id="tests">
+          <p class="section-kicker">07 · AUTOMATED GATES</p>
+          <h2>防静默 bug 的自动化门禁</h2>
+          <p>这些门禁均已落地并进入 <code>scripts/verify-all.ps1</code>；任何字段漂移、错误身份、证据篡改、非法 revision、清单漂移或 Godot 边界退化都会让验证非零退出。</p>
+          <ul class="checklist">
+            <li><strong>Schema ↔ Godot 字段一致性：</strong>自动比较所有 strict DTO 的 required/properties 与 Validator 字段表。</li>
+            <li><strong>POST A → GET B：</strong>每次 HTTP attempt 使用新 request/trace，验证 origin context 不与当前 attempt 混淆。</li>
+            <li><strong>真实消费者合同测试：</strong>FastAPI 测试服务 + 生产 Godot HTTP Transport，不只测试内存 Mock。</li>
+            <li><strong>幂等回放：</strong>同 key 同 body 回放原 receipt；同 key 异 body 必须 409；检查 <code>Idempotency-Replayed</code>。</li>
+            <li><strong>状态机负例：</strong>拒绝同态跳转、跳级、终态回退及非法 UNKNOWN 重试。</li>
+            <li><strong>revision 负例：</strong>World、Registry、Learner 的新 revision 必须严格 previous + 1。</li>
+            <li><strong>Agent 降级 E2E：</strong>provider 失败后，合法 feedback DTO 到达前端并明确展示 degraded。</li>
+            <li><strong>WebSocket 恢复：</strong>重复、乱序、缺口、断线、过期 token、跨 tenant 订阅和 HTTP backfill。</li>
+            <li><strong>消费者版本门禁：</strong>Backend/Frontend CI 校验同一 manifest SHA，不匹配立即失败。</li>
+          </ul>
+        </section>
+
+        <section class="panel" id="plan">
+          <p class="section-kicker">08 · REMEDIATION</p>
+          <h2>后端、前端与飞书的后续接入顺序</h2>
+          <ol>
+            <li><strong>发布 Agent 合同：</strong>提交当前目录，并在同一提交上创建 Manifest 指定的受保护 tag；不要把 Manifest 中的目标 tag 误认为已经发布。</li>
+            <li><strong>Python Backend 锁版本：</strong>固定 tag + Manifest hashes，生成/导入 Python DTO 与 Port，实现 14 条 Game 路由后跑 provider contract tests。</li>
+            <li><strong>Godot Frontend 锁版本：</strong>复用当前 Gateway、Validator 与异步 Transport，实现 UI/store，并跑真实后端消费者测试。</li>
+            <li><strong>接入模型供应商：</strong>仅在基础设施 Adapter 中实现 <code>LlmPort</code>；provider 超时、限流、坏 JSON 与降级必须映射为显式结果。</li>
+            <li><strong>接入飞书：</strong>复用 9 条已冻结合同，实现签名、防重放、Service Bearer、审计与 Outbox；若版本延期则不暴露半成品路由。</li>
+            <li><strong>Admin 另行版本化：</strong>当前 5 条教研 Admin 草案尚未进入 Agent Wire Contract，需先补 OpenAPI/Schema/权限/审计再开发。</li>
+          </ol>
+        </section>
+
+        <section class="panel" id="scope">
+          <p class="section-kicker">09 · SCOPE</p>
+          <h2>管理端与飞书范围说明</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>范围</th><th>当前状态</th><th>进入开发的前置条件</th></tr></thead>
+              <tbody>
+                <tr><td>5 条教研 Admin 只读接口</td><td>Backend 文档草案，Agent 无合同</td><td>新增 OpenAPI、Schema、分页、授权、审计、示例和消费者测试。</td></tr>
+                <tr><td>9 条飞书集成接口</td><td>Agent 已有合同；Backend v1 明确延期</td><td>确认进入哪个版本，固定 Service Bearer/Webhook 签名与 Outbox 语义。</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="small">分阶段本身不构成冲突；但接口未进入共同 Wire Contract 前，不应让 Backend、Frontend 或飞书适配器自行猜测字段。</p>
+        </section>
+
+        <section class="panel" id="sources">
+          <p class="section-kicker">10 · EVIDENCE</p>
+          <h2>固定版本证据（历史归档）</h2>
+          <ul class="source-list">
+            <li><a href="https://github.com/senizuaki-bit/walnut-world-backend/blob/52409f59a46de47139fe8078dec4108ad97cfa98/docs/Python%E5%90%8E%E7%AB%AF%E6%8E%A5%E5%8F%A3%E6%96%87%E6%A1%A3.md">Python 后端接口文档（固定 SHA）</a></li>
+            <li><a href="https://github.com/senizuaki-bit/walnut-world-frontend/blob/a8a26209715bb3e86883ffd738a319c7f2e8bec9/docs/Godot%E5%89%8D%E7%AB%AF%E6%8E%A5%E5%8F%A3%E6%96%87%E6%A1%A3.md">Godot 前端接口文档（固定 SHA）</a></li>
+            <li><a href="../contracts/openapi/game-api.openapi.json">Agent Game OpenAPI（仓内相对路径）</a></li>
+            <li><a href="../contracts/asyncapi/runtime-events.asyncapi.json">Agent Runtime AsyncAPI（仓内相对路径）</a></li>
+            <li><a href="../contracts/schemas/game/command.schema.json">Command JSON Schema（仓内相对路径）</a></li>
+            <li><a href="../clients/godot/contract_validator.gd">Godot Contract Validator（仓内相对路径）</a></li>
+            <li><a href="../clients/godot/agent_api_gateway.gd">Godot Agent API Gateway（仓内相对路径）</a></li>
+          </ul>
+          <p class="small">本报告为历史只读审查归档，不代表 Backend/Frontend 已有运行实现，也不替代共同签署的版本化 Wire Contract。Agent 链接使用当前仓库相对路径；发布身份与逐文件 hash 以 <a href="../contracts/manifest.json">contracts/manifest.json</a> 和不可变 release ref 为准。</p>
+        </section>
+      </main>
+    </div>
+
+    <footer>芽芽家园接口对齐审查 · Contract-first · Fail loudly · Version everything</footer>
+  </div>
+</body>
+</html>

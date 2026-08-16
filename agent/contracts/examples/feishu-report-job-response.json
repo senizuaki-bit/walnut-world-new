@@ -1,0 +1,19 @@
+{
+  "schema_ref": "../schemas/feishu/report-job.schema.json",
+  "value": {
+    "report_id": "rpt_00000001",
+    "job": {
+      "job_id": "job_00000002",
+      "job_type": "FEISHU_REPORT_DRAFT",
+      "status": "QUEUED",
+      "created_at": "2026-08-06T10:30:01Z",
+      "updated_at": "2026-08-06T10:30:01Z",
+      "command_id": "cmd_00000002",
+      "trace_id": "trace_feishu_00000005",
+      "error": null
+    },
+    "draft_status": "NOT_STARTED",
+    "delivery_status": "NOT_SENT",
+    "output_mode": "DRAFT_ONLY"
+  }
+}

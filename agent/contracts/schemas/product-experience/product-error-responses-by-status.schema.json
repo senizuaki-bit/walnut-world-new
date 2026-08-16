@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/product-experience/product-error-responses-by-status.schema.json",
+  "title": "Product Experience error responses by HTTP status",
+  "description": "Narrow Product Experience views of the shared ErrorResponse. Domain-specific Game, World, Sandbox and Feishu codes are intentionally not exposed by this projection API.",
+  "$defs": {
+    "status400": {
+      "allOf": [
+        { "$ref": "../common/error-response.schema.json" },
+        { "$ref": "#/$defs/code400" }
+      ]
+    },
+    "status401": {
+      "allOf": [
+        { "$ref": "../common/error-response.schema.json" },
+        { "$ref": "#/$defs/code401" }
+      ]
+    },
+    "status403": {
+      "allOf": [
+        { "$ref": "../common/error-response.schema.json" },
+        { "$ref": "#/$defs/code403" }
+      ]
+    },
+    "status404": {
+      "allOf": [
+        { "$ref": "../common/error-response.schema.json" },
+        { "$ref": "#/$defs/code404" }
+      ]
+    },
+    "status409": {
+      "allOf": [
+        { "$ref": "../common/error-response.schema.json" },
+        { "$ref": "#/$defs/code409" }
+      ]
+    },
+    "status413": {
+      "allOf": [
+        { "$ref": "../common/error-response.schema.json" },
+        { "$ref": "#/$defs/code413" }
+      ]
+    },
+    "status429": {
+      "allOf": [
+        { "$ref": "../common/error-response.schema.json" },
+        { "$ref": "#/$defs/code429" }
+      ]
+    },
+    "status500": {
+      "allOf": [
+        { "$ref": "../common/error-response.schema.json" },
+        { "$ref": "#/$defs/code500" }
+      ]
+    },
+    "status503": {
+      "allOf": [
+        { "$ref": "../common/error-response.schema.json" },
+        { "$ref": "#/$defs/code503" }
+      ]
+    },
+    "code400": { "$ref": "#/$defs/errorConstraint400" },
+    "code401": { "$ref": "#/$defs/errorConstraint401" },
+    "code403": { "$ref": "#/$defs/errorConstraint403" },
+    "code404": { "$ref": "#/$defs/errorConstraint404" },
+    "code409": { "$ref": "#/$defs/errorConstraint409" },
+    "code413": { "$ref": "#/$defs/errorConstraint413" },
+    "code429": { "$ref": "#/$defs/errorConstraint429" },
+    "code500": { "$ref": "#/$defs/errorConstraint500" },
+    "code503": { "$ref": "#/$defs/errorConstraint503" },
+    "errorConstraint400": {
+      "type": "object",
+      "required": ["error"],
+      "properties": { "error": { "$ref": "#/$defs/error400" } }
+    },
+    "errorConstraint401": {
+      "type": "object",
+      "required": ["error"],
+      "properties": { "error": { "$ref": "#/$defs/error401" } }
+    },
+    "errorConstraint403": {
+      "type": "object",
+      "required": ["error"],
+      "properties": { "error": { "$ref": "#/$defs/error403" } }
+    },
+    "errorConstraint404": {
+      "type": "object",
+      "required": ["error"],
+      "properties": { "error": { "$ref": "#/$defs/error404" } }
+    },
+    "errorConstraint409": {
+      "type": "object",
+      "required": ["error"],
+      "properties": { "error": { "$ref": "#/$defs/error409" } }
+    },
+    "errorConstraint413": {
+      "type": "object",
+      "required": ["error"],
+      "properties": { "error": { "$ref": "#/$defs/error413" } }
+    },
+    "errorConstraint429": {
+      "type": "object",
+      "required": ["error"],
+      "properties": { "error": { "$ref": "#/$defs/error429" } }
+    },
+    "errorConstraint500": {
+      "type": "object",
+      "required": ["error"],
+      "properties": { "error": { "$ref": "#/$defs/error500" } }
+    },
+    "errorConstraint503": {
+      "type": "object",
+      "required": ["error"],
+      "properties": { "error": { "$ref": "#/$defs/error503" } }
+    },
+    "error400": {
+      "type": "object",
+      "required": ["code"],
+      "properties": { "code": { "const": "INVALID_REQUEST" } }
+    },
+    "error401": {
+      "type": "object",
+      "required": ["code"],
+      "properties": { "code": { "const": "AUTHENTICATION_REQUIRED" } }
+    },
+    "error403": {
+      "type": "object",
+      "required": ["code"],
+      "properties": { "code": { "enum": ["AUTHORIZATION_DENIED", "POLICY_DENIED"] } }
+    },
+    "error404": {
+      "type": "object",
+      "required": ["code"],
+      "properties": { "code": { "const": "NOT_FOUND" } }
+    },
+    "error409": {
+      "type": "object",
+      "required": ["code"],
+      "properties": {
+        "code": {
+          "enum": ["SCHEMA_VERSION_UNSUPPORTED", "CONTENT_VERSION_MISMATCH", "IDEMPOTENCY_KEY_REUSED"]
+        }
+      }
+    },
+    "error413": {
+      "type": "object",
+      "required": ["code"],
+      "properties": { "code": { "const": "PAYLOAD_TOO_LARGE" } }
+    },
+    "error429": {
+      "type": "object",
+      "required": ["code"],
+      "properties": { "code": { "const": "RATE_LIMITED" } }
+    },
+    "error500": {
+      "type": "object",
+      "required": ["code"],
+      "properties": { "code": { "enum": ["INVARIANT_VIOLATION", "INTERNAL_ERROR"] } }
+    },
+    "error503": {
+      "type": "object",
+      "required": ["code"],
+      "properties": { "code": { "const": "DEPENDENCY_UNAVAILABLE" } }
+    }
+  }
+}

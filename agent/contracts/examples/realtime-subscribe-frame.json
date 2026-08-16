@@ -1,0 +1,10 @@
+{
+  "schema_ref": "../asyncapi/runtime-events.asyncapi.json#/components/schemas/SubscribeFrame",
+  "value": {
+    "frame_type": "subscribe",
+    "protocol_version": "1.0.0",
+    "request_id": "req_realtime_00000001",
+    "stream_id": "world:world_demo_001",
+    "after_sequence": 731
+  }
+}

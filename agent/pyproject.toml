@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools==75.1.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "yaya-agent-contracts"
+version = "0.6.0"
+description = "Provider-neutral Python ports and domain contracts for YaYa Home Agent services."
+requires-python = ">=3.12"
+license = { text = "UNLICENSED" }
+dependencies = [
+    "jsonschema==4.23.0",
+    "psycopg==3.2.9",
+    "psycopg-binary==3.2.9",
+    "referencing==0.37.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "jsonschema==4.23.0",
+    "rfc3339-validator==0.1.4",
+    "rfc3986-validator==0.1.1",
+]
+
+[tool.setuptools]
+package-dir = { "" = "python" }
+
+[tool.setuptools.packages.find]
+where = ["python"]
+
+[tool.setuptools.package-data]
+yaya_agent_contracts = ["py.typed"]
+yaya_agent_build = ["py.typed"]
+yaya_agent_sandbox = ["py.typed"]
+yaya_agent_runtime = ["py.typed", "config/roles/*.yaml"]
+yaya_agent_backend = ["migrations/*.sql"]
+
+[tool.pyright]
+pythonVersion = "3.12"
+typeCheckingMode = "strict"
+extraPaths = ["python"]
+include = [
+    "python/yaya_agent_contracts",
+    "python/yaya_agent_build",
+    "python/yaya_agent_sandbox",
+    "python/yaya_agent_runtime",
+    "python/yaya_agent_backend",
+]
+reportUnnecessaryIsInstance = false
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "UP"]

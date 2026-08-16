@@ -1,0 +1,49 @@
+{
+  "schema_ref": "../schemas/game/command.schema.json",
+  "value": {
+    "request_context": {
+      "schema_version": "1.0.0",
+      "request_id": "req_game_reject_0001",
+      "correlation_id": "corr_game_reject_0001",
+      "trace_id": "trace_game_reject_0001",
+      "requested_at": "2026-08-08T01:03:20Z",
+      "actor": {
+        "tenant_id": "tenant_yaya",
+        "actor_id": "student_0001",
+        "actor_type": "student",
+        "roles": ["game:player"]
+      },
+      "content_ref": {
+        "unit_id": "YAYA_FARM_001",
+        "version": "1.4.0",
+        "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    "command_id": "cmd_game_reject_0001",
+    "revision": 3,
+    "command_type": "EXECUTE_AGENT_TURN",
+    "status": "APPLIED",
+    "stage": "COMPLETE",
+    "terminal": true,
+    "accepted_at": "2026-08-08T01:03:20Z",
+    "updated_at": "2026-08-08T01:03:29Z",
+    "result": {
+      "result_type": "NO_EFFECT",
+      "reason_code": "PATCH_PROPOSED"
+    },
+    "error": null,
+    "evidence_refs": [],
+    "versions": {
+      "api_version": "1.0.0",
+      "event_version": "1",
+      "policy_version": "policy-38",
+      "world_rules_version": "farm-rules-12",
+      "teaching_spec_version": "teaching-7",
+      "skill_version": "skillver_water_001",
+      "artifact_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    },
+    "links": {
+      "self": "/v1/commands/cmd_game_reject_0001"
+    }
+  }
+}

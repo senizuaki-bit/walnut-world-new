@@ -1,0 +1,8 @@
+build==1.5.0
+jsonschema==4.23.0
+psycopg==3.2.9
+psycopg-binary==3.2.9
+rfc3339-validator==0.1.4
+rfc3986-validator==0.1.1
+ruff==0.15.22
+setuptools==75.1.0

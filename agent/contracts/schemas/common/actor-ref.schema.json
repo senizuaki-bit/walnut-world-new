@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/common/actor-ref.schema.json",
+  "title": "ActorRef",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["tenant_id", "actor_id", "actor_type", "roles"],
+  "properties": {
+    "tenant_id": { "type": "string", "pattern": "^[A-Za-z0-9_-]{3,96}$" },
+    "actor_id": { "type": "string", "pattern": "^[A-Za-z0-9_-]{3,128}$" },
+    "actor_type": {
+      "type": "string",
+      "enum": ["student", "agent", "teacher", "researcher", "operator", "service"]
+    },
+    "roles": {
+      "type": "array",
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9:_-]{1,63}$" }
+    }
+  }
+}

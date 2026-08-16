@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/feishu/evidence-view.schema.json",
+  "title": "Redacted evidence view",
+  "description": "Read-only, purpose-authorized and redacted evidence projection for Feishu. It is not the mutable source of truth.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "evidence_ref",
+    "learner_ref",
+    "observed_at",
+    "summary",
+    "facts",
+    "provenance",
+    "redaction",
+    "trace_id"
+  ],
+  "properties": {
+    "evidence_ref": {
+      "$ref": "../common/evidence-ref.schema.json"
+    },
+    "learner_ref": {
+      "type": "string",
+      "pattern": "^lrn_[A-Za-z0-9_-]{8,128}$"
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "summary": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "facts": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "value"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "value": {
+            "oneOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event_id",
+        "command_id",
+        "source_module"
+      ],
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "command_id": {
+          "$ref": "../common/command-id.schema.json"
+        },
+        "source_module": {
+          "type": "string",
+          "enum": [
+            "SKILL_LIFECYCLE",
+            "WORLD_ENGINE",
+            "AGENT_RUNTIME",
+            "LEARNER_PROJECTION"
+          ]
+        }
+      }
+    },
+    "redaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "direct_identifiers_removed",
+        "policy_version",
+        "fields_omitted"
+      ],
+      "properties": {
+        "direct_identifiers_removed": {
+          "const": true
+        },
+        "policy_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "fields_omitted": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        }
+      }
+    },
+    "trace_id": {
+      "type": "string",
+      "pattern": "^trace_[A-Za-z0-9_-]{8,96}$"
+    }
+  }
+}

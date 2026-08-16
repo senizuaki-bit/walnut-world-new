@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/game/world-presentation-event.schema.json",
+  "title": "Committed world presentation event",
+  "description": "A HARVEST-only display projection derived after the authoritative world transition was committed. It is not a sandbox intent, model output, local prediction, or business mutation command.",
+  "x-invariants": [
+    "The producer creates this projection only from a successfully persisted authoritative world commit; raw sandbox intents and model output are never display authority.",
+    "Within one stream_id, global sequence is 1-based, strictly increasing, gap-free, and stable across retries and process restarts.",
+    "action_index is 0-based and 0 <= action_index < action_count.",
+    "payload_sha256 equals the lowercase SHA-256 of the YAYA_CANONICAL_JSON_V1 UTF-8 encoding of payload.",
+    "integrity_sha256 equals the lowercase SHA-256 of the compact UTF-8 JSON array [event_type,event_version,schema_version,stream_id,sequence,occurred_at,producer,tenant_id,session_id,turn_id,command_id,run_id,world_id,commit_id,world_revision,action_index,action_count,intent_id,state_hash_before,state_hash_after,final_snapshot_revision,final_world_event_sequence,final_snapshot_state_hash,payload_sha256,actor_entity_id,plot_id,position.x,position.y,crop_type,growth_stage,ready_to_harvest] in exactly that order.",
+    "event_id equals 'presentation_' plus the first 32 lowercase hex characters of integrity_sha256.",
+    "stream_id equals 'world-presentation:' plus world_id; all events for one committed action set carry the same tenant, session, turn, command, run, world, commit, revision, action_count, and final snapshot binding.",
+    "Adjacent actions in one committed set chain state_hash_after to the next state_hash_before; the last action state_hash_after equals final_snapshot_state_hash.",
+    "world_revision equals final_snapshot_revision and final_world_event_sequence identifies the authoritative business-event cursor represented by the final snapshot.",
+    "A consumer rejects the entire page and restores the authoritative snapshot on any unknown event type, sequence gap, identity mismatch, payload hash mismatch, integrity mismatch, or snapshot binding mismatch."
+  ],
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "event_type",
+    "event_version",
+    "schema_version",
+    "stream_id",
+    "sequence",
+    "occurred_at",
+    "producer",
+    "tenant_id",
+    "session_id",
+    "turn_id",
+    "command_id",
+    "run_id",
+    "world_id",
+    "commit_id",
+    "world_revision",
+    "action_index",
+    "action_count",
+    "intent_id",
+    "state_hash_before",
+    "state_hash_after",
+    "final_snapshot_revision",
+    "final_world_event_sequence",
+    "final_snapshot_state_hash",
+    "payload",
+    "payload_sha256",
+    "integrity_sha256"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "pattern": "^presentation_[a-f0-9]{32}$"
+    },
+    "event_type": { "const": "world.action.harvested" },
+    "event_version": { "const": 1 },
+    "schema_version": { "const": "1.0.0" },
+    "stream_id": {
+      "type": "string",
+      "pattern": "^world-presentation:[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "sequence": { "type": "integer", "minimum": 1 },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "producer": { "const": "walnut_world_engine" },
+    "tenant_id": { "$ref": "#/$defs/identifier" },
+    "session_id": { "$ref": "#/$defs/identifier" },
+    "turn_id": { "$ref": "#/$defs/identifier" },
+    "command_id": { "$ref": "../common/command-id.schema.json" },
+    "run_id": { "$ref": "#/$defs/identifier" },
+    "world_id": { "$ref": "#/$defs/identifier" },
+    "commit_id": { "$ref": "#/$defs/identifier" },
+    "world_revision": { "type": "integer", "minimum": 1 },
+    "action_index": { "type": "integer", "minimum": 0 },
+    "action_count": { "type": "integer", "minimum": 1, "maximum": 10000 },
+    "intent_id": { "$ref": "#/$defs/identifier" },
+    "state_hash_before": { "$ref": "#/$defs/sha256" },
+    "state_hash_after": { "$ref": "#/$defs/sha256" },
+    "final_snapshot_revision": { "type": "integer", "minimum": 1 },
+    "final_world_event_sequence": { "type": "integer", "minimum": 1 },
+    "final_snapshot_state_hash": { "$ref": "#/$defs/sha256" },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actor_entity_id",
+        "plot_id",
+        "position",
+        "crop_type",
+        "growth_stage",
+        "ready_to_harvest"
+      ],
+      "properties": {
+        "actor_entity_id": { "$ref": "#/$defs/identifier" },
+        "plot_id": { "$ref": "#/$defs/identifier" },
+        "position": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["x", "y"],
+          "properties": {
+            "x": { "type": "integer", "minimum": -100000, "maximum": 100000 },
+            "y": { "type": "integer", "minimum": -100000, "maximum": 100000 }
+          }
+        },
+        "crop_type": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_.-]{1,63}$"
+        },
+        "growth_stage": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "ready_to_harvest": { "const": true }
+      }
+    },
+    "payload_sha256": { "$ref": "#/$defs/sha256" },
+    "integrity_sha256": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

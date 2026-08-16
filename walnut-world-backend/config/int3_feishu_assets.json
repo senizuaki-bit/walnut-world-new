@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0.0",
+  "binding": {
+    "scheme": "WALNUT_FEISHU_HMAC_SHA256_V1",
+    "tenant_fingerprint": "hmac-sha256:57a124fe2825a65541f7b8df5365cb674e4b89e24971227ac425af1ee0448332",
+    "pseudonym_secret_fingerprint": "sha256:2e823a60b24eb791778e1cbaff04876d1c3382f96da98aba6ce77a00737a1dfc"
+  },
+  "base": {
+    "token": "XAcGbyppoaxEDMs8q6dclHoYn0f",
+    "url": "https://hcn3j6gp4127.feishu.cn/base/XAcGbyppoaxEDMs8q6dclHoYn0f",
+    "tables": {
+      "student_profiles": "tblbYveoeSjbGWt9",
+      "daily_records": "tbl80mytH7SIdrvP",
+      "evidence_summaries": "tblisP7Rivj056Lt"
+    }
+  },
+  "dashboard": {
+    "id": "blkTg5qKiB8id2O6",
+    "url": "https://hcn3j6gp4127.feishu.cn/base/XAcGbyppoaxEDMs8q6dclHoYn0f?table=blkTg5qKiB8id2O6"
+  },
+  "growth_document": {
+    "template_version": "v1",
+    "template_token": "OEkcdFpgmoU1rzxQK7actaawnbf",
+    "template_url": "https://hcn3j6gp4127.feishu.cn/docx/OEkcdFpgmoU1rzxQK7actaawnbf"
+  },
+  "miaoda": {
+    "app_id": "app_17c63e4z6px",
+    "online_url": "https://hcn3j6gp4127.feishuapp.com/app/app_17c63e4z6px",
+    "environment": "online"
+  },
+  "backend_public_url": "http://127.0.0.1:8790"
+}

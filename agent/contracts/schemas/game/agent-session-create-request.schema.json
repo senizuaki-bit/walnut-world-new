@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/game/agent-session-create-request.schema.json",
+  "title": "Create agent session request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "world_id",
+    "learner_id",
+    "agent_profile_id",
+    "channel",
+    "locale",
+    "content"
+  ],
+  "properties": {
+    "world_id": { "$ref": "#/$defs/identifier" },
+    "learner_id": { "$ref": "#/$defs/identifier" },
+    "agent_profile_id": { "$ref": "#/$defs/identifier" },
+    "channel": {
+      "type": "string",
+      "enum": ["GAME", "TEACHER_PREVIEW"]
+    },
+    "locale": {
+      "type": "string",
+      "pattern": "^[a-z]{2,3}(?:-[A-Z]{2})?$"
+    },
+    "content": {
+      "$ref": "../common/content-ref.schema.json"
+    },
+    "expected_world_revision": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    }
+  }
+}

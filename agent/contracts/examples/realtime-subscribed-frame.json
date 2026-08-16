@@ -1,0 +1,14 @@
+{
+  "schema_ref": "../asyncapi/runtime-events.asyncapi.json#/components/schemas/SubscribedFrame",
+  "value": {
+    "frame_type": "subscribed",
+    "protocol_version": "1.0.0",
+    "request_id": "req_realtime_00000001",
+    "subscription_id": "sub_realtime_00000001",
+    "stream_id": "world:world_demo_001",
+    "accepted_after_sequence": 731,
+    "high_watermark_sequence": 733,
+    "heartbeat_interval_ms": 30000,
+    "max_unacked_events": 256
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/game/agent-turn-create-request.schema.json",
+  "title": "Create agent turn request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "turn_id",
+    "expected_world_revision",
+    "input",
+    "skill_bindings",
+    "client_state"
+  ],
+  "properties": {
+    "turn_id": { "$ref": "#/$defs/identifier" },
+    "expected_world_revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "input": {
+      "oneOf": [
+        { "$ref": "#/$defs/messageInput" },
+        { "$ref": "#/$defs/taskInput" },
+        { "$ref": "#/$defs/uiActionInput" }
+      ]
+    },
+    "skill_bindings": {
+      "type": "array",
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/skillBinding" }
+    },
+    "client_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["last_event_sequence", "client_turn_sequence"],
+      "properties": {
+        "last_event_sequence": { "type": "integer", "minimum": 0 },
+        "client_turn_sequence": { "type": "integer", "minimum": 1 }
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "messageInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "text", "locale"],
+      "properties": {
+        "type": { "const": "MESSAGE" },
+        "text": { "type": "string", "minLength": 1, "maxLength": 4000 },
+        "locale": { "type": "string", "pattern": "^[a-z]{2,3}(?:-[A-Z]{2})?$" }
+      }
+    },
+    "taskInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "task_id"],
+      "properties": {
+        "type": { "const": "ASSIGNED_TASK" },
+        "task_id": { "$ref": "#/$defs/identifier" }
+      }
+    },
+    "uiActionInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "action_id", "selection_id"],
+      "properties": {
+        "type": { "const": "UI_ACTION" },
+        "action_id": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{1,95}$" },
+        "selection_id": { "$ref": "#/$defs/identifier" }
+      }
+    },
+    "skillBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["skill_id", "skill_version_id", "artifact_sha256", "certification_id"],
+      "properties": {
+        "skill_id": { "$ref": "#/$defs/identifier" },
+        "skill_version_id": { "$ref": "#/$defs/identifier" },
+        "artifact_sha256": { "$ref": "#/$defs/sha256" },
+        "certification_id": { "$ref": "#/$defs/identifier" }
+      }
+    }
+  }
+}

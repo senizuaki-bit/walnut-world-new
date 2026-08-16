@@ -1,0 +1,27 @@
+{
+  "canonicalization_id": "YAYA_CANONICAL_JSON_V1",
+  "version": "1.0.0",
+  "scope": "Any contract projection whose schema explicitly declares YAYA_CANONICAL_JSON_V1, including Evidence.payload and Product Experience draft, patch, and embedded-feedback projections.",
+  "rules": [
+    "The canonical byte sequence is UTF-8 without a byte-order mark.",
+    "Object keys are sorted by ascending Unicode scalar value and encoded recursively.",
+    "Arrays retain their declared order.",
+    "No insignificant whitespace is emitted.",
+    "Strings use JSON escaping while non-ASCII Unicode scalar values remain unescaped.",
+    "Strings and object keys containing an unpaired UTF-16 surrogate are rejected as ill-formed Unicode.",
+    "Numbers are restricted to safe integers and use base-10 notation; negative zero is encoded as zero.",
+    "null and booleans use the lowercase JSON tokens."
+  ],
+  "vectors": [
+    {
+      "name": "nested-unicode-and-integers",
+      "value": {
+        "z": [3, { "β": "芽芽", "a": true }],
+        "a": { "汉字": "浇水", "n": 0 },
+        "m": null
+      },
+      "canonical_utf8": "{\"a\":{\"n\":0,\"汉字\":\"浇水\"},\"m\":null,\"z\":[3,{\"a\":true,\"β\":\"芽芽\"}]}",
+      "sha256": "cf981d59e76cab7b309d61a629c6f6c5dd4e3e324ec797d84cd852f719bc625d"
+    }
+  ]
+}

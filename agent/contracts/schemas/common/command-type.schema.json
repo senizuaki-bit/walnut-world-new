@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/common/command-type.schema.json",
+  "title": "CommandType",
+  "type": "string",
+  "enum": [
+    "CREATE_SKILL_BUILD",
+    "ACTIVATE_SKILL_VERSION",
+    "CREATE_AGENT_SESSION",
+    "EXECUTE_AGENT_TURN",
+    "INGEST_CLIENT_EVENTS"
+  ]
+}

@@ -1,0 +1,116 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scenes/level_demo/watering_plot.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/terrain/tilled_soil.png" id="2_tilled"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/terrain/watered_soil.png" id="3_watered"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/crops/young_seedling.png" id="4_seedling"]
+
+[sub_resource type="StandardMaterial3D" id="TilledMaterial"]
+transparency = 2
+cull_mode = 2
+shading_mode = 0
+albedo_texture = ExtResource("2_tilled")
+roughness = 0.95
+alpha_scissor_threshold = 0.02
+
+[sub_resource type="StandardMaterial3D" id="WateredMaterial"]
+transparency = 2
+cull_mode = 2
+shading_mode = 0
+albedo_texture = ExtResource("3_watered")
+roughness = 0.88
+alpha_scissor_threshold = 0.02
+
+[sub_resource type="PlaneMesh" id="TilledPlane"]
+material = SubResource("TilledMaterial")
+size = Vector2(1.72, 1.46)
+
+[sub_resource type="PlaneMesh" id="WateredPlane"]
+material = SubResource("WateredMaterial")
+size = Vector2(1.72, 1.46)
+
+[sub_resource type="BoxShape3D" id="PlotShape"]
+size = Vector3(1.72, 0.5, 1.46)
+
+[sub_resource type="StandardMaterial3D" id="GuideMaterial"]
+transparency = 1
+shading_mode = 0
+no_depth_test = true
+albedo_color = Color(1, 0.690196, 0.180392, 0.82)
+emission_enabled = true
+emission = Color(1, 0.443137, 0.0980392, 1)
+emission_energy_multiplier = 1.35
+
+[sub_resource type="TorusMesh" id="GuideTorus"]
+material = SubResource("GuideMaterial")
+inner_radius = 0.86
+outer_radius = 1.02
+rings = 32
+ring_segments = 16
+
+[node name="WateringPlot" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="TilledSoil" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.03, 0)
+mesh = SubResource("TilledPlane")
+
+[node name="WateredSoil" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.04, 0)
+mesh = SubResource("WateredPlane")
+visible = false
+
+[node name="Seedling" type="Sprite3D" parent="."]
+position = Vector3(0, 0.7, 0.02)
+pixel_size = 0.00115
+billboard = 1
+texture = ExtResource("4_seedling")
+alpha_cut = 2
+
+[node name="PlotNumber" type="Label3D" parent="."]
+position = Vector3(0, 0.28, 0.72)
+pixel_size = 0.0042
+billboard = 1
+text = "0"
+font_size = 44
+outline_size = 10
+modulate = Color(1, 0.964706, 0.764706, 1)
+outline_modulate = Color(0.109804, 0.270588, 0.223529, 1)
+
+[node name="GuideRing" type="MeshInstance3D" parent="."]
+visible = false
+position = Vector3(0, 0.11, 0)
+mesh = SubResource("GuideTorus")
+cast_shadow = 0
+
+[node name="GuideLabel" type="Label3D" parent="."]
+visible = false
+position = Vector3(0, 1.54, 0.02)
+pixel_size = 0.0048
+billboard = 1
+text = "▼\n0"
+font_size = 46
+outline_size = 12
+modulate = Color(1, 0.827451, 0.341176, 1)
+outline_modulate = Color(0.145098, 0.301961, 0.223529, 1)
+horizontal_alignment = 1
+
+[node name="GrowthSparkles" type="Label3D" parent="."]
+visible = false
+position = Vector3(0, 1.22, 0.04)
+pixel_size = 0.0048
+billboard = 1
+text = "✦   ✦\n  ✦"
+font_size = 44
+outline_size = 9
+modulate = Color(1, 0.913725, 0.376471, 1)
+outline_modulate = Color(0.0705882, 0.384314, 0.278431, 1)
+horizontal_alignment = 1
+
+[node name="InteractionArea" type="Area3D" parent="."]
+position = Vector3(0, 0.2, 0)
+collision_layer = 2
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractionArea"]
+shape = SubResource("PlotShape")

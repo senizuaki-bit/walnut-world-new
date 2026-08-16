@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/game/skill-build-create-request.schema.json",
+  "title": "Create skill build request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "skill_id",
+    "display_name",
+    "client_draft_revision",
+    "source_bundle",
+    "compiler_profile",
+    "test_suite_version"
+  ],
+  "properties": {
+    "skill_id": { "$ref": "#/$defs/identifier" },
+    "display_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "client_draft_revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "source_bundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["language", "entrypoint", "files"],
+      "x-invariants": [
+        "every files[*].content_sha256 equals lowercase SHA-256 of the UTF-8 bytes of files[*].content",
+        "files[*].path values are unique",
+        "entrypoint equals exactly one files[*].path",
+        "files.length <= bootstrap.limits.max_source_files == 32",
+        "sum(utf8_byte_length(files[*].content)) <= bootstrap.limits.max_source_bytes == 1048576"
+      ],
+      "properties": {
+        "language": {
+          "const": "CPP20"
+        },
+        "entrypoint": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.\\/-]{1,240}$"
+        },
+        "files": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["path", "content", "content_sha256"],
+            "properties": {
+              "path": {
+                "type": "string",
+                "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9_.\\/-]{1,240}$"
+              },
+              "content": {
+                "type": "string",
+                "maxLength": 1048576
+              },
+              "content_sha256": { "$ref": "#/$defs/sha256" }
+            }
+          }
+        }
+      }
+    },
+    "compiler_profile": {
+      "type": "string",
+      "enum": ["YAYA_CPP20_SAFE_V1"]
+    },
+    "test_suite_version": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
+    },
+    "requested_capabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "maxItems": 16,
+      "items": {
+        "type": "string",
+        "enum": [
+          "WORLD_READ",
+          "MOVE",
+          "PLANT",
+          "WATER",
+          "HARVEST",
+          "INTERACT",
+          "SPEAK"
+        ]
+      },
+      "default": []
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

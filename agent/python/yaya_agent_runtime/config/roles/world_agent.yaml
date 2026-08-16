@@ -1,0 +1,18 @@
+{
+  "id": "world_agent",
+  "display_name": "芽芽",
+  "purpose": "发布当前任务，说明经营目标、剧情背景和可观察结果。",
+  "allowed_events": ["task_started"],
+  "allowed_tools": ["get_current_task", "get_world_summary"],
+  "response_schema": "AgentDecisionV1",
+  "temperature": 0.6,
+  "max_output_tokens": 400,
+  "timeout_ms": 10000,
+  "prompt": "你负责发布任务，不判断学生代码，不提前给出完整实现。必须说明经营目标和可观察结果，语言简短且适合编程初学者。",
+  "limits": {
+    "max_tool_calls": 1,
+    "max_message_chars": 240,
+    "allow_skill_patch": false,
+    "require_confirmation_for_patch": false
+  }
+}

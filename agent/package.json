@@ -1,0 +1,34 @@
+{
+  "name": "@yaya/agent-contracts",
+  "version": "0.6.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "description": "Contract-first boundaries for YaYa Home game, agent runtime, sandbox, world engine and Feishu integration.",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts"
+    },
+    "./contracts/*": "./contracts/*"
+  },
+  "scripts": {
+    "validate": "node scripts/validate-contracts.mjs",
+    "port-surface:check": "node scripts/port-surface.mjs --check",
+    "port-surface:update": "node scripts/port-surface.mjs --write",
+    "test": "node scripts/run-node-tests.mjs",
+    "test:python": "python scripts/run-non-live-python-tests.py",
+    "test:godot": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-godot-contracts.ps1",
+    "typecheck:python": "pyright python/yaya_agent_contracts python/yaya_agent_build python/yaya_agent_sandbox python/yaya_agent_runtime python/yaya_agent_backend",
+    "typecheck:ts": "tsc --noEmit -p tsconfig.json",
+    "verify": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-all.ps1",
+    "mock": "node scripts/mock-server.mjs"
+  },
+  "devDependencies": {
+    "pyright": "1.1.411",
+    "typescript": "7.0.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

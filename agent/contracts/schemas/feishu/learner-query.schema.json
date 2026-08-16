@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/feishu/learner-query.schema.json",
+  "title": "Learner read query",
+  "description": "A purpose-bound, read-only learner projection query. This contract exposes no mutation, mastery override or world command field.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "context",
+    "learner_ref",
+    "purpose",
+    "requested_fields",
+    "consent_basis"
+  ],
+  "properties": {
+    "context": {
+      "$ref": "../common/request-context.schema.json"
+    },
+    "learner_ref": {
+      "type": "string",
+      "description": "Tenant-scoped opaque learner reference; raw names, phone numbers and email addresses are forbidden.",
+      "pattern": "^lrn_[A-Za-z0-9_-]{8,128}$"
+    },
+    "purpose": {
+      "type": "string",
+      "enum": [
+        "TEACHER_SUPPORT",
+        "GUARDIAN_REPORT",
+        "LEARNING_REVIEW",
+        "SAFETY_INVESTIGATION"
+      ]
+    },
+    "requested_fields": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 6,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "MASTERY_SUMMARY",
+          "RECENT_EVIDENCE",
+          "SUPPORT_NEEDS",
+          "ACTIVITY_SUMMARY",
+          "RECOMMENDED_NEXT_STEPS",
+          "DATA_FRESHNESS"
+        ]
+      }
+    },
+    "consent_basis": {
+      "type": "string",
+      "enum": [
+        "EDUCATIONAL_SERVICE",
+        "GUARDIAN_CONSENT",
+        "LEGAL_SAFETY_DUTY"
+      ]
+    },
+    "time_range": {
+      "$ref": "#/$defs/timeRange"
+    }
+  },
+  "$defs": {
+    "timeRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "from",
+        "to"
+      ],
+      "properties": {
+        "from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

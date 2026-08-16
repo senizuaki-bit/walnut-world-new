@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/product-experience/skill-draft.schema.json",
+  "title": "Recoverable product skill draft",
+  "description": "Actor- and session-scoped mutable source workspace. Compilation and certification remain exclusively in the existing Game SkillBuild contract.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_context",
+    "session_id",
+    "draft_id",
+    "skill_id",
+    "revision",
+    "content_ref",
+    "display_name",
+    "source_bundle",
+    "draft_sha256",
+    "created_at",
+    "updated_at",
+    "last_applied_patch_id",
+    "links"
+  ],
+  "properties": {
+    "request_context": { "$ref": "../common/request-context.schema.json" },
+    "session_id": { "$ref": "#/$defs/identifier" },
+    "draft_id": { "$ref": "#/$defs/identifier" },
+    "skill_id": { "$ref": "#/$defs/identifier" },
+    "revision": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+    "content_ref": { "$ref": "../common/content-ref.schema.json" },
+    "display_name": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "source_bundle": {
+      "$ref": "./skill-source-bundle.schema.json"
+    },
+    "draft_sha256": {
+      "$ref": "#/$defs/sha256",
+      "description": "Server-computed hash of the frozen draft identity projection named by x-draft-hash-contract. Clients echo it for CAS; they never choose it."
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "last_applied_patch_id": {
+      "oneOf": [
+        { "$ref": "#/$defs/identifier" },
+        { "type": "null" }
+      ]
+    },
+    "links": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["self", "session_workspace", "builds"],
+      "properties": {
+        "self": { "$ref": "#/$defs/link" },
+        "session_workspace": { "$ref": "#/$defs/link" },
+        "builds": { "$ref": "#/$defs/link" }
+      }
+    }
+  },
+  "x-draft-hash-contract": {
+    "algorithm": "SHA-256",
+    "encoding": "UTF-8",
+    "canonicalization": "YAYA_CANONICAL_JSON_V1",
+    "projection_fields_in_order_independent_object": [
+      "session_id",
+      "draft_id",
+      "skill_id",
+      "content_ref",
+      "display_name",
+      "source_bundle"
+    ],
+    "excluded_fields": [
+      "request_context",
+      "revision",
+      "draft_sha256",
+      "created_at",
+      "updated_at",
+      "last_applied_patch_id",
+      "links"
+    ]
+  },
+  "x-invariants": [
+    "authenticated actor tenant_id and actor_id equal request_context.actor tenant_id and actor_id",
+    "request_context.content_ref equals content_ref",
+    "path session_id and draft_id equal the resource fields and links.self identifies both",
+    "session_id, draft_id, skill_id and content_ref are immutable after revision 1",
+    "request_context and created_at are immutable origin fields across every revision and request_context.requested_at is not later than created_at",
+    "draft_sha256 equals the hash defined by x-draft-hash-contract",
+    "when a revision is created by PatchDecision ACCEPT, last_applied_patch_id equals the accepted patch_id",
+    "ETag equals the strong quoted value draft:{revision}:{draft_sha256} and X-Draft-Revision equals revision",
+    "updated_at is not earlier than created_at"
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "link": {
+      "type": "string",
+      "format": "uri-reference",
+      "minLength": 1,
+      "maxLength": 2048
+    }
+  }
+}

@@ -1,0 +1,43 @@
+[gd_scene load_steps=7 format=3 uid="uid://ct2m82cc52q75"]
+
+[ext_resource type="Script" uid="uid://dtp8fsbatu152" path="res://scripts/player/player_controller.gd" id="1_controller"]
+[ext_resource type="Script" path="res://scripts/player/player_visual.gd" id="2_visual"]
+[ext_resource type="SpriteFrames" path="res://resources/sprites/player_frames.tres" id="3_frames"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape_player"]
+radius = 0.32
+height = 1.0
+
+[sub_resource type="StandardMaterial3D" id="ShadowMaterial"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.211765, 0.498039, 0.470588, 0.24)
+
+[sub_resource type="SphereMesh" id="ShadowMesh"]
+material = SubResource("ShadowMaterial")
+radius = 0.46
+height = 0.06
+
+[node name="Player" type="CharacterBody3D"]
+motion_mode = 1
+script = ExtResource("1_controller")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("CapsuleShape_player")
+
+[node name="Visual" type="Node3D" parent="."]
+script = ExtResource("2_visual")
+
+[node name="AnimatedSprite3D" type="AnimatedSprite3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.78, 0)
+pixel_size = 0.005
+billboard = 1
+sprite_frames = ExtResource("3_frames")
+animation = &"walk_down"
+autoplay = "idle_down"
+frame_progress = 0.68248975
+
+[node name="SoftShadow" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.68, 0, 0.035, 0)
+mesh = SubResource("ShadowMesh")

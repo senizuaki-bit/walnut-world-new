@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/feishu/report-job-request.schema.json",
+  "title": "Create Feishu report draft job",
+  "description": "Queues evidence-grounded report generation. The only permitted output is a draft; sending or publishing requires a separately authorized workflow.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "context",
+    "report_type",
+    "scope",
+    "template_ref",
+    "evidence_refs",
+    "output_mode",
+    "locale"
+  ],
+  "properties": {
+    "context": {
+      "$ref": "../common/request-context.schema.json"
+    },
+    "report_type": {
+      "type": "string",
+      "enum": [
+        "TEACHER_LEARNER_REVIEW",
+        "GUARDIAN_PROGRESS",
+        "TEACHER_CLASS_INSIGHTS"
+      ]
+    },
+    "scope": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "learner_ref"
+          ],
+          "properties": {
+            "learner_ref": {
+              "type": "string",
+              "pattern": "^lrn_[A-Za-z0-9_-]{8,128}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "class_ref"
+          ],
+          "properties": {
+            "class_ref": {
+              "type": "string",
+              "pattern": "^cls_[A-Za-z0-9_-]{8,128}$"
+            }
+          }
+        }
+      ]
+    },
+    "template_ref": {
+      "$ref": "../common/content-ref.schema.json"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1000,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "../common/evidence-ref.schema.json"
+      }
+    },
+    "output_mode": {
+      "const": "DRAFT_ONLY"
+    },
+    "locale": {
+      "type": "string",
+      "enum": [
+        "zh-CN",
+        "en-US"
+      ]
+    },
+    "time_range": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "from",
+        "to"
+      ],
+      "properties": {
+        "from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

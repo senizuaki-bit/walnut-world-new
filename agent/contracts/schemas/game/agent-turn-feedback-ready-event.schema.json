@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/game/agent-turn-feedback-ready-event.schema.json",
+  "title": "Agent turn feedback ready event",
+  "description": "Ordered downlink event carrying displayable feedback for one accepted agent turn.",
+  "x-invariants": [
+    "payload.command_id == command_id",
+    "stream_id == 'agent-session:' + payload.session_id",
+    "payload.session_id + payload.turn_id identifies the accepted client turn",
+    "payload.run_id is null iff this turn did not start a sandbox run"
+  ],
+  "allOf": [
+    { "$ref": "../common/event-envelope.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "event_type": { "const": "agent.turn.feedback_ready" },
+        "event_version": { "const": 1 },
+        "payload": { "$ref": "./agent-turn-feedback.schema.json" }
+      }
+    }
+  ]
+}

@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/feishu/content-release-status.schema.json",
+  "title": "Content release status",
+  "description": "Read-only lifecycle projection. It makes asynchronous validation, canary and later internal activation outcomes observable without exposing an activation command to Feishu.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "release_id",
+    "candidate_id",
+    "candidate_revision",
+    "lifecycle_status",
+    "activation_status",
+    "validation_job",
+    "checks",
+    "created_at",
+    "updated_at",
+    "trace_id"
+  ],
+  "properties": {
+    "release_id": {
+      "type": "string",
+      "pattern": "^rel_[A-Za-z0-9_-]{8,128}$"
+    },
+    "candidate_id": {
+      "type": "string",
+      "pattern": "^cand_[A-Za-z0-9_-]{8,128}$"
+    },
+    "candidate_revision": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Authoritative current revision for expected_candidate_revision compare-and-set."
+    },
+    "lifecycle_status": {
+      "type": "string",
+      "enum": [
+        "CANDIDATE_CREATED",
+        "VALIDATING",
+        "VALIDATION_FAILED",
+        "READY_FOR_CANARY",
+        "CANARY_RUNNING",
+        "CANARY_FAILED",
+        "READY_FOR_ACTIVATION",
+        "ACTIVATED",
+        "ROLLED_BACK"
+      ]
+    },
+    "activation_status": {
+      "type": "string",
+      "enum": [
+        "NOT_ACTIVATED",
+        "ACTIVE",
+        "ROLLED_BACK"
+      ],
+      "description": "Observation only. No operation in the Feishu API can set this value."
+    },
+    "validation_job": {
+      "$ref": "../common/async-job.schema.json"
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100,
+      "items": {
+        "$ref": "#/$defs/check"
+      }
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "trace_id": {
+      "type": "string",
+      "pattern": "^trace_[A-Za-z0-9_-]{8,96}$"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "lifecycle_status": {
+            "const": "ACTIVATED"
+          }
+        },
+        "required": [
+          "lifecycle_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "activation_status": {
+            "const": "ACTIVE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_status": {
+            "const": "ROLLED_BACK"
+          }
+        },
+        "required": [
+          "lifecycle_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "activation_status": {
+            "const": "ROLLED_BACK"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_status": {
+            "enum": [
+              "CANDIDATE_CREATED",
+              "VALIDATING",
+              "VALIDATION_FAILED",
+              "READY_FOR_CANARY",
+              "CANARY_RUNNING",
+              "CANARY_FAILED",
+              "READY_FOR_ACTIVATION"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "activation_status": {
+            "const": "NOT_ACTIVATED"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "status",
+        "required"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "enum": [
+            "SCHEMA",
+            "SEMANTIC",
+            "POLICY",
+            "AUTOMATED_TESTS",
+            "CANARY"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "PENDING",
+            "RUNNING",
+            "PASSED",
+            "FAILED",
+            "SKIPPED"
+          ]
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "evidence_refs": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "../common/evidence-ref.schema.json"
+          }
+        },
+        "error": {
+          "$ref": "../common/error.schema.json"
+        }
+      }
+    }
+  }
+}

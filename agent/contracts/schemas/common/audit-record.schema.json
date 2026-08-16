@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/common/audit-record.schema.json",
+  "title": "Redacted access audit record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "audit_id",
+    "occurred_at",
+    "operation",
+    "outcome",
+    "actor",
+    "request_id",
+    "correlation_id",
+    "trace_id",
+    "resource_type",
+    "resource_id",
+    "purpose",
+    "subject_hash",
+    "redacted",
+    "evidence_ids",
+    "error_code",
+    "details"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "audit_id": { "type": "string", "pattern": "^audit_[A-Za-z0-9_-]{8,128}$" },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "operation": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "outcome": { "type": "string", "enum": ["ALLOWED", "DENIED", "FAILED"] },
+    "actor": { "$ref": "./actor-ref.schema.json" },
+    "request_id": { "type": "string", "pattern": "^req_[A-Za-z0-9_-]{8,96}$" },
+    "correlation_id": { "type": "string", "pattern": "^corr_[A-Za-z0-9_-]{8,96}$" },
+    "trace_id": { "type": "string", "pattern": "^trace_[A-Za-z0-9_-]{8,96}$" },
+    "resource_type": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$" },
+    "resource_id": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "purpose": {
+      "oneOf": [
+        { "type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$" },
+        { "type": "null" }
+      ]
+    },
+    "subject_hash": {
+      "oneOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "redacted": { "const": true },
+    "evidence_ids": {
+      "type": "array",
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^evidence_[A-Za-z0-9_-]{8,128}$" }
+    },
+    "error_code": {
+      "oneOf": [
+        { "$ref": "./error-code.schema.json" },
+        { "type": "null" }
+      ]
+    },
+    "details": { "type": "object" }
+  }
+}

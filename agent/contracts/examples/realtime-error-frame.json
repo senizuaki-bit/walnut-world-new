@@ -1,0 +1,26 @@
+{
+  "schema_ref": "../asyncapi/runtime-events.asyncapi.json#/components/schemas/RealtimeErrorFrame",
+  "value": {
+    "frame_type": "error",
+    "protocol_version": "1.0.0",
+    "request_id": "req_realtime_00000002",
+    "subscription_id": "sub_realtime_00000001",
+    "stream_id": "world:world_demo_001",
+    "fatal": true,
+    "close_code": 4409,
+    "retry_after_ms": 0,
+    "error": {
+      "code": "EVENT_SEQUENCE_GAP",
+      "category": "CONCURRENCY",
+      "retryable": true,
+      "user_message_key": "event.resync_required",
+      "stage": "REALTIME_STREAM",
+      "message": "The requested checkpoint cannot be replayed; recover through HTTP backfill or a fresh snapshot.",
+      "details": {
+        "requested_after_sequence": 732,
+        "oldest_available_sequence": 740
+      },
+      "evidence_ids": []
+    }
+  }
+}

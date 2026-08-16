@@ -1,0 +1,100 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scenes/task/code_editor_panel.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxPanel"]
+bg_color = Color(0.105, 0.224, 0.157, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.29, 0.49, 0.32, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+content_margin_left = 14.0
+content_margin_top = 12.0
+content_margin_right = 14.0
+content_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxEditor"]
+bg_color = Color(0.075, 0.153, 0.112, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.19, 0.34, 0.23, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFocus"]
+bg_color = Color(0.075, 0.153, 0.112, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.944, 0.69, 0.205, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+
+[node name="CodeEditorPanel" type="PanelContainer"]
+custom_minimum_size = Vector2(0, 372)
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxPanel")
+script = ExtResource("1_script")
+
+[node name="Content" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="HBoxContainer" parent="Content"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Content/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.91, 0.94, 0.72, 1)
+theme_override_font_sizes/font_size = 17
+text = "C++ 农场指令"
+
+[node name="SaveState" type="Label" parent="Content/Header"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.69, 0.82, 0.5, 1)
+theme_override_font_sizes/font_size = 13
+text = "已自动保存"
+
+[node name="CodeEditor" type="CodeEdit" parent="Content"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.92, 0.78, 1)
+theme_override_colors/font_selected_color = Color(1, 1, 1, 1)
+theme_override_colors/font_readonly_color = Color(0.66, 0.7, 0.58, 1)
+theme_override_colors/font_placeholder_color = Color(0.58, 0.66, 0.52, 0.8)
+theme_override_colors/caret_color = Color(1, 0.75, 0.23, 1)
+theme_override_colors/selection_color = Color(0.31, 0.5, 0.32, 0.75)
+theme_override_colors/line_number_color = Color(0.46, 0.58, 0.38, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxEditor")
+theme_override_styles/focus = SubResource("StyleBoxFocus")
+line_numbers = true
+draw_tabs = true
+indent_automatic = true
+auto_brace_completion_enabled = true
+code_completion_enabled = false
+placeholder_text = "在这里补全 C++ 农场指令"

@@ -1,0 +1,100 @@
+{
+  "descriptor_version": "1.0.0",
+  "package_name": "@yaya/agent-contracts",
+  "package_version": "0.6.0",
+  "git_release": "refs/tags/agent-contracts-v0.6.0",
+  "manifest": {
+    "relative_path": "contracts/manifest.json",
+    "sha256": "11dde4ef0fd71de5f78afa8aaeef527ef72775a953b6399929245eb1c4d7ab05",
+    "bytes": 27848,
+    "file_count": 147
+  },
+  "agent_repository": {
+    "environment_variable": "YAYA_AGENT_REPOSITORY_ROOT",
+    "default_relative_path": "../agent"
+  },
+  "godot_sync": {
+    "api_version": "1.1.0",
+    "contract_version": "0.4.0",
+    "openapi": {
+      "game": "contracts/openapi/game-api.openapi.json",
+      "student_bootstrap": "contracts/openapi/student-bootstrap-v2.openapi.json",
+      "product": "contracts/openapi/product-experience.openapi.json"
+    },
+    "canonical_client": {
+      "validator": {
+        "frontend_path": "addons/yaya_contract_client/contract_validator.gd",
+        "agent_path": "clients/godot/contract_validator.gd",
+        "comparison": "text_exact_lf"
+      },
+      "gateway": {
+        "frontend_path": "addons/yaya_contract_client/agent_api_gateway.gd",
+        "agent_path": "clients/godot/agent_api_gateway.gd",
+        "comparison": "relocated_preloads_only"
+      },
+      "transport": {
+        "frontend_path": "addons/yaya_contract_client/http_agent_api_transport.gd",
+        "agent_path": "clients/godot/http_agent_api_transport.gd",
+        "comparison": "canonical_game_plus_product_extensions"
+      }
+    },
+    "student_operation": {
+      "operation_id": "getStudentBootstrap",
+      "method": "GET",
+      "openapi_path": "/v1/student-bootstrap",
+      "client_operation": "get_student_bootstrap",
+      "gateway_method": "get_student_bootstrap"
+    },
+    "product_operations": [
+      {
+        "operation_id": "getProductContentUnit",
+        "method": "GET",
+        "openapi_path": "/product-experience/v1/content-units/{unit_id}/versions/{content_version}",
+        "client_operation": "get_product_content_unit",
+        "gateway_method": "get_content"
+      },
+      {
+        "operation_id": "getProductSessionWorkspace",
+        "method": "GET",
+        "openapi_path": "/product-experience/v1/sessions/{session_id}/workspace",
+        "client_operation": "get_product_session_workspace",
+        "gateway_method": "get_workspace"
+      },
+      {
+        "operation_id": "getProductSkillDraft",
+        "method": "GET",
+        "openapi_path": "/product-experience/v1/sessions/{session_id}/skill-drafts/{draft_id}",
+        "client_operation": "get_product_skill_draft",
+        "gateway_method": "get_draft"
+      },
+      {
+        "operation_id": "upsertProductSkillDraft",
+        "method": "PUT",
+        "openapi_path": "/product-experience/v1/sessions/{session_id}/skill-drafts/{draft_id}",
+        "client_operation": "upsert_product_skill_draft",
+        "gateway_method": "upsert_draft"
+      },
+      {
+        "operation_id": "listProductAgentInteractions",
+        "method": "GET",
+        "openapi_path": "/product-experience/v1/sessions/{session_id}/agent-interactions",
+        "client_operation": "list_product_agent_interactions",
+        "gateway_method": "list_interactions"
+      },
+      {
+        "operation_id": "getProductAgentInteraction",
+        "method": "GET",
+        "openapi_path": "/product-experience/v1/sessions/{session_id}/agent-interactions/{interaction_id}",
+        "client_operation": "get_product_agent_interaction",
+        "gateway_method": "get_interaction"
+      },
+      {
+        "operation_id": "recordProductPatchDecision",
+        "method": "POST",
+        "openapi_path": "/product-experience/v1/sessions/{session_id}/agent-interactions/{interaction_id}/patches/{patch_id}/decision",
+        "client_operation": "record_product_patch_decision",
+        "gateway_method": "record_patch_decision"
+      }
+    ]
+  }
+}

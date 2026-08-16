@@ -1,0 +1,28 @@
+{
+  "schema_ref": "../schemas/product-experience/skill-draft-upsert-request.schema.json",
+  "value": {
+    "session_id": "session_agent_001",
+    "draft_id": "draft_water_001",
+    "skill_id": "skill_water_001",
+    "content_ref": {
+      "unit_id": "YAYA_FARM_001",
+      "version": "1.4.0",
+      "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "base_revision": 7,
+    "base_draft_sha256": "53c203ad61eb09d45d0ca946b2d751cdca5eac9a029baceb8103cb740cc7226c",
+    "display_name": "自动浇水",
+    "source_bundle": {
+      "language": "CPP20",
+      "entrypoint": "src/main.cpp",
+      "files": [
+        {
+          "path": "src/main.cpp",
+          "content": "#include <yaya/skill.hpp>\nint main() { yaya::water(\"plot_1\", 500); return 0; }\n",
+          "content_sha256": "5c981f3d08a2395ad35cedd1afdb582c5068c03fdacad93ef0f401051f4d8f0c"
+        }
+      ]
+    },
+    "client_saved_at": "2026-08-08T01:02:00Z"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "schema_ref": "../schemas/game/skill-activation-request.schema.json",
+  "value": {
+    "expected_registry_revision": 17,
+    "activation_scope": {
+      "world_id": "world_demo_001",
+      "agent_profile_id": "agent_farmer_001"
+    },
+    "reason": "学生已通过隐藏测试，激活本次精确制品版本。"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/game/world-presentation-event-page.schema.json",
+  "title": "Committed world presentation event page",
+  "description": "A closed, read-only page in the independent authoritative world-presentation stream.",
+  "x-invariants": [
+    "events are ordered by sequence, contain no duplicate event_id, and are gap-free.",
+    "For a non-empty page, from_sequence equals events[0].sequence, to_sequence equals the last event sequence, next_after_sequence equals to_sequence, and 1 <= from_sequence <= to_sequence <= presentation_high_watermark.",
+    "For an empty page, from_sequence, to_sequence, and next_after_sequence all equal the request after_sequence and has_more is false.",
+    "For a non-empty page, has_more is true if and only if to_sequence is less than presentation_high_watermark.",
+    "Every event world_id equals page world_id, stream_id equals 'world-presentation:' plus world_id, and tenant_id equals request_context.actor.tenant_id.",
+    "Every event final_snapshot_revision and final_world_event_sequence are less than or equal to page snapshot_revision and snapshot_last_event_sequence; historical events retain their own commit-final state hash.",
+    "Events with the same commit_id have identical commit identity, action_count, world_revision, and final snapshot binding; their action_index values increase by one and their state hashes chain.",
+    "At a commit boundary, the preceding event has action_index equal to action_count minus one and the next event starts at action_index zero; commit-final revision and world-event sequence increase.",
+    "Whenever an event has action_index equal to action_count minus one, its state_hash_after equals its final_snapshot_state_hash.",
+    "Only when a non-empty page reaches presentation_high_watermark, its last event must close its action set and its final_snapshot_revision, final_world_event_sequence, and final_snapshot_state_hash equal page snapshot_revision, snapshot_last_event_sequence, and snapshot_state_hash respectively.",
+    "Duplicate reads are side-effect-free; event_id and sequence are stable and consumers deduplicate by stream_id plus sequence plus event_id.",
+    "A consumer must reject the entire page and restore the authoritative snapshot when any schema, hash, identity, ordering, pagination, or final snapshot invariant is violated."
+  ],
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_context",
+    "world_id",
+    "snapshot_revision",
+    "snapshot_last_event_sequence",
+    "snapshot_state_hash",
+    "presentation_high_watermark",
+    "from_sequence",
+    "to_sequence",
+    "has_more",
+    "next_after_sequence",
+    "events"
+  ],
+  "properties": {
+    "request_context": { "$ref": "../common/request-context.schema.json" },
+    "world_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "snapshot_revision": { "type": "integer", "minimum": 0 },
+    "snapshot_last_event_sequence": { "type": "integer", "minimum": 0 },
+    "snapshot_state_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "presentation_high_watermark": { "type": "integer", "minimum": 0 },
+    "from_sequence": { "type": "integer", "minimum": 0 },
+    "to_sequence": { "type": "integer", "minimum": 0 },
+    "has_more": { "type": "boolean" },
+    "next_after_sequence": { "type": "integer", "minimum": 0 },
+    "events": {
+      "type": "array",
+      "maxItems": 500,
+      "uniqueItems": true,
+      "items": { "$ref": "./world-presentation-event.schema.json" }
+    }
+  }
+}

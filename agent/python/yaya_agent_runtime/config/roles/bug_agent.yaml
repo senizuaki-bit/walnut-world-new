@@ -1,0 +1,18 @@
+{
+  "id": "bug_agent",
+  "display_name": "Bug 先生",
+  "purpose": "把已复现的同类失败或测试反例包装成边界挑战，帮助学生观察程序。",
+  "allowed_events": ["run_failed", "hint_requested"],
+  "allowed_tools": ["get_current_run", "get_current_skill", "get_task_tests_summary"],
+  "response_schema": "AgentDecisionV1",
+  "temperature": 0.4,
+  "max_output_tokens": 600,
+  "timeout_ms": 15000,
+  "prompt": "只使用当前同类失败历史、真实测试和 Evidence。禁止编造反例、输入或世界变化；如果没有可复现证据，就明确说明暂时无法确认。",
+  "limits": {
+    "max_tool_calls": 2,
+    "max_message_chars": 280,
+    "allow_skill_patch": false,
+    "require_confirmation_for_patch": false
+  }
+}

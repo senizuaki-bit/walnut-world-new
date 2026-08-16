@@ -1,0 +1,44 @@
+{
+  "schema_ref": "../schemas/product-experience/int2-capabilities.schema.json",
+  "value": {
+    "request_context": {
+      "schema_version": "1.0.0",
+      "request_id": "req_int2caps_0001",
+      "correlation_id": "corr_int2caps_0001",
+      "trace_id": "trace_int2caps_0001",
+      "requested_at": "2026-08-14T10:00:00Z",
+      "actor": {
+        "tenant_id": "tenant_yaya",
+        "actor_id": "student_0001",
+        "actor_type": "student",
+        "roles": ["game:player"]
+      },
+      "content_ref": {
+        "unit_id": "YAYA_FARM_001",
+        "version": "1.0.0",
+        "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    "api_version": "1.2.0",
+    "contract_version": "0.6.0",
+    "world_presentation_enabled": true,
+    "skill_patch_enabled": false,
+    "skill_patch_constraints": {
+      "request_mode": "EXPLICIT_UI_ACTION",
+      "selection_target": "FAILED_INTERACTION",
+      "agent_role": "teaching_agent",
+      "scenario": "RECTIFICATION",
+      "required_hint_level": 4,
+      "operation": "UPSERT_FILE",
+      "target": "CURRENT_ENTRYPOINT",
+      "max_files": 1,
+      "max_operations": 1,
+      "requires_failed_evidence": true,
+      "cas_required": true,
+      "requires_student_confirmation": true,
+      "auto_build": false,
+      "auto_activate": false,
+      "auto_run": false
+    }
+  }
+}

@@ -1,0 +1,20 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/art/environment/garden_house.png" id="1_house"]
+[ext_resource type="Script" path="res://scripts/terrain/building_footprint.gd" id="2_footprint"]
+
+[node name="GardenHouse" type="Node3D"]
+
+[node name="Billboard" type="Sprite3D" parent="."]
+position = Vector3(0, 1, 0)
+texture = ExtResource("1_house")
+billboard = 1
+pixel_size = 0.0016
+transparent = true
+shaded = false
+
+[node name="BuildingFootprint" type="Node" parent="."]
+script = ExtResource("2_footprint")
+footprint_size = Vector2i(3, 3)
+anchor_offset = Vector2i(-1, -1)
+placement_offset = Vector3(0.3, 0, 0.3)

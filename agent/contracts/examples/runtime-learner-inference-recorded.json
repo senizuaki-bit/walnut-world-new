@@ -1,0 +1,61 @@
+{
+  "schema_ref": "../schemas/learner/learner-inference-recorded-event.schema.json",
+  "value": {
+    "event_id": "evt_learner_inference_00000001",
+    "event_type": "learner.inference.recorded",
+    "event_version": 1,
+    "schema_version": "2.0.0",
+    "stream_id": "learner:student_0001",
+    "sequence": 41,
+    "occurred_at": "2026-08-09T09:30:04Z",
+    "producer": "agent_hub",
+    "trace_id": "trace_learner_inference_00000001",
+    "command_id": "cmd_learner_inference_00000001",
+    "correlation_id": "corr_learner_inference_00000001",
+    "causation_id": "evt_agent_feedback_00000001",
+    "content_ref": {
+      "unit_id": "YAYA_FARM_001",
+      "version": "1.4.0",
+      "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "payload": {
+      "actor": {
+        "tenant_id": "tenant_yaya",
+        "actor_id": "student_0001",
+        "actor_type": "student",
+        "roles": ["game:player"]
+      },
+      "learner_id": "student_0001",
+      "session_id": "session_demo_001",
+      "turn_id": "turn_demo_000001",
+      "command_id": "cmd_learner_inference_00000001",
+      "run_id": "run_water_0001",
+      "source_event_id": "evt_agent_feedback_00000001",
+      "source_event_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "turn_commit_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "task_id": "task_demo_0001",
+      "teaching_spec_version": "teaching-7",
+      "role": "teaching_agent",
+      "concept": "loops.for",
+      "score_delta": 0.2,
+      "confidence": 0.875001,
+      "reason": "The learner completed the loop task with one bounded hint and cited test evidence.",
+      "evidence_refs": [
+        {
+          "evidence_id": "evidence_action_00000001",
+          "evidence_type": "ACTION_LOG",
+          "created_at": "2026-08-09T09:30:01Z",
+          "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        {
+          "evidence_id": "evidence_test_00000001",
+          "evidence_type": "TEST_REPORT",
+          "created_at": "2026-08-09T09:30:02Z",
+          "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        }
+      ],
+      "inferred_at": "2026-08-09T09:30:03Z",
+      "inference_sha256": "42a7cad3b766276fa742efc81bdd61c7d91fa46272105bfbce40ba6916c38b46"
+    }
+  }
+}

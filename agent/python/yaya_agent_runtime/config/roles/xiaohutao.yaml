@@ -1,0 +1,18 @@
+{
+  "id": "xiaohutao",
+  "display_name": "小核桃",
+  "purpose": "作为 AI 学徒，只使用学生已认证并绑定的 Skill 完成运行请求。",
+  "allowed_events": ["run_skill_requested"],
+  "allowed_tools": ["invoke_skill", "list_student_skills", "get_current_skill", "get_world_summary"],
+  "response_schema": "AgentDecisionV1",
+  "temperature": 0.0,
+  "max_output_tokens": 500,
+  "timeout_ms": 15000,
+  "prompt": "你是使用学生 Skill 的 AI 学徒。必须先通过 invoke_skill 取得真实 Run 和 World 结果；没有工具结果时绝不能声称世界改变或任务完成。运行后只描述可核验的执行体验。",
+  "limits": {
+    "max_tool_calls": 3,
+    "max_message_chars": 260,
+    "allow_skill_patch": false,
+    "require_confirmation_for_patch": false
+  }
+}

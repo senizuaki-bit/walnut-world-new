@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/common/event-envelope.schema.json",
+  "title": "EventEnvelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "event_type",
+    "event_version",
+    "schema_version",
+    "stream_id",
+    "sequence",
+    "occurred_at",
+    "producer",
+    "trace_id",
+    "command_id",
+    "correlation_id",
+    "causation_id",
+    "content_ref",
+    "payload"
+  ],
+  "properties": {
+    "event_id": { "type": "string", "pattern": "^evt_[A-Za-z0-9_-]{8,128}$" },
+    "event_type": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{2,127}$" },
+    "event_version": { "type": "integer", "minimum": 1 },
+    "schema_version": { "const": "1.0.0" },
+    "stream_id": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9:_-]{2,159}$" },
+    "sequence": { "type": "integer", "minimum": 1 },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "producer": { "type": "string", "pattern": "^[a-z][a-z0-9_-]{2,63}$" },
+    "trace_id": { "type": "string", "pattern": "^trace_[A-Za-z0-9_-]{8,96}$" },
+    "command_id": { "$ref": "./command-id.schema.json" },
+    "correlation_id": { "type": "string", "pattern": "^corr_[A-Za-z0-9_-]{8,96}$" },
+    "causation_id": {
+      "oneOf": [
+        { "type": "string", "pattern": "^(?:evt|cmd)_[A-Za-z0-9_-]{8,128}$" },
+        { "type": "null" }
+      ]
+    },
+    "content_ref": { "$ref": "./content-ref.schema.json" },
+    "payload": { "type": "object", "additionalProperties": true }
+  }
+}

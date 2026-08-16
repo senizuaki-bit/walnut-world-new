@@ -1,0 +1,59 @@
+{
+  "schema_ref": "../schemas/product-experience/content-unit.schema.json",
+  "value": {
+    "content_ref": {
+      "unit_id": "YAYA_FARM_001",
+      "version": "1.4.0",
+      "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "status": "PUBLISHED",
+    "unit_type": "TASK",
+    "audiences": ["LEARNER", "TEACHER_PREVIEW"],
+    "task": {
+      "task_id": "watering_001",
+      "name": "自动浇灌八块土地",
+      "goal": "使用循环让八块土地都得到浇水。",
+      "instructions": [
+        "编写一个 C++20 Skill。",
+        "用循环对目标地块执行浇水动作。"
+      ],
+      "knowledge_points": ["for_loop", "loop_boundary"],
+      "allowed_capabilities": ["WORLD_READ", "WATER"],
+      "starter_skill": {
+        "skill_id": "skill_water_001",
+        "display_name": "自动浇水",
+        "source_bundle": {
+          "language": "CPP20",
+          "entrypoint": "src/main.cpp",
+          "files": [
+            {
+              "path": "src/main.cpp",
+              "content": "#include <yaya/skill.hpp>\nint main() { return 0; }\n",
+              "content_sha256": "5e7b1c8414988b8dbde4e72f3bd9d3db0a01c6c33ef32e69be263156a04b4075"
+            }
+          ]
+        },
+        "compiler_profile": "YAYA_CPP20_SAFE_V1",
+        "test_suite_version": "farm-water-v3"
+      },
+      "hint_policy": {
+        "max_level": 4,
+        "levels": [
+          { "level": 0, "instruction": "只指出运行现象并提问。" },
+          { "level": 1, "instruction": "指出可能需要检查的代码区域。" },
+          { "level": 2, "instruction": "说明相关编程概念。" },
+          { "level": 3, "instruction": "给出局部修改建议。" },
+          { "level": 4, "instruction": "可提出需要学生明确确认的结构化 Skill Patch。" }
+        ]
+      },
+      "story": {
+        "opening": "今天需要让农场的八块土地都喝到水。",
+        "success": "农场恢复了生机。"
+      }
+    },
+    "published_at": "2026-08-01T00:00:00Z",
+    "links": {
+      "self": "/product-experience/v1/content-units/YAYA_FARM_001/versions/1.4.0?content_hash=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  }
+}

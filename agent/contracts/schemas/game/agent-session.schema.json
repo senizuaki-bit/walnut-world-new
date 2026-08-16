@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/game/agent-session.schema.json",
+  "title": "Agent session",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_context",
+    "session_id",
+    "world_id",
+    "learner_id",
+    "agent_profile_id",
+    "channel",
+    "status",
+    "created_at",
+    "updated_at",
+    "last_turn_sequence",
+    "content",
+    "versions",
+    "links"
+  ],
+  "properties": {
+    "request_context": { "$ref": "../common/request-context.schema.json" },
+    "session_id": { "$ref": "#/$defs/identifier" },
+    "world_id": { "$ref": "#/$defs/identifier" },
+    "learner_id": { "$ref": "#/$defs/identifier" },
+    "agent_profile_id": { "$ref": "#/$defs/identifier" },
+    "channel": { "type": "string", "enum": ["GAME", "TEACHER_PREVIEW"] },
+    "status": { "type": "string", "enum": ["ACTIVE", "CLOSING", "CLOSED", "FAILED"] },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "last_turn_sequence": { "type": "integer", "minimum": 0 },
+    "content": { "$ref": "../common/content-ref.schema.json" },
+    "versions": { "$ref": "../common/version-set.schema.json" },
+    "links": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["self", "turns", "world_snapshot"],
+      "properties": {
+        "self": { "type": "string", "format": "uri-reference", "minLength": 1, "maxLength": 2048 },
+        "turns": { "type": "string", "format": "uri-reference", "minLength": 1, "maxLength": 2048 },
+        "world_snapshot": { "type": "string", "format": "uri-reference", "minLength": 1, "maxLength": 2048 }
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    }
+  }
+}

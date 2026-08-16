@@ -1,0 +1,112 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scenes/task/run_control_panel.gd" id="1_script"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxPanel"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxReset"]
+bg_color = Color(0.98, 0.94, 0.83, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.52, 0.42, 0.24, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0.08, 0.12, 0.08, 0.18)
+shadow_size = 4
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxSubmit"]
+bg_color = Color(0.984, 0.624, 0.176, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.55, 0.31, 0.08, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0.22, 0.13, 0.04, 0.28)
+shadow_size = 5
+shadow_offset = Vector2(0, 4)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxSubmitHover"]
+bg_color = Color(1, 0.72, 0.25, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.42, 0.25, 0.07, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0.22, 0.13, 0.04, 0.2)
+shadow_size = 3
+shadow_offset = Vector2(0, 2)
+
+[node name="RunControlPanel" type="PanelContainer"]
+custom_minimum_size = Vector2(0, 58)
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxPanel")
+script = ExtResource("1_script")
+
+[node name="Actions" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ResetButton" type="Button" parent="Actions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(88, 54)
+layout_mode = 2
+focus_mode = 2
+mouse_default_cursor_shape = 2
+tooltip_text = "恢复本任务最初需要补全的代码"
+theme_override_colors/font_color = Color(0.3, 0.25, 0.15, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxReset")
+theme_override_styles/hover = SubResource("StyleBoxReset")
+text = "↶ 重置"
+
+[node name="BuildButton" type="Button" parent="Actions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(88, 54)
+layout_mode = 2
+focus_mode = 2
+mouse_default_cursor_shape = 2
+tooltip_text = "显式保存草稿并构建、认证新的 SkillVersion"
+theme_override_colors/font_color = Color(0.3, 0.25, 0.15, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxReset")
+theme_override_styles/hover = SubResource("StyleBoxReset")
+text = "① 构建"
+
+[node name="ActivationButton" type="Button" parent="Actions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(88, 54)
+layout_mode = 2
+focus_mode = 2
+mouse_default_cursor_shape = 2
+tooltip_text = "显式激活刚刚认证的 SkillVersion"
+theme_override_colors/font_color = Color(0.3, 0.25, 0.15, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxReset")
+theme_override_styles/hover = SubResource("StyleBoxReset")
+text = "② 激活"
+
+[node name="SubmitButton" type="Button" parent="Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.19, 0.18, 0.09, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxSubmit")
+theme_override_styles/hover = SubResource("StyleBoxSubmitHover")
+theme_override_styles/pressed = SubResource("StyleBoxSubmitHover")
+text = "③ 提交并运行"

@@ -1,0 +1,63 @@
+{
+  "schema_ref": "../schemas/game/evidence.schema.json",
+  "value": {
+    "request_context": {
+      "schema_version": "1.0.0",
+      "request_id": "req_game_00000008",
+      "correlation_id": "corr_game_00000004",
+      "trace_id": "trace_game_00000004",
+      "requested_at": "2026-08-06T10:05:00Z",
+      "actor": {
+        "tenant_id": "tenant_yaya",
+        "actor_id": "student_0001",
+        "actor_type": "student",
+        "roles": ["game:player"]
+      },
+      "content_ref": {
+        "unit_id": "YAYA_FARM_001",
+        "version": "1.4.0",
+        "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    "evidence_ref": {
+      "evidence_id": "evidence_world_00000001",
+      "evidence_type": "WORLD_COMMIT",
+      "created_at": "2026-08-06T10:02:54Z",
+      "sha256": "9552b9e9c089a955fa26f2395573e636c93c466191020506937954283dc7863e"
+    },
+    "subject": {
+      "learner_id": "learner_0001"
+    },
+    "source": {
+      "source_type": "WORLD",
+      "source_id": "world_demo_001",
+      "command_id": "cmd_game_00000001",
+      "world_id": "world_demo_001"
+    },
+    "occurred_at": "2026-08-06T10:02:54Z",
+    "recorded_at": "2026-08-06T10:02:54Z",
+    "integrity": {
+      "payload_sha256": "9552b9e9c089a955fa26f2395573e636c93c466191020506937954283dc7863e",
+      "previous_evidence_sha256": null
+    },
+    "payload": {
+      "evidence_kind": "WORLD_COMMIT",
+      "world_id": "world_demo_001",
+      "previous_revision": 184,
+      "world_revision": 185,
+      "first_event_sequence": 732,
+      "last_event_sequence": 733,
+      "state_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    "related_evidence": [],
+    "versions": {
+      "api_version": "1.0.0",
+      "event_version": "1",
+      "policy_version": "policy-38",
+      "world_rules_version": "farm-rules-12",
+      "teaching_spec_version": "teaching-7",
+      "skill_version": "skillver_water_001",
+      "artifact_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    }
+  }
+}

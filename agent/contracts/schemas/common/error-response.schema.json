@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/common/error-response.schema.json",
+  "title": "ErrorResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["request_id", "trace_id", "status", "data", "error"],
+  "properties": {
+    "request_id": { "type": "string", "pattern": "^req_[A-Za-z0-9_-]{8,96}$" },
+    "command_id": { "$ref": "./command-id.schema.json" },
+    "trace_id": { "type": "string", "pattern": "^trace_[A-Za-z0-9_-]{8,96}$" },
+    "status": { "type": "string", "enum": ["REJECTED", "FAILED", "UNKNOWN"] },
+    "data": { "type": "null" },
+    "error": { "$ref": "./error.schema.json" },
+    "versions": { "$ref": "./version-set.schema.json" }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "status": { "const": "UNKNOWN" } },
+        "required": ["status"]
+      },
+      "then": {
+        "required": ["command_id"],
+        "properties": {
+          "error": {
+            "allOf": [
+              { "$ref": "./error.schema.json" },
+              {
+                "properties": {
+                  "code": { "const": "UNKNOWN_COMMIT_STATE" },
+                  "stage": { "const": "WORLD_COMMIT" }
+                },
+                "required": ["code", "stage"]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "error": {
+            "properties": { "code": { "const": "UNKNOWN_COMMIT_STATE" } },
+            "required": ["code"]
+          }
+        },
+        "required": ["error"]
+      },
+      "then": {
+        "required": ["command_id"],
+        "properties": { "status": { "const": "UNKNOWN" } }
+      }
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "schema_ref": "../schemas/feishu/approval-decision.schema.json",
+  "value": {
+    "context": {
+      "schema_version": "1.0.0",
+      "request_id": "req_feishu_00000002",
+      "correlation_id": "corr_feishu_00000001",
+      "trace_id": "trace_feishu_00000002",
+      "requested_at": "2026-08-06T10:15:00Z",
+      "actor": {
+        "tenant_id": "tenant_yaya",
+        "actor_id": "feishu_operator_001",
+        "actor_type": "operator",
+        "roles": [
+          "content:approver"
+        ]
+      },
+      "content_ref": {
+        "unit_id": "YAYA_FARM_001",
+        "version": "1.4.0",
+        "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    "approval_instance_id": "approval_instance_00000001",
+    "release_id": "rel_00000001",
+    "candidate_id": "cand_00000001",
+    "expected_candidate_revision": 1,
+    "decision": "APPROVE",
+    "comment": "允许进入自动验证；本次审批不代表线上激活。",
+    "decided_at": "2026-08-06T10:14:55Z"
+  }
+}

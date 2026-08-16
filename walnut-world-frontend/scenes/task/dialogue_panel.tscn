@@ -1,0 +1,62 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/task/dialogue_panel.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxDialogue"]
+bg_color = Color(0.925, 0.902, 0.776, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.57, 0.47, 0.26, 0.8)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[node name="DialoguePanel" type="PanelContainer"]
+custom_minimum_size = Vector2(0, 120)
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxDialogue")
+script = ExtResource("1_script")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 10
+
+[node name="Content" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Speaker" type="Label" parent="Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.48, 0.29, 1)
+theme_override_font_sizes/font_size = 17
+text = "小核桃"
+
+[node name="ResponseType" type="Label" parent="Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.53, 0.34, 0.08, 1)
+theme_override_font_sizes/font_size = 13
+text = "任务说明"
+
+[node name="DialogueText" type="Label" parent="Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.22, 0.25, 0.17, 1)
+theme_override_font_sizes/font_size = 14
+autowrap_mode = 2
+text = "把你的代码交给我吧，我会把已确认的结果带回农场。"
+
+[node name="Question" type="Label" parent="Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.38, 0.43, 1)
+theme_override_font_sizes/font_size = 13
+autowrap_mode = 2
+visible = false

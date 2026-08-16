@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.yaya.local/game/evidence.schema.json",
+  "title": "Immutable evidence object",
+  "x-invariants": [
+    "integrity.payload_sha256 equals lowercase SHA-256 of the UTF-8 YAYA_CANONICAL_JSON_V1 encoding of payload",
+    "when evidence_ref.sha256 is present it equals integrity.payload_sha256",
+    "WORLD_COMMIT source.source_id, source.world_id and payload.world_id are equal"
+  ],
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_context",
+    "evidence_ref",
+    "subject",
+    "source",
+    "occurred_at",
+    "recorded_at",
+    "integrity",
+    "payload",
+    "related_evidence",
+    "versions"
+  ],
+  "properties": {
+    "request_context": { "$ref": "../common/request-context.schema.json" },
+    "evidence_ref": { "$ref": "../common/evidence-ref.schema.json" },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["learner_id"],
+      "properties": {
+        "learner_id": { "$ref": "#/$defs/identifier" }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_type", "source_id", "command_id", "world_id"],
+      "properties": {
+        "source_type": { "type": "string", "enum": ["SKILL_BUILD", "SKILL_RUN", "WORLD", "CLIENT_EVENT", "POLICY", "LEARNER_PROJECTOR"] },
+        "source_id": { "$ref": "#/$defs/identifier" },
+        "command_id": {
+          "oneOf": [
+            { "$ref": "../common/command-id.schema.json" },
+            { "type": "null" }
+          ]
+        },
+        "world_id": {
+          "oneOf": [
+            { "$ref": "#/$defs/identifier" },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "recorded_at": { "type": "string", "format": "date-time" },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload_sha256", "previous_evidence_sha256"],
+      "properties": {
+        "payload_sha256": {
+          "$ref": "#/$defs/sha256",
+          "description": "SHA-256 of payload encoded using contracts/canonical-json-v1.json."
+        },
+        "previous_evidence_sha256": {
+          "oneOf": [
+            { "$ref": "#/$defs/sha256" },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+    "payload": {
+      "oneOf": [
+        { "$ref": "#/$defs/buildEvidence" },
+        { "$ref": "#/$defs/runEvidence" },
+        { "$ref": "#/$defs/worldCommitEvidence" },
+        { "$ref": "#/$defs/learnerObservationEvidence" }
+      ]
+    },
+    "related_evidence": {
+      "type": "array",
+      "maxItems": 64,
+      "items": { "$ref": "../common/evidence-ref.schema.json" }
+    },
+    "versions": { "$ref": "../common/version-set.schema.json" }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "buildEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_kind", "build_id", "skill_id", "skill_version_id", "artifact_sha256", "test_suite_version", "outcome"],
+      "properties": {
+        "evidence_kind": { "const": "BUILD_CERTIFICATION" },
+        "build_id": { "$ref": "#/$defs/identifier" },
+        "skill_id": { "$ref": "#/$defs/identifier" },
+        "skill_version_id": { "$ref": "#/$defs/identifier" },
+        "artifact_sha256": { "$ref": "#/$defs/sha256" },
+        "test_suite_version": { "type": "string", "minLength": 1, "maxLength": 96 },
+        "outcome": { "type": "string", "enum": ["CERTIFIED", "REJECTED"] }
+      }
+    },
+    "runEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_kind", "run_id", "sandbox_status", "world_status", "intent_count"],
+      "properties": {
+        "evidence_kind": { "const": "SKILL_RUN" },
+        "run_id": { "$ref": "#/$defs/identifier" },
+        "sandbox_status": { "type": "string", "enum": ["SUCCEEDED", "REJECTED", "TIMED_OUT", "FAILED"] },
+        "world_status": { "type": "string", "enum": ["NOT_ATTEMPTED", "COMMITTED", "REJECTED", "FAILED", "UNKNOWN"] },
+        "intent_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "worldCommitEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "x-invariants": [
+        "world_revision == previous_revision + 1",
+        "first_event_sequence <= last_event_sequence"
+      ],
+      "required": ["evidence_kind", "world_id", "previous_revision", "world_revision", "first_event_sequence", "last_event_sequence", "state_hash"],
+      "properties": {
+        "evidence_kind": { "const": "WORLD_COMMIT" },
+        "world_id": { "$ref": "#/$defs/identifier" },
+        "previous_revision": { "type": "integer", "minimum": 0 },
+        "world_revision": { "type": "integer", "minimum": 1 },
+        "first_event_sequence": { "type": "integer", "minimum": 1 },
+        "last_event_sequence": { "type": "integer", "minimum": 1 },
+        "state_hash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "learnerObservationEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_kind", "observation_type", "task_id", "outcome", "assistance_level"],
+      "properties": {
+        "evidence_kind": { "const": "LEARNER_OBSERVATION" },
+        "observation_type": { "type": "string", "enum": ["CODE_ATTEMPT", "DEBUG_ATTEMPT", "TASK_COMPLETION", "HINT_USE"] },
+        "task_id": { "$ref": "#/$defs/identifier" },
+        "outcome": { "type": "string", "enum": ["SUCCESS", "PARTIAL", "FAILED"] },
+        "assistance_level": { "type": "integer", "minimum": 0, "maximum": 10 }
+      }
+    }
+  }
+}

@@ -1,0 +1,1142 @@
+{
+  "asyncapi": "3.0.0",
+  "info": {
+    "title": "Yaya Agent Runtime Events",
+    "version": "2.0.0",
+    "description": "Authoritative event contract for command execution, skill lifecycle, sandbox, world, learner projection and Feishu delivery. Producers must persist state, event and outbox atomically. Consumers must deduplicate by event_id and checkpoint sequence per stream_id."
+  },
+  "defaultContentType": "application/json",
+  "servers": {
+    "runtimeWss": {
+      "host": "api.yaya.example",
+      "protocol": "wss",
+      "protocolVersion": "13",
+      "description": "TLS-only WebSocket endpoint advertised by bootstrap.world.stream_url. The host is an environment placeholder; deployed bootstrap responses are authoritative.",
+      "security": [
+        { "$ref": "#/components/securitySchemes/bearerAuth" }
+      ]
+    }
+  },
+  "channels": {
+    "runtimeEvents": {
+      "address": "runtime.events.{stream_id}",
+      "description": "Internal integration-bus stream. This is not the client WebSocket endpoint. sequence is monotonically increasing and gap-free within stream_id.",
+      "parameters": {
+        "stream_id": {
+          "description": "Aggregate stream identifier copied from the event envelope.",
+          "location": "$message.payload#/stream_id"
+        }
+      },
+      "messages": {
+        "CommandAccepted": { "$ref": "#/components/messages/CommandAccepted" },
+        "CommandStageChanged": { "$ref": "#/components/messages/CommandStageChanged" },
+        "CommandTerminal": { "$ref": "#/components/messages/CommandTerminal" },
+        "AgentTurnFeedbackReady": { "$ref": "#/components/messages/AgentTurnFeedbackReady" },
+        "SkillBuildRequested": { "$ref": "#/components/messages/SkillBuildRequested" },
+        "SkillBuildStarted": { "$ref": "#/components/messages/SkillBuildStarted" },
+        "SkillBuildCompleted": { "$ref": "#/components/messages/SkillBuildCompleted" },
+        "SkillBuildFailed": { "$ref": "#/components/messages/SkillBuildFailed" },
+        "SkillCertificationGranted": { "$ref": "#/components/messages/SkillCertificationGranted" },
+        "SkillCertificationRejected": { "$ref": "#/components/messages/SkillCertificationRejected" },
+        "SkillActivationApplied": { "$ref": "#/components/messages/SkillActivationApplied" },
+        "SkillActivationRejected": { "$ref": "#/components/messages/SkillActivationRejected" },
+        "SandboxRunStarted": { "$ref": "#/components/messages/SandboxRunStarted" },
+        "SandboxRunCompleted": { "$ref": "#/components/messages/SandboxRunCompleted" },
+        "SandboxRunFailed": { "$ref": "#/components/messages/SandboxRunFailed" },
+        "WorldCommitted": { "$ref": "#/components/messages/WorldCommitted" },
+        "WorldRejected": { "$ref": "#/components/messages/WorldRejected" },
+        "LearnerEvidenceRecorded": { "$ref": "#/components/messages/LearnerEvidenceRecorded" },
+        "LearnerInferenceRecorded": { "$ref": "#/components/messages/LearnerInferenceRecorded" },
+        "LearnerModelUpdated": { "$ref": "#/components/messages/LearnerModelUpdated" },
+        "LearnerProjectionFailed": { "$ref": "#/components/messages/LearnerProjectionFailed" },
+        "FeishuSyncRequested": { "$ref": "#/components/messages/FeishuSyncRequested" },
+        "FeishuSyncSucceeded": { "$ref": "#/components/messages/FeishuSyncSucceeded" },
+        "FeishuSyncFailed": { "$ref": "#/components/messages/FeishuSyncFailed" },
+        "FeishuSyncDeadLettered": { "$ref": "#/components/messages/FeishuSyncDeadLettered" }
+      }
+    },
+    "worldRealtime": {
+      "address": "/v1/realtime",
+      "description": "Bidirectional client WebSocket. A client MUST send exactly one SubscribeFrame or ResumeFrame before any AckFrame. WorldEvent payloads use the exact HTTP backfill item schema.",
+      "x-delivery-semantics": {
+        "guarantee": "at-least-once",
+        "checkpoint": "AckFrame.sequence is the highest contiguous sequence durably applied for AckFrame.stream_id; the matching event_id prevents acknowledging a different event at that sequence.",
+        "deduplication": "Deduplicate by event_id. Repeated stream_id + sequence MUST contain the same event_id and byte-equivalent event; any mismatch is INVARIANT_VIOLATION.",
+        "gap_recovery": "On a sequence gap, pause live application and GET bootstrap.world.events_url with after_sequence equal to the last durable checkpoint. Apply only a gap-free page. If backfill returns EVENT_SEQUENCE_GAP or cannot bridge the gap, GET bootstrap.world.snapshot_url, atomically replace local state, set the checkpoint to snapshot.last_event_sequence, then send ResumeFrame.",
+        "reconnect": "Send ResumeFrame.after_sequence equal to the last durable checkpoint. The server replays from after_sequence + 1 and may redeliver already observed but unacknowledged events.",
+        "ordering": "Never apply sequence N+1 before N for the same stream_id. Events from different stream_id values have no relative ordering."
+      },
+      "servers": [
+        { "$ref": "#/servers/runtimeWss" }
+      ],
+      "bindings": {
+        "ws": {
+          "method": "GET",
+          "headers": { "$ref": "#/components/schemas/WebSocketUpgradeHeaders" },
+          "bindingVersion": "0.1.0"
+        }
+      },
+      "messages": {
+        "WorldEvent": {
+          "name": "world.event",
+          "title": "World event also available through HTTP backfill",
+          "correlationId": { "location": "$message.payload#/correlation_id" },
+          "payload": { "$ref": "#/components/schemas/RealtimeWorldEvent" }
+        },
+        "Subscribe": {
+          "name": "realtime.subscribe",
+          "title": "Open a stream from a durable checkpoint",
+          "payload": { "$ref": "#/components/schemas/SubscribeFrame" }
+        },
+        "Resume": {
+          "name": "realtime.resume",
+          "title": "Resume a prior subscription after reconnect or recovery",
+          "payload": { "$ref": "#/components/schemas/ResumeFrame" }
+        },
+        "Ack": {
+          "name": "realtime.ack",
+          "title": "Acknowledge the highest contiguous durably applied event",
+          "payload": { "$ref": "#/components/schemas/AckFrame" }
+        },
+        "HeartbeatAck": {
+          "name": "realtime.heartbeat_ack",
+          "title": "Acknowledge a server heartbeat nonce",
+          "payload": { "$ref": "#/components/schemas/HeartbeatAckFrame" }
+        },
+        "Subscribed": {
+          "name": "realtime.subscribed",
+          "title": "Subscription accepted with an explicit replay boundary",
+          "payload": { "$ref": "#/components/schemas/SubscribedFrame" }
+        },
+        "Heartbeat": {
+          "name": "realtime.heartbeat",
+          "title": "Server liveness and stream high-watermark notification",
+          "payload": { "$ref": "#/components/schemas/HeartbeatFrame" }
+        },
+        "Error": {
+          "name": "realtime.error",
+          "title": "Machine-readable protocol error sent before an optional close",
+          "payload": { "$ref": "#/components/schemas/RealtimeErrorFrame" }
+        }
+      }
+    }
+  },
+  "operations": {
+    "publishRuntimeEvent": {
+      "action": "send",
+      "channel": { "$ref": "#/channels/runtimeEvents" },
+      "summary": "Publish an event after the domain transaction commits."
+    },
+    "consumeRuntimeEvent": {
+      "action": "receive",
+      "channel": { "$ref": "#/channels/runtimeEvents" },
+      "summary": "Consume idempotently and checkpoint only after the projection commits."
+    },
+    "receiveRealtimeControl": {
+      "action": "receive",
+      "channel": { "$ref": "#/channels/worldRealtime" },
+      "summary": "Receive subscribe, resume, acknowledgement and heartbeat acknowledgement frames from an authenticated client.",
+      "messages": [
+        { "$ref": "#/channels/worldRealtime/messages/Subscribe" },
+        { "$ref": "#/channels/worldRealtime/messages/Resume" },
+        { "$ref": "#/channels/worldRealtime/messages/Ack" },
+        { "$ref": "#/channels/worldRealtime/messages/HeartbeatAck" }
+      ]
+    },
+    "sendRealtimeFrame": {
+      "action": "send",
+      "channel": { "$ref": "#/channels/worldRealtime" },
+      "summary": "Send replay/live events, subscription receipts, heartbeats and explicit errors to the client.",
+      "messages": [
+        { "$ref": "#/channels/worldRealtime/messages/WorldEvent" },
+        { "$ref": "#/channels/worldRealtime/messages/Subscribed" },
+        { "$ref": "#/channels/worldRealtime/messages/Heartbeat" },
+        { "$ref": "#/channels/worldRealtime/messages/Error" }
+      ]
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+      "type": "http",
+      "scheme": "bearer",
+      "bearerFormat": "JWT",
+        "description": "Production profile: a tenant-scoped JWT Bearer credential shared with the Game HTTP API. The local Mock token <tenant_id>:<actor_id> is test-only and MUST NOT be treated as a production token format. Authentication failure closes with 4401; authorization failure closes with 4403."
+      }
+    },
+    "messages": {
+      "CommandAccepted": {
+        "name": "command.accepted",
+        "title": "Command accepted",
+        "correlationId": { "location": "$message.payload#/correlation_id" },
+        "payload": { "$ref": "#/components/schemas/CommandAcceptedEvent" }
+      },
+      "CommandStageChanged": {
+        "name": "command.stage_changed",
+        "title": "Command stage changed",
+        "correlationId": { "location": "$message.payload#/correlation_id" },
+        "payload": { "$ref": "#/components/schemas/CommandStageChangedEvent" }
+      },
+      "CommandTerminal": {
+        "name": "command.terminal",
+        "title": "Command reached an explicit terminal state",
+        "correlationId": { "location": "$message.payload#/correlation_id" },
+        "payload": { "$ref": "#/components/schemas/CommandTerminalEvent" }
+      },
+      "AgentTurnFeedbackReady": {
+        "name": "agent.turn.feedback_ready",
+        "title": "Displayable agent feedback is ready for an accepted turn",
+        "description": "Downlink event. Correlate payload.session_id and payload.turn_id with the submitted turn, require payload.command_id to equal the envelope command_id, and use payload.run_id to reconcile the sandbox run when non-null.",
+        "correlationId": { "location": "$message.payload#/correlation_id" },
+        "payload": { "$ref": "#/components/schemas/AgentTurnFeedbackReadyEvent" }
+      },
+      "SkillBuildRequested": {
+        "name": "skill.build.requested",
+        "title": "Skill build requested",
+        "correlationId": { "location": "$message.payload#/correlation_id" },
+        "payload": { "$ref": "#/components/schemas/SkillBuildRequestedEvent" }
+      },
+      "SkillBuildStarted": {
+        "name": "skill.build.started",
+        "title": "Skill build started",
+        "correlationId": { "location": "$message.payload#/correlation_id" },
+        "payload": { "$ref": "#/components/schemas/SkillBuildStartedEvent" }
+      },
+      "SkillBuildCompleted": {
+        "name": "skill.build.completed",
+        "title": "Skill build completed",
+        "correlationId": { "location": "$message.payload#/correlation_id" },
+        "payload": { "$ref": "#/components/schemas/SkillBuildCompletedEvent" }
+      },
+      "SkillBuildFailed": {
+        "name": "skill.build.failed",
+        "title": "Skill build failed",
+        "correlationId": { "location": "$message.payload#/correlation_id" },
+        "payload": { "$ref": "#/components/schemas/SkillBuildFailedEvent" }
+      },
+      "SkillCertificationGranted": {
+        "name": "skill.certification.granted",
+        "title": "Skill certification granted",
+        "correlationId": { "location": "$message.payload#/correlation_id" },
+        "payload": { "$ref": "#/components/schemas/SkillCertificationGrantedEvent" }
+      },
+      "SkillCertificationRejected": {
+        "name": "skill.certification.rejected",
+        "title": "Skill certification rejected",
+        "correlationId": { "location": "$message.payload#/correlation_id" },
+        "payload": { "$ref": "#/components/schemas/SkillCertificationRejectedEvent" }
+      },
+      "SkillActivationApplied": {
+        "name": "skill.activation.applied",
+        "title": "Certified skill activation applied",
+        "correlationId": { "location": "$message.payload#/correlation_id" },
+        "payload": { "$ref": "#/components/schemas/SkillActivationAppliedEvent" }
+      },
+      "SkillActivationRejected": {
+        "name": "skill.activation.rejected",
+        "title": "Certified skill activation rejected",
+        "correlationId": { "location": "$message.payload#/correlation_id" },
+        "payload": { "$ref": "#/components/schemas/SkillActivationRejectedEvent" }
+      },
+      "SandboxRunStarted": {
+        "name": "sandbox.run.started",
+        "title": "Sandbox run started",
+        "correlationId": { "location": "$message.payload#/correlation_id" },
+        "payload": { "$ref": "#/components/schemas/SandboxRunStartedEvent" }
+      },
+      "SandboxRunCompleted": {
+        "name": "sandbox.run.completed",
+        "title": "Sandbox run completed",
+        "correlationId": { "location": "$message.payload#/correlation_id" },
+        "payload": { "$ref": "#/components/schemas/SandboxRunCompletedEvent" }
+      },
+      "SandboxRunFailed": {
+        "name": "sandbox.run.failed",
+        "title": "Sandbox run failed",
+        "correlationId": { "location": "$message.payload#/correlation_id" },
+        "payload": { "$ref": "#/components/schemas/SandboxRunFailedEvent" }
+      },
+      "WorldCommitted": {
+        "name": "world.committed",
+        "title": "World mutation committed",
+        "correlationId": { "location": "$message.payload#/correlation_id" },
+        "payload": { "$ref": "#/components/schemas/WorldCommittedEvent" }
+      },
+      "WorldRejected": {
+        "name": "world.rejected",
+        "title": "World mutation rejected",
+        "correlationId": { "location": "$message.payload#/correlation_id" },
+        "payload": { "$ref": "#/components/schemas/WorldRejectedEvent" }
+      },
+      "LearnerEvidenceRecorded": {
+        "name": "learner.evidence.recorded",
+        "title": "Learner evidence recorded",
+        "correlationId": { "location": "$message.payload#/correlation_id" },
+        "payload": { "$ref": "#/components/schemas/LearnerEvidenceRecordedEvent" }
+      },
+      "LearnerInferenceRecorded": {
+        "name": "learner.inference.recorded",
+        "title": "Learner inference recorded from a committed Agent turn",
+        "correlationId": { "location": "$message.payload#/correlation_id" },
+        "payload": { "$ref": "#/components/schemas/LearnerInferenceRecordedEvent" }
+      },
+      "LearnerModelUpdated": {
+        "name": "learner.model.updated",
+        "title": "Learner model updated from evidence",
+        "correlationId": { "location": "$message.payload#/correlation_id" },
+        "payload": { "$ref": "#/components/schemas/LearnerModelUpdatedEvent" }
+      },
+      "LearnerProjectionFailed": {
+        "name": "learner.projection.failed",
+        "title": "Learner projection failed",
+        "correlationId": { "location": "$message.payload#/correlation_id" },
+        "payload": { "$ref": "#/components/schemas/LearnerProjectionFailedEvent" }
+      },
+      "FeishuSyncRequested": {
+        "name": "feishu.sync.requested",
+        "title": "Feishu delivery requested",
+        "correlationId": { "location": "$message.payload#/correlation_id" },
+        "payload": { "$ref": "#/components/schemas/FeishuSyncRequestedEvent" }
+      },
+      "FeishuSyncSucceeded": {
+        "name": "feishu.sync.succeeded",
+        "title": "Feishu delivery succeeded",
+        "correlationId": { "location": "$message.payload#/correlation_id" },
+        "payload": { "$ref": "#/components/schemas/FeishuSyncSucceededEvent" }
+      },
+      "FeishuSyncFailed": {
+        "name": "feishu.sync.failed",
+        "title": "Feishu delivery failed and is retryable or terminal",
+        "correlationId": { "location": "$message.payload#/correlation_id" },
+        "payload": { "$ref": "#/components/schemas/FeishuSyncFailedEvent" }
+      },
+      "FeishuSyncDeadLettered": {
+        "name": "feishu.sync.dead_lettered",
+        "title": "Feishu delivery moved to the dead-letter queue",
+        "correlationId": { "location": "$message.payload#/correlation_id" },
+        "payload": { "$ref": "#/components/schemas/FeishuSyncDeadLetteredEvent" }
+      }
+    },
+    "schemas": {
+      "RealtimeProtocolVersion": {
+        "type": "string",
+        "const": "1.0.0"
+      },
+      "RealtimeStreamId": {
+        "type": "string",
+        "pattern": "^[A-Za-z][A-Za-z0-9:_-]{2,159}$"
+      },
+      "RealtimeRequestId": {
+        "type": "string",
+        "pattern": "^req_[A-Za-z0-9_-]{8,96}$"
+      },
+      "RealtimeSubscriptionId": {
+        "type": "string",
+        "pattern": "^sub_[A-Za-z0-9_-]{8,96}$"
+      },
+      "HeartbeatNonce": {
+        "type": "string",
+        "pattern": "^hb_[A-Za-z0-9_-]{8,96}$"
+      },
+      "RealtimeSequence": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "WebSocketUpgradeHeaders": {
+        "type": "object",
+        "required": [
+          "Authorization",
+          "X-Request-Id",
+          "X-Trace-Id",
+          "X-Correlation-Id",
+          "X-Schema-Version",
+          "X-Stream-Protocol-Version",
+          "Sec-WebSocket-Protocol"
+        ],
+        "properties": {
+          "Authorization": { "type": "string", "pattern": "^Bearer [^\\s]+$" },
+          "X-Request-Id": { "$ref": "#/components/schemas/RealtimeRequestId" },
+          "X-Trace-Id": { "type": "string", "pattern": "^trace_[A-Za-z0-9_-]{8,96}$" },
+          "X-Correlation-Id": { "type": "string", "pattern": "^corr_[A-Za-z0-9_-]{8,96}$" },
+          "X-Schema-Version": { "const": "1.0.0" },
+          "X-Stream-Protocol-Version": { "$ref": "#/components/schemas/RealtimeProtocolVersion" },
+          "Sec-WebSocket-Protocol": { "type": "string", "enum": ["yaya.runtime.v1"] }
+        },
+        "additionalProperties": true
+      },
+      "RealtimeWorldEvent": {
+        "$ref": "../schemas/game/world-event-page.schema.json#/properties/events/items",
+        "description": "Exactly the same event item schema returned by GET bootstrap.world.events_url. This reference is intentionally direct so HTTP backfill and WSS live delivery cannot evolve independently."
+      },
+      "SubscribeFrame": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["frame_type", "protocol_version", "request_id", "stream_id", "after_sequence"],
+        "properties": {
+          "frame_type": { "const": "subscribe" },
+          "protocol_version": { "$ref": "#/components/schemas/RealtimeProtocolVersion" },
+          "request_id": { "$ref": "#/components/schemas/RealtimeRequestId" },
+          "stream_id": { "$ref": "#/components/schemas/RealtimeStreamId" },
+          "after_sequence": { "$ref": "#/components/schemas/RealtimeSequence" }
+        }
+      },
+      "ResumeFrame": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["frame_type", "protocol_version", "request_id", "subscription_id", "stream_id", "after_sequence"],
+        "properties": {
+          "frame_type": { "const": "resume" },
+          "protocol_version": { "$ref": "#/components/schemas/RealtimeProtocolVersion" },
+          "request_id": { "$ref": "#/components/schemas/RealtimeRequestId" },
+          "subscription_id": { "$ref": "#/components/schemas/RealtimeSubscriptionId" },
+          "stream_id": { "$ref": "#/components/schemas/RealtimeStreamId" },
+          "after_sequence": { "$ref": "#/components/schemas/RealtimeSequence" }
+        }
+      },
+      "AckFrame": {
+        "type": "object",
+        "additionalProperties": false,
+        "x-invariants": [
+          "sequence is the highest contiguous sequence durably applied for stream_id",
+          "event_id identifies the event at sequence; acknowledgements never skip a gap"
+        ],
+        "required": ["frame_type", "protocol_version", "subscription_id", "stream_id", "sequence", "event_id"],
+        "properties": {
+          "frame_type": { "const": "ack" },
+          "protocol_version": { "$ref": "#/components/schemas/RealtimeProtocolVersion" },
+          "subscription_id": { "$ref": "#/components/schemas/RealtimeSubscriptionId" },
+          "stream_id": { "$ref": "#/components/schemas/RealtimeStreamId" },
+          "sequence": { "type": "integer", "minimum": 1 },
+          "event_id": { "type": "string", "pattern": "^evt_[A-Za-z0-9_-]{8,128}$" }
+        }
+      },
+      "HeartbeatAckFrame": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["frame_type", "protocol_version", "subscription_id", "nonce", "received_at"],
+        "properties": {
+          "frame_type": { "const": "heartbeat_ack" },
+          "protocol_version": { "$ref": "#/components/schemas/RealtimeProtocolVersion" },
+          "subscription_id": { "$ref": "#/components/schemas/RealtimeSubscriptionId" },
+          "nonce": { "$ref": "#/components/schemas/HeartbeatNonce" },
+          "received_at": { "$ref": "#/components/schemas/Timestamp" }
+        }
+      },
+      "SubscribedFrame": {
+        "type": "object",
+        "additionalProperties": false,
+        "x-invariants": [
+          "accepted_after_sequence <= high_watermark_sequence",
+          "the first replayed event sequence, when present, equals accepted_after_sequence + 1"
+        ],
+        "required": ["frame_type", "protocol_version", "request_id", "subscription_id", "stream_id", "accepted_after_sequence", "high_watermark_sequence", "heartbeat_interval_ms", "max_unacked_events"],
+        "properties": {
+          "frame_type": { "const": "subscribed" },
+          "protocol_version": { "$ref": "#/components/schemas/RealtimeProtocolVersion" },
+          "request_id": { "$ref": "#/components/schemas/RealtimeRequestId" },
+          "subscription_id": { "$ref": "#/components/schemas/RealtimeSubscriptionId" },
+          "stream_id": { "$ref": "#/components/schemas/RealtimeStreamId" },
+          "accepted_after_sequence": { "$ref": "#/components/schemas/RealtimeSequence" },
+          "high_watermark_sequence": { "$ref": "#/components/schemas/RealtimeSequence" },
+          "heartbeat_interval_ms": { "type": "integer", "minimum": 1000, "maximum": 120000 },
+          "max_unacked_events": { "type": "integer", "minimum": 1, "maximum": 10000 }
+        }
+      },
+      "HeartbeatFrame": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["frame_type", "protocol_version", "subscription_id", "stream_id", "nonce", "server_time", "high_watermark_sequence"],
+        "properties": {
+          "frame_type": { "const": "heartbeat" },
+          "protocol_version": { "$ref": "#/components/schemas/RealtimeProtocolVersion" },
+          "subscription_id": { "$ref": "#/components/schemas/RealtimeSubscriptionId" },
+          "stream_id": { "$ref": "#/components/schemas/RealtimeStreamId" },
+          "nonce": { "$ref": "#/components/schemas/HeartbeatNonce" },
+          "server_time": { "$ref": "#/components/schemas/Timestamp" },
+          "high_watermark_sequence": { "$ref": "#/components/schemas/RealtimeSequence" }
+        }
+      },
+      "RealtimeCloseCode": {
+        "type": "integer",
+        "enum": [4400, 4401, 4403, 4404, 4406, 4408, 4409, 4429, 4500, 4503]
+      },
+      "RealtimeErrorFrame": {
+        "type": "object",
+        "additionalProperties": false,
+        "x-close-codes": {
+          "4400": ["INVALID_REQUEST"],
+          "4401": ["AUTHENTICATION_REQUIRED"],
+          "4403": ["AUTHORIZATION_DENIED", "POLICY_DENIED"],
+          "4404": ["NOT_FOUND"],
+          "4406": ["SCHEMA_VERSION_UNSUPPORTED"],
+          "4408": ["DEPENDENCY_UNAVAILABLE"],
+          "4409": ["EVENT_SEQUENCE_GAP", "WORLD_REVISION_CONFLICT"],
+          "4429": ["RATE_LIMITED"],
+          "4500": ["INTERNAL_ERROR", "INVARIANT_VIOLATION"],
+          "4503": ["DEPENDENCY_UNAVAILABLE"]
+        },
+        "required": ["frame_type", "protocol_version", "request_id", "subscription_id", "stream_id", "fatal", "close_code", "retry_after_ms", "error"],
+        "properties": {
+          "frame_type": { "const": "error" },
+          "protocol_version": { "$ref": "#/components/schemas/RealtimeProtocolVersion" },
+          "request_id": { "oneOf": [{ "$ref": "#/components/schemas/RealtimeRequestId" }, { "type": "null" }] },
+          "subscription_id": { "oneOf": [{ "$ref": "#/components/schemas/RealtimeSubscriptionId" }, { "type": "null" }] },
+          "stream_id": { "oneOf": [{ "$ref": "#/components/schemas/RealtimeStreamId" }, { "type": "null" }] },
+          "fatal": { "type": "boolean" },
+          "close_code": { "oneOf": [{ "$ref": "#/components/schemas/RealtimeCloseCode" }, { "type": "null" }] },
+          "retry_after_ms": { "oneOf": [{ "type": "integer", "minimum": 0, "maximum": 86400000 }, { "type": "null" }] },
+          "error": { "$ref": "#/components/schemas/ContractError" }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "fatal": { "const": true } }, "required": ["fatal"] },
+            "then": {
+              "properties": { "close_code": { "$ref": "#/components/schemas/RealtimeCloseCode" } },
+              "oneOf": [
+                { "properties": { "close_code": { "const": 4400 }, "error": { "properties": { "code": { "const": "INVALID_REQUEST" } }, "required": ["code"] } } },
+                { "properties": { "close_code": { "const": 4401 }, "error": { "properties": { "code": { "const": "AUTHENTICATION_REQUIRED" } }, "required": ["code"] } } },
+                { "properties": { "close_code": { "const": 4403 }, "error": { "properties": { "code": { "enum": ["AUTHORIZATION_DENIED", "POLICY_DENIED"] } }, "required": ["code"] } } },
+                { "properties": { "close_code": { "const": 4404 }, "error": { "properties": { "code": { "const": "NOT_FOUND" } }, "required": ["code"] } } },
+                { "properties": { "close_code": { "const": 4406 }, "error": { "properties": { "code": { "const": "SCHEMA_VERSION_UNSUPPORTED" } }, "required": ["code"] } } },
+                { "properties": { "close_code": { "const": 4408 }, "error": { "properties": { "code": { "const": "DEPENDENCY_UNAVAILABLE" } }, "required": ["code"] } } },
+                { "properties": { "close_code": { "const": 4409 }, "error": { "properties": { "code": { "enum": ["EVENT_SEQUENCE_GAP", "WORLD_REVISION_CONFLICT"] } }, "required": ["code"] } } },
+                { "properties": { "close_code": { "const": 4429 }, "error": { "properties": { "code": { "const": "RATE_LIMITED" } }, "required": ["code"] } } },
+                { "properties": { "close_code": { "const": 4500 }, "error": { "properties": { "code": { "enum": ["INTERNAL_ERROR", "INVARIANT_VIOLATION"] } }, "required": ["code"] } } },
+                { "properties": { "close_code": { "const": 4503 }, "error": { "properties": { "code": { "const": "DEPENDENCY_UNAVAILABLE" } }, "required": ["code"] } } }
+              ]
+            },
+            "else": { "properties": { "close_code": { "type": "null" } } }
+          },
+          {
+            "if": { "properties": { "retry_after_ms": { "type": "integer" } }, "required": ["retry_after_ms"] },
+            "then": { "properties": { "error": { "properties": { "retryable": { "const": true } }, "required": ["retryable"] } } }
+          }
+        ]
+      },
+      "RealtimeClientFrame": {
+        "oneOf": [
+          { "$ref": "#/components/schemas/SubscribeFrame" },
+          { "$ref": "#/components/schemas/ResumeFrame" },
+          { "$ref": "#/components/schemas/AckFrame" },
+          { "$ref": "#/components/schemas/HeartbeatAckFrame" }
+        ]
+      },
+      "RealtimeServerControlFrame": {
+        "oneOf": [
+          { "$ref": "#/components/schemas/SubscribedFrame" },
+          { "$ref": "#/components/schemas/HeartbeatFrame" },
+          { "$ref": "#/components/schemas/RealtimeErrorFrame" }
+        ]
+      },
+      "RealtimeServerFrame": {
+        "oneOf": [
+          { "$ref": "#/components/schemas/RealtimeWorldEvent" },
+          { "$ref": "#/components/schemas/SubscribedFrame" },
+          { "$ref": "#/components/schemas/HeartbeatFrame" },
+          { "$ref": "#/components/schemas/RealtimeErrorFrame" }
+        ]
+      },
+      "EventEnvelope": { "$ref": "../schemas/common/event-envelope.schema.json" },
+      "EventEnvelopeV2": { "$ref": "../schemas/common/event-envelope-v2.schema.json" },
+      "ContractError": { "$ref": "../schemas/common/error.schema.json" },
+      "EvidenceRef": { "$ref": "../schemas/common/evidence-ref.schema.json" },
+      "CommandStatus": { "$ref": "../schemas/common/command-status.schema.json" },
+      "Identifier": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
+      },
+      "Timestamp": { "type": "string", "format": "date-time" },
+      "Sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+      "EvidenceRefs": {
+        "type": "array",
+        "maxItems": 64,
+        "uniqueItems": true,
+        "items": { "$ref": "#/components/schemas/EvidenceRef" }
+      },
+      "BuildArtifact": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["artifact_sha256", "source_sha256", "compiler_profile", "compiler_version", "sandbox_image_digest", "test_suite_version", "artifact_uri"],
+        "properties": {
+          "artifact_sha256": { "$ref": "#/components/schemas/Sha256" },
+          "source_sha256": { "$ref": "#/components/schemas/Sha256" },
+          "compiler_profile": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "compiler_version": { "type": "string", "minLength": 1, "maxLength": 96 },
+          "sandbox_image_digest": { "type": "string", "minLength": 1, "maxLength": 256 },
+          "test_suite_version": { "type": "string", "minLength": 1, "maxLength": 96 },
+          "artifact_uri": { "type": "string", "minLength": 1, "maxLength": 1024 }
+        }
+      },
+      "TestCaseResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["test_case_id", "visibility", "status", "duration_ms", "diagnostic_codes", "evidence_refs"],
+        "properties": {
+          "test_case_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+          "visibility": { "type": "string", "enum": ["PUBLIC", "HIDDEN"] },
+          "status": { "type": "string", "enum": ["PASSED", "FAILED", "ERROR", "TIMEOUT"] },
+          "duration_ms": { "type": "integer", "minimum": 0 },
+          "diagnostic_codes": { "type": "array", "maxItems": 100, "uniqueItems": true, "items": { "type": "string", "minLength": 1, "maxLength": 96 } },
+          "evidence_refs": { "$ref": "#/components/schemas/EvidenceRefs" }
+        }
+      },
+      "ActionIntent": {
+        "$ref": "../schemas/game/action-intent.schema.json"
+      },
+      "CommandAcceptedPayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["command_type", "status", "accepted_at"],
+        "properties": {
+          "command_type": { "$ref": "../schemas/common/command-type.schema.json" },
+          "status": { "const": "ACCEPTED" },
+          "accepted_at": { "$ref": "#/components/schemas/Timestamp" }
+        }
+      },
+      "CommandStageChangedPayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "x-invariants": [
+          "to_status != from_status",
+          "to_status is a legal successor of from_status according to the CommandStatus graph"
+        ],
+        "required": ["from_status", "to_status", "command_revision", "attempt"],
+        "properties": {
+          "from_status": { "$ref": "#/components/schemas/CommandStatus" },
+          "to_status": { "$ref": "#/components/schemas/CommandStatus" },
+          "command_revision": { "type": "integer", "minimum": 1 },
+          "attempt": { "type": "integer", "minimum": 1 }
+        }
+      },
+      "CommandTerminalPayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["status", "terminal_at", "result_ref", "error"],
+        "properties": {
+          "status": { "type": "string", "enum": ["APPLIED", "REJECTED", "FAILED", "UNKNOWN", "CANCELLED"] },
+          "terminal_at": { "$ref": "#/components/schemas/Timestamp" },
+          "result_ref": { "type": ["string", "null"], "maxLength": 1024 },
+          "error": {
+            "oneOf": [
+              { "$ref": "#/components/schemas/ContractError" },
+              { "type": "null" }
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "status": { "const": "APPLIED" } }, "required": ["status"] },
+            "then": { "properties": { "result_ref": { "type": "string", "minLength": 1 }, "error": { "type": "null" } } }
+          },
+          {
+            "if": { "properties": { "status": { "enum": ["REJECTED", "FAILED", "UNKNOWN"] } }, "required": ["status"] },
+            "then": { "properties": { "result_ref": { "type": "null" }, "error": { "$ref": "#/components/schemas/ContractError" } } }
+          },
+          {
+            "if": { "properties": { "status": { "const": "UNKNOWN" } }, "required": ["status"] },
+            "then": {
+              "properties": {
+                "error": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ContractError" },
+                    { "properties": { "code": { "const": "UNKNOWN_COMMIT_STATE" }, "stage": { "const": "WORLD_COMMIT" } } }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": { "properties": { "status": { "const": "CANCELLED" } }, "required": ["status"] },
+            "then": { "properties": { "result_ref": { "type": "null" } } }
+          }
+        ]
+      },
+      "AgentTurnFeedbackReadyPayload": {
+        "$ref": "../schemas/game/agent-turn-feedback.schema.json",
+        "required": [
+          "session_id",
+          "turn_id",
+          "command_id",
+          "run_id",
+          "message_key",
+          "message",
+          "source",
+          "degraded",
+          "fallback_reason",
+          "evidence_refs",
+          "completed_at"
+        ]
+      },
+      "SkillBuildRequestedPayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["build_id", "skill_id", "source_sha256", "compiler_profile", "test_suite_version"],
+        "properties": {
+          "build_id": { "$ref": "#/components/schemas/Identifier" },
+          "skill_id": { "$ref": "#/components/schemas/Identifier" },
+          "source_sha256": { "$ref": "#/components/schemas/Sha256" },
+          "compiler_profile": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "test_suite_version": { "type": "string", "minLength": 1, "maxLength": 96 }
+        }
+      },
+      "SkillBuildStartedPayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["build_id", "worker_id", "attempt", "started_at"],
+        "properties": {
+          "build_id": { "$ref": "#/components/schemas/Identifier" },
+          "worker_id": { "$ref": "#/components/schemas/Identifier" },
+          "attempt": { "type": "integer", "minimum": 1 },
+          "started_at": { "$ref": "#/components/schemas/Timestamp" }
+        }
+      },
+      "SkillBuildCompletedPayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["build_id", "artifact", "tests", "completed_at"],
+        "properties": {
+          "build_id": { "$ref": "#/components/schemas/Identifier" },
+          "artifact": { "$ref": "#/components/schemas/BuildArtifact" },
+          "tests": { "type": "array", "minItems": 1, "items": { "$ref": "#/components/schemas/TestCaseResult" } },
+          "completed_at": { "$ref": "#/components/schemas/Timestamp" }
+        }
+      },
+      "SkillBuildFailedPayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["build_id", "failed_at", "error"],
+        "properties": {
+          "build_id": { "$ref": "#/components/schemas/Identifier" },
+          "failed_at": { "$ref": "#/components/schemas/Timestamp" },
+          "error": { "$ref": "#/components/schemas/ContractError" }
+        }
+      },
+      "SkillCertificationGrantedPayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["build_id", "certification_id", "skill_id", "skill_version_id", "artifact_sha256", "capabilities", "certified_at"],
+        "properties": {
+          "build_id": { "$ref": "#/components/schemas/Identifier" },
+          "certification_id": { "$ref": "#/components/schemas/Identifier" },
+          "skill_id": { "$ref": "#/components/schemas/Identifier" },
+          "skill_version_id": { "$ref": "#/components/schemas/Identifier" },
+          "artifact_sha256": { "$ref": "#/components/schemas/Sha256" },
+          "capabilities": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1, "maxLength": 64 } },
+          "certified_at": { "$ref": "#/components/schemas/Timestamp" }
+        }
+      },
+      "SkillCertificationRejectedPayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["build_id", "skill_id", "rejected_at", "error", "evidence_refs"],
+        "properties": {
+          "build_id": { "$ref": "#/components/schemas/Identifier" },
+          "skill_id": { "$ref": "#/components/schemas/Identifier" },
+          "rejected_at": { "$ref": "#/components/schemas/Timestamp" },
+          "error": { "$ref": "#/components/schemas/ContractError" },
+          "evidence_refs": { "$ref": "#/components/schemas/EvidenceRefs" }
+        }
+      },
+      "SkillActivationScope": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["world_id", "agent_profile_id"],
+        "properties": {
+          "world_id": { "$ref": "#/components/schemas/Identifier" },
+          "agent_profile_id": { "$ref": "#/components/schemas/Identifier" }
+        }
+      },
+      "SkillActivationAppliedPayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "x-invariants": [
+          "registry_revision = previous_registry_revision + 1"
+        ],
+        "required": ["skill_id", "skill_version_id", "certification_id", "artifact_sha256", "activation_scope", "previous_registry_revision", "registry_revision", "activated_at"],
+        "properties": {
+          "skill_id": { "$ref": "#/components/schemas/Identifier" },
+          "skill_version_id": { "$ref": "#/components/schemas/Identifier" },
+          "certification_id": { "$ref": "#/components/schemas/Identifier" },
+          "artifact_sha256": { "$ref": "#/components/schemas/Sha256" },
+          "activation_scope": { "$ref": "#/components/schemas/SkillActivationScope" },
+          "previous_registry_revision": { "type": "integer", "minimum": 0 },
+          "registry_revision": { "type": "integer", "minimum": 1 },
+          "activated_at": { "$ref": "#/components/schemas/Timestamp" }
+        }
+      },
+      "SkillActivationRejectedPayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["skill_version_id", "activation_scope", "expected_registry_revision", "current_registry_revision", "rejected_at", "error"],
+        "properties": {
+          "skill_version_id": { "$ref": "#/components/schemas/Identifier" },
+          "activation_scope": { "$ref": "#/components/schemas/SkillActivationScope" },
+          "expected_registry_revision": { "type": "integer", "minimum": 0 },
+          "current_registry_revision": { "type": "integer", "minimum": 0 },
+          "rejected_at": { "$ref": "#/components/schemas/Timestamp" },
+          "error": { "$ref": "#/components/schemas/ContractError" }
+        }
+      },
+      "SandboxRunStartedPayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["run_id", "skill_version_id", "world_id", "expected_world_revision", "worker_id", "started_at"],
+        "properties": {
+          "run_id": { "$ref": "#/components/schemas/Identifier" },
+          "skill_version_id": { "$ref": "#/components/schemas/Identifier" },
+          "world_id": { "$ref": "#/components/schemas/Identifier" },
+          "expected_world_revision": { "type": "integer", "minimum": 0 },
+          "worker_id": { "$ref": "#/components/schemas/Identifier" },
+          "started_at": { "$ref": "#/components/schemas/Timestamp" }
+        }
+      },
+      "SandboxRunCompletedPayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["run_id", "exit_code", "action_intents", "finished_at", "evidence_refs"],
+        "properties": {
+          "run_id": { "$ref": "#/components/schemas/Identifier" },
+          "exit_code": { "const": 0 },
+          "action_intents": { "type": "array", "maxItems": 1000, "items": { "$ref": "#/components/schemas/ActionIntent" } },
+          "finished_at": { "$ref": "#/components/schemas/Timestamp" },
+          "evidence_refs": { "$ref": "#/components/schemas/EvidenceRefs" }
+        }
+      },
+      "SandboxRunFailedPayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["run_id", "failed_at", "error", "evidence_refs"],
+        "properties": {
+          "run_id": { "$ref": "#/components/schemas/Identifier" },
+          "failed_at": { "$ref": "#/components/schemas/Timestamp" },
+          "error": { "$ref": "#/components/schemas/ContractError" },
+          "evidence_refs": { "$ref": "#/components/schemas/EvidenceRefs" }
+        }
+      },
+      "WorldCommittedPayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "x-invariants": [
+          "world_revision = previous_world_revision + 1"
+        ],
+        "required": ["commit_id", "run_id", "world_id", "previous_world_revision", "world_revision", "state_hash", "applied_intent_ids", "committed_at", "evidence_refs"],
+        "properties": {
+          "commit_id": { "$ref": "#/components/schemas/Identifier" },
+          "run_id": { "$ref": "#/components/schemas/Identifier" },
+          "world_id": { "$ref": "#/components/schemas/Identifier" },
+          "previous_world_revision": { "type": "integer", "minimum": 0 },
+          "world_revision": { "type": "integer", "minimum": 1 },
+          "state_hash": { "$ref": "#/components/schemas/Sha256" },
+          "applied_intent_ids": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/components/schemas/Identifier" } },
+          "committed_at": { "$ref": "#/components/schemas/Timestamp" },
+          "evidence_refs": { "$ref": "#/components/schemas/EvidenceRefs" }
+        }
+      },
+      "WorldRejectedPayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["run_id", "world_id", "expected_world_revision", "current_world_revision", "rejected_intent_ids", "rejected_at", "error"],
+        "properties": {
+          "run_id": { "$ref": "#/components/schemas/Identifier" },
+          "world_id": { "$ref": "#/components/schemas/Identifier" },
+          "expected_world_revision": { "type": "integer", "minimum": 0 },
+          "current_world_revision": { "type": "integer", "minimum": 0 },
+          "rejected_intent_ids": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/components/schemas/Identifier" } },
+          "rejected_at": { "$ref": "#/components/schemas/Timestamp" },
+          "error": { "$ref": "#/components/schemas/ContractError" }
+        }
+      },
+      "LearnerEvidenceRecordedPayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["learner_id", "evidence_refs", "competency_ids", "recorded_at"],
+        "properties": {
+          "learner_id": { "$ref": "#/components/schemas/Identifier" },
+          "evidence_refs": { "$ref": "#/components/schemas/EvidenceRefs" },
+          "competency_ids": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1, "maxLength": 128 } },
+          "recorded_at": { "$ref": "#/components/schemas/Timestamp" }
+        }
+      },
+      "LearnerInferenceEvidenceRef": {
+        "allOf": [
+          { "$ref": "#/components/schemas/EvidenceRef" },
+          { "type": "object", "required": ["sha256"] }
+        ]
+      },
+      "LearnerInferenceRecordedPayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["actor", "learner_id", "session_id", "turn_id", "command_id", "run_id", "source_event_id", "source_event_sha256", "turn_commit_sha256", "task_id", "teaching_spec_version", "role", "concept", "score_delta", "confidence", "reason", "evidence_refs", "inferred_at", "inference_sha256"],
+        "properties": {
+          "actor": { "$ref": "../schemas/common/actor-ref.schema.json" },
+          "learner_id": { "$ref": "#/components/schemas/Identifier" },
+          "session_id": { "$ref": "#/components/schemas/Identifier" },
+          "turn_id": { "$ref": "#/components/schemas/Identifier" },
+          "command_id": { "$ref": "../schemas/common/command-id.schema.json" },
+          "run_id": {
+            "oneOf": [
+              { "$ref": "#/components/schemas/Identifier" },
+              { "type": "null" }
+            ]
+          },
+          "source_event_id": { "type": "string", "pattern": "^evt_[A-Za-z0-9_-]{8,128}$" },
+          "source_event_sha256": { "$ref": "#/components/schemas/Sha256" },
+          "turn_commit_sha256": { "$ref": "#/components/schemas/Sha256" },
+          "task_id": { "$ref": "#/components/schemas/Identifier" },
+          "teaching_spec_version": { "type": "string", "minLength": 1, "maxLength": 96 },
+          "role": { "type": "string", "enum": ["teaching_agent", "bug_agent", "book_agent"] },
+          "concept": { "type": "string", "pattern": "^[a-z][a-z0-9_.:-]{1,127}$" },
+          "score_delta": { "type": "number", "minimum": -0.3, "maximum": 0.3, "x-decimal-places-max": 6 },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1, "x-decimal-places-max": 6 },
+          "reason": { "type": "string", "minLength": 1, "maxLength": 1000 },
+          "evidence_refs": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 16,
+            "uniqueItems": true,
+            "items": { "$ref": "#/components/schemas/LearnerInferenceEvidenceRef" },
+            "x-invariants": ["items are strictly sorted by evidence_id", "evidence_id values are unique", "every item carries sha256"]
+          },
+          "inferred_at": { "$ref": "#/components/schemas/Timestamp" },
+          "inference_sha256": { "$ref": "#/components/schemas/Sha256" }
+        },
+        "x-invariants": [
+          "actor.actor_id == learner_id",
+          "score_delta and confidence have at most six decimal places",
+          "inference_sha256 equals YAYA_LEARNER_INFERENCE_HASH_V1 over this payload"
+        ]
+      },
+      "LearnerModelUpdatedPayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "x-invariants": [
+          "learner_revision = previous_revision + 1"
+        ],
+        "required": ["learner_id", "previous_revision", "learner_revision", "projected_through_sequence", "changed_competency_ids", "updated_at", "evidence_refs"],
+        "properties": {
+          "learner_id": { "$ref": "#/components/schemas/Identifier" },
+          "previous_revision": { "type": "integer", "minimum": 0 },
+          "learner_revision": { "type": "integer", "minimum": 1 },
+          "projected_through_sequence": { "type": "integer", "minimum": 1 },
+          "changed_competency_ids": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1, "maxLength": 128 } },
+          "updated_at": { "$ref": "#/components/schemas/Timestamp" },
+          "evidence_refs": { "$ref": "#/components/schemas/EvidenceRefs" }
+        }
+      },
+      "LearnerProjectionFailedPayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["learner_id", "source_event_id", "failed_at", "error"],
+        "properties": {
+          "learner_id": { "$ref": "#/components/schemas/Identifier" },
+          "source_event_id": { "type": "string", "pattern": "^evt_[A-Za-z0-9_-]{8,128}$" },
+          "failed_at": { "$ref": "#/components/schemas/Timestamp" },
+          "error": { "$ref": "#/components/schemas/ContractError" }
+        }
+      },
+      "FeishuSyncRequestedPayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["sync_id", "sync_kind", "target_ref", "attempt", "requested_at"],
+        "properties": {
+          "sync_id": { "$ref": "#/components/schemas/Identifier" },
+          "sync_kind": { "type": "string", "enum": ["TEACHER_PROJECTION", "REPORT_DRAFT", "REVIEW_CARD", "OPERATION_ALERT"] },
+          "target_ref": { "type": "string", "minLength": 1, "maxLength": 256 },
+          "attempt": { "type": "integer", "minimum": 1 },
+          "requested_at": { "$ref": "#/components/schemas/Timestamp" }
+        }
+      },
+      "FeishuSyncSucceededPayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["sync_id", "remote_object_id", "attempt", "succeeded_at"],
+        "properties": {
+          "sync_id": { "$ref": "#/components/schemas/Identifier" },
+          "remote_object_id": { "type": "string", "minLength": 1, "maxLength": 256 },
+          "attempt": { "type": "integer", "minimum": 1 },
+          "succeeded_at": { "$ref": "#/components/schemas/Timestamp" }
+        }
+      },
+      "FeishuSyncFailedPayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["sync_id", "attempt", "next_attempt_at", "failed_at", "error"],
+        "properties": {
+          "sync_id": { "$ref": "#/components/schemas/Identifier" },
+          "attempt": { "type": "integer", "minimum": 1 },
+          "next_attempt_at": { "oneOf": [{ "$ref": "#/components/schemas/Timestamp" }, { "type": "null" }] },
+          "failed_at": { "$ref": "#/components/schemas/Timestamp" },
+          "error": { "$ref": "#/components/schemas/ContractError" }
+        }
+      },
+      "FeishuSyncDeadLetteredPayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["sync_id", "attempts", "dead_lettered_at", "error"],
+        "properties": {
+          "sync_id": { "$ref": "#/components/schemas/Identifier" },
+          "attempts": { "type": "integer", "minimum": 1 },
+          "dead_lettered_at": { "$ref": "#/components/schemas/Timestamp" },
+          "error": { "$ref": "#/components/schemas/ContractError" }
+        }
+      },
+      "CommandAcceptedEvent": {
+        "allOf": [
+          { "$ref": "#/components/schemas/EventEnvelope" },
+          { "type": "object", "properties": { "event_type": { "const": "command.accepted" }, "event_version": { "const": 1 }, "payload": { "$ref": "#/components/schemas/CommandAcceptedPayload" } } }
+        ]
+      },
+      "CommandStageChangedEvent": {
+        "allOf": [
+          { "$ref": "#/components/schemas/EventEnvelope" },
+          { "type": "object", "properties": { "event_type": { "const": "command.stage_changed" }, "event_version": { "const": 1 }, "payload": { "$ref": "#/components/schemas/CommandStageChangedPayload" } } }
+        ]
+      },
+      "CommandTerminalEvent": {
+        "allOf": [
+          { "$ref": "#/components/schemas/EventEnvelope" },
+          { "type": "object", "properties": { "event_type": { "const": "command.terminal" }, "event_version": { "const": 1 }, "payload": { "$ref": "#/components/schemas/CommandTerminalPayload" } } }
+        ]
+      },
+      "AgentTurnFeedbackReadyEvent": {
+        "$ref": "../schemas/game/agent-turn-feedback-ready-event.schema.json",
+        "allOf": [
+          { "$ref": "#/components/schemas/EventEnvelope" },
+          { "type": "object", "properties": { "event_type": { "const": "agent.turn.feedback_ready" }, "event_version": { "const": 1 }, "payload": { "$ref": "#/components/schemas/AgentTurnFeedbackReadyPayload" } } }
+        ]
+      },
+      "SkillBuildRequestedEvent": {
+        "allOf": [
+          { "$ref": "#/components/schemas/EventEnvelope" },
+          { "type": "object", "properties": { "event_type": { "const": "skill.build.requested" }, "event_version": { "const": 1 }, "payload": { "$ref": "#/components/schemas/SkillBuildRequestedPayload" } } }
+        ]
+      },
+      "SkillBuildStartedEvent": {
+        "allOf": [
+          { "$ref": "#/components/schemas/EventEnvelope" },
+          { "type": "object", "properties": { "event_type": { "const": "skill.build.started" }, "event_version": { "const": 1 }, "payload": { "$ref": "#/components/schemas/SkillBuildStartedPayload" } } }
+        ]
+      },
+      "SkillBuildCompletedEvent": {
+        "allOf": [
+          { "$ref": "#/components/schemas/EventEnvelope" },
+          { "type": "object", "properties": { "event_type": { "const": "skill.build.completed" }, "event_version": { "const": 1 }, "payload": { "$ref": "#/components/schemas/SkillBuildCompletedPayload" } } }
+        ]
+      },
+      "SkillBuildFailedEvent": {
+        "allOf": [
+          { "$ref": "#/components/schemas/EventEnvelope" },
+          { "type": "object", "properties": { "event_type": { "const": "skill.build.failed" }, "event_version": { "const": 1 }, "payload": { "$ref": "#/components/schemas/SkillBuildFailedPayload" } } }
+        ]
+      },
+      "SkillCertificationGrantedEvent": {
+        "allOf": [
+          { "$ref": "#/components/schemas/EventEnvelope" },
+          { "type": "object", "properties": { "event_type": { "const": "skill.certification.granted" }, "event_version": { "const": 1 }, "payload": { "$ref": "#/components/schemas/SkillCertificationGrantedPayload" } } }
+        ]
+      },
+      "SkillCertificationRejectedEvent": {
+        "allOf": [
+          { "$ref": "#/components/schemas/EventEnvelope" },
+          { "type": "object", "properties": { "event_type": { "const": "skill.certification.rejected" }, "event_version": { "const": 1 }, "payload": { "$ref": "#/components/schemas/SkillCertificationRejectedPayload" } } }
+        ]
+      },
+      "SkillActivationAppliedEvent": {
+        "allOf": [
+          { "$ref": "#/components/schemas/EventEnvelope" },
+          { "type": "object", "properties": { "event_type": { "const": "skill.activation.applied" }, "event_version": { "const": 1 }, "payload": { "$ref": "#/components/schemas/SkillActivationAppliedPayload" } } }
+        ]
+      },
+      "SkillActivationRejectedEvent": {
+        "allOf": [
+          { "$ref": "#/components/schemas/EventEnvelope" },
+          { "type": "object", "properties": { "event_type": { "const": "skill.activation.rejected" }, "event_version": { "const": 1 }, "payload": { "$ref": "#/components/schemas/SkillActivationRejectedPayload" } } }
+        ]
+      },
+      "SandboxRunStartedEvent": {
+        "allOf": [
+          { "$ref": "#/components/schemas/EventEnvelope" },
+          { "type": "object", "properties": { "event_type": { "const": "sandbox.run.started" }, "event_version": { "const": 1 }, "payload": { "$ref": "#/components/schemas/SandboxRunStartedPayload" } } }
+        ]
+      },
+      "SandboxRunCompletedEvent": {
+        "allOf": [
+          { "$ref": "#/components/schemas/EventEnvelope" },
+          { "type": "object", "properties": { "event_type": { "const": "sandbox.run.completed" }, "event_version": { "const": 1 }, "payload": { "$ref": "#/components/schemas/SandboxRunCompletedPayload" } } }
+        ]
+      },
+      "SandboxRunFailedEvent": {
+        "allOf": [
+          { "$ref": "#/components/schemas/EventEnvelope" },
+          { "type": "object", "properties": { "event_type": { "const": "sandbox.run.failed" }, "event_version": { "const": 1 }, "payload": { "$ref": "#/components/schemas/SandboxRunFailedPayload" } } }
+        ]
+      },
+      "WorldCommittedEvent": {
+        "allOf": [
+          { "$ref": "#/components/schemas/EventEnvelope" },
+          { "type": "object", "properties": { "event_type": { "const": "world.committed" }, "event_version": { "const": 1 }, "payload": { "$ref": "#/components/schemas/WorldCommittedPayload" } } }
+        ]
+      },
+      "WorldRejectedEvent": {
+        "allOf": [
+          { "$ref": "#/components/schemas/EventEnvelope" },
+          { "type": "object", "properties": { "event_type": { "const": "world.rejected" }, "event_version": { "const": 1 }, "payload": { "$ref": "#/components/schemas/WorldRejectedPayload" } } }
+        ]
+      },
+      "LearnerEvidenceRecordedEvent": {
+        "allOf": [
+          { "$ref": "#/components/schemas/EventEnvelope" },
+          { "type": "object", "properties": { "event_type": { "const": "learner.evidence.recorded" }, "event_version": { "const": 1 }, "payload": { "$ref": "#/components/schemas/LearnerEvidenceRecordedPayload" } } }
+        ]
+      },
+      "LearnerInferenceRecordedEvent": {
+        "allOf": [
+          { "$ref": "#/components/schemas/EventEnvelopeV2" },
+          { "type": "object", "properties": { "event_type": { "const": "learner.inference.recorded" }, "event_version": { "const": 1 }, "payload": { "$ref": "#/components/schemas/LearnerInferenceRecordedPayload" } } }
+        ],
+        "x-invariants": [
+          "stream_id == 'learner:' + payload.learner_id",
+          "command_id == payload.command_id",
+          "causation_id == payload.source_event_id",
+          "payload.actor.actor_id == payload.learner_id"
+        ]
+      },
+      "LearnerModelUpdatedEvent": {
+        "allOf": [
+          { "$ref": "#/components/schemas/EventEnvelope" },
+          { "type": "object", "properties": { "event_type": { "const": "learner.model.updated" }, "event_version": { "const": 1 }, "payload": { "$ref": "#/components/schemas/LearnerModelUpdatedPayload" } } }
+        ]
+      },
+      "LearnerProjectionFailedEvent": {
+        "allOf": [
+          { "$ref": "#/components/schemas/EventEnvelope" },
+          { "type": "object", "properties": { "event_type": { "const": "learner.projection.failed" }, "event_version": { "const": 1 }, "payload": { "$ref": "#/components/schemas/LearnerProjectionFailedPayload" } } }
+        ]
+      },
+      "FeishuSyncRequestedEvent": {
+        "allOf": [
+          { "$ref": "#/components/schemas/EventEnvelope" },
+          { "type": "object", "properties": { "event_type": { "const": "feishu.sync.requested" }, "event_version": { "const": 1 }, "payload": { "$ref": "#/components/schemas/FeishuSyncRequestedPayload" } } }
+        ]
+      },
+      "FeishuSyncSucceededEvent": {
+        "allOf": [
+          { "$ref": "#/components/schemas/EventEnvelope" },
+          { "type": "object", "properties": { "event_type": { "const": "feishu.sync.succeeded" }, "event_version": { "const": 1 }, "payload": { "$ref": "#/components/schemas/FeishuSyncSucceededPayload" } } }
+        ]
+      },
+      "FeishuSyncFailedEvent": {
+        "allOf": [
+          { "$ref": "#/components/schemas/EventEnvelope" },
+          { "type": "object", "properties": { "event_type": { "const": "feishu.sync.failed" }, "event_version": { "const": 1 }, "payload": { "$ref": "#/components/schemas/FeishuSyncFailedPayload" } } }
+        ]
+      },
+      "FeishuSyncDeadLetteredEvent": {
+        "allOf": [
+          { "$ref": "#/components/schemas/EventEnvelope" },
+          { "type": "object", "properties": { "event_type": { "const": "feishu.sync.dead_lettered" }, "event_version": { "const": 1 }, "payload": { "$ref": "#/components/schemas/FeishuSyncDeadLetteredPayload" } } }
+        ]
+      }
+    }
+  }
+}

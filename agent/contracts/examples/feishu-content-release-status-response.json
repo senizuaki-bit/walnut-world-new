@@ -1,0 +1,58 @@
+{
+  "schema_ref": "../schemas/feishu/content-release-status.schema.json",
+  "value": {
+    "release_id": "rel_00000001",
+    "candidate_id": "cand_00000001",
+    "candidate_revision": 1,
+    "lifecycle_status": "VALIDATING",
+    "activation_status": "NOT_ACTIVATED",
+    "validation_job": {
+      "job_id": "job_00000001",
+      "job_type": "CONTENT_VALIDATION",
+      "status": "RUNNING",
+      "created_at": "2026-08-06T10:05:01Z",
+      "updated_at": "2026-08-06T10:06:20Z",
+      "command_id": "cmd_00000001",
+      "trace_id": "trace_feishu_00000001",
+      "error": null
+    },
+    "checks": [
+      {
+        "name": "SCHEMA",
+        "status": "PASSED",
+        "required": true,
+        "evidence_refs": [
+          {
+            "evidence_id": "evidence_test_00000001",
+            "evidence_type": "TEST_REPORT",
+            "created_at": "2026-08-06T10:06:00Z",
+            "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+          }
+        ]
+      },
+      {
+        "name": "SEMANTIC",
+        "status": "RUNNING",
+        "required": true
+      },
+      {
+        "name": "POLICY",
+        "status": "PENDING",
+        "required": true
+      },
+      {
+        "name": "AUTOMATED_TESTS",
+        "status": "PENDING",
+        "required": true
+      },
+      {
+        "name": "CANARY",
+        "status": "PENDING",
+        "required": true
+      }
+    ],
+    "created_at": "2026-08-06T10:05:01Z",
+    "updated_at": "2026-08-06T10:06:20Z",
+    "trace_id": "trace_feishu_00000001"
+  }
+}
