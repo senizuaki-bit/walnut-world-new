@@ -7,6 +7,9 @@ param(
 
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
+if ($PSVersionTable.PSEdition -eq 'Desktop') {
+    Add-Type -AssemblyName System.Security
+}
 $RepositoryRoot = Split-Path -Parent $PSScriptRoot
 $BackendPort = 8790
 $LoopbackAddress = [System.Net.IPAddress]::Loopback

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 
 from .protocol import RelayResource
 from .store import RelayStore
@@ -11,6 +12,8 @@ from .upstream import (
     UpstreamResponseInvalid,
     UpstreamTransport,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class RelayDispatcher:
@@ -43,7 +46,21 @@ class RelayDispatcher:
         """Drain pending dispatches until the caller requests shutdown."""
 
         while not stop.is_set():
-            progressed = await self.run_once()
+            try:
+                progressed = await self.run_once()
+            except Exception as error:
+                # A transient store failure must not permanently kill the sole
+                # dispatcher task while the HTTP process remains healthy.  A
+                # claim that committed before an ambiguous failure is already
+                # generation-fenced, so retrying the loop cannot issue a
+                # second upstream POST.  Keep logs identity-free because a
+                # database exception may retain bound request/response bytes.
+                logger.error(
+                    "relay dispatcher iteration failed; retrying after bounded poll "
+                    "exception_type=%s",
+                    type(error).__name__,
+                )
+                progressed = False
             if not progressed:
                 try:
                     await asyncio.wait_for(stop.wait(), timeout=self._poll)

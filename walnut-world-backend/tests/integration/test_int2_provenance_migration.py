@@ -35,7 +35,10 @@ from walnut_backend.adapters.postgres.certification_authority import (
 from walnut_backend.adapters.postgres.command_store import PostgresCommandStore
 from walnut_backend.adapters.postgres.models import SkillCertificationRow
 from walnut_backend.adapters.postgres.product_drafts import draft_resource
-from walnut_backend.adapters.postgres.session import create_session_factory
+from walnut_backend.adapters.postgres.session import (
+    create_session_factory,
+    normalize_database_url,
+)
 from walnut_backend.adapters.postgres.skill_builds import PostgresSkillBuildStore
 from walnut_backend.adapters.postgres.workflow_jobs import (
     workflow_step_receipt_id,
@@ -54,7 +57,7 @@ def scratch_database_url() -> Iterator[str]:
         raise RuntimeError(
             "set WALNUT_TEST_DATABASE_URL for required INT2 migration coverage"
         )
-    base = make_url(database_url)
+    base = make_url(normalize_database_url(database_url))
     database_name = f"walnut_int2_{uuid.uuid4().hex[:20]}"
     target = base.set(database=database_name)
     asyncio.run(_create_database(base.set(database="postgres"), database_name))

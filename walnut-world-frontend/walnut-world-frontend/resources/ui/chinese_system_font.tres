@@ -1,0 +1,16 @@
+[gd_resource type="SystemFont" format=3]
+
+[resource]
+font_names = PackedStringArray("Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", "Source Han Sans SC", "WenQuanYi Micro Hei", "Arial Unicode MS")
+font_italic = false
+font_weight = 400
+font_stretch = 100
+antialiasing = 1
+generate_mipmaps = false
+multichannel_signed_distance_field = false
+allow_system_fallback = true
+force_autohinter = false
+hinting = 1
+subpixel_positioning = 1
+keep_rounding_remainders = true
+oversampling = 0.0

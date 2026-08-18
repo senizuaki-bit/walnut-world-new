@@ -14,12 +14,15 @@ param(
     [int]$TotalDeadlineSeconds = 600,
     [ValidateRange(30, 300)]
     [int]$ResourceDeadlineSeconds = 180,
-    [ValidateRange(15, 180)]
+    [ValidateRange(15, 300)]
     [int]$InteractionDeadlineSeconds = 90
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+if ($PSVersionTable.PSEdition -eq 'Desktop') {
+    Add-Type -AssemblyName System.Security
+}
 
 $script:TenantId = 'tenant_yaya'
 $script:StudentId = 'student_0001'
@@ -35,8 +38,22 @@ $script:MaximumWindowsPath = 259
 
 $backendRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
 $workspaceRoot = Split-Path -Parent $backendRoot
-$frontendRoot = Join-Path $workspaceRoot 'walnut-world-frontend'
-$agentRoot = Join-Path $workspaceRoot 'agent'
+$frontendContainerRoot = Join-Path $workspaceRoot 'walnut-world-frontend'
+$nestedFrontendRoot = Join-Path $frontendContainerRoot 'walnut-world-frontend'
+if (Test-Path -LiteralPath (Join-Path $nestedFrontendRoot 'project.godot') -PathType Leaf) {
+    $frontendRoot = (Resolve-Path -LiteralPath $nestedFrontendRoot).Path
+}
+else {
+    $frontendRoot = $frontendContainerRoot
+}
+$bundledAgentRoot = Join-Path $backendRoot 'agent'
+$legacyAgentRoot = Join-Path $workspaceRoot 'agent'
+if (Test-Path -LiteralPath (Join-Path $bundledAgentRoot 'contracts\manifest.json') -PathType Leaf) {
+    $agentRoot = (Resolve-Path -LiteralPath $bundledAgentRoot).Path
+}
+else {
+    $agentRoot = $legacyAgentRoot
+}
 $backendPython = Join-Path $backendRoot '.venv\Scripts\python.exe'
 $frontendRunner = Join-Path $frontendRoot 'scripts\run-real-gateway-e2e.ps1'
 $contractVerifier = Join-Path $backendRoot 'scripts\verify_contract_release.py'
@@ -100,6 +117,7 @@ $environmentNames = @(
     'WALNUT_WORLD_RULES_VERSION',
     'WALNUT_WORLD_CONTENT_VERSION',
     'WALNUT_WORLD_SUCCESS_SCORE',
+    'WALNUT_WORLD_WATERING_EXPECTED_UNITS',
     'WALNUT_WORKER_LEASE_SECONDS',
     'WALNUT_WORKER_IDLE_POLL_SECONDS',
     'WALNUT_LEARNER_WORKER_LEASE_SECONDS',
@@ -297,7 +315,12 @@ function Get-ExactBackendState {
     if (-not (Test-Path -LiteralPath $backendStatePath -PathType Leaf)) {
         throw 'The reusable INT3 production Backend has no active runtime record.'
     }
-    $state = Get-Content -LiteralPath $backendStatePath -Raw -Encoding UTF8 | ConvertFrom-Json
+    # PowerShell 7.5+ converts ISO timestamps to DateTime by default. Casting
+    # that value back to string drops the original UTC suffix, so the later
+    # DateTimeOffset parse applies the local offset a second time. Keep the
+    # persisted timestamp as a string for the process-identity comparison.
+    $state = Get-Content -LiteralPath $backendStatePath -Raw -Encoding UTF8 |
+        ConvertFrom-Json -DateKind String
     if (
         [string]$state.runtime_version -cne $script:ExpectedBackendRuntimeVersion -or
         [int]$state.backend_port -ne $script:GatewayPort -or
@@ -434,11 +457,11 @@ async def main():
                 exact = bool(await session.scalar(text("""
                     SELECT
                       (SELECT count(*) FROM product_content_units WHERE tenant_id='tenant_yaya' AND unit_id='YAYA_FARM_001' AND version='1.0.0') = 1 AND
-                      (SELECT count(*) FROM world_snapshots WHERE tenant_id='tenant_yaya' AND world_id='world_watering_0001' AND actor_id='student_0001' AND revision=0) = 1 AND
+                      (SELECT count(*) FROM world_snapshots WHERE tenant_id='tenant_yaya' AND world_id='world_crop_watering_0001' AND actor_id='student_0001' AND revision=0) = 1 AND
                       (SELECT count(*) FROM learner_profiles WHERE tenant_id='tenant_yaya' AND learner_id='student_0001' AND actor_id='student_0001') = 1 AND
-                      (SELECT count(*) FROM agent_profiles WHERE tenant_id='tenant_yaya' AND agent_profile_id='agent_profile_build_e2e_0001') = 1 AND
-                      (SELECT count(*) FROM build_policies WHERE tenant_id='tenant_yaya' AND build_policy_id='build_policy_e2e_0001' AND active IS TRUE) = 1 AND
-                      (SELECT count(*) FROM launch_authorities WHERE tenant_id='tenant_yaya' AND authority_id='authority_build_e2e_0001' AND active IS TRUE) = 1 AND
+                      (SELECT count(*) FROM agent_profiles WHERE tenant_id='tenant_yaya' AND agent_profile_id='agent_profile_crop_watering_0001') = 1 AND
+                      (SELECT count(*) FROM build_policies WHERE tenant_id='tenant_yaya' AND build_policy_id='build_policy_watering_0001' AND active IS TRUE) = 1 AND
+                      (SELECT count(*) FROM launch_authorities WHERE tenant_id='tenant_yaya' AND authority_id='authority_crop_watering_0001' AND active IS TRUE) = 1 AND
                       (SELECT count(*) FROM registry_heads WHERE tenant_id='tenant_yaya' AND actor_id='student_0001' AND revision=0) = 1
                 """)))
                 if not exact:
@@ -518,7 +541,7 @@ function New-StudentAuthorization {
     $signature = $null
     try {
         $signature = $hmac.ComputeHash($signingBytes)
-        return "Bearer $signingInput.$(ConvertTo-Base64Url -Bytes $signature)"
+        return "$signingInput.$(ConvertTo-Base64Url -Bytes $signature)"
     }
     finally {
         $hmac.Dispose()
@@ -783,6 +806,7 @@ try {
     $env:WALNUT_WORLD_RULES_VERSION = 'farm-rules-1'
     $env:WALNUT_WORLD_CONTENT_VERSION = '1.0.0'
     $env:WALNUT_WORLD_SUCCESS_SCORE = '8'
+    $env:WALNUT_WORLD_WATERING_EXPECTED_UNITS = '2,1,1,0,0,2,0,1'
     $env:WALNUT_WORKER_LEASE_SECONDS = '120'
     $env:WALNUT_WORKER_IDLE_POLL_SECONDS = '0.1'
     $env:WALNUT_LEARNER_WORKER_LEASE_SECONDS = '120'
@@ -814,7 +838,7 @@ try {
         $backendHmac = $null
     }
     $headers = @{
-        Authorization = $studentAuthorization
+        Authorization = "Bearer $studentAuthorization"
         'X-Request-Id' = "req_int3_demo_$runId"
         'X-Trace-Id' = "trace_int3_demo_$runId"
         'X-Correlation-Id' = "corr_int3_demo_$runId"

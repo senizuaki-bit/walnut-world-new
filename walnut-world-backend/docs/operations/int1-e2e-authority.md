@@ -26,7 +26,8 @@ Every variable below must be set explicitly. `WALNUT_LLM_PROVIDER`, `WALNUT_LLM_
 ```powershell
 $env:WALNUT_INT1_E2E_SEED = 'true'
 $env:WALNUT_DATABASE_URL = 'postgresql://postgres:postgres@127.0.0.1:55432/walnut_int1'
-$env:WALNUT_CONTRACT_PATH = (Resolve-Path '..\agent').Path
+$agentRepo = if (Test-Path '.\agent\contracts\manifest.json') { '.\agent' } else { '..\agent' }
+$env:WALNUT_CONTRACT_PATH = (Resolve-Path $agentRepo).Path
 $env:WALNUT_RUNTIME_ROOT = [IO.Path]::GetFullPath((Join-Path (Get-Location) 'tmp\int1-runtime'))
 $env:WALNUT_DEVELOPMENT_AUTH = 'false'
 $env:WALNUT_AUTH_HMAC_SECRET = '<32-or-more-character-test-secret>'

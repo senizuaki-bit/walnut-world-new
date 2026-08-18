@@ -300,6 +300,116 @@ def test_dispatcher_fences_before_post_and_never_reposts_acknowledgement_unknown
     assert store.resource.failure_retryable is False
 
 
+def test_dispatcher_loop_survives_one_store_failure_before_claim(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    async def exercise() -> None:
+        store = OneShotMaintenanceFailureStore()
+        await store.put(_put_request(), max_total_generations=24)
+        upstream = CountingSuccessUpstream()
+        dispatcher = RelayDispatcher(
+            store,
+            upstream,
+            upstream_deadline_seconds=0.1,
+            idle_poll_seconds=0.01,
+            max_total_generations=24,
+        )
+        stop = asyncio.Event()
+        task = asyncio.create_task(dispatcher.run_forever(stop))
+        try:
+            for _ in range(200):
+                resource = store.resources[DISPATCH_ID]
+                if resource.state == "SUCCEEDED":
+                    break
+                await asyncio.sleep(0.005)
+            else:
+                raise AssertionError("dispatcher did not recover from the transient store failure")
+        finally:
+            stop.set()
+            await asyncio.wait_for(task, timeout=1)
+
+        resource = store.resources[DISPATCH_ID]
+        assert store.maintenance_calls >= 2
+        assert store.observed_limits == {24}
+        assert resource.state == "SUCCEEDED"
+        assert resource.generation_count == 1
+        assert upstream.posts == 1
+
+    asyncio.run(exercise())
+    assert "exception_type=ConnectionError" in caplog.text
+    assert "synthetic transient store failure" not in caplog.text
+
+
+def test_dispatcher_loop_never_reposts_after_completion_store_failure() -> None:
+    async def exercise() -> None:
+        store = OneShotCompletionFailureStore()
+        await store.put(_put_request())
+        upstream = CountingSuccessUpstream()
+        dispatcher = RelayDispatcher(
+            store,
+            upstream,
+            upstream_deadline_seconds=0.02,
+            idle_poll_seconds=0.01,
+            max_total_generations=24,
+        )
+        stop = asyncio.Event()
+        task = asyncio.create_task(dispatcher.run_forever(stop))
+        try:
+            for _ in range(200):
+                resource = store.resource
+                if (
+                    resource is not None
+                    and store.completion_calls == 1
+                    and resource.state == "PENDING"
+                    and resource.generation_count == 1
+                ):
+                    # Make the acknowledgement-unknown recovery boundary
+                    # deterministic without depending on host clock granularity.
+                    store.resource = replace(
+                        resource,
+                        upstream_deadline_at=datetime.now(UTC) - timedelta(seconds=1),
+                    )
+                if resource is not None and resource.state == "FAILED":
+                    break
+                await asyncio.sleep(0.005)
+            else:
+                raise AssertionError("generation-fenced completion did not terminalize")
+        finally:
+            stop.set()
+            await asyncio.wait_for(task, timeout=1)
+
+        assert store.resource is not None
+        assert store.completion_calls == 1
+        assert store.resource.state == "FAILED"
+        assert store.resource.generation_count == 1
+        assert store.resource.failure_code == "UPSTREAM_ACKNOWLEDGEMENT_UNKNOWN"
+        assert upstream.posts == 1
+
+    asyncio.run(exercise())
+
+
+def test_dispatcher_loop_does_not_swallow_task_cancellation() -> None:
+    async def exercise() -> None:
+        store = GenerationBudgetMemoryStore()
+        upstream = CountingSuccessUpstream()
+        dispatcher = RelayDispatcher(
+            store,
+            upstream,
+            upstream_deadline_seconds=0.1,
+            idle_poll_seconds=60,
+            max_total_generations=24,
+        )
+        stop = asyncio.Event()
+        task = asyncio.create_task(dispatcher.run_forever(stop))
+        await asyncio.sleep(0)
+        task.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await task
+        assert upstream.posts == 0
+
+    asyncio.run(exercise())
+
+
 def test_explicit_global_generation_limit_stops_thirteenth_before_upstream_post() -> None:
     store = GenerationBudgetMemoryStore()
     upstream = CountingSuccessUpstream()
@@ -708,6 +818,34 @@ class CountingSuccessUpstream:
         return ProviderHttpResponse(200, "application/json", b'{"ok":true}')
 
 
+class OneShotMaintenanceFailureStore(GenerationBudgetMemoryStore):
+    def __init__(self) -> None:
+        super().__init__()
+        self.maintenance_calls = 0
+
+    async def scrub_expired(self) -> int:
+        self.maintenance_calls += 1
+        if self.maintenance_calls == 1:
+            raise ConnectionError("synthetic transient store failure")
+        return 0
+
+
+class OneShotCompletionFailureStore(MemoryRelayStore):
+    def __init__(self) -> None:
+        super().__init__()
+        self.completion_calls = 0
+
+    async def complete_response(
+        self,
+        claim: RelayResource,
+        response: ProviderHttpResponse,
+    ) -> RelayResource:
+        self.completion_calls += 1
+        if self.completion_calls == 1:
+            raise ConnectionError("synthetic ambiguous completion store failure")
+        return await super().complete_response(claim, response)
+
+
 def _settings() -> RelaySettings:
     return RelaySettings(
         database_url="postgresql+asyncpg://walnut:unused@postgres/walnut",
@@ -787,6 +925,19 @@ Set-Acl -LiteralPath $env:WALNUT_TEST_SECRET_PATH -AclObject $acl -ErrorAction S
 def _run_acl_test_script(path: Path, script: str) -> None:
     environment = dict(os.environ)
     environment["WALNUT_TEST_SECRET_PATH"] = str(path)
+    system_root = environment.get("SystemRoot") or environment.get("WINDIR", r"C:\Windows")
+    windows_powershell_modules = str(
+        Path(system_root) / "System32" / "WindowsPowerShell" / "v1.0" / "Modules"
+    )
+    inherited_module_path = environment.get("PSModulePath", "")
+    environment["PSModulePath"] = os.pathsep.join(
+        [windows_powershell_modules]
+        + [
+            entry
+            for entry in inherited_module_path.split(os.pathsep)
+            if entry and entry.casefold() != windows_powershell_modules.casefold()
+        ]
+    )
     completed = subprocess.run(
         [
             "powershell.exe",

@@ -82,6 +82,7 @@ from .models import (
     WorldPresentationEventRow,
 )
 from .run_outcomes import (
+    load_hint_provider_receipts,
     load_patch_provider_receipts,
     load_validated_run,
     validate_provider_decision_wire,
@@ -580,20 +581,26 @@ async def _interactions_have_authority(
 
     ordinary: list[ProductInteractionRow] = []
     proposals: list[ProductInteractionRow] = []
+    hints: list[ProductInteractionRow] = []
     for row in rows:
         kind = _interaction_projection_kind(row.interaction_json)
         if kind == "RUN":
             ordinary.append(row)
         elif kind == "SKILL_PATCH_NO_RUN":
             proposals.append(row)
+        elif kind == "HINT_NO_RUN":
+            hints.append(row)
         else:
             return False
     if ordinary and not await _run_interactions_have_authority(session, ordinary, owner):
         return False
     return all(
         [
-            await _skill_patch_interaction_has_authority(session, row, owner)
-            for row in proposals
+            *[
+                await _skill_patch_interaction_has_authority(session, row, owner)
+                for row in proposals
+            ],
+            *[await _hint_interaction_has_authority(session, row, owner) for row in hints],
         ]
     )
 
@@ -908,7 +915,15 @@ def _interaction_projection_kind(value: Mapping[str, Any]) -> str | None:
         ):
             return "SKILL_PATCH_NO_RUN"
         return None
-    return "RUN" if isinstance(feedback.get("run_id"), str) else None
+    if isinstance(feedback.get("run_id"), str):
+        return "RUN"
+    if (
+        feedback.get("run_id") is None
+        and value.get("role") in {"teaching_agent", "bug_agent"}
+        and value.get("response_type") in {"question", "hint"}
+    ):
+        return "HINT_NO_RUN"
+    return None
 
 
 async def _skill_patch_interaction_has_authority(
@@ -1350,12 +1365,356 @@ async def _skill_patch_interaction_has_authority(
     )
 
 
+async def _hint_interaction_has_authority(
+    session: AsyncSession,
+    row: ProductInteractionRow,
+    owner: AgentSessionRow,
+) -> bool:
+    """Close a hint projection to its no-Run Turn and forbid every side effect."""
+
+    value = row.interaction_json
+    try:
+        origin = _object_value(value, "request_context")
+        actor = _object_value(origin, "actor")
+        content = _object_value(origin, "content_ref")
+        feedback = _object_value(value, "feedback")
+        feedback_event = _object_value(value, "feedback_event")
+        source = _object_value(value, "projection_source")
+        links = _object_value(value, "links")
+        command_id = _text_value(feedback, "command_id")
+        event_id = _text_value(feedback_event, "event_id")
+        receipt_id = _text_value(source, "receipt_id")
+        created_at = _time_value(value, "created_at")
+        updated_at = _time_value(value, "updated_at")
+        completed_at = _time_value(feedback, "completed_at")
+    except (KeyError, TypeError, ValueError):
+        return False
+    role = value.get("role")
+    response_type = value.get("response_type")
+    question = value.get("question")
+    hint_level = value.get("hint_level")
+    if (
+        feedback.get("run_id") is not None
+        or feedback.get("evidence_refs") != []
+        or role not in {"teaching_agent", "bug_agent"}
+        or response_type not in {"question", "hint"}
+        or value.get("skill_patch") is not None
+        or value.get("patch_decision") is not None
+        or (response_type == "question" and (question is None or hint_level is not None))
+        or (
+            response_type == "hint"
+            and (
+                question is not None
+                or isinstance(hint_level, bool)
+                or not isinstance(hint_level, int)
+                or not 0 <= hint_level <= 3
+            )
+        )
+        or value.get("session_id") != row.session_id
+        or value.get("interaction_id") != row.interaction_id
+        or value.get("turn_id") != row.turn_id
+        or value.get("sequence") != row.sequence
+        or value.get("interaction_revision") != row.interaction_revision
+        or row.interaction_revision != 1
+        or created_at != row.created_at
+        or updated_at != row.updated_at
+        or created_at != updated_at
+        or actor.get("tenant_id") != row.tenant_id
+        or actor.get("actor_id") != row.actor_id
+        or owner.tenant_id != row.tenant_id
+        or owner.actor_id != row.actor_id
+        or owner.session_id != row.session_id
+        or content != owner.session_json.get("content")
+        or feedback.get("session_id") != row.session_id
+        or feedback.get("turn_id") != row.turn_id
+        or feedback.get("source") != "provider"
+        or feedback.get("degraded") is not False
+        or feedback.get("fallback_reason") is not None
+        or links
+        != {
+            "self": (
+                f"/product-experience/v1/sessions/{row.session_id}/"
+                f"agent-interactions/{row.interaction_id}"
+            ),
+            "session_workspace": f"/product-experience/v1/sessions/{row.session_id}/workspace",
+            "skill_draft": None,
+        }
+    ):
+        return False
+
+    turn = await session.scalar(
+        select(AgentTurnRow).where(
+            AgentTurnRow.tenant_id == row.tenant_id,
+            AgentTurnRow.actor_id == row.actor_id,
+            AgentTurnRow.session_id == row.session_id,
+            AgentTurnRow.turn_id == row.turn_id,
+            AgentTurnRow.command_id == command_id,
+        )
+    )
+    command_row = await session.scalar(
+        select(CommandRow).where(
+            CommandRow.tenant_id == row.tenant_id,
+            CommandRow.actor_id == row.actor_id,
+            CommandRow.command_id == command_id,
+        )
+    )
+    command = (
+        await validated_command_record(session, command_row) if command_row is not None else None
+    )
+    job = await session.scalar(
+        select(WorkflowJobRow).where(
+            WorkflowJobRow.tenant_id == row.tenant_id,
+            WorkflowJobRow.command_id == command_id,
+            WorkflowJobRow.subject_type == "AGENT_TURN",
+            WorkflowJobRow.subject_id == row.turn_id,
+        )
+    )
+    command_receipt = await session.scalar(
+        select(IdempotencyReceiptRow).where(
+            IdempotencyReceiptRow.tenant_id == row.tenant_id,
+            IdempotencyReceiptRow.actor_id == row.actor_id,
+            IdempotencyReceiptRow.operation == "EXECUTE_AGENT_TURN",
+            IdempotencyReceiptRow.command_id == command_id,
+        )
+    )
+    forbidden_runs = list(
+        (
+            await session.scalars(
+                select(RunRow).where(
+                    RunRow.tenant_id == row.tenant_id,
+                    RunRow.actor_id == row.actor_id,
+                    RunRow.session_id == row.session_id,
+                    RunRow.command_id == command_id,
+                )
+            )
+        ).all()
+    )
+    forbidden_evidence = list(
+        (
+            await session.scalars(
+                select(EvidenceRow).where(
+                    EvidenceRow.tenant_id == row.tenant_id,
+                    EvidenceRow.actor_id == row.actor_id,
+                    EvidenceRow.command_id == command_id,
+                )
+            )
+        ).all()
+    )
+    request_events = list(
+        (
+            await session.scalars(
+                select(EventRow).where(
+                    EventRow.tenant_id == row.tenant_id,
+                    EventRow.event_json["command_id"].astext == command_id,
+                )
+            )
+        ).all()
+    )
+    forbidden_learner_jobs = list(
+        (
+            await session.scalars(
+                select(LearnerProjectionJobRow).where(
+                    LearnerProjectionJobRow.tenant_id == row.tenant_id,
+                    LearnerProjectionJobRow.command_id == command_id,
+                )
+            )
+        ).all()
+    )
+    forbidden_world_events = list(
+        (
+            await session.scalars(
+                select(WorldPresentationEventRow).where(
+                    WorldPresentationEventRow.tenant_id == row.tenant_id,
+                    WorldPresentationEventRow.command_id == command_id,
+                )
+            )
+        ).all()
+    )
+    if (
+        turn is None
+        or command is None
+        or job is None
+        or command_receipt is None
+        or forbidden_runs
+        or forbidden_evidence
+        or forbidden_learner_jobs
+        or forbidden_world_events
+    ):
+        return False
+    turn_input = turn.request_json.get("input")
+    expected_context = request_context_data(command.request_context)
+    if (
+        origin != expected_context
+        or turn.tenant_id != row.tenant_id
+        or turn.actor_id != row.actor_id
+        or turn.session_id != row.session_id
+        or not isinstance(turn_input, Mapping)
+        or turn_input.get("type") != "MESSAGE"
+        or turn.request_json.get("skill_bindings") != []
+        or command.command_type != "EXECUTE_AGENT_TURN"
+        or command.status is not CommandStatus.APPLIED
+        or command.stage != "COMPLETE"
+        or not command.terminal
+        or command.updated_at != created_at
+        or command.result != {"result_type": "NO_EFFECT", "reason_code": "HINT_DELIVERED"}
+        or command.error is not None
+        or command.evidence_refs != ()
+        or command.links != {"self": f"/v1/commands/{command_id}"}
+        or command_receipt.request_sha256 != job.request_sha256
+        or command_receipt.accepted_at != command.accepted_at
+    ):
+        return False
+
+    receipts = list(
+        (
+            await session.scalars(
+                select(JobStepReceiptRow).where(
+                    JobStepReceiptRow.tenant_id == row.tenant_id,
+                    JobStepReceiptRow.job_id == job.job_id,
+                )
+            )
+        ).all()
+    )
+    try:
+        provider_results = await load_hint_provider_receipts(session, job)
+    except WorkflowInvariantError:
+        return False
+    provider_names = {
+        name
+        for result in provider_results
+        for name in (result.step_name, result.step_name.replace("_RESULT_", "_DISPATCH_"))
+    }
+    required_receipts = {*provider_names, "HINT_DECISION_DERIVED", "TURN_COMPLETED"}
+    if not _patch_job_receipts_have_authority(receipts, job, required_receipts):
+        return False
+    receipts_by_name = {item.step_name: item for item in receipts}
+    terminal = receipts_by_name["TURN_COMPLETED"]
+    derived = receipts_by_name["HINT_DECISION_DERIVED"]
+    provider_result = provider_results[-1]
+    provider_dispatch = receipts_by_name[
+        provider_result.step_name.replace("_RESULT_", "_DISPATCH_")
+    ]
+    decision = derived.receipt_json.get("decision")
+    if set(derived.receipt_json) != {"decision"} or not isinstance(decision, Mapping):
+        return False
+    durable_draft = decision.get("draft")
+    directive = decision.get("teaching_directive")
+    try:
+        # The frozen decision renders its instant with an explicit UTC offset
+        # while the public feedback renders the same instant with "Z"; compare
+        # the instants, never the two spellings.
+        decision_completed_at = _time_value(decision, "completed_at")
+    except (KeyError, TypeError, ValueError):
+        return False
+    if (
+        not isinstance(durable_draft, Mapping)
+        or not isinstance(directive, Mapping)
+        or derived.input_sha256 != terminal.input_sha256
+        or decision.get("source") != "provider"
+        or decision.get("degraded") is not False
+        or decision.get("fallback_reason") is not None
+        or decision.get("evidence_refs") != []
+        or decision.get("message_key") != feedback.get("message_key")
+        or decision_completed_at != completed_at
+        or directive.get("patch_eligible") is not False
+        or directive.get("full_solution_eligible") is not False
+        or durable_draft.get("role") != role
+        or durable_draft.get("response_type") != response_type
+        or durable_draft.get("question") != question
+        or durable_draft.get("hint_level") != hint_level
+        or durable_draft.get("skill_patch") is not None
+        or durable_draft.get("requires_student_confirmation") is not False
+        or durable_draft.get("message") != feedback.get("message")
+        or any(
+            not isinstance(item, Mapping) or item.get("name") == "invoke_skill"
+            for item in cast(list[Any], decision.get("tool_calls") or [])
+        )
+    ):
+        return False
+    try:
+        provider_result_authority = _object_value(provider_result.receipt_json, "dispatch")
+        validate_provider_decision_wire(
+            provider_results,
+            decision_draft=dict(durable_draft),
+            evidence_refs=(),
+            decision=dict(decision),
+        )
+    except (KeyError, TypeError, WorkflowInvariantError):
+        return False
+    if (
+        receipt_id != terminal.receipt_id
+        or terminal.receipt_id
+        != workflow_step_receipt_id(row.tenant_id, job.job_id, "TURN_COMPLETED")
+        or terminal.receipt_json != dict(source)
+        or terminal.output_sha256 != workflow_receipt_sha256(dict(source))
+        or provider_dispatch.input_sha256 != provider_result.input_sha256
+        or provider_dispatch.receipt_json.get("command_id") != command_id
+        or provider_dispatch.receipt_json.get("turn_id") != row.turn_id
+        or provider_result_authority.get("request_sha256") != provider_result.input_sha256
+        or provider_result_authority.get("generation_count") != 1
+        or provider_result_authority.get("state") != "SUCCEEDED"
+        or job.status != "SUCCEEDED"
+        or job.phase != "COMPLETE"
+        or job.lease_owner is not None
+        or job.lease_expires_at is not None
+        or job.operation != "EXECUTE_AGENT_TURN"
+        or job.job_json.get("request_context") != origin
+        or job.job_json.get("session_id") != row.session_id
+        or job.job_json.get("turn_id") != row.turn_id
+    ):
+        return False
+
+    runtime_event_row = await session.scalar(
+        select(EventRow).where(
+            EventRow.tenant_id == row.tenant_id,
+            EventRow.event_id == event_id,
+        )
+    )
+    runtime_event = _runtime_event(runtime_event_row) if runtime_event_row is not None else None
+    feedback_sha256 = canonical_json_sha256(dict(feedback))
+    source_projection = dict(source)
+    retained_source_sha256 = source_projection.pop("source_sha256", None)
+    retained_event = public_domain_event_data(runtime_event) if runtime_event is not None else None
+    event_payload = retained_event.pop("payload", None) if retained_event is not None else None
+    if retained_event is not None:
+        retained_event["feedback_sha256"] = feedback_sha256
+    return not (
+        runtime_event is None
+        or len(request_events) != 1
+        or request_events[0].event_id != event_id
+        or runtime_event.event_type != RuntimeEventType.AGENT_TURN_FEEDBACK_READY.value
+        or runtime_event.command_id != command_id
+        or runtime_event.stream_id != f"agent-session:{row.session_id}"
+        or runtime_event.occurred_at != completed_at
+        or event_payload != feedback
+        or retained_event != feedback_event
+        or source.get("source_type") != "AGENT_TURN_PRODUCT_PROJECTION"
+        or source.get("source_revision") != 1
+        or source.get("actor") != actor
+        or source.get("content_ref") != content
+        or source.get("interaction_id") != row.interaction_id
+        or source.get("session_id") != row.session_id
+        or source.get("turn_id") != row.turn_id
+        or source.get("sequence") != row.sequence
+        or source.get("command_id") != command_id
+        or source.get("feedback_event_id") != event_id
+        or source.get("feedback_sha256") != feedback_sha256
+        or source.get("skill_patch_sha256") is not None
+        or source.get("committed_at") != value.get("created_at")
+        or retained_source_sha256 != canonical_json_sha256(source_projection)
+        or any(
+            source.get(field) != value.get(field)
+            for field in ("role", "response_type", "question", "hint_level")
+        )
+    )
+
+
 def _patch_job_receipts_have_authority(
     receipts: Sequence[JobStepReceiptRow],
     job: WorkflowJobRow,
     required_receipts: set[str],
 ) -> bool:
-    """Allow only the Patch terminal receipts plus closed reconciliation waits."""
+    """Allow only one no-Run projection's terminal receipts plus closed waits."""
 
     receipts_by_name = {item.step_name: item for item in receipts}
     if (

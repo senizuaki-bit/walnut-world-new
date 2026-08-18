@@ -45,7 +45,7 @@ from yaya_agent_runtime import (
 )
 
 from walnut_backend.adapters.postgres.models import json_value
-from walnut_backend.bootstrap import Settings
+from walnut_backend.bootstrap import DEFAULT_CONTRACT_PATH, Settings
 from walnut_backend.domain.world.engine import WorldEngine
 from walnut_backend.domain.world.rules import WorldRules
 from walnut_backend.int1_e2e_authority import (
@@ -64,7 +64,7 @@ from walnut_backend.int1_e2e_authority import (
 from walnut_backend.workers.turn_projection import _canonical_teaching_directive
 
 BACKEND_ROOT = Path(__file__).resolve().parents[2]
-AGENT_ROOT = BACKEND_ROOT.parent / "agent"
+AGENT_ROOT = DEFAULT_CONTRACT_PATH
 JWT_SECRET = "int1-test-only-hs256-secret-value"
 TEACHING_SPEC_VERSION = "agent-teaching-v1"
 

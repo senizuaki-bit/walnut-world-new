@@ -27,8 +27,22 @@ function Test-DigestPinnedImage([string]$Value) {
 
 $backendRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
 $workspaceParent = Split-Path -Parent $backendRoot
-$frontendRoot = Join-Path $workspaceParent 'walnut-world-frontend'
-$agentRoot = Join-Path $workspaceParent 'agent'
+$frontendContainerRoot = Join-Path $workspaceParent 'walnut-world-frontend'
+$nestedFrontendRoot = Join-Path $frontendContainerRoot 'walnut-world-frontend'
+if (Test-Path -LiteralPath (Join-Path $nestedFrontendRoot 'project.godot') -PathType Leaf) {
+    $frontendRoot = (Resolve-Path -LiteralPath $nestedFrontendRoot).Path
+}
+else {
+    $frontendRoot = $frontendContainerRoot
+}
+$bundledAgentRoot = Join-Path $backendRoot 'agent'
+$legacyAgentRoot = Join-Path $workspaceParent 'agent'
+if (Test-Path -LiteralPath (Join-Path $bundledAgentRoot 'contracts\manifest.json') -PathType Leaf) {
+    $agentRoot = (Resolve-Path -LiteralPath $bundledAgentRoot).Path
+}
+else {
+    $agentRoot = $legacyAgentRoot
+}
 $backendPython = Join-Path $backendRoot '.venv\Scripts\python.exe'
 $relayScript = Join-Path $PSScriptRoot 'int1_recoverable_relay.py'
 $realProviderFaultProxyScript = Join-Path $PSScriptRoot 'int1_real_provider_fault_proxy.py'

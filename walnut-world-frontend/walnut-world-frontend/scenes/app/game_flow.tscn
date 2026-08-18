@@ -1,0 +1,36 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scenes/app/game_flow.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/ui/game_start_screen.tscn" id="2_start"]
+[ext_resource type="PackedScene" path="res://scenes/level_demo/crop_adaptive_watering_demo.tscn" id="3_level"]
+
+[node name="GameFlow" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="CropAdaptiveWateringDemo" parent="." instance=ExtResource("3_level")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+
+[node name="GameStartScreen" parent="." instance=ExtResource("2_start")]
+unique_name_in_owner = true
+layout_mode = 1
+
+[node name="TransitionLayer" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="Transition" type="ColorRect" parent="TransitionLayer"]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.08, 0.22, 0.16, 0)

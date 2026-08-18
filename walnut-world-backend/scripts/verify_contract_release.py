@@ -7,6 +7,11 @@ import sys
 from pathlib import Path
 
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_AGENT_ROOT = (
+    BACKEND_ROOT / "agent"
+    if (BACKEND_ROOT / "agent" / "contracts" / "manifest.json").is_file()
+    else BACKEND_ROOT.parent / "agent"
+)
 sys.path.insert(0, str(BACKEND_ROOT / "src"))
 
 from walnut_backend.contract_release import (  # noqa: E402, I001
@@ -21,7 +26,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--agent-repo",
         type=Path,
-        default=BACKEND_ROOT.parent / "agent",
+        default=DEFAULT_AGENT_ROOT,
         help="Agent workspace or installed release containing contracts/manifest.json",
     )
     parser.add_argument(

@@ -19,7 +19,8 @@ Python 后端是整个产品的唯一 HTTP Gateway、PostgreSQL 写入端和 Ale
 合同跟随当前 Agent 工作树：每次构建、测试和部署前运行：
 
 ```powershell
-$env:WALNUT_CONTRACT_PATH = (Resolve-Path ..\agent).Path
+$agentRepo = if (Test-Path '.\agent\contracts\manifest.json') { '.\agent' } else { '..\agent' }
+$env:WALNUT_CONTRACT_PATH = (Resolve-Path $agentRepo).Path
 py -3.12 scripts/verify_contract_release.py --agent-repo $env:WALNUT_CONTRACT_PATH
 ```
 

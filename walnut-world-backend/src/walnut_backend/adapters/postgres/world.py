@@ -197,7 +197,21 @@ class PostgresWorldUnitOfWork:
             return Failure(_not_found())
         snapshot = world_snapshot_from_data(existing.snapshot_json)
         _validate_snapshot(request, context, snapshot, existing)
-        transition = self._engine.apply(snapshot.state, request.command.intents, rules)
+        # A Run is one attempt at the level, not a move in an accumulating game.
+        # Applying to the level baseline instead of the carried-over state is
+        # what makes attempts independent: watering adds to hydration and
+        # success compares hydration against exact expected units, so replaying
+        # from the previous result would overshoot and no correct program could
+        # ever pass twice -- nor could a student recover from one wrong Run.
+        #
+        # Worlds seeded before the baseline existed carry none, and those keep
+        # the original accumulating behaviour.
+        baseline = _baseline_state(existing.snapshot_json)
+        transition = self._engine.apply(
+            snapshot.state if baseline is None else baseline,
+            request.command.intents,
+            rules,
+        )
         committed_at = _validated_world_event(
             request, context, transition, snapshot.revision, snapshot.last_event_sequence
         )
@@ -241,7 +255,13 @@ class PostgresWorldUnitOfWork:
         existing.last_event_sequence = next_snapshot.last_event_sequence
         existing.state_hash = next_snapshot.state_hash
         existing.generated_at = next_snapshot.generated_at
-        existing.snapshot_json = world_snapshot_data(next_snapshot)
+        # WorldSnapshot has no baseline field, so serializing drops it; carry it
+        # forward explicitly or the very first commit would erase the baseline
+        # and silently restore the accumulating behaviour.
+        persisted = world_snapshot_data(next_snapshot)
+        if baseline is not None:
+            persisted["baseline_state"] = baseline
+        existing.snapshot_json = persisted
         outbox_messages = await _insert_outbox(session, request, context)
         receipt = WorldCommitReceipt(
             world_id=next_snapshot.world_id,
@@ -360,6 +380,17 @@ def _validated_world_event(
         schema_version=event.schema_version,
     )
     return timestamp
+
+
+def _baseline_state(snapshot_json: Mapping[str, Any]) -> Mapping[str, Any] | None:
+    """The level's starting World, when the content recorded one.
+
+    Written once when the World is seeded and never rewritten, so every Run is
+    scored against the same starting conditions.
+    """
+
+    baseline = snapshot_json.get("baseline_state")
+    return baseline if isinstance(baseline, Mapping) else None
 
 
 def _next_snapshot(

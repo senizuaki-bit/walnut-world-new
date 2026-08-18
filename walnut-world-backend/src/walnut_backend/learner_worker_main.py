@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import multiprocessing
 import os
 import signal
 from dataclasses import dataclass
@@ -87,6 +88,11 @@ async def run_learner_worker(settings: LearnerWorkerSettings) -> None:
 
 
 def main() -> None:
+    # Windows multiprocessing (spawn) re-imports this module in every child and
+    # runs __main__ again.  Only the launcher-spawned parent may own the job
+    # polling loop; children exist only to run a dependency sub-task.
+    if multiprocessing.parent_process() is not None:
+        return
     asyncio.run(run_learner_worker(LearnerWorkerSettings.from_env()))
 
 

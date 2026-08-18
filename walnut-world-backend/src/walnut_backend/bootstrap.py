@@ -17,7 +17,13 @@ from referencing import Registry, Resource
 from walnut_backend.contract_release import verify_agent_contract_release
 
 BACKEND_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_CONTRACT_PATH = BACKEND_ROOT.parent / "agent"
+_BUNDLED_CONTRACT_PATH = BACKEND_ROOT / "agent"
+_LEGACY_CONTRACT_PATH = BACKEND_ROOT.parent / "agent"
+DEFAULT_CONTRACT_PATH = (
+    _BUNDLED_CONTRACT_PATH
+    if (_BUNDLED_CONTRACT_PATH / "contracts" / "manifest.json").is_file()
+    else _LEGACY_CONTRACT_PATH
+)
 
 
 def _environment_flag(name: str, default: bool) -> bool:

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import multiprocessing
 import os
 import signal
 from dataclasses import dataclass, field
@@ -48,6 +49,7 @@ class WorkerSettings:
     world_max_y: int = 31
     world_harvest_growth_stage: int = 2
     world_success_score: int = 1
+    world_watering_expected_units: tuple[int, ...] | None = None
     sandbox_cpu_ms: int = 1_000
     sandbox_wall_ms: int = 2_000
     sandbox_memory_bytes: int = 67_108_864
@@ -121,6 +123,9 @@ class WorkerSettings:
             world_max_y=_integer("WALNUT_WORLD_MAX_Y", 31),
             world_harvest_growth_stage=_integer("WALNUT_WORLD_HARVEST_GROWTH_STAGE", 2),
             world_success_score=_integer("WALNUT_WORLD_SUCCESS_SCORE", 1),
+            world_watering_expected_units=_tuple_integers(
+                "WALNUT_WORLD_WATERING_EXPECTED_UNITS"
+            ),
             sandbox_cpu_ms=_integer("WALNUT_SANDBOX_CPU_MS", 1_000),
             sandbox_wall_ms=_integer("WALNUT_SANDBOX_WALL_MS", 2_000),
             sandbox_memory_bytes=_integer("WALNUT_SANDBOX_MEMORY_BYTES", 67_108_864),
@@ -160,6 +165,7 @@ async def run_worker(settings: WorkerSettings) -> None:
         max_y=settings.world_max_y,
         harvest_growth_stage=settings.world_harvest_growth_stage,
         success_score=settings.world_success_score,
+        watering_expected_units=settings.world_watering_expected_units,
     )
     versions = VersionSet(
         api_version="1.0.0",
@@ -246,6 +252,11 @@ async def run_worker(settings: WorkerSettings) -> None:
 
 
 def main() -> None:
+    # Windows multiprocessing (spawn) re-imports this module in every child and
+    # runs __main__ again.  Only the launcher-spawned parent may own the job
+    # polling loop; children exist only to run a dependency sub-task.
+    if multiprocessing.parent_process() is not None:
+        return
     asyncio.run(run_worker(WorkerSettings.from_env()))
 
 
@@ -259,6 +270,13 @@ def _required(name: str) -> str:
 def _integer(name: str, default: int) -> int:
     value = os.getenv(name)
     return default if value is None else int(value)
+
+
+def _tuple_integers(name: str) -> tuple[int, ...] | None:
+    value = os.getenv(name)
+    if value is None or not value.strip():
+        return None
+    return tuple(int(part) for part in value.split(",") if part.strip() != "")
 
 
 def _boolean_flag(name: str, default: bool) -> bool:

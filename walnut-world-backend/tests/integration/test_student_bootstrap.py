@@ -42,10 +42,10 @@ from walnut_backend.adapters.postgres.session_binding_authority import (
     current_session_binding_id,
 )
 from walnut_backend.api.app import create_app
-from walnut_backend.bootstrap import Settings
+from walnut_backend.bootstrap import DEFAULT_CONTRACT_PATH, Settings
 
 BACKEND_ROOT = Path(__file__).resolve().parents[2]
-AGENT_ROOT = BACKEND_ROOT.parent / "agent"
+AGENT_ROOT = DEFAULT_CONTRACT_PATH
 
 
 @dataclass(frozen=True, slots=True)

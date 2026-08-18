@@ -1,0 +1,51 @@
+[gd_resource type="SpriteFrames" load_steps=10 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/art/generated/effects/watering_can_sequence_v2.png" id="1_sheet"]
+
+[sub_resource type="AtlasTexture" id="Frame0"]
+atlas = ExtResource("1_sheet")
+region = Rect2(0, 0, 400, 480)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Frame1"]
+atlas = ExtResource("1_sheet")
+region = Rect2(400, 0, 400, 480)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Frame2"]
+atlas = ExtResource("1_sheet")
+region = Rect2(800, 0, 400, 480)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Frame3"]
+atlas = ExtResource("1_sheet")
+region = Rect2(1200, 0, 400, 480)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Frame4"]
+atlas = ExtResource("1_sheet")
+region = Rect2(0, 480, 400, 480)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Frame5"]
+atlas = ExtResource("1_sheet")
+region = Rect2(400, 480, 400, 480)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Frame6"]
+atlas = ExtResource("1_sheet")
+region = Rect2(800, 480, 400, 480)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Frame7"]
+atlas = ExtResource("1_sheet")
+region = Rect2(1200, 480, 400, 480)
+filter_clip = true
+
+[resource]
+animations = [{
+"frames": [{"duration": 1.0, "texture": SubResource("Frame0")}, {"duration": 1.0, "texture": SubResource("Frame1")}, {"duration": 1.0, "texture": SubResource("Frame2")}, {"duration": 1.0, "texture": SubResource("Frame3")}, {"duration": 1.0, "texture": SubResource("Frame4")}, {"duration": 1.0, "texture": SubResource("Frame5")}, {"duration": 1.0, "texture": SubResource("Frame6")}, {"duration": 1.0, "texture": SubResource("Frame7")}],
+"loop": false,
+"name": &"pour",
+"speed": 8.0
+}]

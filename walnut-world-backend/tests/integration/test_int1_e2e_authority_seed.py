@@ -43,7 +43,7 @@ from walnut_backend.adapters.postgres.session import (
 )
 from walnut_backend.adapters.postgres.student_bootstrap import PostgresStudentBootstrapReader
 from walnut_backend.api.auth import JwtAuthenticator
-from walnut_backend.bootstrap import Settings
+from walnut_backend.bootstrap import DEFAULT_CONTRACT_PATH, Settings
 from walnut_backend.int1_e2e_authority import (
     ACTOR_ID,
     PINNED_GCC_IMAGE,
@@ -55,7 +55,7 @@ from walnut_backend.int1_e2e_authority import (
 )
 
 BACKEND_ROOT = Path(__file__).resolve().parents[2]
-AGENT_ROOT = BACKEND_ROOT.parent / "agent"
+AGENT_ROOT = DEFAULT_CONTRACT_PATH
 JWT_SECRET = "int1-integration-only-hs256-secret"
 EXPECTED_ROWS = {
     "product_content_units": 1,

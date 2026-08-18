@@ -4,14 +4,21 @@ param(
     [string]$Action = 'Status',
     [ValidateRange(1024, 65535)]
     [int]$BackendPort = 8790,
-    [ValidateRange(60, 900)]
-    [int]$TokenLifetimeSeconds = 900,
+    [ValidateRange(60, 86400)]
+    [int]$TokenLifetimeSeconds = 28800,
     [string]$PostgresContainer = 'walnut-int3-postgres',
-    [string]$TenantId = 'tenant_yaya'
+    [string]$TenantId = 'tenant_yaya',
+    [ValidateRange(1024, 65535)]
+    [int]$RelayPort = 8081,
+    [string]$LlmUpstreamKeyFile = $env:WALNUT_LLM_UPSTREAM_API_KEY_FILE,
+    [switch]$GatewayOnly
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+if ($PSVersionTable.PSEdition -eq 'Desktop') {
+    Add-Type -AssemblyName System.Security
+}
 
 $script:ProtocolVersion = '2025-06-18'
 $script:ActorId = 'feishu_teacher_int3_aily'
@@ -29,7 +36,17 @@ $script:TeacherWorkspaceUrl =
 
 $backendRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $pythonPath = Join-Path $backendRoot '.venv\Scripts\python.exe'
-$agentPath = (Resolve-Path (Join-Path $backendRoot '..\agent')).Path
+$bundledAgentPath = Join-Path $backendRoot 'agent'
+$legacyAgentPath = Join-Path (Split-Path -Parent $backendRoot) 'agent'
+if (Test-Path -LiteralPath (Join-Path $bundledAgentPath 'contracts\manifest.json') -PathType Leaf) {
+    $agentPath = (Resolve-Path -LiteralPath $bundledAgentPath).Path
+}
+elseif (Test-Path -LiteralPath (Join-Path $legacyAgentPath 'contracts\manifest.json') -PathType Leaf) {
+    $agentPath = (Resolve-Path -LiteralPath $legacyAgentPath).Path
+}
+else {
+    throw "Agent workspace was not found at $bundledAgentPath or $legacyAgentPath"
+}
 $localApplicationData = [Environment]::GetFolderPath(
     [Environment+SpecialFolder]::LocalApplicationData
 )
@@ -61,11 +78,14 @@ function New-RandomBase64Url {
     param([ValidateRange(32, 512)][int]$ByteCount = 48)
 
     $bytes = [byte[]]::new($ByteCount)
+    $rng = $null
     try {
-        [Security.Cryptography.RandomNumberGenerator]::Fill($bytes)
+        $rng = [System.Security.Cryptography.RNGCryptoServiceProvider]::new()
+        $rng.GetBytes($bytes)
         return ConvertTo-Base64Url -Bytes $bytes
     }
     finally {
+        if ($null -ne $rng) { $rng.Dispose() }
         [Array]::Clear($bytes, 0, $bytes.Length)
     }
 }
@@ -164,8 +184,11 @@ function Read-ActiveState {
     if (-not (Test-Path -LiteralPath $activeStatePath -PathType Leaf)) {
         throw 'No active INT3 Aily Backend runtime exists.'
     }
-    return Get-Content -LiteralPath $activeStatePath -Raw -Encoding utf8 |
-        ConvertFrom-Json -DateKind String
+    $json = Get-Content -LiteralPath $activeStatePath -Raw -Encoding utf8
+    if ((Get-Command ConvertFrom-Json).Parameters.ContainsKey('DateKind')) {
+        return $json | ConvertFrom-Json -DateKind String
+    }
+    return $json | ConvertFrom-Json
 }
 
 function Assert-SafeRunDirectory {
@@ -203,6 +226,51 @@ function Get-ExpectedBackendProcess {
         throw 'Recorded PID start time changed; refusing to operate on a reused PID.'
     }
     return $process
+}
+
+function Get-ExpectedRuntimeChild {
+    param(
+        [Parameter(Mandatory)][object]$State,
+        [Parameter(Mandatory)][string]$PidKey,
+        [Parameter(Mandatory)][string]$StartedAtKey,
+        [Parameter(Mandatory)][string]$CommandMarker
+    )
+
+    if ($State.PSObject.Properties.Name -notcontains $PidKey -or $null -eq $State.$PidKey) {
+        return $null
+    }
+    if (
+        $State.PSObject.Properties.Name -notcontains $StartedAtKey -or
+        [string]::IsNullOrWhiteSpace([string]$State.$StartedAtKey)
+    ) {
+        throw "Runtime state has $PidKey without its start-time identity; refusing to stop it."
+    }
+    $processId = [int]$State.$PidKey
+    $process = Get-Process -Id $processId -ErrorAction SilentlyContinue
+    if ($null -eq $process) {
+        return $null
+    }
+    $cim = Get-CimInstance Win32_Process -Filter "ProcessId = $processId"
+    if ($null -eq $cim -or $cim.CommandLine -notlike "*$CommandMarker*") {
+        throw "Recorded $PidKey is not the scoped INT3 runtime child; refusing to stop it."
+    }
+    $recordedStart = [DateTimeOffset]::Parse([string]$State.$StartedAtKey).UtcDateTime
+    if ([Math]::Abs(($process.StartTime.ToUniversalTime() - $recordedStart).TotalSeconds) -gt 2) {
+        throw "Recorded $PidKey start time changed; refusing to stop a reused PID."
+    }
+    return $process
+}
+
+function Stop-ProcessAndWait {
+    param([AllowNull()][System.Diagnostics.Process]$Process)
+
+    if ($null -eq $Process -or $Process.HasExited) {
+        return
+    }
+    Stop-Process -Id $Process.Id -Force -ErrorAction Stop
+    if (-not $Process.WaitForExit(10000)) {
+        throw "Process $($Process.Id) did not exit within 10 seconds."
+    }
 }
 
 function Get-BackendListenerProcessId {
@@ -399,12 +467,45 @@ function Invoke-McpRequest {
     if ([string]$Body.method -ne 'initialize') {
         $headers.'MCP-Protocol-Version' = $script:ProtocolVersion
     }
-    return Invoke-WebRequest -NoProxy -UseBasicParsing -Method Post `
-        -Uri "http://127.0.0.1:$Port/integrations/feishu/v1/mcp" `
-        -Headers $headers -ContentType 'application/json' `
-        -Body ($Body | ConvertTo-Json -Depth 12 -Compress) `
-        -ConnectionTimeoutSeconds 1 -OperationTimeoutSeconds 2 `
-        -SkipHttpErrorCheck:$SkipHttpErrorCheck
+    $invokeParameters = @{
+        UseBasicParsing = $true
+        Method = 'Post'
+        Uri = "http://127.0.0.1:$Port/integrations/feishu/v1/mcp"
+        Headers = $headers
+        ContentType = 'application/json'
+        Body = ($Body | ConvertTo-Json -Depth 12 -Compress)
+    }
+    $availableParameters = (Get-Command Invoke-WebRequest).Parameters
+    if ($availableParameters.ContainsKey('NoProxy')) {
+        $invokeParameters.NoProxy = $true
+    }
+    if ($availableParameters.ContainsKey('ConnectionTimeoutSeconds')) {
+        $invokeParameters.ConnectionTimeoutSeconds = 1
+        $invokeParameters.OperationTimeoutSeconds = 2
+    }
+    else {
+        $invokeParameters.TimeoutSec = 2
+    }
+    if ($availableParameters.ContainsKey('SkipHttpErrorCheck')) {
+        $invokeParameters.SkipHttpErrorCheck = [bool]$SkipHttpErrorCheck
+    }
+    try {
+        return Invoke-WebRequest @invokeParameters
+    }
+    catch {
+        if (-not $SkipHttpErrorCheck -or $null -eq $_.Exception.Response) {
+            throw
+        }
+        $response = $_.Exception.Response
+        $content = [string]$_.ErrorDetails.Message
+        if ([string]::IsNullOrWhiteSpace($content)) {
+            $content = '{}'
+        }
+        return [pscustomobject]@{
+            StatusCode = [int]$response.StatusCode
+            Content = $content
+        }
+    }
 }
 
 function Assert-BackendCredential {
@@ -472,11 +573,22 @@ function Remove-ScopedRuntime {
     )
 
     $safeDirectory = Assert-SafeRunDirectory -Path $RunDirectory
-    if (Test-Path -LiteralPath $safeDirectory -PathType Container) {
-        Remove-Item -LiteralPath $safeDirectory -Recurse -Force
+    for ($attempt = 1; $attempt -le 40; $attempt++) {
+        if (-not (Test-Path -LiteralPath $safeDirectory -PathType Container)) {
+            break
+        }
+        try {
+            Remove-Item -LiteralPath $safeDirectory -Recurse -Force -ErrorAction Stop
+        }
+        catch {
+            if ($attempt -eq 40) {
+                throw
+            }
+            Start-Sleep -Milliseconds 250
+        }
     }
     if ($RemoveActiveState -and (Test-Path -LiteralPath $activeStatePath -PathType Leaf)) {
-        Remove-Item -LiteralPath $activeStatePath -Force
+        Remove-Item -LiteralPath $activeStatePath -Force -ErrorAction Stop
     }
 }
 
@@ -502,6 +614,9 @@ function Start-BackendRuntime {
     Protect-RunDirectory -Path $runDirectory
 
     $backendProcess = $null
+    $relayProcess = $null
+    $workerProcess = $null
+    $learnerProcess = $null
     try {
         & $pythonPath (Join-Path $backendRoot 'scripts\verify_contract_release.py') `
             --agent-repo $agentPath *> $null
@@ -520,6 +635,19 @@ function Start-BackendRuntime {
             -LifetimeSeconds $TokenLifetimeSeconds
         Save-TeacherCredential -RunDirectory $runDirectory -Credential $credential -Tenant $TenantId
 
+        if (-not $GatewayOnly) {
+            if ([string]::IsNullOrWhiteSpace($LlmUpstreamKeyFile)) {
+                $LlmUpstreamKeyFile = Join-Path (
+                    [Environment]::GetFolderPath([Environment+SpecialFolder]::UserProfile)
+                ) '.walnut-secrets\deepseek-v4-flash.key'
+            }
+            if (-not (Test-Path -LiteralPath $LlmUpstreamKeyFile -PathType Leaf)) {
+                throw "LLM upstream key file is missing at $LlmUpstreamKeyFile. Configure WALNUT_LLM_UPSTREAM_API_KEY_FILE or pass -LlmUpstreamKeyFile."
+            }
+        }
+        $relaySecret = New-RandomBase64Url
+        $workerId = 'walnut-int3-worker'
+        $learnerWorkerId = 'walnut-int3-learner'
         $childEnvironment = @{
             WALNUT_DATABASE_URL = $databaseUrl
             WALNUT_CONTRACT_PATH = $agentPath
@@ -528,7 +656,7 @@ function Start-BackendRuntime {
             WALNUT_AUTH_ISSUER = $script:Issuer
             WALNUT_AUTH_AUDIENCE = $script:Audience
             WALNUT_AUTH_CLOCK_SKEW_SECONDS = '0'
-            WALNUT_AUTH_MAXIMUM_LIFETIME_SECONDS = '900'
+            WALNUT_AUTH_MAXIMUM_LIFETIME_SECONDS = [string]$TokenLifetimeSeconds
             WALNUT_FEISHU_PSEUDONYM_SECRET = $pseudonymSecret
             WALNUT_FEISHU_MCP_DASHBOARD_URL = $script:DashboardUrl
             WALNUT_FEISHU_MCP_TEACHER_WORKSPACE_URL = $script:TeacherWorkspaceUrl
@@ -537,30 +665,117 @@ function Start-BackendRuntime {
             WALNUT_ENABLE_WORLD_PRESENTATION = 'false'
             WALNUT_ENABLE_SKILL_PATCH = 'false'
             WALNUT_LLM_UPSTREAM_API_KEY = ''
+            WALNUT_LLM_UPSTREAM_API_KEY_FILE = ''
             DEEPSEEK_API_KEY = ''
             OPENAI_API_KEY = ''
             PYTHONPATH = (Join-Path $backendRoot 'src')
             PYTHONUTF8 = '1'
+            WALNUT_LLM_RELAY_ENDPOINT = "http://127.0.0.1:$RelayPort"
+            WALNUT_LLM_RELAY_API_KEY = $relaySecret
+            WALNUT_LLM_RELAY_ALLOW_INSECURE_LOCALHOST = 'true'
+            WALNUT_LLM_RELAY_REQUIRED_RETENTION_SECONDS = '604800'
+            WALNUT_LLM_RELAY_MAX_RESPONSE_BYTES = '2097152'
+            WALNUT_LLM_RELAY_CAPABILITY_TIMEOUT_MS = '5000'
+            WALNUT_LLM_RELAY_SERVER_API_KEY = $relaySecret
+            WALNUT_LLM_RELAY_BIND_HOST = '127.0.0.1'
+            WALNUT_LLM_RELAY_BIND_PORT = [string]$RelayPort
+            WALNUT_LLM_UPSTREAM_ENDPOINT = 'https://api.deepseek.com/chat/completions'
+            WALNUT_LLM_PROVIDER = 'deepseek'
+            WALNUT_LLM_MODEL = 'deepseek-v4-flash'
+            WALNUT_LLM_RESPONSE_FORMAT = 'json_object'
+            WALNUT_LLM_THINKING_MODE = 'disabled'
+            WALNUT_SANDBOX_IMAGE = 'gcc@sha256:b99b86a28812b1e6453a231a947dc43d76fe192788a12f344a9b568bf9f5d24c'
+            WALNUT_DOCKER_EXECUTABLE = 'docker'
+            WALNUT_SANDBOX_CPU_MS = '1000'
+            WALNUT_SANDBOX_WALL_MS = '15000'
+            WALNUT_SANDBOX_MEMORY_BYTES = '536870912'
+            WALNUT_SANDBOX_MAX_PROCESSES = '64'
+            WALNUT_SANDBOX_MAX_OUTPUT_BYTES = '65536'
+            WALNUT_TENANT_ID = $TenantId
+            WALNUT_PROMPT_VERSION = 'int1-prompt-v1'
+            WALNUT_TEACHING_SPEC_VERSION = 'agent-teaching-v1'
+            WALNUT_WORLD_RULES_VERSION = 'farm-rules-1'
+            WALNUT_WORLD_CONTENT_VERSION = '1.0.0'
+            WALNUT_WORLD_SUCCESS_SCORE = '8'
+            WALNUT_WORLD_WATERING_EXPECTED_UNITS = '2,1,1,0,0,2,0,1'
+            WALNUT_RUNTIME_ROOT = $runtimeRoot
+            WALNUT_WORKER_ID = $workerId
+            WALNUT_WORKER_LEASE_SECONDS = '120'
+            WALNUT_WORKER_IDLE_POLL_SECONDS = '0.1'
+            WALNUT_LEARNER_WORKER_ID = $learnerWorkerId
+            WALNUT_LEARNER_WORKER_LEASE_SECONDS = '120'
+            WALNUT_LEARNER_WORKER_IDLE_POLL_SECONDS = '0.1'
+            WALNUT_LEARNER_WORKER_MAXIMUM_ATTEMPTS = '5'
         }
         $stdoutPath = Join-Path $runDirectory 'backend.stdout.log'
         $stderrPath = Join-Path $runDirectory 'backend.stderr.log'
-        $backendProcess = Start-Process -FilePath $pythonPath -ArgumentList @(
-            '-m',
-            'uvicorn',
-            'walnut_backend.main:app',
-            '--host',
-            '127.0.0.1',
-            '--port',
-            [string]$BackendPort,
-            '--no-access-log',
-            '--log-level',
-            'warning'
-        ) -WorkingDirectory $backendRoot -WindowStyle Hidden -PassThru `
-            -RedirectStandardOutput $stdoutPath -RedirectStandardError $stderrPath `
-            -Environment $childEnvironment
+        $relayStdoutPath = Join-Path $runDirectory 'relay.stdout.log'
+        $relayStderrPath = Join-Path $runDirectory 'relay.stderr.log'
+        $workerStdoutPath = Join-Path $runDirectory 'worker.stdout.log'
+        $workerStderrPath = Join-Path $runDirectory 'worker.stderr.log'
+        $learnerStdoutPath = Join-Path $runDirectory 'learner-worker.stdout.log'
+        $learnerStderrPath = Join-Path $runDirectory 'learner-worker.stderr.log'
+        # Windows PowerShell 5.1 Start-Process has no -Environment; set the child
+        # variables on this process (children inherit) and restore them after.
+        $savedChildEnvironment = @{}
+        foreach ($key in $childEnvironment.Keys) {
+            $savedChildEnvironment[[string]$key] = [Environment]::GetEnvironmentVariable([string]$key)
+            [Environment]::SetEnvironmentVariable([string]$key, [string]$childEnvironment[$key])
+        }
+        try {
+            $backendProcess = Start-Process -FilePath $pythonPath -ArgumentList @(
+                '-m',
+                'uvicorn',
+                'walnut_backend.main:app',
+                '--host',
+                '127.0.0.1',
+                '--port',
+                [string]$BackendPort,
+                '--no-access-log',
+                '--log-level',
+                'warning'
+            ) -WorkingDirectory $backendRoot -WindowStyle Hidden -PassThru `
+                -RedirectStandardOutput $stdoutPath -RedirectStandardError $stderrPath
+            if (-not $GatewayOnly) {
+                try {
+                    [Environment]::SetEnvironmentVariable(
+                        'WALNUT_LLM_UPSTREAM_API_KEY_FILE', $LlmUpstreamKeyFile
+                    )
+                    $relayProcess = Start-Process -FilePath $pythonPath `
+                        -ArgumentList @('-m', 'walnut_backend.llm_relay.main') `
+                        -WorkingDirectory $backendRoot -WindowStyle Hidden -PassThru `
+                        -RedirectStandardOutput $relayStdoutPath `
+                        -RedirectStandardError $relayStderrPath
+                }
+                finally {
+                    [Environment]::SetEnvironmentVariable('WALNUT_LLM_UPSTREAM_API_KEY_FILE', '')
+                }
+                $workerProcess = Start-Process -FilePath $pythonPath `
+                    -ArgumentList @('-m', 'walnut_backend.worker_main') `
+                    -WorkingDirectory $backendRoot -WindowStyle Hidden -PassThru `
+                    -RedirectStandardOutput $workerStdoutPath `
+                    -RedirectStandardError $workerStderrPath
+                $learnerProcess = Start-Process -FilePath $pythonPath `
+                    -ArgumentList @('-m', 'walnut_backend.learner_worker_main') `
+                    -WorkingDirectory $backendRoot -WindowStyle Hidden -PassThru `
+                    -RedirectStandardOutput $learnerStdoutPath `
+                    -RedirectStandardError $learnerStderrPath
+            }
+        }
+        finally {
+            foreach ($key in $savedChildEnvironment.Keys) {
+                [Environment]::SetEnvironmentVariable([string]$key, $savedChildEnvironment[$key])
+            }
+        }
 
         Assert-BackendCredential -Port $BackendPort `
             -Authorization ([string]$credential.authorization) -Attempts 40
+        if (-not $GatewayOnly) {
+            Start-Sleep -Seconds 1
+            if ($relayProcess.HasExited -or $workerProcess.HasExited) {
+                throw 'LLM relay or workflow worker exited during startup; inspect relay/worker logs.'
+            }
+        }
         $process = Get-Process -Id $backendProcess.Id
         $listenerProcessId = Get-BackendListenerProcessId `
             -LauncherProcessId $backendProcess.Id -Port $BackendPort
@@ -570,7 +785,15 @@ function Start-BackendRuntime {
             backend_pid = $backendProcess.Id
             backend_listener_pid = $listenerProcessId
             backend_port = $BackendPort
+            relay_pid = if ($null -ne $relayProcess) { $relayProcess.Id } else { $null }
+            relay_started_at = if ($null -ne $relayProcess) { $relayProcess.StartTime.ToUniversalTime().ToString('o') } else { $null }
+            worker_pid = if ($null -ne $workerProcess) { $workerProcess.Id } else { $null }
+            worker_started_at = if ($null -ne $workerProcess) { $workerProcess.StartTime.ToUniversalTime().ToString('o') } else { $null }
+            learner_pid = if ($null -ne $learnerProcess -and -not $learnerProcess.HasExited) { $learnerProcess.Id } else { $null }
+            learner_started_at = if ($null -ne $learnerProcess -and -not $learnerProcess.HasExited) { $learnerProcess.StartTime.ToUniversalTime().ToString('o') } else { $null }
             process_started_at = $process.StartTime.ToUniversalTime().ToString('o')
+            runtime_mode = if ($GatewayOnly) { 'GATEWAY_ONLY' } else { 'FULL_STACK' }
+            provider_started = -not $GatewayOnly
             tenant_id = $TenantId
             actor_id = $script:ActorId
             actor_type = 'teacher'
@@ -578,7 +801,7 @@ function Start-BackendRuntime {
             issuer = $script:Issuer
             audience = $script:Audience
             development_auth = $false
-            maximum_jwt_lifetime_seconds = 900
+            maximum_jwt_lifetime_seconds = $TokenLifetimeSeconds
             credential_expires_at = $credential.expires_at
             mcp_path = '/integrations/feishu/v1/mcp'
             created_at = [DateTimeOffset]::UtcNow.ToString('o')
@@ -597,13 +820,19 @@ function Start-BackendRuntime {
             credential_expires_at = $credential.expires_at
             credential_storage = 'CURRENT_WINDOWS_USER_DPAPI'
             authorization_echoed = $false
-            provider_started = $false
+            provider_started = -not $GatewayOnly
+            runtime_mode = if ($GatewayOnly) { 'GATEWAY_ONLY' } else { 'FULL_STACK' }
+            relay_pid = if ($null -ne $relayProcess) { $relayProcess.Id } else { $null }
+            worker_pid = if ($null -ne $workerProcess) { $workerProcess.Id } else { $null }
+            learner_pid = if ($null -ne $learnerProcess -and -not $learnerProcess.HasExited) { $learnerProcess.Id } else { $null }
             database_exposure = 'LOOPBACK_ONLY_EXISTING_DEMO_CONTAINER'
         }
     }
     catch {
-        if ($null -ne $backendProcess -and -not $backendProcess.HasExited) {
-            Stop-Process -Id $backendProcess.Id -Force -ErrorAction SilentlyContinue
+        foreach ($candidate in @($backendProcess, $relayProcess, $workerProcess, $learnerProcess)) {
+            if ($null -ne $candidate -and -not $candidate.HasExited) {
+                Stop-Process -Id $candidate.Id -Force -ErrorAction SilentlyContinue
+            }
         }
         if (Test-Path -LiteralPath $runDirectory -PathType Container) {
             Remove-ScopedRuntime -RunDirectory $runDirectory
@@ -674,7 +903,18 @@ function Show-BackendStatus {
         credential_expires_at = $state.credential_expires_at
         credential_is_dpapi_protected = (Test-Path -LiteralPath $credentialPath -PathType Leaf)
         authorization_echoed = $false
-        provider_started = $false
+        provider_started = if ($state.PSObject.Properties.Name -contains 'provider_started') {
+            [bool]$state.provider_started
+        }
+        else {
+            $false
+        }
+        runtime_mode = if ($state.PSObject.Properties.Name -contains 'runtime_mode') {
+            [string]$state.runtime_mode
+        }
+        else {
+            'LEGACY_GATEWAY_ONLY'
+        }
         database_exposure = 'LOOPBACK_ONLY_EXISTING_DEMO_CONTAINER'
     }
 }
@@ -690,13 +930,24 @@ function Stop-BackendRuntime {
         Get-BackendListenerProcessId -LauncherProcessId ([int]$state.backend_pid) `
             -Port ([int]$state.backend_port)
     }
-    if ($listenerProcessId -ne [int]$state.backend_pid) {
-        Stop-Process -Id $listenerProcessId -Force -ErrorAction SilentlyContinue
+    $listenerProcess = if ($listenerProcessId -ne [int]$state.backend_pid) {
+        Get-Process -Id $listenerProcessId -ErrorAction SilentlyContinue
     }
-    if ($null -ne $process) {
-        Stop-Process -Id $process.Id -Force
-        $process.WaitForExit(10000)
+    else {
+        $null
     }
+    $relayProcess = Get-ExpectedRuntimeChild -State $state -PidKey 'relay_pid' `
+        -StartedAtKey 'relay_started_at' -CommandMarker 'walnut_backend.llm_relay.main'
+    $workerProcess = Get-ExpectedRuntimeChild -State $state -PidKey 'worker_pid' `
+        -StartedAtKey 'worker_started_at' -CommandMarker 'walnut_backend.worker_main'
+    $learnerProcess = Get-ExpectedRuntimeChild -State $state -PidKey 'learner_pid' `
+        -StartedAtKey 'learner_started_at' -CommandMarker 'walnut_backend.learner_worker_main'
+
+    Stop-ProcessAndWait -Process $learnerProcess
+    Stop-ProcessAndWait -Process $workerProcess
+    Stop-ProcessAndWait -Process $relayProcess
+    Stop-ProcessAndWait -Process $listenerProcess
+    Stop-ProcessAndWait -Process $process
     Remove-ScopedRuntime -RunDirectory $runDirectory -RemoveActiveState
     return [pscustomobject]@{
         status = 'STOPPED'

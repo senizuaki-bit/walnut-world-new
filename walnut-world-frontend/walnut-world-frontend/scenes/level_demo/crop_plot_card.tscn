@@ -1,0 +1,200 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scenes/level_demo/crop_plot_card.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="CardStyle"]
+bg_color = Color(0.993, 0.959, 0.824, 0.97)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.24, 0.49, 0.33, 1)
+corner_radius_top_left = 19
+corner_radius_top_right = 19
+corner_radius_bottom_right = 19
+corner_radius_bottom_left = 19
+shadow_color = Color(0.06, 0.16, 0.10, 0.24)
+shadow_size = 6
+shadow_offset = Vector2(0, 4)
+
+[sub_resource type="StyleBoxFlat" id="BarBackground"]
+bg_color = Color(0.80, 0.77, 0.57, 0.55)
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
+[sub_resource type="StyleBoxFlat" id="BarFill"]
+bg_color = Color(0.22, 0.66, 0.76, 1)
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
+[sub_resource type="StyleBoxFlat" id="AttentionStyle"]
+bg_color = Color(1, 0.78, 0.18, 0.12)
+border_width_left = 6
+border_width_top = 6
+border_width_right = 6
+border_width_bottom = 6
+border_color = Color(1, 0.68, 0.08, 1)
+corner_radius_top_left = 21
+corner_radius_top_right = 21
+corner_radius_bottom_right = 21
+corner_radius_bottom_left = 21
+shadow_color = Color(1, 0.61, 0.05, 0.72)
+shadow_size = 10
+
+[node name="CropPlotCard" type="PanelContainer"]
+custom_minimum_size = Vector2(190, 194)
+offset_right = 190.0
+offset_bottom = 194.0
+theme_override_styles/panel = SubResource("CardStyle")
+script = ExtResource("1_script")
+
+[node name="ScanClip" type="Control" parent="."]
+layout_mode = 2
+mouse_filter = 2
+clip_contents = true
+
+[node name="ScanGlow" type="ColorRect" parent="ScanClip"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = -46.0
+offset_top = -10.0
+offset_right = 14.0
+offset_bottom = 210.0
+rotation = -0.10
+mouse_filter = 2
+color = Color(0.42, 0.96, 0.86, 0.68)
+
+[node name="AttentionFrame" type="Panel" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("AttentionStyle")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="Content" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 3
+
+[node name="Header" type="HBoxContainer" parent="Margin/Content"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="NumberLabel" type="Label" parent="Margin/Content/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.74, 0.34, 0.08, 1)
+theme_override_font_sizes/font_size = 15
+text = "00"
+
+[node name="CropLabel" type="Label" parent="Margin/Content/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.12, 0.31, 0.21, 1)
+theme_override_font_sizes/font_size = 17
+text = "胡萝卜"
+horizontal_alignment = 2
+
+[node name="ArtRow" type="Control" parent="Margin/Content"]
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="CropArt" type="TextureRect" parent="Margin/Content/ArtRow"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -48.0
+offset_top = -38.0
+offset_right = 48.0
+offset_bottom = 38.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MoistureBar" type="ProgressBar" parent="Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/background = SubResource("BarBackground")
+theme_override_styles/fill = SubResource("BarFill")
+value = 20.0
+show_percentage = false
+
+[node name="Values" type="HBoxContainer" parent="Margin/Content"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="CurrentLabel" type="Label" parent="Margin/Content/Values"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.19, 0.43, 0.48, 1)
+theme_override_font_sizes/font_size = 12
+text = "当前湿度 20"
+
+[node name="TargetLabel" type="Label" parent="Margin/Content/Values"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.59, 0.31, 0.08, 1)
+theme_override_font_sizes/font_size = 12
+text = "目标湿度 60"
+horizontal_alignment = 2
+
+[node name="WaterBadge" type="Label" parent="Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(1, 0.97, 0.82, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 13
+text = "💧 × 2 · 500 ml"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="GapLabel" type="Label" parent="Margin/Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.13, 0.39, 0.26, 1)
+theme_override_font_sizes/font_size = 13
+text = "缺口 +40"
+horizontal_alignment = 1
+
+[node name="HitButton" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 1
+mouse_default_cursor_shape = 2
+flat = true

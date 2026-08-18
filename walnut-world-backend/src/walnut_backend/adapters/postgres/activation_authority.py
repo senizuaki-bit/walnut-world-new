@@ -47,6 +47,17 @@ class ValidatedActivationAuthority:
     entry: RegistryEntryRow
     activation: SkillActivationRow
 
+    @property
+    def skill_ref(self) -> SkillRef:
+        """The exact certified tuple selected by the current Registry head."""
+
+        return SkillRef(
+            skill_id=self.activation.skill_id,
+            skill_version_id=self.activation.skill_version_id,
+            artifact_sha256=self.activation.artifact_sha256,
+            certification_id=self.activation.certification_id,
+        )
+
 
 async def validate_historical_activation_authority(
     session: AsyncSession,
@@ -255,10 +266,16 @@ async def load_current_activation_authority(
     world_id: str,
     agent_profile_id: str,
     authority_id: str,
-    skill_ref: SkillRef,
+    skill_ref: SkillRef | None,
     for_update: bool = False,
 ) -> ValidatedActivationAuthority:
-    """Load the current tuple, then validate every duplicated column and JSON byte."""
+    """Load the current tuple, then validate every duplicated column and JSON byte.
+
+    ``skill_ref`` is the caller's requested binding and is compared against the
+    Activation the head selected.  Pass ``None`` only when the caller has no
+    requested binding at all and adopts the current head as the authority; the
+    full Registry/Certification/Build closure above is validated either way.
+    """
 
     head_statement = select(RegistryHeadRow).where(
         RegistryHeadRow.tenant_id == tenant_id,
@@ -423,15 +440,10 @@ async def load_current_activation_authority(
         or activation_receipt.receipt_json != expected_receipt
     ):
         raise WorkflowInvariantError("active Skill provenance receipt drifted")
-    active_ref = SkillRef(
-        skill_id=activation.skill_id,
-        skill_version_id=activation.skill_version_id,
-        artifact_sha256=activation.artifact_sha256,
-        certification_id=activation.certification_id,
-    )
-    if active_ref != skill_ref:
+    authority = ValidatedActivationAuthority(head, entry, activation)
+    if skill_ref is not None and authority.skill_ref != skill_ref:
         raise ActivationAuthorityNotFound("requested Skill differs from current Activation")
-    return ValidatedActivationAuthority(head, entry, activation)
+    return authority
 
 
 def validate_activation_registry_authority(

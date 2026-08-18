@@ -11,14 +11,14 @@ import sys
 
 import pytest
 
-from walnut_backend.bootstrap import ContractRelease, Settings
+from walnut_backend.bootstrap import DEFAULT_CONTRACT_PATH, ContractRelease, Settings
 from walnut_backend.contract_release import ContractReleaseVerificationError
 
 
 BACKEND_ROOT = Path(__file__).resolve().parents[2]
 VERIFY_SCRIPT = BACKEND_ROOT / "scripts" / "verify_contract_release.py"
 AGENT_REPOSITORY = Path(
-    os.environ.get("WALNUT_CONTRACT_PATH", str(BACKEND_ROOT.parent / "agent"))
+    os.environ.get("WALNUT_CONTRACT_PATH", str(DEFAULT_CONTRACT_PATH))
 )
 
 

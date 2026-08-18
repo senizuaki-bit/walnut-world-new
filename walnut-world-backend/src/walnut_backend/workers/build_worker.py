@@ -142,7 +142,11 @@ class BuildWorkflowHandler:
     async def execute(self, claim: ClaimedWorkflowJob) -> None:
         if claim.operation not in self.operations:
             raise ValueError(f"unsupported Build operation {claim.operation}")
-        authority = await self._prepare(claim)
+        try:
+            authority = await self._prepare(claim)
+        except WorkflowInvariantError as error:
+            print(f"BUILD_WORKER_INVARIANT_ERROR: {error}", flush=True)
+            raise
         result, owned = await self._build_with_heartbeat(authority)
         if result.succeeded:
             if result.staged_artifact is None:

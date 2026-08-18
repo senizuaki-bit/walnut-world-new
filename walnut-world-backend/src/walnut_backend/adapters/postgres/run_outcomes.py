@@ -1949,6 +1949,23 @@ async def load_patch_provider_receipts(
     )
 
 
+async def load_hint_provider_receipts(
+    session: AsyncSession,
+    job: WorkflowJobRow,
+) -> tuple[JobStepReceiptRow, ...]:
+    return await _load_provider_receipts(
+        session,
+        job,
+        namespace="HINT",
+        ordinal_base=300,
+        # The hint runtime keeps the role's read-only tools, so one successful
+        # tool round plus the single repair allowance plus the decision is a
+        # legal history, exactly as it is for the final Run role.
+        max_results=3,
+        authority_label="hint",
+    )
+
+
 async def _validate_provider_decision(
     session: AsyncSession,
     *,
@@ -2984,6 +3001,7 @@ __all__ = [
     "list_validated_session_runs",
     "load_task_snapshot",
     "load_final_provider_receipts",
+    "load_hint_provider_receipts",
     "load_patch_provider_receipts",
     "load_validated_run",
     "run_authority_sha256",

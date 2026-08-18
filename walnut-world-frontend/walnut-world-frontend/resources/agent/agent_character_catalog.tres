@@ -1,0 +1,48 @@
+[gd_resource type="Resource" script_class="AgentCharacterCatalog" load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://resources/agent/agent_character_catalog.gd" id="1_catalog"]
+[ext_resource type="Script" path="res://resources/agent/agent_character_profile.gd" id="2_profile"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/characters/yaya_sprout.png" id="3_yaya"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/characters/little_walnut.png" id="4_walnut"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/characters/master_ding_dang.png" id="5_dingdang"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/characters/pest_bug.png" id="6_bug"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/characters/shu_shu.png" id="7_shushu"]
+
+[sub_resource type="Resource" id="AgentCharacterProfile_world"]
+script = ExtResource("2_profile")
+role_id = &"world_agent"
+display_name = "芽芽"
+portrait = ExtResource("3_yaya")
+world_presentation_key = &"yaya"
+
+[sub_resource type="Resource" id="AgentCharacterProfile_walnut"]
+script = ExtResource("2_profile")
+role_id = &"xiaohutao"
+display_name = "小核桃"
+portrait = ExtResource("4_walnut")
+world_presentation_key = &"little_walnut"
+
+[sub_resource type="Resource" id="AgentCharacterProfile_teaching"]
+script = ExtResource("2_profile")
+role_id = &"teaching_agent"
+display_name = "叮当师傅"
+portrait = ExtResource("5_dingdang")
+world_presentation_key = &"master_ding_dang"
+
+[sub_resource type="Resource" id="AgentCharacterProfile_bug"]
+script = ExtResource("2_profile")
+role_id = &"bug_agent"
+display_name = "Bug 先生"
+portrait = ExtResource("6_bug")
+world_presentation_key = &"bug_legion"
+
+[sub_resource type="Resource" id="AgentCharacterProfile_book"]
+script = ExtResource("2_profile")
+role_id = &"book_agent"
+display_name = "书书"
+portrait = ExtResource("7_shushu")
+world_presentation_key = &"shu_shu"
+
+[resource]
+script = ExtResource("1_catalog")
+profiles = Array[ExtResource("2_profile")]([SubResource("AgentCharacterProfile_world"), SubResource("AgentCharacterProfile_walnut"), SubResource("AgentCharacterProfile_teaching"), SubResource("AgentCharacterProfile_bug"), SubResource("AgentCharacterProfile_book")])

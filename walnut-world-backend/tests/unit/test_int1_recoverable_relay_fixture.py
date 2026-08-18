@@ -347,11 +347,16 @@ def test_fixture_skill_patch_restores_exact_compilable_eight_harvest_entrypoint(
     decision = cast(dict[str, object], output["decision"])
     patch = cast(dict[str, object], decision["skill_patch"])
     seed_tree = ast.parse(AUTHORITY_SEED.read_text(encoding="utf-8"))
+    harvest_functions = [
+        node
+        for node in seed_tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "_harvest_source"
+    ]
     seed_sources = [
         node.value.value
-        for node in ast.walk(seed_tree)
-        if isinstance(node, ast.Assign)
-        and any(isinstance(target, ast.Name) and target.id == "source" for target in node.targets)
+        for function in harvest_functions
+        for node in ast.walk(function)
+        if isinstance(node, ast.Return)
         and isinstance(node.value, ast.Constant)
         and isinstance(node.value.value, str)
         and "int main(int argc, char** argv)" in node.value.value

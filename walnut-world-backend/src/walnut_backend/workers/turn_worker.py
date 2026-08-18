@@ -110,6 +110,23 @@ class _TurnAuthority:
     learner_id: str
 
 
+class _NoSkillInvocation:
+    """A SkillInvocationPort that cannot execute: a hint never runs the Skill.
+
+    ``invoke_skill`` is authorized for xiaohutao alone, so a teaching role can
+    never reach this port through the registry.  Refusing here makes that a
+    structural property of the hint runtime rather than an incidental one.
+    """
+
+    async def invoke(self, request: Any, context: OperationContext) -> Any:
+        del request, context
+        raise WorkflowInvariantError("a hint Turn cannot invoke the Skill")
+
+    async def get_result(self, invocation_id: str, context: OperationContext) -> None:
+        del invocation_id, context
+        raise WorkflowInvariantError("a hint Turn has no Skill invocation")
+
+
 def _final_runtime_boundary(error: RuntimeBoundaryError) -> WorkflowBoundaryError:
     """Map a redacted Agent substage into the durable workflow namespace."""
 
@@ -204,6 +221,9 @@ class TurnWorkflowHandler:
         authority = await self._prepare(claim)
         if authority.event.event_type == "skill_patch_requested":
             await self._execute_skill_patch(authority)
+            return
+        if authority.event.event_type == "hint_requested":
+            await self._execute_hint(authority)
             return
         invocation = PostgresFencedSkillInvocation(
             session_factory=self._sessions,
@@ -350,6 +370,88 @@ class TurnWorkflowHandler:
         )
         await self._finish(authority, outcome, decision, result)
 
+    async def _execute_hint(self, authority: _TurnAuthority) -> None:
+        """Dispatch one teaching role for a hint with no Run and no World change."""
+
+        route = RoleRouter().route(authority.event)
+        if not route.should_run or route.role not in {"teaching_agent", "bug_agent"}:
+            raise WorkflowInvariantError("hint_requested did not route to one teaching role")
+        try:
+            turn_context = await self._contexts.build(
+                authority.event,
+                route.role,
+                authority.context,
+            )
+        except ValueError as error:
+            raise WorkflowBoundaryError("HINT_CONTEXT_BUILD") from error
+        llm = PostgresDurableLlm(
+            session_factory=self._sessions,
+            jobs=self._jobs,
+            claim=authority.claim,
+            provider=self._provider,
+            provider_name=self._provider_name,
+            model_version=self._model_version,
+            lease_seconds=self._lease_seconds,
+            receipt_namespace="HINT",
+            ordinal_base=300,
+        )
+        runtime = self._hint_runtime(
+            llm,
+            authority.command.versions,
+            clock_at=authority.event.occurred_at,
+        )
+        try:
+            decision = await runtime.run(
+                route.role,
+                turn_context,
+                authority.context,
+            )
+        except RuntimeBoundaryError as error:
+            raise WorkflowBoundaryError(f"HINT_RUNTIME_{error.stage.value}") from error
+        except ValueError as error:
+            raise WorkflowBoundaryError("HINT_RUNTIME_PRE_DISPATCH") from error
+        directive = decision.teaching_directive
+        hint_mismatches: list[str] = []
+        if decision.role != route.role:
+            hint_mismatches.append("ROLE")
+        if decision.response_type not in {"question", "hint"}:
+            hint_mismatches.append("RESPONSE_TYPE")
+        if decision.draft.skill_patch is not None:
+            hint_mismatches.append("PATCH_BODY")
+        if decision.source != "provider":
+            hint_mismatches.append("SOURCE")
+        if decision.degraded:
+            hint_mismatches.append("DEGRADED")
+        if any(item.name == "invoke_skill" for item in decision.tool_calls):
+            hint_mismatches.append("TOOLS")
+        if decision.evidence_refs != collect_decision_evidence(turn_context):
+            hint_mismatches.append("DECISION_EVIDENCE")
+        if decision.evidence_refs:
+            # A hint observes prior Evidence through its prompt; it never owns
+            # any, because it produces no Run and no World commit.
+            hint_mismatches.append("OWNED_EVIDENCE")
+        if (
+            directive is None
+            or directive.patch_eligible
+            or directive.full_solution_eligible
+            or directive != turn_context.teaching_directive
+        ):
+            hint_mismatches.append("TEACHING_DIRECTIVE")
+        if hint_mismatches:
+            raise WorkflowInvariantError(
+                "hint decision closure mismatch: " + ",".join(hint_mismatches)
+            )
+        from walnut_backend.workers.turn_projection import finish_hint_interaction
+
+        await finish_hint_interaction(
+            session_factory=self._sessions,
+            commands=self._commands,
+            jobs=self._jobs,
+            authority=authority,
+            decision=decision,
+            lease_seconds=self._lease_seconds,
+        )
+
     async def _execute_skill_patch(self, authority: _TurnAuthority) -> None:
         """Dispatch only teaching_agent for one pre-authorized UI request."""
 
@@ -444,6 +546,25 @@ class TurnWorkflowHandler:
             llm=llm,
             role_configs=self._role_configs,
             tools=tools,
+            prompts=PromptBuilder(),
+            trace=self._trace,
+            versions=versions,
+            clock=lambda: clock_at,
+        )
+
+    def _hint_runtime(
+        self,
+        llm: LlmPort,
+        versions: VersionSet,
+        *,
+        clock_at: datetime,
+    ) -> SharedAgentRuntime:
+        """A teaching runtime whose only tools are the role's read-only reads."""
+
+        return SharedAgentRuntime(
+            llm=llm,
+            role_configs=self._role_configs,
+            tools=build_default_tool_registry(self._trace, _NoSkillInvocation()),
             prompts=PromptBuilder(),
             trace=self._trace,
             versions=versions,
@@ -572,15 +693,26 @@ class TurnWorkflowHandler:
             if command.versions.world_rules_version not in self._rules:
                 raise WorkflowInvariantError("Turn WorldRules version is not configured")
             request = _object(turn.request_json, "Turn request")
+            # A hint asks the teaching roles to explain the student's current
+            # situation.  It never invokes the Skill and never touches the
+            # World, so it is the one Turn that carries no binding.  The
+            # teaching roles still need the exact source they teach about, so
+            # the server adopts its own Registry head rather than trusting a
+            # client tuple.  A declared binding always means "execute this
+            # Skill" and is validated against that same head.
+            requested_input = _object(request.get("input"), "Turn input")
             raw_bindings = request.get("skill_bindings")
-            if (
-                not isinstance(raw_bindings, list)
-                or len(raw_bindings) != 1
-                or not isinstance(raw_bindings[0], Mapping)
-            ):
-                raise WorkflowInvariantError("Turn has no unique Skill binding")
-            skill_ref = SkillRef(**dict(raw_bindings[0]))
-            await load_current_activation_authority(
+            if not isinstance(raw_bindings, list):
+                raise WorkflowInvariantError("Turn skill_bindings must be an array")
+            is_hint_request = (
+                not raw_bindings and requested_input.get("type") == "MESSAGE"
+            )
+            requested_ref: SkillRef | None = None
+            if not is_hint_request:
+                if len(raw_bindings) != 1 or not isinstance(raw_bindings[0], Mapping):
+                    raise WorkflowInvariantError("Turn has no unique Skill binding")
+                requested_ref = SkillRef(**dict(raw_bindings[0]))
+            active = await load_current_activation_authority(
                 session,
                 tenant_id=owned.tenant_id,
                 actor_id=binding.actor_id,
@@ -588,8 +720,14 @@ class TurnWorkflowHandler:
                 world_id=binding.world_id,
                 agent_profile_id=binding.agent_profile_id,
                 authority_id=binding.authority_id,
-                skill_ref=skill_ref,
+                skill_ref=requested_ref,
             )
+            skill_ref: SkillRef = active.skill_ref
+            if (
+                command.versions.skill_version != skill_ref.skill_version_id
+                or command.versions.artifact_sha256 != skill_ref.artifact_sha256
+            ):
+                raise WorkflowInvariantError("Turn Activation authority drifted after acceptance")
             content = await session.scalar(
                 select(ProductContentUnitRow).where(
                     ProductContentUnitRow.tenant_id == owned.tenant_id,
@@ -954,7 +1092,9 @@ class TurnWorkflowHandler:
                 )
             event = GameEvent(
                 event_id=_identifier("gameevent", command.command_id),
-                event_type="run_skill_requested",
+                # hint_requested routes to the teaching roles without a Skill Run;
+                # run_skill_requested routes to xiaohutao and executes the Skill.
+                event_type="hint_requested" if is_hint_request else "run_skill_requested",
                 student_id=context.actor.actor_id,
                 task_id=task_id,
                 session_id=turn.session_id,
@@ -965,6 +1105,33 @@ class TurnWorkflowHandler:
                 skill_ref=skill_ref,
                 payload={"input": turn_input},
             )
+            if is_hint_request:
+                # A hint never enters SANDBOX or WORLD, so its only pre-Provider
+                # stage is POLICY.  The Skill Run path leaves the Command in
+                # ACCEPTED and lets the fenced invocation own every transition.
+                if turn.turn_sequence != owner.session_json.get("last_turn_sequence"):
+                    raise WorkflowInvariantError("hint request was superseded by a later Turn")
+                if command.status is CommandStatus.ACCEPTED:
+                    validating = replace(
+                        command,
+                        status=CommandStatus.VALIDATING,
+                        stage="POLICY",
+                        revision=command.revision + 1,
+                        updated_at=max(command.updated_at, turn.created_at),
+                    )
+                    transitioned = await self._commands.transition_in_session(
+                        session,
+                        CommandTransition(command, validating),
+                        context,
+                    )
+                    if isinstance(transitioned, Failure):
+                        raise WorkflowInvariantError("hint Command validation CAS was lost")
+                    command = validating
+                elif (
+                    command.status is not CommandStatus.VALIDATING
+                    or command.stage != "POLICY"
+                ):
+                    raise WorkflowInvariantError("hint Command is outside its policy stage")
             return _TurnAuthority(
                 claim=owned,
                 command=command,

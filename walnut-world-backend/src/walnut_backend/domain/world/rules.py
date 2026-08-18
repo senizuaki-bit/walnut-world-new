@@ -17,6 +17,10 @@ class WorldRules:
     max_y: int
     harvest_growth_stage: int
     success_score: int
+    # When set, the task is a watering task: success counts plots whose watered
+    # amount (hydration) equals the per-plot expected units, indexed by plot
+    # order.  When None the legacy harvest scoring is used.
+    watering_expected_units: tuple[int, ...] | None = None
 
     def __post_init__(self) -> None:
         if not self.content_version:
@@ -29,6 +33,16 @@ class WorldRules:
             raise ValueError("harvest_growth_stage must be non-negative")
         if self.success_score < 0:
             raise ValueError("success_score must be non-negative")
+        if self.watering_expected_units is not None and any(
+            unit < 0 or unit > 10_000 for unit in self.watering_expected_units
+        ):
+            raise ValueError("watering_expected_units must contain 0..10000 units")
+        if self.watering_expected_units is not None and not self.watering_expected_units:
+            raise ValueError("watering_expected_units must not be empty when set")
+
+    @property
+    def is_watering(self) -> bool:
+        return self.watering_expected_units is not None
 
     def contains(self, x: int, y: int) -> bool:
         return self.min_x <= x <= self.max_x and self.min_y <= y <= self.max_y

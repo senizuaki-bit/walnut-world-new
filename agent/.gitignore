@@ -7,6 +7,9 @@ htmlcov/
 .env*
 !.env.example
 
+# LLM API key 文件（模板 walnut-llm-api-key.key.example 保留，真实 key 忽略）
+*.key
+
 __pycache__/
 *.py[cod]
 .pytest_cache/

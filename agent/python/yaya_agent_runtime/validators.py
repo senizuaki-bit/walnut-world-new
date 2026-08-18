@@ -292,6 +292,18 @@ def validate_decision(
             "only xiaohutao may execute invoke_skill",
         )
 
+    if context.event.event_type == "hint_requested" and any(
+        phrase in decision.message
+        or (decision.question is not None and phrase in decision.question)
+        for phrase in _FALSE_SUCCESS_PHRASES
+    ):
+        # A hint carries no Run, so it has no authority to settle the outcome
+        # either way.  This replaces what the deterministic copy used to say
+        # for it ("I will not infer success or failure").
+        raise InvalidAgentOutput(
+            "HINT_CLAIMS_OUTCOME",
+            "a hint has no bound Run and cannot claim the task succeeded",
+        )
     run = context.run_result
     if run is not None and not run.task_success:
         if any(phrase in decision.message for phrase in _FALSE_SUCCESS_PHRASES):
@@ -382,6 +394,19 @@ def _canonical_teaching_copy(
     context: TurnContext,
     maximum: int,
 ) -> DecisionDraft:
+    if context.event.event_type == "hint_requested":
+        # A hint is the one teaching turn with no compile or run result to
+        # restate, so the deterministic copy below would collapse every hint to
+        # the same content-free sentence and discard the only thing the student
+        # pressed the button for: the model's reading of their current source.
+        #
+        # Keeping the prose is not trusting it blindly.  By this point it has
+        # already passed the role/response_type/hint_level checks, the length
+        # limit, the permanent-judgment ban and the output schema, and
+        # `validate_decision` additionally forbids a hint from claiming the task
+        # succeeded, because a hint has no authoritative Run behind it.
+        del maximum
+        return decision
     if context.compile_result is not None:
         diagnostic = context.compile_result.diagnostics[0][:160]
         fact = f"规范编译记录确认代码未通过；第一条诊断是：{diagnostic}"

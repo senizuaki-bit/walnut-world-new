@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
 import subprocess
+import sys
 from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Any
@@ -271,7 +273,7 @@ class LarkCliFeishuSyncPort:
 
 def _default_runner(command: Sequence[str]) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        list(command),
+        _safe_subprocess_command(command),
         check=False,
         capture_output=True,
         text=True,
@@ -280,6 +282,50 @@ def _default_runner(command: Sequence[str]) -> subprocess.CompletedProcess[str]:
         cwd=Path.cwd(),
         shell=False,
     )
+
+
+def _safe_subprocess_command(
+    command: Sequence[str],
+    *,
+    platform: str | None = None,
+    which: Callable[[str], str | None] | None = None,
+) -> list[str]:
+    """Resolve the Windows npm shim without routing arguments through cmd.exe."""
+
+    argv = list(command)
+    if not argv:
+        raise ValueError("lark-cli command is required")
+    current_platform = sys.platform if platform is None else platform
+    if current_platform != "win32":
+        return argv
+
+    resolve = shutil.which if which is None else which
+    resolved = resolve(argv[0])
+    if resolved is None:
+        return argv
+    shim = Path(resolved)
+    if shim.stem.casefold() != "lark-cli" or shim.suffix.casefold() not in {
+        ".bat",
+        ".cmd",
+        ".ps1",
+    }:
+        return [resolved, *argv[1:]]
+
+    run_script = (
+        shim.parent
+        / "node_modules"
+        / "@larksuite"
+        / "cli"
+        / "scripts"
+        / "run.js"
+    )
+    if not run_script.is_file():
+        raise FileNotFoundError("lark-cli npm entrypoint was not found")
+    adjacent_node = shim.parent / "node.exe"
+    node = str(adjacent_node) if adjacent_node.is_file() else resolve("node")
+    if node is None:
+        raise FileNotFoundError("node executable for lark-cli was not found")
+    return [node, str(run_script), *argv[1:]]
 
 
 def _projected_fields(

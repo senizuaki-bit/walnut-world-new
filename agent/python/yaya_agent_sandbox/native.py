@@ -259,17 +259,48 @@ def _parse_action_intents(
 ) -> tuple[ActionIntent, ...]:
     try:
         text = stdout.decode("utf-8", errors="strict")
-        decoded = json.loads(
-            text,
-            object_pairs_hook=_strict_object,
-            parse_constant=_reject_non_finite,
-        )
-    except (UnicodeDecodeError, json.JSONDecodeError, RecursionError, ValueError) as error:
+    except UnicodeDecodeError as error:
         raise _SandboxRejected(
             "SANDBOX_RUNTIME_ERROR",
             "Sandbox stdout is not one strict JSON document.",
             {"reason": "INVALID_JSON"},
         ) from error
+    parsed = _parse_json_action_intents(text, request)
+    if parsed is None:
+        parsed = _parse_water_line_intents(text, request)
+    intent_ids: set[str] = set()
+    for intent in parsed:
+        intent_id = cast(str, getattr(intent, "intent_id"))
+        if intent_id in intent_ids:
+            raise _SandboxRejected(
+                "SANDBOX_RUNTIME_ERROR",
+                "Sandbox emitted duplicate intent identifiers.",
+                {"reason": "DUPLICATE_INTENT_ID"},
+            )
+        intent_ids.add(intent_id)
+        if getattr(intent, "expected_world_revision") != request.world_snapshot.revision:
+            raise _SandboxRejected(
+                "SANDBOX_RUNTIME_ERROR",
+                "Sandbox intent targets a different World revision.",
+                {"reason": "INTENT_REVISION_MISMATCH"},
+            )
+    return parsed
+
+
+def _parse_json_action_intents(
+    text: str,
+    request: SandboxRunRequest,
+) -> tuple[ActionIntent, ...] | None:
+    """Parse the strict JSON action-array form.  Returns None when the output
+    is not a JSON document so the caller can fall back to the watering line form."""
+    try:
+        decoded = json.loads(
+            text,
+            object_pairs_hook=_strict_object,
+            parse_constant=_reject_non_finite,
+        )
+    except (json.JSONDecodeError, RecursionError, ValueError):
+        return None
     try:
         root = _exact_object(decoded, {"actions"}, "Sandbox output")
     except ValueError as error:
@@ -303,23 +334,65 @@ def _parse_action_intents(
             "Sandbox emitted an invalid or open action intent.",
             {"reason": "INVALID_ACTION_INTENT"},
         ) from error
-    intent_ids: set[str] = set()
-    for intent in parsed:
-        intent_id = cast(str, getattr(intent, "intent_id"))
-        if intent_id in intent_ids:
-            raise _SandboxRejected(
-                "SANDBOX_RUNTIME_ERROR",
-                "Sandbox emitted duplicate intent identifiers.",
-                {"reason": "DUPLICATE_INTENT_ID"},
-            )
-        intent_ids.add(intent_id)
-        if getattr(intent, "expected_world_revision") != request.world_snapshot.revision:
-            raise _SandboxRejected(
-                "SANDBOX_RUNTIME_ERROR",
-                "Sandbox intent targets a different World revision.",
-                {"reason": "INTENT_REVISION_MISMATCH"},
-            )
     return parsed
+
+
+def _parse_water_line_intents(
+    text: str,
+    request: SandboxRunRequest,
+) -> tuple[ActionIntent, ...]:
+    """Parse the watering line form `WATER <plot_index> <amount>` into WATER
+    intents.  Each non-empty line must match exactly; empty lines are ignored.
+    The actor entity is fixed to the sandbox avatar and the world revision is
+    taken from the request snapshot (the line form carries neither)."""
+    intents: list[WaterIntent] = []
+    sequence = 0
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        sequence += 1
+        parts = line.split()
+        if len(parts) != 3 or parts[0] != "WATER":
+            raise _SandboxRejected(
+                "SANDBOX_RUNTIME_ERROR",
+                "Sandbox stdout is not one strict JSON document.",
+                {"reason": "INVALID_JSON"},
+            )
+        try:
+            plot_index = int(parts[1])
+            amount = int(parts[2])
+        except ValueError as error:
+            raise _SandboxRejected(
+                "SANDBOX_RUNTIME_ERROR",
+                "Sandbox stdout is not one strict JSON document.",
+                {"reason": "INVALID_JSON"},
+            ) from error
+        if plot_index < 0 or plot_index > 9999 or amount < 1 or amount > 10_000:
+            raise _SandboxRejected(
+                "SANDBOX_RUNTIME_ERROR",
+                "Sandbox emitted an invalid or open action intent.",
+                {"reason": "INVALID_ACTION_INTENT"},
+            )
+        intents.append(
+            WaterIntent(
+                intent_id=f"intent_water_{sequence:04d}",
+                actor_entity_id="avatar_0001",
+                expected_world_revision=request.world_snapshot.revision,
+                plot_id=f"plot_{plot_index + 1:04d}",
+                amount_ml=amount,
+            )
+        )
+    if len(intents) > request.limits.max_intents:
+        raise _SandboxRejected(
+            "SANDBOX_RESOURCE_LIMIT",
+            "Sandbox emitted more action intents than allowed.",
+            {
+                "reason": "ACTION_LIMIT",
+                "max_intents": request.limits.max_intents,
+            },
+        )
+    return tuple(intents)
 
 
 def _default_arguments(request: SandboxRunRequest) -> Sequence[str]:

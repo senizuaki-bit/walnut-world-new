@@ -49,7 +49,8 @@ Backend 当前 `contract-release.json` 指向尚未发布 tag 的 additive v0.6 
 部署和测试前逐字节验证 sibling Agent：
 
 ```powershell
-$env:WALNUT_CONTRACT_PATH = (Resolve-Path '..\agent').Path
+$agentRepo = if (Test-Path '.\agent\contracts\manifest.json') { '.\agent' } else { '..\agent' }
+$env:WALNUT_CONTRACT_PATH = (Resolve-Path $agentRepo).Path
 py -3.12 scripts/verify_contract_release.py --agent-repo $env:WALNUT_CONTRACT_PATH
 ```
 

@@ -324,3 +324,145 @@ class AgentRuntimeCanonicalPublicCopyTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class HintKeepsProviderTeachingProseTests(unittest.TestCase):
+    """A hint is the one teaching turn whose prose is the deliverable.
+
+    Every other teaching turn restates a canonical compile/run fact, so its copy
+    is deterministic.  A hint has no such fact, and replacing it collapsed every
+    hint to one content-free sentence -- the student pressed the button and
+    learned nothing.  These pin that the model's own reading of the source
+    survives, while the outcome-claim and permanent-judgment bans still hold.
+    """
+
+    def _hint_context(self) -> TurnContext:
+        operation = make_operation()
+        event = make_event("hint_requested")
+        return TurnContext(
+            role="teaching_agent",
+            event=event,
+            task=make_task(operation),
+            session=make_session(operation=operation),
+            hint_level=1,
+            skill=make_skill(operation),
+            learner_profile=make_learner_profile(operation),
+            teaching_directive=TeachingDirective(
+                phase=TeachingPhase.REVIEW,
+                target_concept="for_loop",
+                hint_level=1,
+                allowed_response_types=("question", "hint"),
+                patch_eligible=False,
+                full_solution_eligible=False,
+                required_evidence_ids=(),
+                reason_codes=(
+                    "LEARNER_REVISION_ZERO",
+                    "PATCH_DISABLED_RUNTIME_STAGE",
+                    "FULL_SOLUTION_DISABLED",
+                ),
+                pedagogy_policy_version=PEDAGOGY_POLICY_VERSION,
+                learner_revision=0,
+                teaching_spec_version="agent-teaching-v1",
+            ),
+        )
+
+    def test_hint_question_retains_provider_message_and_question(self) -> None:
+        context = self._hint_context()
+        decision = validate_decision(
+            _draft(
+                "teaching_agent",
+                "question",
+                "你写的循环里用了 if 和 else if 来判断每个地块需要浇多少水。",
+                question="如果 gap 正好等于 30，程序会输出 WATER 2 还是 WATER 1？",
+            ),
+            make_role_config("teaching_agent"),
+            context,
+            (),
+        )
+        self.assertEqual(
+            decision.message,
+            "你写的循环里用了 if 和 else if 来判断每个地块需要浇多少水。",
+        )
+        self.assertEqual(
+            decision.question,
+            "如果 gap 正好等于 30，程序会输出 WATER 2 还是 WATER 1？",
+        )
+
+    def test_hint_keeps_a_long_message_that_fits_the_role_limit(self) -> None:
+        context = self._hint_context()
+        config = make_role_config("teaching_agent")
+        message = "边" * config.limits.max_message_chars
+        decision = validate_decision(
+            _draft("teaching_agent", "question", message, question="再看一次？"),
+            config,
+            context,
+            (),
+        )
+        self.assertEqual(decision.message, message)
+
+    def test_hint_over_the_role_limit_is_rejected_not_truncated(self) -> None:
+        # Rejecting lets the model shorten on its repair round; truncating would
+        # hand a child half a sentence.
+        context = self._hint_context()
+        config = make_role_config("teaching_agent")
+        with self.assertRaises(InvalidAgentOutput) as raised:
+            validate_decision(
+                _draft(
+                    "teaching_agent",
+                    "question",
+                    "边" * (config.limits.max_message_chars + 1),
+                    question="再看一次？",
+                ),
+                config,
+                context,
+                (),
+            )
+        self.assertEqual(raised.exception.code, "MESSAGE_TOO_LONG")
+
+    def test_hint_cannot_claim_the_task_succeeded(self) -> None:
+        context = self._hint_context()
+        with self.assertRaises(InvalidAgentOutput) as raised:
+            validate_decision(
+                _draft(
+                    "teaching_agent",
+                    "question",
+                    "你已经全部完成了这一关。",
+                    question="还要再看一遍吗？",
+                ),
+                make_role_config("teaching_agent"),
+                context,
+                (),
+            )
+        self.assertEqual(raised.exception.code, "HINT_CLAIMS_OUTCOME")
+
+    def test_hint_cannot_claim_the_outcome_through_its_question(self) -> None:
+        context = self._hint_context()
+        with self.assertRaises(InvalidAgentOutput) as raised:
+            validate_decision(
+                _draft(
+                    "teaching_agent",
+                    "question",
+                    "再看看这段循环。",
+                    question="既然任务已经完成，要不要挑战下一关？",
+                ),
+                make_role_config("teaching_agent"),
+                context,
+                (),
+            )
+        self.assertEqual(raised.exception.code, "HINT_CLAIMS_OUTCOME")
+
+    def test_hint_still_rejects_permanent_learner_judgment(self) -> None:
+        context = self._hint_context()
+        with self.assertRaises(InvalidAgentOutput) as raised:
+            validate_decision(
+                _draft(
+                    "teaching_agent",
+                    "question",
+                    "你完全不会写循环。",
+                    question="要不要换一关？",
+                ),
+                make_role_config("teaching_agent"),
+                context,
+                (),
+            )
+        self.assertEqual(raised.exception.code, "PERMANENT_LEARNER_JUDGMENT")

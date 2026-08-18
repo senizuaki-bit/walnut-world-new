@@ -498,9 +498,14 @@ def _terminal_expired(row: RecoverableLlmDispatchRow, now: datetime) -> bool:
 
 
 async def _database_now(session: AsyncSession) -> datetime:
-    value = await session.scalar(text("SELECT CURRENT_TIMESTAMP"))
+    # CURRENT_TIMESTAMP is fixed at transaction start.  Under READ COMMITTED a
+    # later statement may observe a dispatch created after that timestamp (for
+    # example after waiting for the capped-generation advisory lock), which
+    # would make claim.updated_at precede row.created_at.  Use PostgreSQL's
+    # wall clock at this statement so durable timestamp ordering stays valid.
+    value = await session.scalar(text("SELECT clock_timestamp()"))
     if not isinstance(value, datetime) or value.tzinfo is None:
-        raise RuntimeError("PostgreSQL returned an invalid CURRENT_TIMESTAMP")
+        raise RuntimeError("PostgreSQL returned an invalid clock_timestamp()")
     return value
 
 

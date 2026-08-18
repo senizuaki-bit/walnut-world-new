@@ -11,6 +11,7 @@ from yaya_agent_contracts import canonical_json_sha256
 
 from walnut_backend.adapters.postgres.models import RecoverableLlmDispatchRow
 from walnut_backend.adapters.postgres.session import create_session_factory
+from walnut_backend.llm_relay import store as relay_store_module
 from walnut_backend.llm_relay.protocol import (
     RelayDispatchConflict,
     RelayDispatchExpired,
@@ -36,6 +37,27 @@ def test_postgres_relay_is_atomic_restart_safe_and_never_reopens_generation() ->
 
 def test_postgres_global_generation_limit_refuses_thirteenth_before_claim() -> None:
     asyncio.run(_exercise_postgres_global_generation_limit(_database_url()))
+
+
+def test_postgres_relay_clock_advances_inside_one_transaction() -> None:
+    asyncio.run(_exercise_postgres_relay_clock(_database_url()))
+
+
+async def _exercise_postgres_relay_clock(database_url: str) -> None:
+    sessions = create_session_factory(database_url)
+    try:
+        async with sessions() as session, session.begin():
+            await session.execute(text("SET TRANSACTION READ ONLY"))
+            transaction_started_at = await session.scalar(text("SELECT CURRENT_TIMESTAMP"))
+            assert transaction_started_at is not None
+            await asyncio.sleep(0.02)
+            statement_clock = await relay_store_module._database_now(session)
+            # A claim can wait in a transaction while another request creates
+            # the row it will later observe.  The relay must not reuse the
+            # earlier transaction timestamp for that claim update.
+            assert statement_clock > transaction_started_at
+    finally:
+        await sessions.kw["bind"].dispose()
 
 
 async def _exercise_postgres_global_generation_limit(database_url: str) -> None:

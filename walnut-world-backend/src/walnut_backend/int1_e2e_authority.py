@@ -40,6 +40,7 @@ from yaya_agent_contracts import (
     FrozenJsonObject,
     HarvestIntent,
     RequestContext,
+    WaterIntent,
     WorldSnapshot,
     canonical_json_sha256,
 )
@@ -122,6 +123,7 @@ class Int1AuthoritySeedConfig:
     teaching_spec_version: str
     world_rules_version: str
     world_success_score: int
+    watering: bool = False
 
     def __post_init__(self) -> None:
         if self.settings.development_auth_enabled:
@@ -161,6 +163,9 @@ class Int1AuthoritySeedConfig:
         _required("WALNUT_DATABASE_URL")
         _required("WALNUT_CONTRACT_PATH")
         runtime_root = Path(_required("WALNUT_RUNTIME_ROOT")).expanduser().resolve()
+        task_mode = os.getenv("WALNUT_INT1_TASK_MODE", "harvest").strip().lower()
+        if task_mode not in {"harvest", "watering"}:
+            raise ValueError("WALNUT_INT1_TASK_MODE must be 'harvest' or 'watering'")
         return cls(
             settings=Settings.from_env(),
             artifact_root=(runtime_root / "artifacts").resolve(),
@@ -171,6 +176,7 @@ class Int1AuthoritySeedConfig:
             teaching_spec_version=_required_identifier("WALNUT_TEACHING_SPEC_VERSION"),
             world_rules_version=_required_identifier("WALNUT_WORLD_RULES_VERSION"),
             world_success_score=_required_integer("WALNUT_WORLD_SUCCESS_SCORE"),
+            watering=task_mode == "watering",
         )
 
 
@@ -238,10 +244,8 @@ class Int1AuthoritySeedResult:
         }
 
 
-def build_int1_e2e_fixture(config: Int1AuthoritySeedConfig) -> Int1AuthorityFixture:
-    """Build the exact Agent-derived Task/Build authority without touching storage."""
-
-    source = """#include <iostream>
+def _harvest_source() -> str:
+    return """#include <iostream>
 #include <stdexcept>
 #include <string>
 
@@ -280,6 +284,27 @@ int main(int argc, char** argv) {
     return 0;
 }
 """
+
+
+def build_int1_e2e_fixture(config: Int1AuthoritySeedConfig) -> Int1AuthorityFixture:
+    """Build the exact Agent-derived Task/Build authority without touching storage."""
+
+    is_watering = config.watering
+    if is_watering:
+        task_id = "task_crop_watering_0001"
+        world_id = "world_crop_watering_0001"
+        build_policy_id = "build_policy_watering_0001"
+        skill_id = "skill_crop_watering_0001"
+        authority_id = "authority_crop_watering_0001"
+        agent_profile_id = "agent_profile_crop_watering_0001"
+    else:
+        task_id = TASK_ID
+        world_id = WORLD_ID
+        build_policy_id = BUILD_POLICY_ID
+        skill_id = SKILL_ID
+        authority_id = AUTHORITY_ID
+        agent_profile_id = AGENT_PROFILE_ID
+    source = _watering_source() if is_watering else _harvest_source()
     source_bundle: dict[str, object] = {
         "language": "CPP20",
         "entrypoint": "main.cpp",
@@ -293,37 +318,72 @@ int main(int argc, char** argv) {
     }
     validate_source_bundle(source_bundle)
     source_bundle_sha256 = canonical_source_bundle_sha256(source_bundle)
-    allowed_capabilities = ["HARVEST", "WORLD_READ"]
-    task: dict[str, object] = {
-        "task_id": TASK_ID,
-        "name": "Harvest every plot",
-        "goal": "Use one loop to harvest all eight mature plots.",
-        "instructions": [
-            "Compile the starter as C++20.",
-            "Read the plot count from the single process argument; stdin is closed.",
-            "Emit one strict HARVEST action intent for each plot as compact JSON.",
-        ],
-        "knowledge_points": ["for_loop", "sequence"],
-        "allowed_capabilities": allowed_capabilities,
-        "starter_skill": {
-            "skill_id": SKILL_ID,
-            "display_name": "Process Restart Docker Skill",
-            "source_bundle": source_bundle,
-            "compiler_profile": CPP20_SAFE_V1_PROFILE,
-            "test_suite_version": TEST_SUITE_VERSION,
-        },
-        "hint_policy": {
-            "max_level": 4,
-            "levels": [
-                {"level": level, "instruction": f"Hint authority level {level}."}
-                for level in range(5)
+    allowed_capabilities = (
+        ["WATER", "WORLD_READ"] if is_watering else ["HARVEST", "WORLD_READ"]
+    )
+    if is_watering:
+        task: dict[str, object] = {
+            "task_id": task_id,
+            "name": "Water every thirsty plot",
+            "goal": "Use one loop to water every plot that needs watering.",
+            "instructions": [
+                "Compile the starter as C++20.",
+                "Read the plot count from the single process argument; stdin is closed.",
+                "For each plot compute the gap between its target and current moisture.",
+                "Emit a WATER action for each plot whose gap is positive: 2 units when the gap is at least 30, otherwise 1 unit.",
             ],
-        },
-        "story": {
-            "opening": "The mature crops must be gathered before sunset.",
-            "success": "Every plot has been harvested.",
-        },
-    }
+            "knowledge_points": ["for_loop", "conditionals"],
+            "allowed_capabilities": allowed_capabilities,
+            "starter_skill": {
+                "skill_id": skill_id,
+                "display_name": "Crop Watering Skill",
+                "source_bundle": source_bundle,
+                "compiler_profile": CPP20_SAFE_V1_PROFILE,
+                "test_suite_version": TEST_SUITE_VERSION,
+            },
+            "hint_policy": {
+                "max_level": 4,
+                "levels": [
+                    {"level": level, "instruction": f"Hint authority level {level}."}
+                    for level in range(5)
+                ],
+            },
+            "story": {
+                "opening": "The mixed crop field is thirsty, but not every plot needs the same amount of water.",
+                "success": "Every plot that needed water received exactly the right amount.",
+            },
+        }
+    else:
+        task = {
+            "task_id": task_id,
+            "name": "Harvest every plot",
+            "goal": "Use one loop to harvest all eight mature plots.",
+            "instructions": [
+                "Compile the starter as C++20.",
+                "Read the plot count from the single process argument; stdin is closed.",
+                "Emit one strict HARVEST action intent for each plot as compact JSON.",
+            ],
+            "knowledge_points": ["for_loop", "sequence"],
+            "allowed_capabilities": allowed_capabilities,
+            "starter_skill": {
+                "skill_id": skill_id,
+                "display_name": "Process Restart Docker Skill",
+                "source_bundle": source_bundle,
+                "compiler_profile": CPP20_SAFE_V1_PROFILE,
+                "test_suite_version": TEST_SUITE_VERSION,
+            },
+            "hint_policy": {
+                "max_level": 4,
+                "levels": [
+                    {"level": level, "instruction": f"Hint authority level {level}."}
+                    for level in range(5)
+                ],
+            },
+            "story": {
+                "opening": "The mature crops must be gathered before sunset.",
+                "success": "Every plot has been harvested.",
+            },
+        }
     content_hash_basis = {
         "schema_version": "1.0.0",
         "unit_id": CONTENT_UNIT_ID,
@@ -368,11 +428,14 @@ int main(int argc, char** argv) {
         content_ref=ContentRef(CONTENT_UNIT_ID, CONTENT_VERSION, content_hash),
     )
     world_state = _world_state()
-    _assert_harvest_world_closure(world_state, config.world_success_score)
+    if is_watering:
+        _assert_watering_world_closure(world_state, config.world_success_score)
+    else:
+        _assert_harvest_world_closure(world_state, config.world_success_score)
     world_state_hash = canonical_json_sha256(world_state)
     world_snapshot = WorldSnapshot(
         request_context=request_context,
-        world_id=WORLD_ID,
+        world_id=world_id,
         revision=WORLD_REVISION,
         last_event_sequence=WORLD_EVENT_SEQUENCE,
         state_hash=world_state_hash,
@@ -381,6 +444,11 @@ int main(int argc, char** argv) {
         state=world_state,
     )
     world_snapshot_json = world_snapshot_data(world_snapshot)
+    # The level's starting World, recorded once so every later Run is scored as
+    # an independent attempt instead of continuing from the previous result.
+    # Without it a correct program passes exactly once, and one overshooting Run
+    # makes the level permanently unreachable.
+    world_snapshot_json["baseline_state"] = json.loads(json.dumps(world_state))
 
     learner_profile_json: dict[str, Any] = {
         "schema_version": "1.0.0",
@@ -399,7 +467,7 @@ int main(int argc, char** argv) {
     learner_profile_sha256 = canonical_json_sha256(learner_profile_json)
     agent_profile_json: dict[str, Any] = {
         "schema_version": "1.0.0",
-        "agent_profile_id": AGENT_PROFILE_ID,
+        "agent_profile_id": agent_profile_id,
         "actor_id": ACTOR_ID,
         "content": content_ref,
         "role": "farmer_build_tutor",
@@ -410,7 +478,7 @@ int main(int argc, char** argv) {
     }
     agent_profile_sha256 = canonical_json_sha256(agent_profile_json)
 
-    harvest_stdout = _harvest_stdout(8)
+    expected_stdout = None if is_watering else _harvest_stdout(8)
     build_policy_json: dict[str, Any] = {
         "schema_version": "1.0.0",
         "compiler_image": config.sandbox_image,
@@ -424,7 +492,7 @@ int main(int argc, char** argv) {
                 "PUBLIC",
                 "8",
                 b"",
-                harvest_stdout,
+                expected_stdout,
             )
         ],
         "hidden_tests": [
@@ -433,7 +501,7 @@ int main(int argc, char** argv) {
                 "HIDDEN",
                 "8",
                 b"",
-                harvest_stdout,
+                expected_stdout,
             )
         ],
         "parameter_schema": {
@@ -456,13 +524,13 @@ int main(int argc, char** argv) {
     build_policy_sha256 = canonical_json_sha256(build_policy_json)
     launch_authority_json: dict[str, Any] = {
         "schema_version": "1.0.0",
-        "authority_id": AUTHORITY_ID,
+        "authority_id": authority_id,
         "actor_id": ACTOR_ID,
         "content": content_ref,
-        "world_id": WORLD_ID,
+        "world_id": world_id,
         "learner_id": LEARNER_ID,
-        "agent_profile_id": AGENT_PROFILE_ID,
-        "build_policy_id": BUILD_POLICY_ID,
+        "agent_profile_id": agent_profile_id,
+        "build_policy_id": build_policy_id,
         "channel": "GAME",
         "teaching_spec_version": config.teaching_spec_version,
         "active": True,
@@ -522,18 +590,19 @@ async def seed_int1_e2e_authority(
     finally:
         await sessions.kw["bind"].dispose()
     _assert_empty_artifact_root(config.artifact_root)
+    launch_authority = fixture.launch_authority_json
     return Int1AuthoritySeedResult(
         tenant_id=TENANT_ID,
         actor_id=ACTOR_ID,
         content_unit_id=CONTENT_UNIT_ID,
         content_version=CONTENT_VERSION,
         content_hash=fixture.content_hash,
-        world_id=WORLD_ID,
+        world_id=str(launch_authority["world_id"]),
         world_revision=WORLD_REVISION,
         learner_id=LEARNER_ID,
-        agent_profile_id=AGENT_PROFILE_ID,
-        build_policy_id=BUILD_POLICY_ID,
-        authority_id=AUTHORITY_ID,
+        agent_profile_id=str(launch_authority["agent_profile_id"]),
+        build_policy_id=str(launch_authority["build_policy_id"]),
+        authority_id=str(launch_authority["authority_id"]),
         registry_revision=0,
         source_bundle_sha256=fixture.source_bundle_sha256,
         sandbox_image=config.sandbox_image,
@@ -548,6 +617,13 @@ def _add_preconditions(
     fixture: Int1AuthorityFixture,
 ) -> None:
     digest = config.sandbox_image.rsplit("@", 1)[1]
+    launch = fixture.launch_authority_json
+    world_id = str(launch["world_id"])
+    agent_profile_id = str(launch["agent_profile_id"])
+    build_policy_id = str(launch["build_policy_id"])
+    allowed_capabilities = (
+        ["WATER", "WORLD_READ"] if config.watering else ["HARVEST", "WORLD_READ"]
+    )
     session.add_all(
         [
             ProductContentUnitRow(
@@ -561,7 +637,7 @@ def _add_preconditions(
             ),
             WorldSnapshotRow(
                 tenant_id=TENANT_ID,
-                world_id=WORLD_ID,
+                world_id=world_id,
                 actor_id=ACTOR_ID,
                 content_hash=fixture.content_hash,
                 revision=WORLD_REVISION,
@@ -582,7 +658,7 @@ def _add_preconditions(
             ),
             AgentProfileRow(
                 tenant_id=TENANT_ID,
-                agent_profile_id=AGENT_PROFILE_ID,
+                agent_profile_id=agent_profile_id,
                 actor_id=ACTOR_ID,
                 content_hash=fixture.content_hash,
                 profile_sha256=fixture.agent_profile_sha256,
@@ -591,14 +667,14 @@ def _add_preconditions(
             ),
             BuildPolicyRow(
                 tenant_id=TENANT_ID,
-                build_policy_id=BUILD_POLICY_ID,
+                build_policy_id=build_policy_id,
                 actor_id=ACTOR_ID,
                 content_hash=fixture.content_hash,
                 compiler_profile=CPP20_SAFE_V1_PROFILE,
                 compiler_version=PINNED_GCC_VERSION,
                 sandbox_image_digest=digest,
                 test_suite_version=TEST_SUITE_VERSION,
-                allowed_capabilities=["HARVEST", "WORLD_READ"],
+                allowed_capabilities=allowed_capabilities,
                 max_source_files=32,
                 max_source_bytes=1_048_576,
                 policy_json=fixture.build_policy_json,
@@ -619,18 +695,19 @@ async def _verify_seeded_transaction(
 ) -> None:
     # The first flush persisted the five independent parents.  Add the launch
     # authority and registry head in FK order inside the same transaction.
+    launch = fixture.launch_authority_json
     session.add(
         LaunchAuthorityRow(
             tenant_id=TENANT_ID,
-            authority_id=AUTHORITY_ID,
+            authority_id=str(launch["authority_id"]),
             actor_id=ACTOR_ID,
             content_unit_id=CONTENT_UNIT_ID,
             content_version=CONTENT_VERSION,
             content_hash=fixture.content_hash,
-            world_id=WORLD_ID,
+            world_id=str(launch["world_id"]),
             learner_id=LEARNER_ID,
-            agent_profile_id=AGENT_PROFILE_ID,
-            build_policy_id=BUILD_POLICY_ID,
+            agent_profile_id=str(launch["agent_profile_id"]),
+            build_policy_id=str(launch["build_policy_id"]),
             channel="GAME",
             teaching_spec_version=config.teaching_spec_version,
             authority_sha256=fixture.launch_authority_sha256,
@@ -644,9 +721,9 @@ async def _verify_seeded_transaction(
             tenant_id=TENANT_ID,
             actor_id=ACTOR_ID,
             content_hash=fixture.content_hash,
-            world_id=WORLD_ID,
-            agent_profile_id=AGENT_PROFILE_ID,
-            authority_id=AUTHORITY_ID,
+            world_id=str(launch["world_id"]),
+            agent_profile_id=str(launch["agent_profile_id"]),
+            authority_id=str(launch["authority_id"]),
             revision=0,
             updated_at=SEED_TIMESTAMP,
         )
@@ -762,6 +839,58 @@ def _harvest_stdout(length: int) -> bytes:
     )
 
 
+# The crop watering fixture: 8 plots with moisture and target arrays; a plot is
+# watered 2 units when the gap is at least 30, 1 unit when the gap is positive,
+# and skipped otherwise.  These match the frontend crop level EXPECTED_UNITS.
+WATERING_MOISTURE = (20, 65, 45, 90, 60, 35, 55, 50)
+WATERING_TARGET = (60, 70, 50, 65, 60, 70, 50, 65)
+WATERING_EXPECTED_UNITS = (2, 1, 1, 0, 0, 2, 0, 1)
+
+
+def _watering_source() -> str:
+    moisture = ", ".join(str(value) for value in WATERING_MOISTURE)
+    target = ", ".join(str(value) for value in WATERING_TARGET)
+    return f"""#include <iostream>
+using namespace std;
+
+int main() {{
+    int moisture[8] = {{{moisture}}};
+    int target[8]   = {{{target}}};
+    (void)target;
+
+    for (int i = 0; i < 8; i++) {{
+        int gap = 60 - moisture[i];
+
+        if (gap >= 30) {{
+            cout << "WATER " << i << " 2\\n";
+        }} else if (gap > 0) {{
+            cout << "WATER " << i << " 1\\n";
+        }}
+    }}
+
+    return 0;
+}}
+"""
+
+
+def _watering_stdout(length: int) -> bytes:
+    lines = [
+        f"WATER {index} {amount}\n"
+        for index in range(length)
+        if (amount := _expected_units(index)) > 0
+    ]
+    return "".join(lines).encode("utf-8")
+
+
+def _expected_units(index: int) -> int:
+    gap = WATERING_TARGET[index] - WATERING_MOISTURE[index]
+    if gap >= 30:
+        return 2
+    if gap > 0:
+        return 1
+    return 0
+
+
 def _assert_harvest_world_closure(world_state: FrozenJsonObject, world_success_score: int) -> None:
     intents = tuple(
         HarvestIntent(
@@ -796,6 +925,45 @@ def _assert_harvest_world_closure(world_state: FrozenJsonObject, world_success_s
     ):
         raise Int1AuthoritySeedError(
             "canonical HARVEST fixture does not satisfy the pinned 7/8 WorldRules boundary"
+        )
+
+
+def _assert_watering_world_closure(
+    world_state: FrozenJsonObject, world_success_score: int
+) -> None:
+    rules = WorldRules(
+        content_version=CONTENT_VERSION,
+        max_actions=8,
+        min_x=0,
+        max_x=31,
+        min_y=0,
+        max_y=31,
+        harvest_growth_stage=2,
+        success_score=world_success_score,
+        watering_expected_units=WATERING_EXPECTED_UNITS,
+    )
+    engine = WorldEngine()
+    intents = tuple(
+        WaterIntent(
+            f"intent_water_{index + 1:04d}",
+            "avatar_0001",
+            WORLD_REVISION,
+            f"plot_{index + 1:04d}",
+            amount,
+        )
+        for index, amount in enumerate(WATERING_EXPECTED_UNITS)
+        if amount > 0
+    )
+    incomplete = engine.apply(world_state, intents[:-1], rules)
+    transition = engine.apply(world_state, intents, rules)
+    if (
+        incomplete.score != 7
+        or incomplete.success
+        or transition.score != 8
+        or not transition.success
+    ):
+        raise Int1AuthoritySeedError(
+            "canonical WATERING fixture does not satisfy the pinned 7/8 WorldRules boundary"
         )
 
 
@@ -864,14 +1032,18 @@ def _test_case(
     visibility: str,
     argument: str,
     stdin: bytes,
-    expected_stdout: bytes,
+    expected_stdout: bytes | None,
 ) -> dict[str, object]:
     return {
         "test_case_id": test_case_id,
         "visibility": visibility,
         "arguments": [argument],
         "stdin_base64": base64.b64encode(stdin).decode("ascii"),
-        "expected_stdout_sha256": hashlib.sha256(expected_stdout).hexdigest(),
+        "expected_stdout_sha256": (
+            hashlib.sha256(expected_stdout).hexdigest()
+            if expected_stdout is not None
+            else None
+        ),
     }
 
 

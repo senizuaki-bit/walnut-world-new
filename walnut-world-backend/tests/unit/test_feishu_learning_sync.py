@@ -19,6 +19,7 @@ from yaya_agent_contracts import canonical_json_sha256
 from walnut_backend.adapters.lark_cli.feishu_learning import (
     LarkCliError,
     LarkCliFeishuSyncPort,
+    _safe_subprocess_command,
 )
 from walnut_backend.application.feishu.learning_queries import (
     EvidenceAuthority,
@@ -69,6 +70,52 @@ def test_sync_cli_starts_from_clean_powershell_without_pythonpath() -> None:
 
     assert completed.returncode == 0, completed.stderr
     assert "--tenant-id" in completed.stdout
+
+
+def test_windows_lark_cli_npm_shim_uses_node_without_cmd_shell(tmp_path: Path) -> None:
+    npm_root = tmp_path / "npm"
+    shim = npm_root / "lark-cli.cmd"
+    run_script = (
+        npm_root
+        / "node_modules"
+        / "@larksuite"
+        / "cli"
+        / "scripts"
+        / "run.js"
+    )
+    node = tmp_path / "node.exe"
+    run_script.parent.mkdir(parents=True)
+    shim.touch()
+    run_script.touch()
+    node.touch()
+    sql = "BEGIN;\nINSERT INTO evidence_summary(payload) VALUES ('a&b|c');\nCOMMIT;"
+
+    def which(executable: str) -> str | None:
+        return {"lark-cli": str(shim), "node": str(node)}.get(executable)
+
+    command = ["lark-cli", "apps", "+db-execute", "--sql", sql, "--yes"]
+
+    resolved = _safe_subprocess_command(command, platform="win32", which=which)
+
+    assert resolved == [str(node), str(run_script), *command[1:]]
+    assert resolved[-2:] == [sql, "--yes"]
+    assert all("cmd.exe" not in argument.casefold() for argument in resolved)
+
+
+def test_windows_lark_cli_npm_shim_requires_fixed_adjacent_entrypoint(
+    tmp_path: Path,
+) -> None:
+    shim = tmp_path / "npm" / "lark-cli.cmd"
+    node = tmp_path / "node.exe"
+    shim.parent.mkdir(parents=True)
+    shim.touch()
+    node.touch()
+
+    def which(executable: str) -> str | None:
+        return {"lark-cli": str(shim), "node": str(node)}.get(executable)
+
+    with pytest.raises(FileNotFoundError, match="npm entrypoint"):
+        _safe_subprocess_command(["lark-cli", "auth", "status"], platform="win32", which=which)
 
 
 NOW = datetime(2026, 8, 15, 7, 0, tzinfo=UTC)

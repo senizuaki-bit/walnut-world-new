@@ -257,6 +257,20 @@ def _assert_windows_acl_denies_broad_read(path: Path) -> None:
         )
         if (value := os.environ.get(name)) is not None
     }
+    system_root = validator_environment.get("SystemRoot") or validator_environment.get(
+        "WINDIR", r"C:\Windows"
+    )
+    windows_powershell_modules = str(
+        Path(system_root) / "System32" / "WindowsPowerShell" / "v1.0" / "Modules"
+    )
+    inherited_module_path = validator_environment.get("PSModulePath", "")
+    module_paths = [windows_powershell_modules]
+    module_paths.extend(
+        entry
+        for entry in inherited_module_path.split(os.pathsep)
+        if entry and entry.casefold() != windows_powershell_modules.casefold()
+    )
+    validator_environment["PSModulePath"] = os.pathsep.join(module_paths)
     try:
         resolved_path = path.resolve(strict=True)
     except OSError:

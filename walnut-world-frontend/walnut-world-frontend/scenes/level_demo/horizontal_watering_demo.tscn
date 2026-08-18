@@ -1,0 +1,988 @@
+[gd_scene load_steps=23 format=3 uid="uid://btv80wjstwb0a"]
+
+[ext_resource type="Script" path="res://scenes/level_demo/horizontal_watering_demo.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/level_demo/watering_plot.tscn" id="2_plot"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/terrain/grass_plot.png" id="3_grass"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/characters/yaya_sprout.png" id="4_yaya"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/characters/little_walnut.png" id="5_walnut"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/characters/master_ding_dang.png" id="6_dingdang"]
+[ext_resource type="PackedScene" path="res://scenes/characters/bug_legion/bug_legion.tscn" id="7_bug"]
+[ext_resource type="SpriteFrames" path="res://resources/sprites/shu_shu_magic_frames.tres" id="8_shushu_magic"]
+[ext_resource type="SpriteFrames" path="res://resources/sprites/watering_can_frames_v2.tres" id="9_watering_can"]
+[ext_resource type="PackedScene" path="res://scenes/ui/story_dialogue_overlay.tscn" id="10_story_dialogue"]
+
+[sub_resource type="Environment" id="Environment_demo"]
+background_mode = 1
+background_color = Color(0.745098, 0.913725, 0.882353, 1)
+background_energy_multiplier = 0.8
+ambient_light_source = 3
+ambient_light_color = Color(0.92549, 0.980392, 0.87451, 1)
+ambient_light_energy = 0.7
+reflected_light_source = 2
+tonemap_mode = 2
+tonemap_exposure = 0.9
+glow_enabled = true
+glow_intensity = 0.16
+glow_strength = 0.28
+
+[sub_resource type="StandardMaterial3D" id="GroundMaterial"]
+transparency = 2
+alpha_scissor_threshold = 0.02
+cull_mode = 2
+shading_mode = 0
+albedo_texture = ExtResource("3_grass")
+
+[sub_resource type="PlaneMesh" id="GroundPlane"]
+material = SubResource("GroundMaterial")
+size = Vector2(16, 11)
+
+[sub_resource type="StandardMaterial3D" id="GroundFallbackMaterial"]
+shading_mode = 0
+albedo_color = Color(0.713726, 0.909804, 0.796078, 1)
+
+[sub_resource type="PlaneMesh" id="GroundFallbackPlane"]
+material = SubResource("GroundFallbackMaterial")
+size = Vector2(24, 18)
+
+[sub_resource type="StyleBoxFlat" id="TaskCardStyle"]
+bg_color = Color(0.992157, 0.94902, 0.792157, 0.96)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.278431, 0.568627, 0.411765, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+shadow_color = Color(0.109804, 0.235294, 0.180392, 0.24)
+shadow_size = 8
+shadow_offset = Vector2(0, 5)
+
+[sub_resource type="StyleBoxFlat" id="PhaseStyle"]
+bg_color = Color(0.121569, 0.32549, 0.25098, 0.92)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0.0627451, 0.145098, 0.113725, 0.2)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="ToolButtonNormal"]
+bg_color = Color(0.992157, 0.941176, 0.741176, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.286275, 0.584314, 0.435294, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0.105882, 0.223529, 0.168627, 0.22)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="DrawerStyle"]
+bg_color = Color(0.960784, 0.913725, 0.741176, 0.99)
+border_width_left = 5
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.184314, 0.462745, 0.345098, 1)
+corner_radius_top_left = 28
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 28
+shadow_color = Color(0.0392157, 0.121569, 0.0901961, 0.38)
+shadow_size = 18
+
+[sub_resource type="StyleBoxFlat" id="TraceStyle"]
+bg_color = Color(0.890196, 0.945098, 0.823529, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.505882, 0.713726, 0.45098, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="CodeStyle"]
+bg_color = Color(0.0705882, 0.168627, 0.129412, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.313726, 0.658824, 0.482353, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="FillNormal"]
+bg_color = Color(1, 0.839216, 0.352941, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.976471, 0.721569, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.28)
+shadow_size = 5
+
+[sub_resource type="StyleBoxFlat" id="FillFocus"]
+bg_color = Color(1, 0.92549, 0.529412, 1)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+border_color = Color(0.227451, 0.929412, 0.811765, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0.14902, 0.941176, 0.823529, 0.45)
+shadow_size = 9
+
+[sub_resource type="StyleBoxFlat" id="SubmitStyle"]
+bg_color = Color(0.258824, 0.682353, 0.470588, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.105882, 0.368627, 0.27451, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="ResetStyle"]
+bg_color = Color(0.941176, 0.741176, 0.462745, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.635294, 0.345098, 0.176471, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="GrowthFeedbackStyle"]
+bg_color = Color(1, 0.882353, 0.376471, 0.985)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+border_color = Color(0.137255, 0.607843, 0.368627, 1)
+corner_radius_top_left = 30
+corner_radius_top_right = 30
+corner_radius_bottom_right = 30
+corner_radius_bottom_left = 30
+shadow_color = Color(0.0470588, 0.227451, 0.145098, 0.35)
+shadow_size = 18
+
+[sub_resource type="StyleBoxFlat" id="CompletionStyle"]
+bg_color = Color(0.901961, 0.984314, 0.85098, 0.985)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+border_color = Color(0.219608, 0.658824, 0.462745, 1)
+corner_radius_top_left = 28
+corner_radius_top_right = 28
+corner_radius_bottom_right = 28
+corner_radius_bottom_left = 28
+shadow_color = Color(0.0509804, 0.203922, 0.141176, 0.34)
+shadow_size = 16
+
+[sub_resource type="StyleBoxFlat" id="SpellRingOuter"]
+bg_color = Color(0.054902, 0.8, 0.85098, 0.08)
+border_width_left = 8
+border_width_top = 8
+border_width_right = 8
+border_width_bottom = 8
+border_color = Color(0.286275, 0.956863, 0.929412, 0.86)
+corner_radius_top_left = 180
+corner_radius_top_right = 180
+corner_radius_bottom_right = 180
+corner_radius_bottom_left = 180
+shadow_color = Color(0.0784314, 0.92549, 0.901961, 0.45)
+shadow_size = 18
+
+[sub_resource type="StyleBoxFlat" id="SpellRingInner"]
+bg_color = Color(0.980392, 0.890196, 0.313726, 0.1)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+border_color = Color(1, 0.905882, 0.454902, 0.9)
+corner_radius_top_left = 130
+corner_radius_top_right = 130
+corner_radius_bottom_right = 130
+corner_radius_bottom_left = 130
+
+[node name="HorizontalWateringDemo" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_demo")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.88294756, 0.37981048, -0.2759485, 0, 0.5877853, 0.809017, 0.46947157, -0.7143196, 0.5189836, 0, 0, 0)
+light_color = Color(1, 0.937255, 0.803922, 1)
+light_energy = 0.88
+shadow_enabled = true
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.8290376, 0.5591929, 0, -0.5591929, 0.8290376, 0, 7.2, 10.5)
+projection = 1
+current = true
+size = 10.4
+near = 0.1
+
+[node name="Ground" type="MeshInstance3D" parent="."]
+mesh = SubResource("GroundPlane")
+
+[node name="GroundFallback" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.03, 0)
+mesh = SubResource("GroundFallbackPlane")
+
+[node name="ManualRow" type="Node3D" parent="."]
+position = Vector3(0, 0.04, 2)
+
+[node name="Plot0" parent="ManualRow" instance=ExtResource("2_plot")]
+position = Vector3(-3.6, 0, 0)
+
+[node name="Plot1" parent="ManualRow" instance=ExtResource("2_plot")]
+position = Vector3(-1.8, 0, 0)
+plot_index = 1
+
+[node name="Plot2" parent="ManualRow" instance=ExtResource("2_plot")]
+plot_index = 2
+
+[node name="Plot3" parent="ManualRow" instance=ExtResource("2_plot")]
+position = Vector3(1.8, 0, 0)
+plot_index = 3
+
+[node name="Plot4" parent="ManualRow" instance=ExtResource("2_plot")]
+position = Vector3(3.6, 0, 0)
+plot_index = 4
+
+[node name="AutoRow" type="Node3D" parent="."]
+visible = false
+position = Vector3(0, 0.05, -0.65)
+
+[node name="Plot0" parent="AutoRow" instance=ExtResource("2_plot")]
+position = Vector3(-3.6, 0, 0)
+interactive = false
+
+[node name="Plot1" parent="AutoRow" instance=ExtResource("2_plot")]
+position = Vector3(-1.8, 0, 0)
+plot_index = 1
+interactive = false
+
+[node name="Plot2" parent="AutoRow" instance=ExtResource("2_plot")]
+plot_index = 2
+interactive = false
+
+[node name="Plot3" parent="AutoRow" instance=ExtResource("2_plot")]
+position = Vector3(1.8, 0, 0)
+plot_index = 3
+interactive = false
+
+[node name="Plot4" parent="AutoRow" instance=ExtResource("2_plot")]
+position = Vector3(3.6, 0, 0)
+plot_index = 4
+interactive = false
+
+[node name="Cast" type="Node3D" parent="."]
+
+[node name="Yaya" type="Sprite3D" parent="Cast"]
+position = Vector3(-5.05, 1, 1.58)
+pixel_size = 0.00145
+billboard = 1
+alpha_cut = 2
+texture = ExtResource("4_yaya")
+
+[node name="LittleWalnut" type="Sprite3D" parent="Cast"]
+position = Vector3(-4.75, 1.04, 2.72)
+pixel_size = 0.0014
+billboard = 1
+alpha_cut = 2
+texture = ExtResource("5_walnut")
+
+[node name="DingDang" type="Sprite3D" parent="Cast"]
+position = Vector3(5.05, 1.08, 2.23)
+pixel_size = 0.00135
+billboard = 1
+alpha_cut = 2
+texture = ExtResource("6_dingdang")
+
+[node name="Bug" parent="Cast" instance=ExtResource("7_bug")]
+position = Vector3(4.75, 0.12, -0.75)
+
+[node name="ShuShu" type="AnimatedSprite3D" parent="Cast"]
+visible = false
+position = Vector3(4.8, 1.18, -0.72)
+pixel_size = 0.004
+billboard = 1
+alpha_cut = 2
+sprite_frames = ExtResource("8_shushu_magic")
+animation = &"cast_loop_water"
+
+[node name="ManualWateringCan" type="AnimatedSprite3D" parent="."]
+visible = false
+pixel_size = 0.0032
+billboard = 1
+alpha_cut = 2
+sprite_frames = ExtResource("9_watering_can")
+animation = &"pour"
+
+[node name="MagicWateringCan" type="AnimatedSprite3D" parent="."]
+visible = false
+pixel_size = 0.0035
+billboard = 1
+alpha_cut = 2
+sprite_frames = ExtResource("9_watering_can")
+animation = &"pour"
+
+[node name="Guidance" type="Node3D" parent="."]
+
+[node name="ManualPath" type="Label3D" parent="Guidance"]
+visible = false
+position = Vector3(0, 1.75, 2)
+pixel_size = 0.0058
+billboard = 1
+modulate = Color(1, 0.839216, 0.388235, 1)
+outline_modulate = Color(0.121569, 0.301961, 0.219608, 1)
+text = "[0] → 1 → 2 → 3 → 4"
+font_size = 44
+
+[node name="VariableBadge" type="Label3D" parent="Guidance"]
+visible = false
+position = Vector3(-3.6, 1.82, -0.65)
+pixel_size = 0.0035
+billboard = 1
+modulate = Color(0.352941, 0.862745, 0.788235, 1)
+outline_modulate = Color(0.0627451, 0.235294, 0.176471, 1)
+text = "i = 0\n▼"
+font_size = 46
+
+[node name="Hud" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="SafeArea" type="Control" parent="Hud"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TaskCard" type="PanelContainer" parent="Hud/SafeArea"]
+offset_left = 22.0
+offset_top = 20.0
+offset_right = 300.0
+offset_bottom = 100.0
+theme_override_styles/panel = SubResource("TaskCardStyle")
+
+[node name="Margin" type="MarginContainer" parent="Hud/SafeArea/TaskCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 9
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 9
+
+[node name="Content" type="VBoxContainer" parent="Hud/SafeArea/TaskCard/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="TaskTitle" type="Label" parent="Hud/SafeArea/TaskCard/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.105882, 0.286275, 0.215686, 1)
+theme_override_font_sizes/font_size = 18
+text = ""
+
+[node name="TaskProgress" type="Label" parent="Hud/SafeArea/TaskCard/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.247059, 0.431373, 0.313726, 1)
+theme_override_font_sizes/font_size = 14
+text = ""
+
+[node name="PhaseStrip" type="PanelContainer" parent="Hud/SafeArea"]
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -150.0
+offset_top = 20.0
+offset_right = 150.0
+offset_bottom = 60.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("PhaseStyle")
+
+[node name="Margin" type="MarginContainer" parent="Hud/SafeArea/PhaseStrip"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 9
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 9
+
+[node name="Phases" type="HBoxContainer" parent="Hud/SafeArea/PhaseStrip/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 18
+alignment = 1
+
+[node name="ManualPhase" type="Label" parent="Hud/SafeArea/PhaseStrip/Margin/Phases"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.847059, 0.478431, 1)
+theme_override_font_sizes/font_size = 14
+text = "● 体验"
+
+[node name="LoopPhase" type="Label" parent="Hud/SafeArea/PhaseStrip/Margin/Phases"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.901961, 0.803922, 1)
+theme_override_font_sizes/font_size = 14
+text = "○ 循环"
+
+[node name="RunPhase" type="Label" parent="Hud/SafeArea/PhaseStrip/Margin/Phases"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.901961, 0.803922, 1)
+theme_override_font_sizes/font_size = 14
+text = "○ 魔法"
+
+[node name="ToolRail" type="HBoxContainer" parent="Hud/SafeArea"]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -82.0
+offset_top = 20.0
+offset_right = -22.0
+offset_bottom = 76.0
+grow_horizontal = 0
+
+[node name="HintButton" type="Button" parent="Hud/SafeArea/ToolRail"]
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 2
+tooltip_text = "提示"
+focus_mode = 1
+theme_override_colors/font_color = Color(0.105882, 0.286275, 0.215686, 1)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("ToolButtonNormal")
+text = "?"
+
+[node name="GrowthFeedback" type="PanelContainer" parent="Hud/SafeArea"]
+visible = false
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -235.0
+offset_top = -58.0
+offset_right = 235.0
+offset_bottom = 58.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("GrowthFeedbackStyle")
+
+[node name="Margin" type="MarginContainer" parent="Hud/SafeArea/GrowthFeedback"]
+layout_mode = 2
+theme_override_constants/margin_left = 26
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 26
+theme_override_constants/margin_bottom = 18
+
+[node name="Message" type="Label" parent="Hud/SafeArea/GrowthFeedback/Margin"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.0509804, 0.337255, 0.211765, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 30
+text = "🌱 两排幼苗都发芽啦！ 🌱"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CompletionCard" type="PanelContainer" parent="Hud/SafeArea"]
+visible = false
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -100.0
+offset_right = 260.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("CompletionStyle")
+
+[node name="Margin" type="MarginContainer" parent="Hud/SafeArea/CompletionCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 34
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 34
+theme_override_constants/margin_bottom = 28
+
+[node name="Content" type="VBoxContainer" parent="Hud/SafeArea/CompletionCard/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Title" type="Label" parent="Hud/SafeArea/CompletionCard/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.0980392, 0.388235, 0.27451, 1)
+theme_override_font_sizes/font_size = 29
+text = "任务已完成"
+horizontal_alignment = 1
+
+[node name="SkillSaved" type="Label" parent="Hud/SafeArea/CompletionCard/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.784314, 0.403922, 0.14902, 1)
+theme_override_font_sizes/font_size = 20
+text = "权威运行已确认完成"
+horizontal_alignment = 1
+
+[node name="NextTech" type="Label" parent="Hud/SafeArea/CompletionCard/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.352941, 0.482353, 0.372549, 1)
+theme_override_font_sizes/font_size = 14
+text = "下一步：把循环魔法用到更多农田"
+horizontal_alignment = 1
+
+[node name="CodeDrawer" type="Control" parent="Hud"]
+visible = false
+layout_mode = 3
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -500.0
+offset_top = 14.0
+offset_right = -14.0
+offset_bottom = -14.0
+grow_horizontal = 0
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="DrawerSurface" type="PanelContainer" parent="Hud/CodeDrawer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("DrawerStyle")
+
+[node name="DrawerMargin" type="MarginContainer" parent="Hud/CodeDrawer/DrawerSurface"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 22
+theme_override_constants/margin_bottom = 20
+
+[node name="Content" type="VBoxContainer" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="DrawerHeader" type="HBoxContainer" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content/DrawerHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.101961, 0.294118, 0.223529, 1)
+theme_override_font_sizes/font_size = 23
+text = "循环浇水咒语"
+
+[node name="SaveState" type="Label" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content/DrawerHeader"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.360784, 0.52549, 0.298039, 1)
+theme_override_font_sizes/font_size = 18
+text = "✓"
+
+[node name="Instruction" type="Label" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.576471, 0.333333, 0.180392, 1)
+theme_override_font_sizes/font_size = 15
+text = "正式源码"
+
+[node name="BlankHint" type="Label" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.94902, 0.478431, 0.160784, 1)
+theme_override_font_sizes/font_size = 15
+text = ""
+
+[node name="CodeFillPanel" type="PanelContainer" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content"]
+visible = false
+custom_minimum_size = Vector2(0, 218)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("CodeStyle")
+
+[node name="CodeMargin" type="MarginContainer" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content/CodeFillPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 14
+
+[node name="CodeLines" type="VBoxContainer" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content/CodeFillPanel/CodeMargin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="LoopLine" type="HBoxContainer" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content/CodeFillPanel/CodeMargin/CodeLines"]
+layout_mode = 2
+theme_override_constants/separation = 7
+
+[node name="Prefix" type="Label" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content/CodeFillPanel/CodeMargin/CodeLines/LoopLine"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.858824, 0.956863, 0.827451, 1)
+theme_override_font_sizes/font_size = 16
+text = "for (int i ="
+vertical_alignment = 1
+
+[node name="StartInput" type="LineEdit" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content/CodeFillPanel/CodeMargin/CodeLines/LoopLine"]
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.0901961, 0.270588, 0.2, 1)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("FillNormal")
+theme_override_styles/focus = SubResource("FillFocus")
+max_length = 2
+alignment = 1
+placeholder_text = "?"
+
+[node name="Middle" type="Label" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content/CodeFillPanel/CodeMargin/CodeLines/LoopLine"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.858824, 0.956863, 0.827451, 1)
+theme_override_font_sizes/font_size = 16
+text = "; i <"
+vertical_alignment = 1
+
+[node name="LimitInput" type="LineEdit" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content/CodeFillPanel/CodeMargin/CodeLines/LoopLine"]
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.0901961, 0.270588, 0.2, 1)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("FillNormal")
+theme_override_styles/focus = SubResource("FillFocus")
+max_length = 2
+alignment = 1
+placeholder_text = "?"
+
+[node name="Suffix" type="Label" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content/CodeFillPanel/CodeMargin/CodeLines/LoopLine"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.858824, 0.956863, 0.827451, 1)
+theme_override_font_sizes/font_size = 16
+text = "; i++) {"
+vertical_alignment = 1
+
+[node name="OutputLine" type="HBoxContainer" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content/CodeFillPanel/CodeMargin/CodeLines"]
+layout_mode = 2
+theme_override_constants/separation = 7
+
+[node name="Prefix" type="Label" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content/CodeFillPanel/CodeMargin/CodeLines/OutputLine"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.858824, 0.956863, 0.827451, 1)
+theme_override_font_sizes/font_size = 15
+text = "  cout << \"浇\" <<"
+vertical_alignment = 1
+
+[node name="IndexInput" type="LineEdit" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content/CodeFillPanel/CodeMargin/CodeLines/OutputLine"]
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.0901961, 0.270588, 0.2, 1)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("FillNormal")
+theme_override_styles/focus = SubResource("FillFocus")
+max_length = 2
+alignment = 1
+placeholder_text = "?"
+
+[node name="Suffix" type="Label" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content/CodeFillPanel/CodeMargin/CodeLines/OutputLine"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.858824, 0.956863, 0.827451, 1)
+theme_override_font_sizes/font_size = 15
+text = "<< \"号土地中……\";"
+vertical_alignment = 1
+
+[node name="CloseBrace" type="Label" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content/CodeFillPanel/CodeMargin/CodeLines"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.858824, 0.956863, 0.827451, 1)
+theme_override_font_sizes/font_size = 16
+text = "}"
+
+[node name="DoneLine" type="Label" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content/CodeFillPanel/CodeMargin/CodeLines"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.858824, 0.956863, 0.827451, 1)
+theme_override_font_sizes/font_size = 16
+text = "cout << \"浇灌完成！\";"
+
+[node name="CodeEditor" type="CodeEdit" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content"]
+custom_minimum_size = Vector2(0, 300)
+layout_mode = 2
+theme_override_colors/background_color = Color(0.0705882, 0.168627, 0.129412, 1)
+theme_override_colors/font_color = Color(0.854902, 0.960784, 0.85098, 1)
+theme_override_colors/caret_color = Color(1, 0.839216, 0.352941, 1)
+theme_override_colors/selection_color = Color(0.258824, 0.682353, 0.470588, 0.45)
+theme_override_font_sizes/font_size = 15
+editable = false
+gutters_draw_line_numbers = true
+highlight_current_line = true
+scroll_fit_content_height = false
+
+[node name="TraceTitle" type="Label" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.105882, 0.286275, 0.215686, 1)
+theme_override_font_sizes/font_size = 16
+text = "Run + Evidence"
+
+[node name="Trace" type="RichTextLabel" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content"]
+custom_minimum_size = Vector2(0, 82)
+layout_mode = 2
+theme_override_colors/default_color = Color(0.12549, 0.333333, 0.243137, 1)
+theme_override_font_sizes/normal_font_size = 15
+theme_override_styles/normal = SubResource("TraceStyle")
+text = ""
+
+[node name="Feedback" type="Label" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content"]
+visible = false
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.670588, 0.333333, 0.141176, 1)
+theme_override_font_sizes/font_size = 15
+text = ""
+autowrap_mode = 2
+
+[node name="Actions" type="HBoxContainer" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ResetButton" type="Button" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content/Actions"]
+custom_minimum_size = Vector2(110, 48)
+layout_mode = 2
+focus_mode = 1
+theme_override_colors/font_color = Color(0.321569, 0.180392, 0.0901961, 1)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("ResetStyle")
+text = "↻ 重填"
+
+[node name="SubmitButton" type="Button" parent="Hud/CodeDrawer/DrawerSurface/DrawerMargin/Content/Actions"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 1
+theme_override_colors/font_color = Color(1, 0.980392, 0.878431, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("SubmitStyle")
+text = "施放魔法  ▶"
+
+[node name="MagicSpellOverlay" type="Control" parent="Hud"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Backdrop" type="ColorRect" parent="Hud/MagicSpellOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.0156863, 0.211765, 0.25098, 0.42)
+
+[node name="Flash" type="ColorRect" parent="Hud/MagicSpellOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.560784, 1, 0.968627, 0.74)
+
+[node name="RippleOuter" type="Panel" parent="Hud/MagicSpellOverlay"]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -180.0
+offset_top = -180.0
+offset_right = 180.0
+offset_bottom = 180.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+pivot_offset = Vector2(180, 180)
+theme_override_styles/panel = SubResource("SpellRingOuter")
+
+[node name="RippleInner" type="Panel" parent="Hud/MagicSpellOverlay"]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -126.0
+offset_top = -126.0
+offset_right = 126.0
+offset_bottom = 126.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+pivot_offset = Vector2(126, 126)
+theme_override_styles/panel = SubResource("SpellRingInner")
+
+[node name="SpellTitle" type="RichTextLabel" parent="Hud/MagicSpellOverlay"]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -360.0
+offset_top = -62.0
+offset_right = 360.0
+offset_bottom = 62.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+pivot_offset = Vector2(360, 62)
+theme_override_colors/default_color = Color(0.713726, 1, 0.960784, 1)
+theme_override_colors/font_outline_color = Color(0.0196078, 0.188235, 0.227451, 1)
+theme_override_constants/outline_size = 10
+theme_override_font_sizes/normal_font_size = 50
+bbcode_enabled = true
+text = "[center][wave amp=18.0 freq=4.0 connected=1]循环浇水魔法[/wave][/center]"
+fit_content = true
+
+[node name="WaterDrops" type="Label" parent="Hud/MagicSpellOverlay"]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -210.0
+offset_top = 82.0
+offset_right = 210.0
+offset_bottom = 130.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.6, 1, 0.968627, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 30
+text = "💧  ✦  💧  ✦  💧"
+horizontal_alignment = 1
+
+[node name="StoryDialogueOverlay" parent="Hud" instance=ExtResource("10_story_dialogue")]
+
+[node name="AgentStatusPanel" type="PanelContainer" parent="Hud"]
+visible = false
+offset_left = 22.0
+offset_top = 520.0
+offset_right = 440.0
+offset_bottom = 690.0
+theme_override_styles/panel = SubResource("TaskCardStyle")
+
+[node name="Margin" type="MarginContainer" parent="Hud/AgentStatusPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 14
+
+[node name="Content" type="VBoxContainer" parent="Hud/AgentStatusPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="Hud/AgentStatusPanel/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.105882, 0.286275, 0.215686, 1)
+theme_override_font_sizes/font_size = 18
+
+[node name="Body" type="Label" parent="Hud/AgentStatusPanel/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.247059, 0.431373, 0.313726, 1)
+theme_override_font_sizes/font_size = 14
+autowrap_mode = 2
+
+[node name="RecoveryPanel" type="Control" parent="Hud"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="Dimmer" type="ColorRect" parent="Hud/RecoveryPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.0313726, 0.105882, 0.0823529, 0.72)
+
+[node name="Panel" type="PanelContainer" parent="Hud/RecoveryPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -100.0
+offset_right = 260.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("TaskCardStyle")
+
+[node name="Margin" type="MarginContainer" parent="Hud/RecoveryPanel/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="Content" type="VBoxContainer" parent="Hud/RecoveryPanel/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="Hud/RecoveryPanel/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.635294, 0.203922, 0.141176, 1)
+theme_override_font_sizes/font_size = 22
+text = "需要恢复"
+horizontal_alignment = 1
+
+[node name="Message" type="Label" parent="Hud/RecoveryPanel/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.247059, 0.431373, 0.313726, 1)
+theme_override_font_sizes/font_size = 16
+autowrap_mode = 2
+horizontal_alignment = 1
+
+[node name="AutoSaveTimer" type="Timer" parent="."]
+wait_time = 0.65
+one_shot = true
+
+[node name="SaveIndicatorTimer" type="Timer" parent="."]
+wait_time = 0.7
+one_shot = true

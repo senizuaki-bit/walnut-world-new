@@ -97,6 +97,7 @@ from walnut_backend.adapters.postgres.models import (
 )
 from walnut_backend.adapters.postgres.product_drafts import draft_resource
 from walnut_backend.adapters.postgres.product_interactions import (
+    _interaction_projection_kind,
     _run_interactions_have_authority,
     _skill_patch_interaction_has_authority,
 )
@@ -1628,6 +1629,317 @@ async def finish_skill_patch_proposal(
         await jobs.finish_in_session(session, claim, status="SUCCEEDED")
 
 
+async def finish_hint_interaction(
+    *,
+    session_factory: async_sessionmaker[AsyncSession],
+    commands: PostgresCommandStore,
+    jobs: PostgresWorkflowJobStore,
+    authority: _TurnAuthority,
+    decision: AgentDecision,
+    lease_seconds: int,
+) -> None:
+    """Atomically publish one no-Run teaching hint as an AgentInteraction.
+
+    A hint explains the current situation to the student.  It never compiles or
+    executes the Skill, so it produces no Run, no Evidence and no World event;
+    the only durable products are one AgentInteraction, its feedback Event and
+    the frozen TeachingDirective receipt that authorized the response.
+    """
+
+    directive = decision.teaching_directive
+    if (
+        directive is None
+        or decision.response_type not in {"question", "hint"}
+        or decision.draft.skill_patch is not None
+        or decision.evidence_refs
+    ):
+        raise WorkflowInvariantError("hint projection requires one no-Evidence teaching response")
+    decision_wire = cast(dict[str, Any], json_value(decision))
+    request_sha256 = canonical_json_sha256(cast(dict[str, Any], json_value(authority.event)))
+    async with session_factory() as session, session.begin():
+        owner = await session.scalar(
+            select(AgentSessionRow)
+            .where(
+                AgentSessionRow.tenant_id == authority.claim.tenant_id,
+                AgentSessionRow.actor_id == authority.context.actor.actor_id,
+                AgentSessionRow.session_id == authority.event.session_id,
+                AgentSessionRow.status == "ACTIVE",
+            )
+            .with_for_update()
+        )
+        replayed = await session.scalar(
+            select(ProductInteractionRow).where(
+                ProductInteractionRow.tenant_id == authority.claim.tenant_id,
+                ProductInteractionRow.actor_id == authority.context.actor.actor_id,
+                ProductInteractionRow.session_id == authority.event.session_id,
+                ProductInteractionRow.turn_id == authority.event.turn_id,
+            )
+        )
+        if replayed is not None:
+            # The whole projection commits in one transaction, so an existing
+            # Interaction for this Turn can only be this hint replayed after an
+            # ACK-unknown restart.  Re-close its identity instead of appending a
+            # second one.  The full read-side closure cannot be used here: it
+            # requires the workflow job to be SUCCEEDED and unleased, which is
+            # by construction false while this worker still holds the claim.
+            replayed_feedback = replayed.interaction_json.get("feedback")
+            replayed_terminal = await session.scalar(
+                select(JobStepReceiptRow).where(
+                    JobStepReceiptRow.tenant_id == authority.claim.tenant_id,
+                    JobStepReceiptRow.job_id == authority.claim.job_id,
+                    JobStepReceiptRow.step_name == "TURN_COMPLETED",
+                )
+            )
+            if (
+                owner is None
+                or replayed_terminal is None
+                or not isinstance(replayed_feedback, Mapping)
+                or _interaction_projection_kind(replayed.interaction_json) != "HINT_NO_RUN"
+                or replayed_feedback.get("command_id") != authority.command.command_id
+                or replayed_feedback.get("run_id") is not None
+                or replayed.interaction_json.get("projection_source")
+                != replayed_terminal.receipt_json
+            ):
+                raise WorkflowInvariantError("hint ACK recovery authority drifted")
+            return
+        claim = await jobs.start_step_in_session(
+            session,
+            authority.claim,
+            phase="PRODUCT_PROJECTION",
+            lease_seconds=lease_seconds,
+        )
+        command = await _command(session, claim.command_id, claim.tenant_id)
+        context = _operation_context(command)
+        request_turn = await session.scalar(
+            select(AgentTurnRow).where(
+                AgentTurnRow.tenant_id == claim.tenant_id,
+                AgentTurnRow.actor_id == context.actor.actor_id,
+                AgentTurnRow.session_id == authority.event.session_id,
+                AgentTurnRow.turn_id == authority.event.turn_id,
+                AgentTurnRow.command_id == command.command_id,
+            )
+        )
+        side_effect_receipts = list(
+            (
+                await session.scalars(
+                    select(JobStepReceiptRow).where(
+                        JobStepReceiptRow.tenant_id == claim.tenant_id,
+                        JobStepReceiptRow.job_id == claim.job_id,
+                        JobStepReceiptRow.step_name.in_(
+                            ("SKILL_INVOKED", "SANDBOX_DISPATCHED", "WORLD_COMMITTED")
+                        ),
+                    )
+                )
+            ).all()
+        )
+        request_runs = list(
+            (
+                await session.scalars(
+                    select(RunRow).where(
+                        RunRow.tenant_id == claim.tenant_id,
+                        RunRow.actor_id == context.actor.actor_id,
+                        RunRow.session_id == authority.event.session_id,
+                        RunRow.command_id == command.command_id,
+                    )
+                )
+            ).all()
+        )
+        request_evidence = list(
+            (
+                await session.scalars(
+                    select(EvidenceRow).where(
+                        EvidenceRow.tenant_id == claim.tenant_id,
+                        EvidenceRow.actor_id == context.actor.actor_id,
+                        EvidenceRow.command_id == command.command_id,
+                    )
+                )
+            ).all()
+        )
+        if (
+            owner is None
+            or request_turn is None
+            or command.status is not CommandStatus.VALIDATING
+            or command.stage != "POLICY"
+            or command.terminal
+            or command.request_context != authority.command.request_context
+            or command.versions != authority.command.versions
+            or request_turn.turn_sequence != owner.session_json.get("last_turn_sequence")
+            or side_effect_receipts
+            or request_runs
+            or request_evidence
+        ):
+            raise WorkflowInvariantError("hint Command, Turn or no-Run boundary drifted")
+        interaction_sequence = int(
+            await session.scalar(
+                select(func.max(ProductInteractionRow.sequence)).where(
+                    ProductInteractionRow.tenant_id == claim.tenant_id,
+                    ProductInteractionRow.actor_id == context.actor.actor_id,
+                    ProductInteractionRow.session_id == authority.event.session_id,
+                )
+            )
+            or 0
+        ) + 1
+        now = max(
+            await _database_now(session),
+            command.updated_at,
+            decision.completed_at,
+            request_turn.created_at,
+        )
+        interaction_id = _identifier("interaction", claim.tenant_id, claim.job_id)
+        feedback = {
+            "session_id": authority.event.session_id,
+            "turn_id": authority.event.turn_id,
+            "command_id": command.command_id,
+            "run_id": None,
+            "message_key": decision.message_key,
+            "message": decision.message,
+            "source": decision.source,
+            "degraded": decision.degraded,
+            "fallback_reason": decision.fallback_reason,
+            "evidence_refs": [],
+            "completed_at": _timestamp(decision.completed_at),
+        }
+        feedback_sha256 = canonical_json_sha256(feedback)
+        stream_id = f"agent-session:{authority.event.session_id}"
+        appended = await append_events_in_session(
+            session,
+            stream_id,
+            await _stream_sequence(session, claim.tenant_id, stream_id),
+            (
+                UncommittedEvent(
+                    event_type=RuntimeEventType.AGENT_TURN_FEEDBACK_READY.value,
+                    event_version=1,
+                    producer="walnut_agent_runtime",
+                    trace_id=context.trace_id,
+                    command_id=command.command_id,
+                    correlation_id=context.correlation_id,
+                    causation_id=command.command_id,
+                    content_ref=context.content_ref,
+                    payload=feedback,
+                ),
+            ),
+            context,
+            world_id=None,
+            event_model=RuntimeEvent,
+            occurred_at=decision.completed_at,
+        )
+        feedback_event = cast(RuntimeEvent, appended.events[0])
+        source = {
+            "receipt_id": workflow_step_receipt_id(
+                claim.tenant_id, claim.job_id, "TURN_COMPLETED"
+            ),
+            "source_type": "AGENT_TURN_PRODUCT_PROJECTION",
+            "source_revision": 1,
+            "actor": cast(dict[str, Any], json_value(context.actor)),
+            "content_ref": cast(dict[str, Any], json_value(context.content_ref)),
+            "interaction_id": interaction_id,
+            "session_id": authority.event.session_id,
+            "turn_id": authority.event.turn_id,
+            "sequence": interaction_sequence,
+            "command_id": command.command_id,
+            "feedback_event_id": feedback_event.event_id,
+            "feedback_sha256": feedback_sha256,
+            "role": decision.role,
+            "response_type": decision.response_type,
+            "question": decision.draft.question,
+            "hint_level": decision.draft.hint_level,
+            "skill_patch_sha256": None,
+            "committed_at": _timestamp(now),
+        }
+        source["source_sha256"] = canonical_json_sha256(source)
+        event_wire = cast(dict[str, Any], json_value(public_domain_event_data(feedback_event)))
+        event_wire.pop("payload")
+        event_wire["feedback_sha256"] = feedback_sha256
+        interaction = {
+            "request_context": request_context_data(context),
+            "interaction_id": interaction_id,
+            "session_id": authority.event.session_id,
+            "turn_id": authority.event.turn_id,
+            "sequence": interaction_sequence,
+            "interaction_revision": 1,
+            "projection_source": source,
+            "role": decision.role,
+            "response_type": decision.response_type,
+            "question": decision.draft.question,
+            "hint_level": decision.draft.hint_level,
+            "feedback": feedback,
+            "feedback_event": event_wire,
+            "skill_patch": None,
+            "patch_decision": None,
+            "created_at": _timestamp(now),
+            "updated_at": _timestamp(now),
+            "links": {
+                "self": (
+                    f"/product-experience/v1/sessions/{authority.event.session_id}/"
+                    f"agent-interactions/{interaction_id}"
+                ),
+                "session_workspace": (
+                    f"/product-experience/v1/sessions/{authority.event.session_id}/workspace"
+                ),
+                "skill_draft": None,
+            },
+        }
+        session.add(
+            ProductInteractionRow(
+                tenant_id=claim.tenant_id,
+                actor_id=context.actor.actor_id,
+                session_id=authority.event.session_id,
+                interaction_id=interaction_id,
+                turn_id=authority.event.turn_id,
+                sequence=interaction_sequence,
+                interaction_revision=1,
+                created_at=now,
+                updated_at=now,
+                interaction_json=interaction,
+            )
+        )
+        await session.flush()
+        await jobs.record_step_in_session(
+            session,
+            claim,
+            step_name="HINT_DECISION_DERIVED",
+            input_sha256=request_sha256,
+            output={"decision": decision_wire},
+        )
+        await jobs.record_step_in_session(
+            session,
+            claim,
+            step_name="TURN_COMPLETED",
+            input_sha256=request_sha256,
+            output=source,
+        )
+        terminal = replace(
+            command,
+            status=CommandStatus.APPLIED,
+            stage="COMPLETE",
+            terminal=True,
+            result={
+                "result_type": "NO_EFFECT",
+                "reason_code": "HINT_DELIVERED",
+            },
+            error=None,
+            evidence_refs=(),
+            links={"self": command.links["self"]},
+            revision=command.revision + 1,
+            updated_at=now,
+        )
+        transitioned = await commands.transition_in_session(
+            session,
+            CommandTransition(command, terminal),
+            context,
+        )
+        if isinstance(transitioned, Failure):
+            raise WorkflowInvariantError("hint terminal Command CAS was lost")
+        await refresh_workspace_in_session(
+            session,
+            tenant_id=claim.tenant_id,
+            actor_id=context.actor.actor_id,
+            session_id=authority.event.session_id,
+            updated_at=now,
+        )
+        await jobs.finish_in_session(session, claim, status="SUCCEEDED")
+
+
 async def _learner_objective(
     session: AsyncSession,
     *,
@@ -2325,7 +2637,7 @@ def _canonical_teaching_directive(
             role=cast(Any, role),
             event_type=outcome.event_type,
             failure_count=outcome.failure_count,
-            hint_requested=False,
+            hint_requested=outcome.event_type == "hint_requested",
             teaching_spec_version=teaching_spec_version,
             task_concepts=tuple(cast(Sequence[str], knowledge_points)),
             max_hint_level=_integer(hint_policy, "max_level"),

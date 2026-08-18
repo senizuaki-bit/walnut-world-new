@@ -7,10 +7,15 @@ from dataclasses import replace
 from pathlib import Path
 
 import pytest
-from yaya_agent_build import CPP20_SAFE_V1_PROFILE, canonical_source_bundle_sha256
+from yaya_agent_build import (
+    CPP20_SAFE_V1_FLAGS,
+    CPP20_SAFE_V1_PROFILE,
+    canonical_source_bundle_sha256,
+)
 from yaya_agent_contracts import HarvestIntent, canonical_json_sha256
 
-from walnut_backend.bootstrap import Settings
+from walnut_backend.adapters.postgres.models import BuildPolicyRow
+from walnut_backend.bootstrap import DEFAULT_CONTRACT_PATH, Settings
 from walnut_backend.domain.world.engine import WorldEngine
 from walnut_backend.domain.world.rules import WorldRules
 from walnut_backend.int1_e2e_authority import (
@@ -21,9 +26,10 @@ from walnut_backend.int1_e2e_authority import (
     _issue_student_authorization,
     build_int1_e2e_fixture,
 )
+from walnut_backend.workers.build_worker import _parse_policy
 
 BACKEND_ROOT = Path(__file__).resolve().parents[2]
-AGENT_ROOT = BACKEND_ROOT.parent / "agent"
+AGENT_ROOT = DEFAULT_CONTRACT_PATH
 JWT_SECRET = "int1-test-only-hs256-secret-value"
 FORMAL_M2_PHASE_DEADLINE_SECONDS = 600
 FORMAL_M2_TRANSITION_BUDGET_SECONDS = 300
@@ -118,6 +124,48 @@ def test_int1_fixture_is_deterministic_canonical_and_agent_compatible(tmp_path: 
     assert transition.score == 8
     assert transition.applied_intent_ids == tuple(intent.intent_id for intent in intents)
     assert all(plot["crop"] is None for plot in transition.state["plots"])
+
+
+def test_watering_fixture_keeps_exact_certified_flags_and_both_draft_semantics(
+    tmp_path: Path,
+) -> None:
+    config = replace(_config(tmp_path), watering=True)
+    fixture = build_int1_e2e_fixture(config)
+    policy_json = fixture.build_policy_json
+    source = fixture.content_json["task"]["starter_skill"]["source_bundle"]["files"][0][
+        "content"
+    ]
+
+    assert policy_json["compile_flags"] == list(CPP20_SAFE_V1_FLAGS)
+    assert "-Wno-unused-variable" not in policy_json["compile_flags"]
+    assert "    (void)target;" in source
+    assert "        int gap = 60 - moisture[i];" in source
+    assert "        int gap = target[i] - moisture[i];" not in source
+
+    corrected = source.replace(
+        "        int gap = 60 - moisture[i];",
+        "        int gap = target[i] - moisture[i];",
+    )
+    assert corrected != source
+    assert corrected.count("        int gap = target[i] - moisture[i];") == 1
+
+    policy = BuildPolicyRow(
+        tenant_id="tenant_yaya",
+        build_policy_id=str(fixture.launch_authority_json["build_policy_id"]),
+        actor_id=ACTOR_ID,
+        content_hash=fixture.content_hash,
+        compiler_profile=str(policy_json["compiler_profile"]),
+        compiler_version=str(policy_json["compiler_version"]),
+        sandbox_image_digest=config.sandbox_image.rsplit("@", 1)[1],
+        test_suite_version=str(policy_json["test_suite_version"]),
+        allowed_capabilities=["WATER", "WORLD_READ"],
+        max_source_files=32,
+        max_source_bytes=1_048_576,
+        policy_json=policy_json,
+        policy_sha256=fixture.build_policy_sha256,
+        active=True,
+    )
+    assert _parse_policy(policy)["policy_json"] == policy_json
 
 
 def test_env_loader_requires_opt_in_production_auth_and_never_captures_secrets(

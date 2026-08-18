@@ -103,6 +103,9 @@ class _InvocationAuthority:
     activation: SkillActivationRow
     artifact: SkillArtifactRow
     policy: BuildPolicyRow
+    # The level's starting World, when the content recorded one. Scoring uses it
+    # so every Run is an independent attempt; see _materialize.
+    world_baseline: Mapping[str, Any] | None = None
 
 
 class PostgresFencedSkillInvocation:
@@ -336,8 +339,22 @@ class PostgresFencedSkillInvocation:
                 if rules is None:
                     raise WorkflowInvariantError("World rules are not activated")
                 try:
+                    # Score the attempt against the level baseline rather than
+                    # the carried-over World. Watering accumulates and success
+                    # compares hydration to exact expected units, so scoring the
+                    # carried-over state means a correct program passes once and
+                    # never again, and a single overshooting Run makes the level
+                    # permanently unreachable. The World commit below applies to
+                    # the same baseline, so both agree on the resulting hash.
+                    #
+                    # Worlds seeded before the baseline existed carry none and
+                    # keep the original behaviour.
                     transition = self._world_engine.apply(
-                        authority.world.state, candidate.action_intents, rules
+                        authority.world.state
+                        if authority.world_baseline is None
+                        else authority.world_baseline,
+                        candidate.action_intents,
+                        rules,
                     )
                 except WorldRuleViolation as error:
                     world_failure = _world_rejected(error.code)
@@ -993,7 +1010,19 @@ async def _load_authority(
         raise AgentToolExecutionError(
             "TOOL_WORLD_REVISION_CONFLICT", "World authority differs from the accepted Turn."
         )
-    return _InvocationAuthority(command, world, activation, artifact, policy)
+    return _InvocationAuthority(
+        command,
+        world,
+        activation,
+        artifact,
+        policy,
+        _baseline_state(world_row.snapshot_json),
+    )
+
+
+def _baseline_state(snapshot_json: Mapping[str, Any]) -> Mapping[str, Any] | None:
+    baseline = snapshot_json.get("baseline_state")
+    return baseline if isinstance(baseline, Mapping) else None
 
 
 async def _scalar(session: AsyncSession, statement: Any, *, for_update: bool) -> Any | None:

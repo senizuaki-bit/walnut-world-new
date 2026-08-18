@@ -1,0 +1,296 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/game_start_screen.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/terrain/grass_plot.png" id="2_grass"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/facilities/ancient_magic_tree.png" id="3_tree"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/facilities/greenhouse.png" id="4_greenhouse"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/characters/little_walnut.png" id="5_walnut"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/crops/tomato.png" id="6_tomato"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/crops/carrot.png" id="7_carrot"]
+
+[sub_resource type="StyleBoxFlat" id="HeroPanel"]
+bg_color = Color(0.991, 0.957, 0.806, 0.98)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.176, 0.42, 0.302, 1)
+corner_radius_top_left = 34
+corner_radius_top_right = 34
+corner_radius_bottom_right = 34
+corner_radius_bottom_left = 34
+shadow_color = Color(0.055, 0.16, 0.105, 0.32)
+shadow_size = 18
+shadow_offset = Vector2(0, 10)
+
+[sub_resource type="StyleBoxFlat" id="StartButton"]
+bg_color = Color(0.984, 0.665, 0.169, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.145, 0.357, 0.247, 1)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+shadow_color = Color(0.302, 0.188, 0.047, 0.38)
+shadow_size = 8
+shadow_offset = Vector2(0, 5)
+
+[sub_resource type="StyleBoxFlat" id="StartButtonHover"]
+bg_color = Color(1, 0.78, 0.278, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.145, 0.357, 0.247, 1)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+shadow_color = Color(0.302, 0.188, 0.047, 0.28)
+shadow_size = 6
+shadow_offset = Vector2(0, 4)
+
+[sub_resource type="StyleBoxFlat" id="Badge"]
+bg_color = Color(0.118, 0.302, 0.216, 0.96)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+content_margin_left = 14.0
+content_margin_top = 7.0
+content_margin_right = 14.0
+content_margin_bottom = 7.0
+
+[node name="GameStartScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.77, 0.93, 0.84, 1)
+
+[node name="Grass" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -650.0
+offset_top = -470.0
+offset_right = 650.0
+offset_bottom = 58.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+modulate = Color(1, 1, 1, 0.76)
+texture = ExtResource("2_grass")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Tree" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = -76.0
+offset_top = 170.0
+offset_right = 344.0
+offset_bottom = 640.0
+mouse_filter = 2
+modulate = Color(1, 1, 1, 0.86)
+texture = ExtResource("3_tree")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Greenhouse" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -358.0
+offset_top = 245.0
+offset_right = 62.0
+offset_bottom = 625.0
+grow_horizontal = 0
+mouse_filter = 2
+modulate = Color(1, 1, 1, 0.82)
+texture = ExtResource("4_greenhouse")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LeafLeft" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 66.0
+offset_top = 62.0
+offset_right = 170.0
+offset_bottom = 150.0
+rotation = -0.24
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.18, 0.49, 0.31, 1)
+theme_override_font_sizes/font_size = 54
+text = "❧"
+
+[node name="LeafRight" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -150.0
+offset_top = 70.0
+offset_right = -45.0
+offset_bottom = 150.0
+grow_horizontal = 0
+rotation = 0.21
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.18, 0.49, 0.31, 1)
+theme_override_font_sizes/font_size = 54
+text = "❧"
+
+[node name="HeroCard" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -410.0
+offset_top = -264.0
+offset_right = 410.0
+offset_bottom = 270.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(410, 267)
+theme_override_styles/panel = SubResource("HeroPanel")
+
+[node name="Margin" type="MarginContainer" parent="HeroCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 44
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 44
+theme_override_constants/margin_bottom = 30
+
+[node name="Content" type="HBoxContainer" parent="HeroCard/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 22
+
+[node name="Copy" type="VBoxContainer" parent="HeroCard/Margin/Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="TitleGroup" type="VBoxContainer" parent="HeroCard/Margin/Content/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="Eyebrow" type="Label" parent="HeroCard/Margin/Content/Copy/TitleGroup"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.76, 0.36, 0.08, 1)
+theme_override_font_sizes/font_size = 17
+text = "芽芽家园 · AI 编程农场"
+
+[node name="Title" type="Label" parent="HeroCard/Margin/Content/Copy/TitleGroup"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.10, 0.30, 0.21, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.82, 0.28, 0.38)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 3
+theme_override_font_sizes/font_size = 43
+text = "核桃代码世界"
+
+[node name="Subtitle" type="Label" parent="HeroCard/Margin/Content/Copy"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.28, 0.39, 0.26, 1)
+theme_override_font_sizes/font_size = 18
+text = "学会用循环，让小核桃一次照顾整排农田。"
+autowrap_mode = 2
+
+[node name="Badge" type="PanelContainer" parent="HeroCard/Margin/Content/Copy"]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_styles/panel = SubResource("Badge")
+
+[node name="Label" type="Label" parent="HeroCard/Margin/Content/Copy/Badge"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.93, 0.98, 0.81, 1)
+theme_override_font_sizes/font_size = 14
+text = "演示关卡  横向循环浇水"
+
+[node name="Spacer" type="Control" parent="HeroCard/Margin/Content/Copy"]
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+
+[node name="EnterButton" type="Button" parent="HeroCard/Margin/Content/Copy"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(330, 72)
+layout_mode = 2
+size_flags_horizontal = 0
+focus_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StartButton")
+theme_override_styles/hover = SubResource("StartButtonHover")
+theme_override_styles/pressed = SubResource("StartButtonHover")
+text = "进入农场  →"
+
+[node name="Tip" type="Label" parent="HeroCard/Margin/Content/Copy"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.40, 0.48, 0.32, 1)
+theme_override_font_sizes/font_size = 13
+text = "任务、草稿和农田状态会从正式服务恢复"
+
+[node name="ArtStage" type="Control" parent="HeroCard/Margin/Content"]
+custom_minimum_size = Vector2(300, 430)
+layout_mode = 2
+
+[node name="Tomato" type="TextureRect" parent="HeroCard/Margin/Content/ArtStage"]
+layout_mode = 0
+offset_left = -2.0
+offset_top = 248.0
+offset_right = 118.0
+offset_bottom = 368.0
+rotation = -0.13
+mouse_filter = 2
+texture = ExtResource("6_tomato")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Carrot" type="TextureRect" parent="HeroCard/Margin/Content/ArtStage"]
+layout_mode = 0
+offset_left = 202.0
+offset_top = 250.0
+offset_right = 302.0
+offset_bottom = 370.0
+rotation = 0.15
+mouse_filter = 2
+texture = ExtResource("7_carrot")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="WalnutArt" type="TextureRect" parent="HeroCard/Margin/Content/ArtStage"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 28.0
+offset_top = 20.0
+offset_right = 278.0
+offset_bottom = 320.0
+mouse_filter = 2
+texture = ExtResource("5_walnut")
+expand_mode = 1
+stretch_mode = 5

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 from yaya_agent_contracts import (
     ActionIntent,
@@ -17,7 +17,7 @@ from yaya_agent_contracts import (
 )
 
 from .rules import WorldRules
-from .scoring import is_successful, score_actions
+from .scoring import is_successful, score_actions, score_watering
 from .state import WorldRuleViolation, mutable_state, state_hash
 
 
@@ -97,7 +97,14 @@ class WorldEngine:
             )
             action_types.append(intent.action_type)
 
-        score = score_actions(action_types)
+        score = (
+            score_watering(
+                cast(Sequence[Mapping[str, object]], next_state.get("plots", [])),
+                rules,
+            )
+            if rules.is_watering
+            else score_actions(action_types)
+        )
         return WorldTransition(
             state=next_state,
             applied_intent_ids=tuple(intent.intent_id for intent in intents),

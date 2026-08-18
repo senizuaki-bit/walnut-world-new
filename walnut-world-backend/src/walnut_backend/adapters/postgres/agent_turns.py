@@ -174,16 +174,29 @@ class PostgresAgentTurnStore:
                 or client_state.get("last_event_sequence") != world.last_event_sequence
             ):
                 return Failure(_event_gap())
+            # A hint asks the teaching roles to explain the student's current
+            # situation.  It never compiles or executes the Skill, so it is the
+            # one Turn that declares no binding at all, and the server adopts
+            # its own Registry head as the Skill the hint is about.  A declared
+            # binding always means "execute this Skill" regardless of the input
+            # type, and is still validated against that same head.
+            turn_input = request_body.get("input")
             bindings = request_body.get("skill_bindings")
-            if not isinstance(bindings, list) or len(bindings) != 1:
+            if not isinstance(bindings, list):
                 return Failure(_not_certified())
-            skill = bindings[0]
-            if not isinstance(skill, Mapping):
-                return Failure(_not_certified())
-            try:
-                requested_skill = SkillRef(**dict(skill))
-            except (TypeError, ValueError):
-                return Failure(_not_certified())
+            is_hint_request = (
+                not bindings
+                and isinstance(turn_input, Mapping)
+                and turn_input.get("type") == "MESSAGE"
+            )
+            requested_skill: SkillRef | None = None
+            if not is_hint_request:
+                if len(bindings) != 1 or not isinstance(bindings[0], Mapping):
+                    return Failure(_not_certified())
+                try:
+                    requested_skill = SkillRef(**dict(bindings[0]))
+                except (TypeError, ValueError):
+                    return Failure(_not_certified())
             try:
                 active = await load_current_activation_authority(
                     session,
@@ -205,7 +218,7 @@ class PostgresAgentTurnStore:
                     exists().where(
                         SkillCertificationRevocationRow.tenant_id == context.actor.tenant_id,
                         SkillCertificationRevocationRow.certification_id
-                        == skill.get("certification_id"),
+                        == activation.certification_id,
                     )
                 )
             )

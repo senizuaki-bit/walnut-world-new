@@ -4,6 +4,8 @@
 
 const { spawnSync } = require('node:child_process');
 
+const { packageManagerCommand } = require('../package-manager');
+
 const SEP = '  ' + '─'.repeat(36);
 
 function failAndExit(step, body) {
@@ -19,7 +21,8 @@ function failAndExit(step, body) {
 
 function runLint() {
   const cwd = process.cwd();
-  const res = spawnSync('npm', ['run', 'lint'], {
+  const invocation = packageManagerCommand('npm', ['run', 'lint']);
+  const res = spawnSync(invocation.command, invocation.args, {
     cwd,
     stdio: ['ignore', 'pipe', 'pipe'],
     env: process.env,

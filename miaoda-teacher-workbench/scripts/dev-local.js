@@ -24,6 +24,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { execSync, spawn, spawnSync } = require('node:child_process');
 
+const { packageManagerCommand } = require('./package-manager');
+
 process.chdir(path.resolve(__dirname, '..'));
 
 function warn(msg) {
@@ -100,9 +102,7 @@ if (process.env.SUDA_WEBUSER) {
 
 // 5. 并发起前后端 dev server
 console.log('[dev-local] (5/5) 并发起 dev:server + dev:client');
-const child = spawn(
-  'npx',
-  [
+const npxInvocation = packageManagerCommand('npx', [
     '--no-install',
     'concurrently',
     '--names',
@@ -112,7 +112,10 @@ const child = spawn(
     '--kill-others-on-fail',
     'npm run dev:server',
     'npm run dev:client',
-  ],
+  ]);
+const child = spawn(
+  npxInvocation.command,
+  npxInvocation.args,
   { stdio: 'inherit', env: process.env },
 );
 child.on('exit', (code) => process.exit(code ?? 0));

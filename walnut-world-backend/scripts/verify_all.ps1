@@ -45,7 +45,17 @@ if (-not (Test-Path -LiteralPath $NodeExe -PathType Leaf)) {
 }
 
 if ([string]::IsNullOrWhiteSpace($ContractPath)) {
-    $ContractPath = Join-Path (Split-Path -Parent $RepositoryRoot) "agent"
+    $BundledContractPath = Join-Path $RepositoryRoot "agent"
+    $LegacyContractPath = Join-Path (Split-Path -Parent $RepositoryRoot) "agent"
+    if (Test-Path -LiteralPath (Join-Path $BundledContractPath 'contracts\manifest.json') -PathType Leaf) {
+        $ContractPath = $BundledContractPath
+    }
+    elseif (Test-Path -LiteralPath (Join-Path $LegacyContractPath 'contracts\manifest.json') -PathType Leaf) {
+        $ContractPath = $LegacyContractPath
+    }
+    else {
+        throw "Agent contract workspace was not found at $BundledContractPath or $LegacyContractPath"
+    }
 }
 $ContractPath = [System.IO.Path]::GetFullPath($ContractPath)
 

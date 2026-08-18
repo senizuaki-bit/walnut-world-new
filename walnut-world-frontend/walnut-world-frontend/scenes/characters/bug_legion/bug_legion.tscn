@@ -1,0 +1,45 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/characters/bug_legion/bug_legion.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/characters/pest_bug.png" id="2_bug"]
+
+[node name="BugLegion" type="Node3D"]
+visible = false
+script = ExtResource("1_script")
+
+[node name="Members" type="Node3D" parent="."]
+
+[node name="DismissTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="BugCaptain" type="Sprite3D" parent="Members"]
+position = Vector3(0, 0.82, 0)
+scale = Vector3(1.12, 1.12, 1.12)
+pixel_size = 0.00115
+billboard = 1
+alpha_cut = 2
+texture = ExtResource("2_bug")
+
+[node name="BugLeft" type="Sprite3D" parent="Members"]
+position = Vector3(-0.72, 0.58, 0.22)
+scale = Vector3(0.78, 0.78, 0.78)
+pixel_size = 0.00115
+billboard = 1
+alpha_cut = 2
+texture = ExtResource("2_bug")
+
+[node name="BugRight" type="Sprite3D" parent="Members"]
+position = Vector3(0.72, 0.58, 0.22)
+scale = Vector3(0.78, 0.78, 0.78)
+pixel_size = 0.00115
+billboard = 1
+alpha_cut = 2
+texture = ExtResource("2_bug")
+
+[node name="BugRear" type="Sprite3D" parent="Members"]
+position = Vector3(0.18, 0.5, 0.58)
+scale = Vector3(0.64, 0.64, 0.64)
+pixel_size = 0.00115
+billboard = 1
+alpha_cut = 2
+texture = ExtResource("2_bug")

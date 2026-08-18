@@ -36,6 +36,73 @@ def test_int3_demo_script_powershell_syntax_is_valid_without_execution() -> None
     assert completed.returncode == 0, completed.stdout + completed.stderr
 
 
+def test_int3_demo_allows_bounded_provider_interaction_recovery_over_three_minutes() -> None:
+    script = SCRIPT.read_text(encoding="utf-8")
+
+    assert "[ValidateRange(15, 300)]\n    [int]$InteractionDeadlineSeconds" in script
+    assert "$InteractionDeadlineSeconds -ge $TotalDeadlineSeconds" in script
+
+
+def test_int3_demo_worker_uses_the_pinned_watering_world_rules() -> None:
+    script = SCRIPT.read_text(encoding="utf-8")
+
+    assert "'WALNUT_WORLD_WATERING_EXPECTED_UNITS'" in script
+    assert (
+        "$env:WALNUT_WORLD_WATERING_EXPECTED_UNITS = '2,1,1,0,0,2,0,1'"
+        in script
+    )
+    worker_start = script.index("Start-OwnedProcess -Role workflow")
+    assert script.index("$env:WALNUT_WORLD_WATERING_EXPECTED_UNITS =", 0, worker_start) > 0
+
+
+def test_backend_state_timestamp_remains_an_exact_utc_string_in_powershell_7() -> None:
+    script = SCRIPT.read_text(encoding="utf-8")
+    state_reader = script.split("function Get-ExactBackendState", 1)[1].split(
+        "function Get-DatabaseUrl", 1
+    )[0]
+
+    assert "ConvertFrom-Json -DateKind String" in state_reader
+    assert state_reader.index("ConvertFrom-Json -DateKind String") < state_reader.index(
+        "[DateTimeOffset]::Parse([string]$state.process_started_at)"
+    )
+
+    completed = subprocess.run(
+        [
+            "pwsh.exe",
+            "-NoProfile",
+            "-NonInteractive",
+            "-Command",
+            (
+                "$raw='{\"process_started_at\":\"2026-08-17T09:00:00.1234567Z\"}';"
+                "$state=$raw|ConvertFrom-Json -DateKind String;"
+                "if($state.process_started_at -isnot [string]){exit 2};"
+                "if($state.process_started_at -cne '2026-08-17T09:00:00.1234567Z'){exit 3};"
+                "$parsed=[DateTimeOffset]::Parse([string]$state.process_started_at);"
+                "if($parsed.Offset -ne [TimeSpan]::Zero){exit 4}"
+            ),
+        ],
+        cwd=BACKEND_ROOT,
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    assert completed.returncode == 0, completed.stdout + completed.stderr
+
+
+def test_student_jwt_is_raw_for_godot_and_prefixed_once_for_gateway_preflight() -> None:
+    script = SCRIPT.read_text(encoding="utf-8")
+    jwt_function = script.split("function New-StudentAuthorization", 1)[1].split(
+        "function Unprotect-BackendHmacSecret", 1
+    )[0]
+
+    assert 'return "$signingInput.$(ConvertTo-Base64Url -Bytes $signature)"' in jwt_function
+    assert 'return "Bearer $signingInput.' not in jwt_function
+    assert 'Authorization = "Bearer $studentAuthorization"' in script
+    assert "$env:YAYA_AUTH_TOKEN = $studentAuthorization" in script
+    assert '$env:YAYA_AUTH_TOKEN = "Bearer $studentAuthorization"' not in script
+
+
 def test_int3_demo_reuses_gateway_and_starts_only_private_runtime_children() -> None:
     script = SCRIPT.read_text(encoding="utf-8")
 
@@ -77,7 +144,7 @@ def test_int3_demo_has_read_only_exact_baseline_and_preserves_result_database() 
         'expected["audit_records"] = counts.get("audit_records", 0)',
         "database is not the seven-row authority baseline",
         "unit_id='YAYA_FARM_001'",
-        "world_id='world_watering_0001'",
+        "world_id='world_crop_watering_0001'",
         "learner_id='student_0001'",
         "recoverable_llm_dispatches",
         "game_runs",

@@ -1,0 +1,70 @@
+[gd_scene load_steps=9 format=3 uid="uid://bmfxii7yqshbu"]
+
+[ext_resource type="PackedScene" uid="uid://ct2m82cc52q75" path="res://scenes/player/player.tscn" id="1_player"]
+[ext_resource type="PackedScene" path="res://scenes/environment/grass_patch.tscn" id="2_grass"]
+[ext_resource type="Script" uid="uid://evqtfxx3em06" path="res://scripts/camera/camera_follow.gd" id="3_camera"]
+[ext_resource type="PackedScene" path="res://scenes/terrain/terrain_manager.tscn" id="4_terrain"]
+[ext_resource type="PackedScene" path="res://scenes/environment/garden_house.tscn" id="5_house"]
+[ext_resource type="PackedScene" path="res://scenes/environment/art_gallery.tscn" id="6_gallery"]
+[ext_resource type="PackedScene" path="res://scenes/characters/bug_legion/bug_legion.tscn" id="7_bug_legion"]
+
+[sub_resource type="Environment" id="Environment_pastel"]
+background_mode = 1
+background_color = Color(0.796078, 0.929412, 0.937255, 1)
+background_energy_multiplier = 0.65
+ambient_light_source = 3
+ambient_light_color = Color(0.890196, 0.984314, 0.941176, 1)
+ambient_light_energy = 0.45
+reflected_light_source = 2
+tonemap_mode = 2
+tonemap_exposure = 0.85
+glow_enabled = true
+glow_intensity = 0.18
+glow_strength = 0.35
+
+[node name="Main" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_pastel")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.88294756, 0.36994863, -0.2890356, 0, 0.6156615, 0.7880107, 0.46947157, -0.6957722, 0.5435968, 0, 0, 0)
+light_color = Color(1, 0.960784, 0.85098, 1)
+light_energy = 0.75
+
+[node name="CameraRig" type="Node3D" parent="."]
+script = ExtResource("3_camera")
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig"]
+transform = Transform3D(1, 0, 0, 0, 0.8910065, 0.4539905, 0, -0.4539905, 0.8910065, 0, 6, 8)
+current = true
+fov = 32.0
+near = 0.1
+
+[node name="TerrainManager" parent="." instance=ExtResource("4_terrain")]
+
+[node name="GardenHouseInstance" parent="TerrainManager/Buildings" instance=ExtResource("5_house")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 2.8, 0, -1.2)
+
+[node name="ArtGalleryInstance" parent="TerrainManager/Buildings" instance=ExtResource("6_gallery")]
+
+[node name="GrassInstances" type="Node3D" parent="."]
+
+[node name="GrassPatchA" parent="GrassInstances" instance=ExtResource("2_grass")]
+transform = Transform3D(0.69210845, 0, -0.19845891, 0, 0.72, 0, 0.19845891, 0, 0.69210845, -5.8, 0, -3.8)
+
+[node name="GrassPatchB" parent="GrassInstances" instance=ExtResource("2_grass")]
+transform = Transform3D(0.5298563, 0, 0.23590724, 0, 0.58, 0, -0.23590724, 0, 0.5298563, 5.6, 0, -3.1)
+
+[node name="GrassPatchC" parent="GrassInstances" instance=ExtResource("2_grass")]
+transform = Transform3D(0.5333517, 0, 0.08447462, 0, 0.54, 0, -0.08447462, 0, 0.5333517, -4.4, 0, 4)
+
+[node name="GrassPatchD" parent="GrassInstances" instance=ExtResource("2_grass")]
+transform = Transform3D(0.638991, 0, -0.23257369, 0, 0.68, 0, 0.23257369, 0, 0.638991, 4.8, 0, 3.6)
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+
+[node name="AgentPresentation" type="Node3D" parent="."]
+
+[node name="BugLegion" parent="AgentPresentation" instance=ExtResource("7_bug_legion")]
+position = Vector3(3.6, 0.3, 0.8)
