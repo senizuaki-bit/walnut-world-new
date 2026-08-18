@@ -126,6 +126,9 @@ def test_int1_fixture_is_deterministic_canonical_and_agent_compatible(tmp_path: 
     assert all(plot["crop"] is None for plot in transition.state["plots"])
 
 
+SLASH, STAR = chr(47), chr(42)
+
+
 def test_watering_fixture_keeps_exact_certified_flags_and_both_draft_semantics(
     tmp_path: Path,
 ) -> None:
@@ -138,16 +141,31 @@ def test_watering_fixture_keeps_exact_certified_flags_and_both_draft_semantics(
 
     assert policy_json["compile_flags"] == list(CPP20_SAFE_V1_FLAGS)
     assert "-Wno-unused-variable" not in policy_json["compile_flags"]
-    assert "    (void)target;" in source
-    assert "        int gap = 60 - moisture[i];" in source
-    assert "        int gap = target[i] - moisture[i];" not in source
+    # The starter is a fill-in-the-blank template rather than compiling-but-wrong
+    # code. A child opening the scroll has to be told what to do, and four markers
+    # name the four decisions the task is actually about. The trade-off is
+    # deliberate and is why this test changed: the first Build now fails in the
+    # compiler, so the level no longer opens with a Run that waters a wrong amount.
+    for name in ("目标", "当前", "边界", "份数"):
+        marker = SLASH + STAR + name + STAR + SLASH
+        assert marker in source, marker
+    assert "int gap = target[i] - moisture[i];" not in source
 
-    corrected = source.replace(
-        "        int gap = 60 - moisture[i];",
-        "        int gap = target[i] - moisture[i];",
-    )
-    assert corrected != source
-    assert corrected.count("        int gap = target[i] - moisture[i];") == 1
+    # Filling the blanks in has to land exactly on the intended solution, so the
+    # task stays solvable by doing only what the markers ask. Note that the two
+    # boundary markers and the two amount markers each take a DIFFERENT number --
+    # the child fills every blank on its own, not all of one name at once.
+    filled = source
+    for name, answers in (("目标", ["target"]), ("当前", ["moisture"]),
+                          ("边界", ["30", "0"]), ("份数", ["2", "1"])):
+        for answer in answers:
+            filled = filled.replace(SLASH + STAR + name + STAR + SLASH, answer, 1)
+    assert SLASH + STAR not in filled.split('for (int i')[1]
+    assert "        int gap = target[i] - moisture[i];" in filled
+    assert "        if (gap >= 30) {" in filled
+    assert "        } else if (gap > 0) {" in filled
+    assert filled.count(chr(34) + "WATER " + chr(34) + " << i << " + chr(34) + " 2") == 1
+    assert filled.count(chr(34) + "WATER " + chr(34) + " << i << " + chr(34) + " 1") == 1
 
     policy = BuildPolicyRow(
         tenant_id="tenant_yaya",

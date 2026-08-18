@@ -42,6 +42,7 @@ from yaya_agent_runtime.tool_registry import ToolRegistry
 from yaya_agent_sandbox import RecoverableSandboxPort
 
 from walnut_backend.adapters.postgres.activation_authority import (
+    ActivationAuthorityNotFound,
     load_current_activation_authority,
 )
 from walnut_backend.adapters.postgres.agent_runtime import (
@@ -712,22 +713,35 @@ class TurnWorkflowHandler:
                 if len(raw_bindings) != 1 or not isinstance(raw_bindings[0], Mapping):
                     raise WorkflowInvariantError("Turn has no unique Skill binding")
                 requested_ref = SkillRef(**dict(raw_bindings[0]))
-            active = await load_current_activation_authority(
-                session,
-                tenant_id=owned.tenant_id,
-                actor_id=binding.actor_id,
-                content_hash=binding.content_hash,
-                world_id=binding.world_id,
-                agent_profile_id=binding.agent_profile_id,
-                authority_id=binding.authority_id,
-                skill_ref=requested_ref,
-            )
-            skill_ref: SkillRef = active.skill_ref
-            if (
-                command.versions.skill_version != skill_ref.skill_version_id
-                or command.versions.artifact_sha256 != skill_ref.artifact_sha256
-            ):
-                raise WorkflowInvariantError("Turn Activation authority drifted after acceptance")
+            skill_ref: SkillRef | None = None
+            try:
+                active = await load_current_activation_authority(
+                    session,
+                    tenant_id=owned.tenant_id,
+                    actor_id=binding.actor_id,
+                    content_hash=binding.content_hash,
+                    world_id=binding.world_id,
+                    agent_profile_id=binding.agent_profile_id,
+                    authority_id=binding.authority_id,
+                    skill_ref=requested_ref,
+                )
+            except ActivationAuthorityNotFound:
+                # At the start of a level nothing has been built yet, so the
+                # Registry names no Skill. A hint is still answerable from the
+                # task alone -- refusing it would silence the Agent exactly when
+                # the learner is most likely to be stuck. Every other Turn needs
+                # a Skill to execute and keeps failing here.
+                if not is_hint_request:
+                    raise
+            else:
+                skill_ref = active.skill_ref
+                if (
+                    command.versions.skill_version != skill_ref.skill_version_id
+                    or command.versions.artifact_sha256 != skill_ref.artifact_sha256
+                ):
+                    raise WorkflowInvariantError(
+                        "Turn Activation authority drifted after acceptance"
+                    )
             content = await session.scalar(
                 select(ProductContentUnitRow).where(
                     ProductContentUnitRow.tenant_id == owned.tenant_id,

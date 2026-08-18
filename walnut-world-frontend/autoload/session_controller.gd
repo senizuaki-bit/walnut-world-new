@@ -23,18 +23,27 @@ const PENDING_TURN_SLOTS := ["agent_turn", "agent_hint"]
 ## server-side state left to reconcile. 401/403 are deliberately excluded: a
 ## fresh token recovers those, and the envelope must survive to be replayed.
 const UNACCEPTED_TURN_HTTP_STATUSES := [400, 404, 409, 422]
-## Flow states from which a student may start a new action.
+## Flow states a student may act from.
 ##
-## ERROR is deliberately absent: it is a fail-closed state, and
-## submit_and_run_flow_test pins that the controller must reject student
-## mutations while the client is in it. Leaving ERROR is AppRoot's job, via a
-## full authority re-bootstrap -- not something an individual action may do.
+## ERROR is included, and that is not a loosening of the authority gate. Whether
+## authority exists is decided independently, and strictly, by the other checks
+## in _student_action_readiness: authority_context, authoritative_session and its
+## session_id must all be present. ERROR only records that the *previous* action
+## failed, which says nothing about whether authority still holds.
+##
+## Excluding it meant any single failure -- a compile error, one dead-lettered
+## Turn -- disabled every student action until the game was restarted, 问叮当
+## included. That is the opposite of what a learner needs: the moment something
+## breaks is the moment they want to retry or ask for help. Retrying is safe on
+## its own terms; each action re-derives its authority, carries a stable
+## Idempotency-Key, and reconciles its own pending envelope first.
 const STUDENT_ACTION_READY_FLOW_STATES := [
 	WalnutClientStore.FlowState.READY,
 	WalnutClientStore.FlowState.BUILD_FAILED,
 	WalnutClientStore.FlowState.CERTIFIED,
 	WalnutClientStore.FlowState.ACTIVE,
 	WalnutClientStore.FlowState.COMPLETED,
+	WalnutClientStore.FlowState.ERROR,
 ]
 const PENDING_DRAFT_SAVE_SLOT := "draft_save"
 const RETRYABLE_HTTP_STATUSES := [429, 502, 503, 504]
@@ -1372,11 +1381,18 @@ func request_turn(input_override: Dictionary = {}, requires_skill_binding: bool 
 	# invocation only reconciles that envelope; a new Turn requires a later,
 	# explicit invocation after the pending identity has closed.
 	#
-	# Every slot is reconciled, not just this action's. A pending Hint has no Run
-	# and no World change, but the gateway still advanced last_turn_sequence when
-	# it accepted it, so leaving it unclosed would make this Turn's
-	# client_turn_sequence wrong. Pinned by pending_turn_restart_recovery_test.
-	var pending_recovery: Dictionary = await recover_pending_turn_operations()
+	# Only THIS action's slot is reconciled. "问叮当" and "直接运行" are separate
+	# student actions: a Run that is stuck retrying must not also take away the
+	# ability to ask for help, which is exactly when help is wanted most.
+	#
+	# Reconciling every slot used to be required for a different reason -- the
+	# gateway advances last_turn_sequence on any accepted Turn, so skipping an
+	# unclosed one left this Turn's client_turn_sequence stale. That is now
+	# handled where it belongs: a refused submission re-reads the Session cursor
+	# and retries once (_resynced_turn_sequence). Startup still reconciles every
+	# slot exactly once, from app_root.
+	var slot := "agent_turn" if requires_skill_binding else "agent_hint"
+	var pending_recovery: Dictionary = await recover_pending_turn_operations(true, [slot])
 	if not pending_recovery.get("ok", false):
 		store.report_error(pending_recovery.get("error", _local_error("PENDING_TURN_RECOVERY_FAILED", "Pending Agent Turn reconciliation failed.")))
 		return
@@ -1418,7 +1434,6 @@ func request_turn(input_override: Dictionary = {}, requires_skill_binding: bool 
 		if not input_override.is_empty()
 		else {"type": "ASSIGNED_TASK", "task_id": task.task_id}
 	)
-	var slot := "agent_turn" if requires_skill_binding else "agent_hint"
 	var attempted_sequence := int(session.get("last_turn_sequence", 0)) + 1
 	var execution: Dictionary = await _submit_turn_attempt(
 		slot, session, world, turn_input, skill_bindings, attempted_sequence,
@@ -1543,15 +1558,26 @@ func _resynced_turn_sequence(session_id: String, attempted_sequence: int) -> int
 	return corrected if corrected != attempted_sequence and corrected > 0 else 0
 
 
-## Reconcile every persisted Turn identity before callers are allowed to derive
-## a new identity from Workspace. The original request Dictionary and key are
-## passed through unchanged, including after ClientStore JSON restoration.
-func recover_pending_turn_operations(recovery_mode := true) -> Dictionary:
+## Reconcile persisted Turn identities before callers are allowed to derive a new
+## identity from Workspace. The original request Dictionary and key are passed
+## through unchanged, including after ClientStore JSON restoration.
+##
+## `slots` restricts the reconciliation to those envelopes. It defaults to every
+## slot, which is what startup recovery wants; a single student action passes only
+## its own slot so that one stuck action cannot disable the others.
+func recover_pending_turn_operations(
+	recovery_mode := true,
+	slots: Array = [],
+) -> Dictionary:
 	var store := _client_store()
 	if store == null:
 		return _local_failure("PENDING_TURN_STORE_UNAVAILABLE", "ClientStore is unavailable for pending Turn recovery.")
+	var requested_slots: Array = PENDING_TURN_SLOTS if slots.is_empty() else slots
+	for slot in requested_slots:
+		if slot not in PENDING_TURN_SLOTS:
+			return _local_failure("PENDING_TURN_SLOT_UNKNOWN", "Pending Turn recovery received an unknown slot.")
 	var pending_slots: Array[String] = []
-	for slot in PENDING_TURN_SLOTS:
+	for slot in requested_slots:
 		var integrity: Dictionary = store.validate_pending_operation(slot)
 		if not integrity.get("ok", false):
 			return integrity

@@ -238,7 +238,17 @@ class PostgresAgentRuntimeReads:
             seen_versions: set[str] = set()
             for entry in entries:
                 if entry.skill_version_id in seen_versions:
-                    raise AgentRuntimeAuthorityError("Skill history repeats a version")
+                    # The same version can legitimately be activated more than
+                    # once: a student who edits their code and then changes it
+                    # back rebuilds to an identical artifact, so the version id
+                    # repeats, and re-activating the current version is allowed
+                    # outright. This is a version *history*, so record where each
+                    # version first entered the Registry and skip the repeats.
+                    #
+                    # Rejecting them used to end the Session for good -- history
+                    # is replayed on every completed task, so one re-activation
+                    # meant the learner could never finish a task again.
+                    continue
                 seen_versions.add(entry.skill_version_id)
                 certification = await session.scalar(
                     select(SkillCertificationRow).where(

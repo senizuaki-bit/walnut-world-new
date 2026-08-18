@@ -197,6 +197,7 @@ class PostgresAgentTurnStore:
                     requested_skill = SkillRef(**dict(bindings[0]))
                 except (TypeError, ValueError):
                     return Failure(_not_certified())
+            activation = None
             try:
                 active = await load_current_activation_authority(
                     session,
@@ -209,21 +210,28 @@ class PostgresAgentTurnStore:
                     skill_ref=requested_skill,
                 )
             except ActivationAuthorityNotFound:
-                return Failure(_not_certified())
+                # Nothing has been built yet, so the Registry names no Skill. A
+                # hint can still be answered from the task alone, and refusing it
+                # would silence the Agent at the start of a level, which is
+                # exactly when a learner is most likely to ask for help.
+                if not is_hint_request:
+                    return Failure(_not_certified())
             except WorkflowInvariantError as error:
                 return Failure(_invariant(str(error)))
-            activation = active.activation
-            revoked = await session.scalar(
-                select(
-                    exists().where(
-                        SkillCertificationRevocationRow.tenant_id == context.actor.tenant_id,
-                        SkillCertificationRevocationRow.certification_id
-                        == activation.certification_id,
+            else:
+                activation = active.activation
+            if activation is not None:
+                revoked = await session.scalar(
+                    select(
+                        exists().where(
+                            SkillCertificationRevocationRow.tenant_id == context.actor.tenant_id,
+                            SkillCertificationRevocationRow.certification_id
+                            == activation.certification_id,
+                        )
                     )
                 )
-            )
-            if revoked is True:
-                return Failure(_not_certified())
+                if revoked is True:
+                    return Failure(_not_certified())
             policy = await session.scalar(
                 select(BuildPolicyRow).where(
                     BuildPolicyRow.tenant_id == context.actor.tenant_id,
@@ -260,8 +268,13 @@ class PostgresAgentTurnStore:
                     policy_version=authority.build_policy_id,
                     world_rules_version=world_snapshot.world_rules_version,
                     teaching_spec_version=authority.teaching_spec_version,
-                    skill_version=activation.skill_version_id,
-                    artifact_sha256=activation.artifact_sha256,
+                    # None when a hint is raised before anything was built.
+                    skill_version=(
+                        None if activation is None else activation.skill_version_id
+                    ),
+                    artifact_sha256=(
+                        None if activation is None else activation.artifact_sha256
+                    ),
                     compiler_version=policy.compiler_version,
                     sandbox_image_digest=policy.sandbox_image_digest,
                     test_suite_version=policy.test_suite_version,

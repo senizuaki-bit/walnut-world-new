@@ -7,12 +7,17 @@ extends SceneTree
 ## failure path returned early without restoring it. TURN_RUNNING is not in the
 ## readiness gate's ready_states, so the marker outlived the operation that set it.
 ##
-## This is deliberately NOT a test that a failed Turn re-enables student actions:
-## ClientStore.report_error moves the flow to ERROR, and ERROR is fail-closed on
-## purpose (pinned by submit_and_run_flow_test). The invariant under test is only
-## that the transient marker never outlives its operation, which matters most on
-## AppRoot's startup recovery path -- that caller reports startup failure without
-## going through report_error, so nothing else would ever clear TURN_RUNNING.
+## The invariant under test is that the transient marker never outlives its
+## operation, which matters most on AppRoot's startup recovery path -- that caller
+## reports startup failure without going through report_error, so nothing else
+## would ever clear TURN_RUNNING.
+##
+## Note what is NOT claimed here. report_error moves the flow to ERROR, and ERROR
+## does not disable later student actions: a failed Turn is settled knowledge, not
+## lost authority, and the learner must be able to retry it or ask 问叮当 for help.
+## Authority itself is gated separately and strictly (submit_and_run_flow_test).
+## What must not happen is the reverse -- a failed Turn silently *restoring* a
+## marker-carrying flow, which is what the last block below pins.
 
 const StoreScript := preload("res://autoload/client_store.gd")
 const ControllerScript := preload("res://autoload/session_controller.gd")
@@ -111,15 +116,24 @@ func _initialize() -> void:
 	if store.flow_state != WalnutClientStore.FlowState.ACTIVE:
 		failures.append("回收失败后必须原样恢复进入前的 flow_state，不得擅自升级或降级。")
 
-	# And the marker must never be used to grant authority the client did not hold:
-	# a fail-closed ERROR must survive a failed Turn unchanged.
+	# And the marker must never be rewritten by a failure: whatever report_error
+	# recorded has to survive a failed Turn unchanged.
 	store.report_error({"scope": "HTTP", "code": "UNAUTHORIZED", "message": "JWT has expired"})
 	var flow_before_error_turn := store.flow_state
 	var recovery_from_error: Dictionary = await controller.recover_pending_turn_operations()
 	if bool(recovery_from_error.get("ok", false)):
 		failures.append("失败前提不成立：401 之下的第二次回收同样必须失败。")
 	if store.flow_state != flow_before_error_turn:
-		failures.append("失败的 Turn 不得把 fail-closed 的 ERROR 状态改写成可操作状态。")
+		failures.append("失败的 Turn 不得改写 report_error 记录下来的 flow_state。")
+
+	# The learner's way out. One failed Run used to take away every button --
+	# including 问叮当, the one thing a stuck student actually needs -- until the
+	# game was restarted. Authority is untouched by a failure, so the next action
+	# must still be allowed.
+	if not controller._student_action_readiness("Hint").get("ok", false):
+		failures.append("一次失败的 Turn 之后必须还能问叮当，不能把学生锁死到重启为止。")
+	if not controller._student_action_readiness("Run").get("ok", false):
+		failures.append("一次失败的 Turn 之后必须还能重新运行代码。")
 
 	store.queue_free()
 	await process_frame

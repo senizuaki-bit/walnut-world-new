@@ -268,7 +268,23 @@ func _initialize() -> void:
 		"pre_world": _snapshot(5, 9, NEW_HASH),
 		"interaction_cursor_before": 3,
 	})
-	await controller.request_turn()
+	# Slot isolation: reconciling the Run slot must not see, and must not clear,
+	# an envelope stranded in the Hint slot. Before this, one stuck Run silenced
+	# 问叮当 -- reconciliation covered every slot, so the Hint returned early on
+	# the Run's open envelope. The sequence concern that once justified that is
+	# now handled by re-reading the Session cursor on a refused submission.
+	var isolated: Dictionary = await controller.recover_pending_turn_operations(true, ["agent_turn"])
+	if not isolated.get("ok", false) or bool(isolated.get("value", {}).get("had_pending", true)):
+		_abort("Reconciling the Run slot must not report the Hint slot's pending envelope.", absolute_path)
+		return
+	if restored.get_pending_operation("agent_hint").is_empty():
+		_abort("Reconciling the Run slot must not clear the Hint slot's envelope.", absolute_path)
+		return
+
+	# Reconciled through the Hint entry point because the stranded envelope is in
+	# the Hint slot: each student action now reconciles only its own slot, so a
+	# stuck Run cannot take away the ability to ask for help.
+	await controller.request_hint()
 	if (
 		game.calls.size() != 2
 		or game.calls[1].request != failed_request

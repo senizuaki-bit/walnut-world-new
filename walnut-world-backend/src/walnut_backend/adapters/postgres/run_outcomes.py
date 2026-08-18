@@ -687,6 +687,12 @@ async def exact_failure_suffix_count(
             else:
                 _validate_terminal_command(authority)
         else:
+            if _abandoned_run_attempt(authority):
+                # The suffix must be a contiguous run of settled same-class
+                # failures. A crashed Turn tells us nothing about what the
+                # student did, so stop here instead of counting it or guessing
+                # past it -- the same as hitting a Turn with no Run at all.
+                break
             _validate_terminal_command(authority)
             await validate_terminal_projection(
                 session,
@@ -757,6 +763,10 @@ async def list_validated_session_runs(
             validation_state=validation_state,
         )
         if authority.run.run_id != through_run_id:
+            if _abandoned_run_attempt(authority):
+                # Wreckage from a crashed Turn. Leave it out of the history
+                # entirely rather than failing the whole walk over it.
+                continue
             _validate_terminal_command(authority)
             await validate_terminal_projection(
                 session,
@@ -2413,6 +2423,35 @@ async def _validate_world(
         )
     ):
         raise WorkflowInvariantError("World event differs from the Run receipt")
+
+
+def _abandoned_run_attempt(authority: ValidatedRunAuthority) -> bool:
+    """True when this Run's Turn never finished, so it is wreckage, not history.
+
+    A Run row is written when the Sandbox result lands, but the Turn that owns it
+    still has to settle its Command. If the workflow dies in between -- a
+    dead-lettered job, a Command stuck at FAILED -- the Run survives describing an
+    attempt that was never completed.
+
+    Such a Run is not a step in the learner's history and must not be replayed as
+    one. Treating it as authoritative is what made a single crashed Turn disable a
+    Session for good: every later Turn re-walked the history, found the mismatch,
+    and dead-lettered in turn, so the damage kept reproducing itself. A student
+    should just be able to try again.
+
+    This is deliberately NOT a way to make an inconvenient Run disappear. It keys
+    only on the Command/job settlement state, which the workflow owns and which is
+    append-only. A Run whose Turn *did* settle is still held to
+    `_validate_terminal_command` in full, so a Command that claims success while
+    disagreeing with its Run is still rejected.
+    """
+
+    return (
+        not authority.command.terminal
+        or authority.command.status
+        not in {CommandStatus.APPLIED, CommandStatus.REJECTED}
+        or authority.job.status != "SUCCEEDED"
+    )
 
 
 def _validate_terminal_command(authority: ValidatedRunAuthority) -> None:

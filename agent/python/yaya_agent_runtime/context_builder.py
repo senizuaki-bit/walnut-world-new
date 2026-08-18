@@ -546,21 +546,27 @@ class ContextBuilder:
 
         if role in {"xiaohutao", "teaching_agent", "bug_agent"}:
             if event.skill_ref is None:
-                raise _context_error(
-                    "CONTEXT_SKILL_REQUIRED",
-                    f"{role} requires an exact certified skill binding",
+                # Asking for help before building anything is legitimate: at the
+                # start of a level the Registry holds no activation, so the
+                # teaching roles advise from the task alone rather than refusing
+                # the learner outright. Every other turn still requires a binding.
+                if event.event_type != "hint_requested":
+                    raise _context_error(
+                        "CONTEXT_SKILL_REQUIRED",
+                        f"{role} requires an exact certified skill binding",
+                    )
+            else:
+                skill = _require_snapshot(
+                    await self._skills.get_bound_skill(event.skill_ref, operation_context),
+                    SkillSnapshot,
+                    "skill",
                 )
-            skill = _require_snapshot(
-                await self._skills.get_bound_skill(event.skill_ref, operation_context),
-                SkillSnapshot,
-                "skill",
-            )
-            if skill.ref != event.skill_ref:
-                raise _context_error(
-                    "CONTEXT_SKILL_BINDING_MISMATCH",
-                    "skill port returned a different certified binding",
-                )
-            _validate_snapshot_provenance(skill.request_context, operation_context, "skill")
+                if skill.ref != event.skill_ref:
+                    raise _context_error(
+                        "CONTEXT_SKILL_BINDING_MISMATCH",
+                        "skill port returned a different certified binding",
+                    )
+                _validate_snapshot_provenance(skill.request_context, operation_context, "skill")
 
         if role == "xiaohutao":
             available_skills = _require_snapshot_sequence(
@@ -999,13 +1005,12 @@ class ContextBuilder:
                     "CONTEXT_SESSION_RUNS_MISMATCH",
                     "session run history is incomplete or contains another session",
                 )
-            if len(session_runs) < 2 or not any(
-                not item.task_success for item in session_runs[:-1]
-            ):
-                raise _context_error(
-                    "CONTEXT_BOOK_HISTORY_TRIVIAL",
-                    "book_agent requires at least one failed Run before the current success",
-                )
+            # Solving a task on the first try used to be rejected here, because a
+            # growth summary was assumed to need a failure to contrast against.
+            # That punished the learners who did best: the Turn dead-lettered,
+            # which stranded the client envelope and left them unable to run or
+            # ask for a hint at all. A first-try success is still a real result,
+            # and book_agent summarizes it from the completion Run.
             session_current = next(item for item in session_runs if item.run_id == event.run_id)
             if session_current != run_result:
                 raise _context_error(
@@ -1220,7 +1225,10 @@ def validate_context_for_role(context: TurnContext) -> None:
             )
         return
     if role == "teaching_agent":
-        if context.skill is None or context.learner_profile is None:
+        # A hint raised before the learner has built anything has no certified
+        # source to reason about; every other teaching turn still requires it.
+        skill_optional = context.event.event_type == "hint_requested"
+        if (context.skill is None and not skill_optional) or context.learner_profile is None:
             raise _context_error(
                 "CONTEXT_TEACHING_INCOMPLETE",
                 "teaching_agent requires bound source and learner projection",

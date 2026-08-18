@@ -856,18 +856,21 @@ using namespace std;
 int main() {{
     int moisture[8] = {{{moisture}}};
     int target[8]   = {{{target}}};
-    (void)target;
 
     for (int i = 0; i < 8; i++) {{
-        int gap = 60 - moisture[i];
+        // 第一步：将两个标记替换为目标数组名和当前数组名
+        int gap = /*目标*/[i] - /*当前*/[i];
 
-        if (gap >= 30) {{
-            cout << "WATER " << i << " 2\\n";
-        }} else if (gap > 0) {{
-            cout << "WATER " << i << " 1\\n";
+        // 第二步：将边界和份数标记替换为正确数字
+        if (gap >= /*边界*/) {{
+            cout << "WATER " << i << " /*份数*/\\n";
+        }} else if (gap > /*边界*/) {{
+            cout << "WATER " << i << " /*份数*/\\n";
         }}
-    }}
 
+        // 提示：gap <= 0 时不输出 WATER，喷头保持关闭
+        // 真实运行出错后，可继续修改整个循环体
+    }}
     return 0;
 }}
 """

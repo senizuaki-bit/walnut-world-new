@@ -369,12 +369,21 @@ class GameEvent:
                 "compile_failed",
                 "run_failed",
                 "task_completed",
-                "hint_requested",
                 "skill_patch_requested",
             }
             and self.skill_ref is None
         ):
             raise ValueError(f"{self.event_type} requires one certified skill_ref")
+        # A hint is the one request a learner can make before building anything.
+        # At the start of a level the Registry holds no activation, so there is
+        # no certified Skill to name -- the teaching roles then advise from the
+        # task alone. Once a hint refers to a Run it must name that Run's Skill.
+        if (
+            self.event_type == "hint_requested"
+            and self.skill_ref is None
+            and self.run_id is not None
+        ):
+            raise ValueError("hint_requested about a Run requires its certified skill_ref")
         if self.event_type == "run_failed":
             if self.failure_count < 1 or self.failure_key is None:
                 raise ValueError(

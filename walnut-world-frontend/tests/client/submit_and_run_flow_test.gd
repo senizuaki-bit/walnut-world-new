@@ -98,13 +98,27 @@ func _initialize() -> void:
 		push_error("An existing public activation must preserve the direct Save -> Run action: %s %s" % [str(game.stages), str(store.last_error)])
 		quit(1)
 		return
+	# Losing Session authority is what must close the gate -- the client then does
+	# not know the server's state and cannot act on guesses. This used to be
+	# asserted by setting flow to ERROR, which conflated "authority is unknown"
+	# with "the last action failed". Those are different: a failed action leaves
+	# authority perfectly intact, and locking the learner out after one bad Run
+	# took away every button, 问叮当 included, until the game was restarted.
+	var retained_session: Dictionary = controller.authoritative_session.duplicate(true)
+	controller.configure_authority(active_bootstrap, {})
 	store.set_flow(WalnutClientStore.FlowState.ERROR)
 	var stages_before_error := game.stages.duplicate()
 	await controller.request_build()
 	await controller.request_activation()
 	var error_blocked: Dictionary = await controller.request_submit_and_run()
 	if error_blocked.get("ok", true) or str(error_blocked.get("stage", "")) != "AUTHORITY" or game.stages != stages_before_error:
-		push_error("Controller must reject student mutations while the formal AppRoot is in ERROR.")
+		push_error("Controller must reject student mutations while Session authority is missing.")
+		quit(1)
+		return
+	# With authority intact, a prior failure must NOT keep the learner locked out.
+	controller.configure_authority(active_bootstrap, retained_session)
+	if not controller._student_action_readiness("Run").get("ok", false):
+		push_error("A failed action must not disable later student actions while authority holds.")
 		quit(1)
 		return
 	var fresh_bootstrap := _bootstrap(false)
