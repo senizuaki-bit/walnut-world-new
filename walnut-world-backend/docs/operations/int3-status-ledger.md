@@ -111,6 +111,7 @@
 - `scripts/sync_feishu_learning.py`
 - `config/int3_feishu_assets.json`
 - `config/int3_feishu_assets.target.json`
+- `config/int3_feishu_assets.legacy.json`
 - `docs/operations/int3-feishu-demo.md`
 
 冻结情况：
@@ -602,5 +603,6 @@
 
 - [INT3 五分钟真实演示](int3-feishu-demo.md)
 - [Backend 运行手册](runbook.md)
-- [新账号非敏感飞书资产配置](../../config/int3_feishu_assets.target.json)
-- [旧账号保留配置](../../config/int3_feishu_assets.json)
+- [新账号非敏感飞书资产配置](../../config/int3_feishu_assets.target.json)（与默认配置内容一致）
+- [默认飞书资产配置](../../config/int3_feishu_assets.json)：`sync_feishu_learning.py` 不带 `--assets` 时用它，现指向新账号
+- [旧账号保留配置](../../config/int3_feishu_assets.legacy.json)
