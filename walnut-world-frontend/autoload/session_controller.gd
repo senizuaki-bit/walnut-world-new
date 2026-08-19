@@ -1482,15 +1482,30 @@ func request_turn(input_override: Dictionary = {}, requires_skill_binding: bool 
 		slot, session, world, turn_input, skill_bindings, attempted_sequence,
 	)
 	if not execution.get("ok", false) and _turn_refused_before_acceptance(execution):
-		# The gateway only accepts the next client_turn_sequence, so this client
-		# falling behind the Session -- another window, a lost update, any Turn
-		# raised elsewhere -- refuses every later action forever: each one
-		# recomputes the same stale number from the same stale Workspace. Re-read
-		# just the cursor and retry once with the corrected number.
+		# A Turn declares three cursors -- the Session's next sequence, the World
+		# revision and the World event sequence -- and the gateway refuses the
+		# whole request if any one of them is behind. Every one of them advances
+		# on the learner's own successful Run, so falling a single revision behind
+		# refused every later action forever: each attempt recomputed the same
+		# stale numbers from the same stale state. Correcting only the sequence
+		# fixed one third of that and left 问叮当 refused after every Run.
+		#
+		# Re-read all three and retry once. Only the cursors are adopted, so a
+		# correction here can never overwrite the learner's Draft.
 		var resynced := await _resynced_turn_sequence(str(session.session_id), attempted_sequence)
-		if resynced > 0:
+		var refreshed_world := await _resynced_world_cursor(world)
+		if resynced > 0 or not refreshed_world.is_empty():
+			if not refreshed_world.is_empty():
+				world = refreshed_world
+				if store != null:
+					store.replace_world(refreshed_world)
 			execution = await _submit_turn_attempt(
-				slot, session, world, turn_input, skill_bindings, resynced,
+				slot,
+				session,
+				world,
+				turn_input,
+				skill_bindings,
+				resynced if resynced > 0 else attempted_sequence,
 			)
 	if not execution.get("ok", false):
 		store.report_error(execution.get("error", _local_error("TURN_RECOVERY_FAILED", "Agent Turn reconciliation failed.")))
@@ -1500,6 +1515,29 @@ func request_turn(input_override: Dictionary = {}, requires_skill_binding: bool 
 	if bool(execution_value.get("terminal_failure", false)) and terminal_error is Dictionary:
 		store.report_error(terminal_error)
 
+
+## Re-read the World cursors the server actually holds.
+##
+## Returns the refreshed snapshot only when it differs from the one just
+## refused, so a refusal for some other reason does not cause a pointless
+## retry. Nothing but the World is read, so this cannot disturb the Draft.
+func _resynced_world_cursor(attempted_world: Dictionary) -> Dictionary:
+	var world_id := str(attempted_world.get("world_id", ""))
+	if world_id.is_empty() or game_gateway == null or not game_gateway.has_method("get_world_snapshot"):
+		return {}
+	var refreshed: Dictionary = await game_gateway.get_world_snapshot(
+		_new_request_context(), world_id,
+	)
+	if not refreshed.get("ok", false):
+		return {}
+	var value: Variant = refreshed.get("value")
+	if not value is Dictionary:
+		return {}
+	if str(value.get("world_id", "")) != world_id:
+		return {}
+	if int(value.get("revision", -1)) == int(attempted_world.get("revision", -2)):
+		return {}
+	return value.duplicate(true)
 
 ## Build and submit one Turn attempt under an explicit client_turn_sequence.
 ##
