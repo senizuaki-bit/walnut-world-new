@@ -1633,7 +1633,15 @@ func recover_pending_turn_operations(
 	for slot in requested_slots:
 		var integrity: Dictionary = store.validate_pending_operation(slot)
 		if not integrity.get("ok", false):
-			return integrity
+			if not bool(integrity.get("superseded", false)):
+				return integrity
+			# The session has moved past this envelope -- it names a Skill version
+			# that is no longer active, so it can never be executed again. Whatever
+			# the server did with it is already durable and is re-read on every
+			# bootstrap, so retiring it loses nothing. Keeping it only guaranteed
+			# that every later action failed here, before sending anything.
+			store.clear_pending_operation(slot)
+			continue
 		if not integrity.get("value", {}).is_empty():
 			pending_slots.append(slot)
 	if pending_slots.is_empty():
@@ -1651,6 +1659,9 @@ func recover_pending_turn_operations(
 	for slot in pending_slots:
 		var integrity: Dictionary = store.validate_pending_operation(slot)
 		if not integrity.get("ok", false):
+			if bool(integrity.get("superseded", false)):
+				store.clear_pending_operation(slot)
+				continue
 			_pending_turn_recovery_active = false
 			return integrity
 		var envelope: Dictionary = integrity.get("value", {})

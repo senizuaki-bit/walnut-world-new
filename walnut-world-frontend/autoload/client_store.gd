@@ -1386,7 +1386,7 @@ func _turn_envelope_integrity(
 	var bindings: Array = request.skill_bindings
 	if slot == "agent_turn":
 		if not _valid_active_skill_tuple(active_skill) or bindings != [_binding_from_active(active_skill)]:
-			return _integrity_failure("Pending bound Turn does not use the exact active Skill tuple.")
+			return _superseded_failure("Pending bound Turn does not use the exact active Skill tuple.")
 	elif not bindings.is_empty():
 		return _integrity_failure("Pending hint Turn must not carry a Skill binding.")
 	var expected_identity := JSON.stringify({
@@ -1881,6 +1881,20 @@ func _closed_dictionary(value: Dictionary, fields: Array) -> bool:
 
 func _integrity_failure(message: String) -> Dictionary:
 	return {"ok": false, "message": message}
+
+
+## An envelope that is well formed but describes authority the session has
+## already moved past.
+##
+## This is not corruption and must not be treated as such. A bound Turn is
+## recorded against the Skill tuple that was active when it was written; the
+## learner then builds and activates again, and the tuple changes. The envelope
+## can no longer be executed -- rightly, it names a version that is no longer
+## active -- but refusing to look at it at all left it un-executable and
+## un-clearable at once, and every later action died locally without sending a
+## single request. The learner saw a game that had simply stopped responding.
+func _superseded_failure(message: String) -> Dictionary:
+	return {"ok": false, "message": message, "superseded": true}
 
 
 func _set_persistence_integrity_error(code: String, message: String) -> void:
