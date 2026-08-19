@@ -938,7 +938,7 @@ func request_activation() -> void:
 		request["reason"] = activation_context.reason
 	store.set_flow(WalnutClientStore.FlowState.ACTIVATING)
 	var submission: Dictionary = await _submit_activation(request)
-	if not submission.get("ok", false) and _activation_revision_is_stale(submission):
+	if not submission.get("ok", false):
 		# The Registry advances on every activation, including this learner's own
 		# earlier ones, while activation_context only refreshes on success. A
 		# refused activation therefore left the cached revision stale for good:
@@ -1005,16 +1005,6 @@ func _submit_activation(request: Dictionary) -> Dictionary:
 	return await game_gateway.activate_skill_version(
 		_new_request_context(), str(certified_build.skill_version_id), key, request,
 	)
-
-
-## True when the gateway refused this activation for naming a stale Registry.
-func _activation_revision_is_stale(submission: Dictionary) -> bool:
-	if int(submission.get("status", 0)) != 409:
-		return false
-	var error: Variant = submission.get("error")
-	if not error is Dictionary:
-		return false
-	return str(error.get("code", "")) in ["CONTENT_VERSION_MISMATCH", "INVALID_REQUEST", "REGISTRY_REVISION_STALE"]
 
 
 ## Re-read the Registry revision the server actually holds.
