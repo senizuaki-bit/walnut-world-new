@@ -1365,6 +1365,35 @@ async def _skill_patch_interaction_has_authority(
     )
 
 
+def _evidence_refs_from_wire(value: object) -> tuple[EvidenceRef, ...]:
+    """Read back the Evidence a durable decision cited, or nothing if malformed.
+
+    A malformed reference yields an empty tuple rather than an exception: the
+    caller is a read-side authority check, and "cited something unreadable" has
+    to fail the check, not the request.
+    """
+
+    if not isinstance(value, list):
+        return ()
+    refs: list[EvidenceRef] = []
+    for item in value:
+        if not isinstance(item, Mapping):
+            return ()
+        try:
+            refs.append(
+                EvidenceRef(
+                    evidence_id=str(item["evidence_id"]),
+                    evidence_type=str(item["evidence_type"]),
+                    created_at=datetime.fromisoformat(str(item["created_at"]).replace("Z", "+00:00")),
+                    sha256=item.get("sha256"),
+                    uri=item.get("uri"),
+                )
+            )
+        except (KeyError, TypeError, ValueError):
+            return ()
+    return tuple(refs)
+
+
 async def _hint_interaction_has_authority(
     session: AsyncSession,
     row: ProductInteractionRow,
@@ -1639,7 +1668,13 @@ async def _hint_interaction_has_authority(
         validate_provider_decision_wire(
             provider_results,
             decision_draft=dict(durable_draft),
-            evidence_refs=(),
+            # The Evidence this hint is allowed to cite is the Evidence it did
+            # cite, which the checks above already pinned to the feedback. It was
+            # hard-coded empty when a hint could only ever ask a question; now a
+            # hint that answers a compile rejection names it, and declaring none
+            # allowed would reject exactly the hints that talk about a real
+            # failure -- the ones this whole path exists to deliver.
+            evidence_refs=_evidence_refs_from_wire(decision.get("evidence_refs")),
             decision=dict(decision),
         )
     except (KeyError, TypeError, WorkflowInvariantError):

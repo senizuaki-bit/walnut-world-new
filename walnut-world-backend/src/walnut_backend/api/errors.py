@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+
 from collections.abc import Mapping
 from typing import Any
 
@@ -41,6 +43,18 @@ def error_response(
         code = "INTERNAL_ERROR"
         http_status, category, retryable, message_key = catalog[code]
         body = error_body(code, "TRANSPORT", context, category, retryable, message_key, http_status)
+    if http_status >= 500:
+        # The wire body is deliberately sanitized down to a code, which is the
+        # right thing to send a client and useless to an operator: a server-side
+        # failure cannot be identified from it at all. Name the real reason in
+        # this process's own log, where it reaches neither the client nor the
+        # database.
+        logging.getLogger(__name__).error(
+            "server error %s at stage %s: %s",
+            code,
+            error.stage,
+            error.message or "no detail",
+        )
     headers = attempt_headers(context)
     if code == "UNKNOWN_COMMIT_STATE":
         headers["Location"] = f"/v1/commands/{context.command_id}"

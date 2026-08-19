@@ -466,7 +466,17 @@ async def validate_build_terminal_authority(
         )
     )
     if not build.terminal:
-        return build.status == "ACCEPTED" and sealed is None
+        # COMPILING is a state the Build worker writes itself, on its way from
+        # ACCEPTED to a terminal status. Admitting only ACCEPTED meant any Build
+        # observed mid-compile read as corrupt -- and a Build abandoned there,
+        # when its workflow exhausted its retries, stayed unreadable for good.
+        # That is what left a learner unable to build at all: the client replays
+        # its request under the original Idempotency-Key, the replay validates
+        # the existing Build, and this check failed every single time.
+        #
+        # What actually matters is unchanged: a Build that has not reached a
+        # terminal status must not have sealed a terminal execution.
+        return build.status in {"ACCEPTED", "COMPILING"} and sealed is None
     if sealed is None or build.status not in {"REJECTED", "CERTIFIED"}:
         return False
     command = await session.scalar(

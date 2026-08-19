@@ -852,6 +852,28 @@ def _build_authority_matches(
         return False
     command_versions = {key: item for key, item in versions.items() if item is not None}
     if not row.terminal:
+        if job.status == "DEAD_LETTER" and record.terminal:
+            # An abandoned attempt, not corruption. The workflow exhausted its
+            # retries, so the Command settled while the Build row never did.
+            # Reading that pair as corrupt is what left a learner unable to
+            # build at all: the client replays its Build under the original
+            # Idempotency-Key, the replay re-validated this wreck, and every
+            # attempt came back 500 -- forever, because authority rows are
+            # append-only and nothing will ever revisit a dead-lettered job.
+            #
+            # The state is perfectly coherent as long as nothing was published,
+            # which is what the rest of this branch still requires. Reporting it
+            # honestly lets the client see a failed Build and start a new one.
+            return (
+                value.get("versions") == command_versions
+                and value.get("skill_version_id") is None
+                and value.get("artifact") is None
+                and value.get("certification") is None
+                and value.get("evidence_refs") == []
+                and not artifacts
+                and not certifications
+                and not evidence
+            )
         return (
             record.terminal is False
             and job.status not in {"SUCCEEDED", "FAILED", "CANCELLED", "DEAD_LETTER"}

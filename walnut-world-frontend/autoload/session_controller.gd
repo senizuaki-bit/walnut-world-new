@@ -45,6 +45,9 @@ const STUDENT_ACTION_READY_FLOW_STATES := [
 	WalnutClientStore.FlowState.COMPLETED,
 	WalnutClientStore.FlowState.ERROR,
 ]
+## One retry is enough: it distinguishes a spent identity from a fresh
+## failure, and a genuinely failing Build must not be resubmitted in a loop.
+const BUILD_ATTEMPT_RETRY_LIMIT := 1
 const PENDING_DRAFT_SAVE_SLOT := "draft_save"
 const RETRYABLE_HTTP_STATUSES := [429, 502, 503, 504]
 const RETRYABLE_LOCAL_TRANSPORT_CODES := [
@@ -862,27 +865,22 @@ func request_build() -> void:
 		"requested_capabilities": build_context.requested_capabilities.duplicate(true),
 	}
 	store.set_flow(WalnutClientStore.FlowState.BUILDING)
-	var key := RequestContextFactory.idempotency_key_for(
-		"createSkillBuild",
-		"%s:%s:%s" % [store.draft.draft_id, store.draft.revision, _source_identity(source_bundle)],
-	)
-	var submission: Dictionary = await game_gateway.submit_skill_build(
-		_new_request_context(), key, request,
-	)
-	var poller := _new_poller()
-	var command_result: Dictionary = await poller.reconcile({}, submission)
-	if not command_result.get("ok", false):
-		store.report_error(command_result.get("error", _local_error("BUILD_COMMAND_FAILED", "Build command reconciliation failed.")))
+	var build_identity := "%s:%s:%s" % [store.draft.draft_id, store.draft.revision, _source_identity(source_bundle)]
+	var attempt: Dictionary = await _submit_build_attempt(build_identity, request, 0)
+	if not attempt.get("ok", false):
 		return
-	var command: Dictionary = command_result.value
+	var command: Dictionary = attempt.value
 	if str(command.get("status", "")) != "APPLIED":
+		# The attempt is settled and it did not certify. Whether the learner can
+		# try again is decided inside _submit_build_attempt, which retries under a
+		# new identity when the failure it found belonged to an older attempt.
 		store.set_flow(WalnutClientStore.FlowState.BUILD_FAILED)
 		return
 	var resource: Variant = command.get("result")
 	if not resource is Dictionary or str(resource.get("resource_type", "")) != "SKILL_BUILD":
 		store.report_error(_local_error("BUILD_COMMAND_INVALID", "Build command did not resolve to a SkillBuild resource."))
 		return
-	var build_result: Dictionary = await poller.poll_resource(
+	var build_result: Dictionary = await _new_poller().poll_resource(
 		{}, "get_skill_build", str(resource.get("resource_id", "")), "build_id",
 	)
 	if not build_result.get("ok", false):
@@ -939,13 +937,20 @@ func request_activation() -> void:
 	if activation_context.has("reason"):
 		request["reason"] = activation_context.reason
 	store.set_flow(WalnutClientStore.FlowState.ACTIVATING)
-	var key := RequestContextFactory.idempotency_key_for(
-		"activateSkillVersion",
-		"%s:%s:%s" % [certified_build.skill_version_id, activation_context.world_id, activation_context.expected_registry_revision],
-	)
-	var submission: Dictionary = await game_gateway.activate_skill_version(
-		_new_request_context(), str(certified_build.skill_version_id), key, request,
-	)
+	var submission: Dictionary = await _submit_activation(request)
+	if not submission.get("ok", false) and _activation_revision_is_stale(submission):
+		# The Registry advances on every activation, including this learner's own
+		# earlier ones, while activation_context only refreshes on success. A
+		# refused activation therefore left the cached revision stale for good:
+		# every later Run rebuilt, then failed to activate, forever. Re-read the
+		# authoritative revision and try once more under it.
+		var corrected := await _resynced_registry_revision(
+			int(activation_context.expected_registry_revision)
+		)
+		if corrected >= 0:
+			activation_context.expected_registry_revision = corrected
+			request["expected_registry_revision"] = corrected
+			submission = await _submit_activation(request)
 	var command_result: Dictionary = await _new_poller().reconcile({}, submission)
 	if not command_result.get("ok", false):
 		store.report_error(command_result.get("error", _local_error("ACTIVATION_COMMAND_FAILED", "Activation reconciliation failed.")))
@@ -986,6 +991,54 @@ func request_activation() -> void:
 	store.set_flow(WalnutClientStore.FlowState.ACTIVE)
 	store.set_objective_result({"summary": "The exact Skill tuple is active in the public registry."})
 
+
+## Submit one activation attempt under the revision the request declares.
+func _submit_activation(request: Dictionary) -> Dictionary:
+	var key := RequestContextFactory.idempotency_key_for(
+		"activateSkillVersion",
+		"%s:%s:%s" % [
+			certified_build.skill_version_id,
+			activation_context.world_id,
+			request.get("expected_registry_revision"),
+		],
+	)
+	return await game_gateway.activate_skill_version(
+		_new_request_context(), str(certified_build.skill_version_id), key, request,
+	)
+
+
+## True when the gateway refused this activation for naming a stale Registry.
+func _activation_revision_is_stale(submission: Dictionary) -> bool:
+	if int(submission.get("status", 0)) != 409:
+		return false
+	var error: Variant = submission.get("error")
+	if not error is Dictionary:
+		return false
+	return str(error.get("code", "")) in ["CONTENT_VERSION_MISMATCH", "INVALID_REQUEST", "REGISTRY_REVISION_STALE"]
+
+
+## Re-read the Registry revision the server actually holds.
+##
+## Only the revision is adopted. Nothing else from the refreshed bootstrap is
+## written back, so a correction here can never quietly replace the learner's
+## Draft or their active Skill tuple.
+func _resynced_registry_revision(attempted_revision: int) -> int:
+	if game_gateway == null or not game_gateway.has_method("get_student_bootstrap"):
+		return -1
+	var refreshed: Dictionary = await game_gateway.get_student_bootstrap(_new_request_context())
+	if not refreshed.get("ok", false):
+		return -1
+	var value: Variant = refreshed.get("value")
+	if not value is Dictionary:
+		return -1
+	var activation: Variant = value.get("activation")
+	if not activation is Dictionary:
+		return -1
+	var revision: Variant = activation.get("registry_revision")
+	if typeof(revision) != TYPE_INT and typeof(revision) != TYPE_FLOAT:
+		return -1
+	var corrected := int(revision)
+	return corrected if corrected != attempted_revision and corrected >= 0 else -1
 
 func request_hint(message: String = "Please give me the next hint.") -> void:
 	if not _student_action_readiness("Hint").get("ok", false):
@@ -3015,6 +3068,61 @@ func _wait_for_interaction(
 			await _wait_seconds(delay_seconds)
 	return _local_failure("INTERACTION_RECONCILIATION_TIMEOUT", "Matching AgentInteraction did not appear before the deadline.", true)
 
+
+## Submit one Build attempt, retrying once under a fresh identity when the
+## reply turns out to describe an attempt that already settled without
+## certifying.
+##
+## The Idempotency-Key is derived from the source, so it does not change while
+## the learner's code does not. A Build that failed once therefore owned that
+## key for good: every later press of Run replayed it, the gateway correctly
+## returned the same settled failure, and that exact source could never be
+## built again -- the only escape was to edit the code. Writing a correct
+## solution and then running it again is precisely when this happens.
+##
+## Replaying is still what has to happen while an attempt is in flight; that is
+## what makes a lost response safe. The distinction is whether the attempt the
+## key names has settled. The gateway already says so, in Idempotency-Replayed:
+## a replayed reply that is terminal and not APPLIED belongs to an older
+## attempt, and this press is a new one.
+func _submit_build_attempt(
+	build_identity: String, request: Dictionary, generation: int
+) -> Dictionary:
+	var store := _client_store()
+	var identity := (
+		build_identity if generation == 0 else "%s#%d" % [build_identity, generation]
+	)
+	var key := RequestContextFactory.idempotency_key_for("createSkillBuild", identity)
+	var submission: Dictionary = await game_gateway.submit_skill_build(
+		_new_request_context(), key, request,
+	)
+	var command_result: Dictionary = await _new_poller().reconcile({}, submission)
+	if not command_result.get("ok", false):
+		if store != null:
+			store.report_error(command_result.get(
+				"error",
+				_local_error("BUILD_COMMAND_FAILED", "Build command reconciliation failed."),
+			))
+		return {"ok": false}
+	var command: Dictionary = command_result.value
+	if (
+		generation < BUILD_ATTEMPT_RETRY_LIMIT
+		and _submission_was_replayed(submission)
+		and str(command.get("status", "")) != "APPLIED"
+	):
+		return await _submit_build_attempt(build_identity, request, generation + 1)
+	return {"ok": true, "value": command}
+
+
+## True when the gateway answered from a receipt this call did not create.
+func _submission_was_replayed(submission: Dictionary) -> bool:
+	var headers: Variant = submission.get("headers")
+	if not headers is Dictionary:
+		return false
+	for name: Variant in headers:
+		if str(name).to_lower() == "idempotency-replayed":
+			return str(headers[name]).to_lower() == "true"
+	return false
 
 func _new_poller() -> RefCounted:
 	return CommandPoller.new(
