@@ -327,10 +327,24 @@ func _start() -> void:
 	var pending_value: Dictionary = pending_recovery.get("value", {})
 	var terminal_error: Variant = pending_value.get("terminal_error")
 	if terminal_error is Dictionary and not terminal_error.is_empty():
-		_fail(
-			str(terminal_error.get("code", "PENDING_TURN_TERMINAL_FAILURE")),
-			str(terminal_error.get("message", "The persisted Agent Turn reached a terminal failure.")),
-		)
+		# A recovered Turn that ended in failure is settled knowledge, not a
+		# broken startup. Treating it as fatal meant one failed Run bricked the
+		# client on every later launch: startup never marked authority ready, so
+		# every button silently did nothing and only deleting the persisted state
+		# by hand brought the game back.
+		#
+		# The failure is still reported -- the learner is told what happened -- but
+		# it belongs to the attempt that produced it, not to everything after.
+		store.report_error(terminal_error)
+		if session_controller.has_method("set_startup_authority_ready"):
+			session_controller.set_startup_authority_ready(true)
+		_finish({
+			"ok": true,
+			"session_id": str(session.session_id),
+			"pending_turn_recovered": true,
+			"pending_turn_outcomes": pending_value.get("outcomes", []).duplicate(true),
+			"pending_turn_terminal_error": terminal_error.duplicate(true),
+		})
 		return
 	if bool(pending_value.get("had_pending", false)):
 		if session_controller.has_method("set_startup_authority_ready"):

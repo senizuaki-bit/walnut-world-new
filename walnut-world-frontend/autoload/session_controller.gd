@@ -1630,17 +1630,27 @@ func recover_pending_turn_operations(
 		if slot not in PENDING_TURN_SLOTS:
 			return _local_failure("PENDING_TURN_SLOT_UNKNOWN", "Pending Turn recovery received an unknown slot.")
 	var pending_slots: Array[String] = []
+	var quarantined: Array[Dictionary] = []
+	# An envelope that cannot be validated is quarantined, never allowed to
+	# block. This is the rule that was missing, and its absence is what kept
+	# turning one stale record into a game that stopped responding: every
+	# student action reconciles pending operations first, so any envelope the
+	# session had moved past -- a Skill version since replaced, a World since
+	# advanced -- failed this check forever and each press returned here without
+	# sending a single request.
+	#
+	# Refusing to act was never what made replay safe. The server's Idempotency-
+	# Key does that: a replayed submission returns the original outcome, and a
+	# new attempt carries a new identity. Holding the client hostage to a record
+	# it can no longer interpret adds no safety and removes the learner's game.
 	for slot in requested_slots:
 		var integrity: Dictionary = store.validate_pending_operation(slot)
 		if not integrity.get("ok", false):
-			if not bool(integrity.get("superseded", false)):
-				return integrity
-			# The session has moved past this envelope -- it names a Skill version
-			# that is no longer active, so it can never be executed again. Whatever
-			# the server did with it is already durable and is re-read on every
-			# bootstrap, so retiring it loses nothing. Keeping it only guaranteed
-			# that every later action failed here, before sending anything.
 			store.clear_pending_operation(slot)
+			quarantined.append({
+				"slot": slot,
+				"reason": str(integrity.get("message", "Pending operation could not be validated.")),
+			})
 			continue
 		if not integrity.get("value", {}).is_empty():
 			pending_slots.append(slot)
@@ -1649,7 +1659,12 @@ func recover_pending_turn_operations(
 			"ok": true,
 			"status": 200,
 			"headers": {},
-			"value": {"had_pending": false, "outcomes": [], "terminal_error": null},
+			"value": {
+				"had_pending": false,
+				"outcomes": [],
+				"terminal_error": null,
+				"quarantined": quarantined,
+			},
 		}
 	if _pending_turn_recovery_active:
 		return _local_failure("PENDING_TURN_RECOVERY_ACTIVE", "A pending Turn recovery is already in progress.", true)
@@ -1659,11 +1674,12 @@ func recover_pending_turn_operations(
 	for slot in pending_slots:
 		var integrity: Dictionary = store.validate_pending_operation(slot)
 		if not integrity.get("ok", false):
-			if bool(integrity.get("superseded", false)):
-				store.clear_pending_operation(slot)
-				continue
-			_pending_turn_recovery_active = false
-			return integrity
+			store.clear_pending_operation(slot)
+			quarantined.append({
+				"slot": slot,
+				"reason": str(integrity.get("message", "Pending operation could not be validated.")),
+			})
+			continue
 		var envelope: Dictionary = integrity.get("value", {})
 		if envelope.is_empty():
 			continue
@@ -1686,6 +1702,7 @@ func recover_pending_turn_operations(
 			"had_pending": true,
 			"outcomes": outcomes,
 			"terminal_error": terminal_error,
+			"quarantined": quarantined,
 		},
 	}
 
