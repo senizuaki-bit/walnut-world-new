@@ -8,6 +8,7 @@ param(
     [string]$Model = 'deepseek-v4-flash',
     [string]$Provider = 'deepseek',
     [int]$TokenLifetimeSeconds = 7200,
+    [string]$PythonExe = '',
     [string]$GodotExe = $env:GODOT_EXE,
     [string]$UpstreamKeyFile = $env:WALNUT_LLM_UPSTREAM_API_KEY_FILE
 )
@@ -44,6 +45,9 @@ if ([string]::IsNullOrWhiteSpace($GodotExe)) {
     $GodotExe = Join-Path $workspaceRoot 'tools\godot-4.5.2\Godot_v4.5.2-stable_win64.exe'
 }
 $backendPython = Join-Path $backendRoot '.venv\Scripts\python.exe'
+if (-not [string]::IsNullOrWhiteSpace($PythonExe)) {
+    $backendPython = $PythonExe
+}
 if ([string]::IsNullOrWhiteSpace($UpstreamKeyFile)) {
     $UpstreamKeyFile = Join-Path (
         [Environment]::GetFolderPath([Environment+SpecialFolder]::UserProfile)
