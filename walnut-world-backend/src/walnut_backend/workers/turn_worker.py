@@ -15,6 +15,7 @@ from yaya_agent_contracts import (
     CommandRecord,
     CommandStatus,
     CommandTransition,
+    EvidenceRef,
     Failure,
     LlmPort,
     OperationContext,
@@ -37,6 +38,7 @@ from yaya_agent_runtime import (
     build_default_tool_registry,
     side_effect_execution_id,
 )
+from yaya_agent_runtime import BUG_FAILURE_THRESHOLD
 from yaya_agent_runtime.evidence import collect_decision_evidence
 from yaya_agent_runtime.tool_registry import ToolRegistry
 from yaya_agent_sandbox import RecoverableSandboxPort
@@ -427,10 +429,12 @@ class TurnWorkflowHandler:
             hint_mismatches.append("TOOLS")
         if decision.evidence_refs != collect_decision_evidence(turn_context):
             hint_mismatches.append("DECISION_EVIDENCE")
-        if decision.evidence_refs:
-            # A hint observes prior Evidence through its prompt; it never owns
-            # any, because it produces no Run and no World commit.
-            hint_mismatches.append("OWNED_EVIDENCE")
+        # A hint creates no Evidence -- it produces no Run and no World commit --
+        # but it may *cite* the compile rejection its event carries, which is how
+        # a learner stuck on compiler errors gets a located, explained failure
+        # instead of the same opening question again. The equality check above is
+        # the real invariant: the decision must reference exactly the Evidence the
+        # turn context supplied, never more.
         if (
             directive is None
             or directive.patch_eligible
@@ -1104,6 +1108,11 @@ class TurnWorkflowHandler:
                     task=task,
                     learner_id=launch.learner_id,
                 )
+            compile_failure = (
+                await _unresolved_compile_failure(session, context)
+                if is_hint_request
+                else None
+            )
             event = GameEvent(
                 event_id=_identifier("gameevent", command.command_id),
                 # hint_requested routes to the teaching roles without a Skill Run;
@@ -1117,6 +1126,11 @@ class TurnWorkflowHandler:
                 occurred_at=turn.created_at,
                 expected_world_revision=expected_revision,
                 skill_ref=skill_ref,
+                failure_count=0 if compile_failure is None else compile_failure.failure_count,
+                failure_key=None if compile_failure is None else compile_failure.failure_key,
+                evidence_refs=(
+                    () if compile_failure is None else compile_failure.evidence_refs
+                ),
                 payload={"input": turn_input},
             )
             if is_hint_request:
@@ -1174,6 +1188,96 @@ class TurnWorkflowHandler:
             result=result,
             lease_seconds=self._lease_seconds,
         )
+
+
+@dataclass(frozen=True, slots=True)
+class _CompileFailureStreak:
+    """The run of rejected Builds a learner is currently stuck on."""
+
+    failure_count: int
+    failure_key: str
+    evidence_refs: tuple[EvidenceRef, ...]
+
+
+# A hint that names this many same-class failures must hand over to bug_agent,
+# and the contract requires such an event to name the exact failed Run. A compile
+# rejection has no Run, so the streak reported to the policy stops one short. The
+# learner still leaves REVIEW/HEURISTIC and gets a located, explained failure --
+# what stays out of reach is Bug 先生 and the Patch offer, both of which are
+# defined on Run failures today.
+_COMPILE_FAILURE_REPORT_CEILING = BUG_FAILURE_THRESHOLD - 1
+
+
+async def _unresolved_compile_failure(
+    session: AsyncSession,
+    context: OperationContext,
+) -> _CompileFailureStreak | None:
+    """Describe the compile rejections that the learner has not yet built past.
+
+    Build Evidence is the authority here rather than the Build rows, because it
+    is what a teaching turn is allowed to cite and it is the record that carries
+    the content it belongs to. Only rejections newer than the latest certified
+    Build count: once a Build certifies, whatever went wrong before it is history
+    the learner has already moved past, and advice about it would be advice about
+    code that no longer exists.
+    """
+
+    rows = (
+        await session.scalars(
+            select(EvidenceRow)
+            .where(
+                EvidenceRow.tenant_id == context.actor.tenant_id,
+                EvidenceRow.actor_id == context.actor.actor_id,
+                EvidenceRow.content_hash == context.content_ref.content_hash,
+            )
+            .order_by(EvidenceRow.recorded_at.desc(), EvidenceRow.evidence_id.desc())
+        )
+    ).all()
+
+    streak: list[tuple[EvidenceRow, Mapping[str, Any]]] = []
+    for row in rows:
+        payload = row.evidence_json.get("payload")
+        if not isinstance(payload, Mapping):
+            continue
+        kind = payload.get("evidence_kind")
+        if kind == "BUILD_CERTIFICATION":
+            break
+        if kind != "BUILD_REJECTION":
+            continue
+        streak.append((row, payload))
+    if not streak:
+        return None
+
+    newest_row, newest_payload = streak[0]
+    failure_key = _compile_failure_key(newest_payload)
+    same_class = 0
+    for _row, payload in streak:
+        if _compile_failure_key(payload) != failure_key:
+            break
+        same_class += 1
+
+    ref = _object(newest_row.evidence_json.get("evidence_ref"), "Evidence ref")
+    return _CompileFailureStreak(
+        failure_count=min(same_class, _COMPILE_FAILURE_REPORT_CEILING),
+        failure_key=failure_key,
+        evidence_refs=(
+            EvidenceRef(
+                evidence_id=_text(ref, "evidence_id"),
+                evidence_type=_text(ref, "evidence_type"),
+                created_at=newest_row.recorded_at,
+                sha256=ref.get("sha256"),
+                uri=ref.get("uri"),
+            ),
+        ),
+    )
+
+
+def _compile_failure_key(payload: Mapping[str, Any]) -> str:
+    """Identify one class of compile failure so repeats can be recognised."""
+
+    codes = payload.get("diagnostic_codes")
+    diagnostics = ",".join(sorted(str(code) for code in codes)) if isinstance(codes, list) else ""
+    return f"compile:{payload.get('failure_stage')}:{payload.get('failure_code')}:{diagnostics}"
 
 
 async def _command(

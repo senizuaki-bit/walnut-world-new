@@ -673,6 +673,74 @@ class BuildWorkflowHandler:
             row.terminal = True
             row.updated_at = now
             row.build_json = build
+
+            # A rejected Build is teaching evidence, not just a failed job. The
+            # certified path has always recorded Evidence; the rejected path
+            # recorded none, so a learner stuck on compiler errors produced no
+            # evidence at all -- the pedagogy policy saw failure_count 0, could
+            # never leave REVIEW/HEURISTIC, and 叮当 kept re-asking the same
+            # opening question because it had no failure to talk about.
+            #
+            # This Evidence owns no Run, and does not need one: a compile
+            # rejection is settled by the Build's own terminal authority, which
+            # this transaction has just written.
+            evidence_id = _identifier("evidence", "buildreject", authority.build_id)
+            evidence_payload = {
+                "evidence_kind": "BUILD_REJECTION",
+                "build_id": authority.build_id,
+                "skill_id": authority.skill_id,
+                "test_suite_version": authority.test_suite_version,
+                "outcome": "REJECTED",
+                "failure_stage": result.failure.stage,
+                "failure_code": result.failure.code,
+                "diagnostic_codes": list(diagnostic_codes),
+            }
+            evidence_sha256 = canonical_json_sha256(evidence_payload)
+            versions = dict(cast(Mapping[str, Any], row.build_json["versions"]))
+            versions.update(
+                {
+                    "policy_version": authority.policy_id,
+                    "compiler_version": authority.compiler_version,
+                    "sandbox_image_digest": authority.compiler_image,
+                    "test_suite_version": authority.test_suite_version,
+                }
+            )
+            session.add(
+                EvidenceRow(
+                    evidence_id=evidence_id,
+                    tenant_id=claim.tenant_id,
+                    actor_id=command.request_context.actor.actor_id,
+                    content_hash=command.request_context.content_ref.content_hash,
+                    command_id=command.command_id,
+                    recorded_at=now,
+                    evidence_json={
+                        "request_context": request_context_data(command.request_context),
+                        "evidence_ref": {
+                            "evidence_id": evidence_id,
+                            "evidence_type": "TEST_REPORT",
+                            "created_at": _iso(now),
+                            "sha256": evidence_sha256,
+                            "uri": f"/v1/evidence/{evidence_id}",
+                        },
+                        "subject": {"learner_id": authority.learner_id},
+                        "source": {
+                            "source_type": "SKILL_BUILD",
+                            "source_id": authority.build_id,
+                            "command_id": command.command_id,
+                            "world_id": authority.world_id,
+                        },
+                        "occurred_at": _iso(now),
+                        "recorded_at": _iso(now),
+                        "integrity": {
+                            "payload_sha256": evidence_sha256,
+                            "previous_evidence_sha256": None,
+                        },
+                        "payload": evidence_payload,
+                        "related_evidence": [],
+                        "versions": versions,
+                    },
+                )
+            )
             rejected_receipt = await self._jobs.record_step_in_session(
                 session,
                 claim,
@@ -680,6 +748,7 @@ class BuildWorkflowHandler:
                 input_sha256=claim.request_sha256,
                 output={
                     "build_id": authority.build_id,
+                    "evidence_id": evidence_id,
                     "failure_code": result.failure.code,
                     "failure_stage": result.failure.stage,
                     "diagnostic_codes": list(diagnostic_codes),

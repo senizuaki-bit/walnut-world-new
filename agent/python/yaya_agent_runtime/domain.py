@@ -396,9 +396,14 @@ class GameEvent:
         ):
             raise ValueError("hint_requested with failures requires failure_key")
         if self.event_type == "hint_requested" and self.failure_count >= BUG_FAILURE_THRESHOLD:
-            if self.run_id is None or not self.evidence_refs:
+            # Repeating the same failure this many times hands the turn to
+            # bug_agent, which reasons about one exact reproducible attempt. That
+            # attempt is a Run when the code ran, and a rejected Build when it
+            # never compiled -- a learner who cannot get past the compiler is
+            # repeating a failure just as surely, and used to be invisible here.
+            if (self.run_id is None and self.build_id is None) or not self.evidence_refs:
                 raise ValueError(
-                    "bug-threshold hint_requested requires the exact failed run and Evidence"
+                    "bug-threshold hint_requested requires the exact failed attempt and Evidence"
                 )
 
         if self.event_type == "skill_patch_requested":

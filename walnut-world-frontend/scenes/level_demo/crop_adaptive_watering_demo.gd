@@ -164,7 +164,6 @@ var _button_tweens: Dictionary = {}
 var _agent_mode := false
 var _synchronizing_agent_draft := false
 var _agent_source := ""
-var _clean_agent_source := ""
 var _agent_task_title := ""
 var _authoritative_content: Dictionary = {}
 var _authoritative_snapshot: Dictionary = {}
@@ -858,7 +857,16 @@ func show_next_level_preview() -> void:
 
 
 func _reset_code() -> void:
-	code_editor.text = _clean_agent_source if _agent_mode and not _clean_agent_source.is_empty() else INITIAL_PRACTICE_CODE
+	# Reset means "start this level over", so it restores the task's original
+	# fill-in-the-blank starter -- the same text a child sees the first time they
+	# open the scroll. It used to restore the last draft the server accepted, so
+	# reset meant "undo since my last save": a learner who wanted a clean slate
+	# got their own half-finished attempt back instead.
+	#
+	# INITIAL_PRACTICE_CODE is byte-identical to the starter the backend seeds in
+	# walnut_backend.int1_e2e_authority._watering_source, so this restores the
+	# authoritative starting point rather than a client-only approximation.
+	code_editor.text = INITIAL_PRACTICE_CODE
 	_draft_active = false
 	_build_result.clear()
 	_set_phase(Phase.CODE)
@@ -1091,8 +1099,6 @@ func load_agent_draft(source: String) -> void:
 func update_agent_draft_state(state: int) -> void:
 	if not _agent_mode:
 		return
-	if state == WalnutClientStore.DraftState.CLEAN:
-		_clean_agent_source = _agent_source
 	save_state.text = {
 		WalnutClientStore.DraftState.CLEAN: "✓ 正式草稿已同步",
 		WalnutClientStore.DraftState.DIRTY: "• 待交给小核桃",

@@ -1395,7 +1395,6 @@ async def _hint_interaction_has_authority(
     hint_level = value.get("hint_level")
     if (
         feedback.get("run_id") is not None
-        or feedback.get("evidence_refs") != []
         or role not in {"teaching_agent", "bug_agent"}
         or response_type not in {"question", "hint"}
         or value.get("skill_patch") is not None
@@ -1613,7 +1612,11 @@ async def _hint_interaction_has_authority(
         or decision.get("source") != "provider"
         or decision.get("degraded") is not False
         or decision.get("fallback_reason") is not None
-        or decision.get("evidence_refs") != []
+        # A hint owns no Evidence -- `forbidden_evidence` below still proves no
+        # Evidence row was written under this Command -- but it may cite the
+        # compile rejection it was answering. The citation has to be identical
+        # everywhere it is repeated, or the record would disagree with itself.
+        or decision.get("evidence_refs") != feedback.get("evidence_refs")
         or decision.get("message_key") != feedback.get("message_key")
         or decision_completed_at != completed_at
         or directive.get("patch_eligible") is not False

@@ -883,6 +883,7 @@ def _build_authority_matches(
             row,
             record,
             job,
+            authority,
             receipts,
             artifacts,
             certifications,
@@ -1233,10 +1234,84 @@ def _command_evidence_matches(record: CommandRecord, evidence_ref: Mapping[str, 
     )
 
 
+def _rejection_evidence_matches(
+    row: SkillBuildRow,
+    record: CommandRecord,
+    authority: LaunchAuthorityRow,
+    evidence_row: EvidenceRow,
+    evidence_id: object,
+) -> bool:
+    """Hold a rejection's Evidence to the same shape the Build worker wrote.
+
+    Rejections became evidence-bearing so that a learner stuck on compiler errors
+    is visible to the teaching policy at all. Reading one back must therefore be
+    as strict as reading a certification: the row has to describe *this* Build,
+    under this Command, with the diagnostics the Build row already settled on.
+    """
+
+    failure = row.build_json.get("failure")
+    details = failure.get("details") if isinstance(failure, Mapping) else None
+    diagnostics = details.get("diagnostic_codes") if isinstance(details, Mapping) else None
+    phases = row.build_json.get("phases")
+    stage = None
+    if isinstance(phases, Sequence):
+        for phase in phases:
+            if isinstance(phase, Mapping) and phase.get("status") == "FAILED":
+                stage = phase.get("name")
+                break
+
+    data = evidence_row.evidence_json
+    if not isinstance(data, Mapping):
+        return False
+    payload = data.get("payload")
+    source = data.get("source")
+    reference = data.get("evidence_ref")
+    if (
+        not isinstance(payload, Mapping)
+        or not isinstance(source, Mapping)
+        or not isinstance(reference, Mapping)
+    ):
+        return False
+
+    expected_payload = {
+        "evidence_kind": "BUILD_REJECTION",
+        "build_id": row.build_id,
+        "skill_id": row.skill_id,
+        "test_suite_version": payload.get("test_suite_version"),
+        "outcome": "REJECTED",
+        "failure_stage": stage,
+        "failure_code": payload.get("failure_code"),
+        "diagnostic_codes": list(diagnostics) if isinstance(diagnostics, list) else [],
+    }
+    return (
+        evidence_row.evidence_id == evidence_id
+        and evidence_row.tenant_id == row.tenant_id
+        and evidence_row.actor_id == row.actor_id
+        and evidence_row.content_hash == record.request_context.content_ref.content_hash
+        and evidence_row.command_id == row.command_id
+        and evidence_row.recorded_at == row.updated_at
+        and dict(payload) == expected_payload
+        and dict(source)
+        == {
+            "source_type": "SKILL_BUILD",
+            "source_id": row.build_id,
+            "command_id": row.command_id,
+            "world_id": authority.world_id,
+        }
+        and data.get("subject") == {"learner_id": authority.learner_id}
+        and reference.get("evidence_id") == evidence_id
+        and reference.get("evidence_type") == "TEST_REPORT"
+        and reference.get("created_at") == _iso(row.updated_at)
+        and reference.get("sha256") == canonical_json_sha256(dict(payload))
+        and reference.get("uri") == f"/v1/evidence/{evidence_id}"
+    )
+
+
 def _rejected_build_matches(
     row: SkillBuildRow,
     record: CommandRecord,
     job: WorkflowJobRow,
+    authority: LaunchAuthorityRow,
     receipts: Sequence[JobStepReceiptRow],
     artifacts: Sequence[SkillArtifactRow],
     certifications: Sequence[SkillCertificationRow],
@@ -1261,7 +1336,10 @@ def _rejected_build_matches(
         or terminal[0].step_name != "BUILD_REJECTED"
         or artifacts
         or certifications
-        or evidence_rows
+        # What must stay absent either way is an artifact or a certification --
+        # nothing was published. Whether Evidence must exist is decided by the
+        # receipt below, which is the authority that names it.
+        or len(evidence_rows) > 1
     ):
         return False
     receipt = terminal[0]
@@ -1281,15 +1359,31 @@ def _rejected_build_matches(
         or any(not isinstance(item, str) for item in diagnostics)
         or not isinstance(failed_stage, str)
         or failed_stage not in _PHASE_NAMES
+        # Rejections only started recording Evidence once a learner stuck on the
+        # compiler had to become visible to the teaching policy. Receipts written
+        # before that name no Evidence, and the Builds they settled are still
+        # perfectly valid history -- authority rows are append-only, and inventing
+        # an evidence_id for them would fabricate a record no worker ever wrote.
         or set(output)
-        != {
-            "build_id",
-            "failure_code",
-            "failure_stage",
-            "diagnostic_codes",
-            "source_sha256",
-            "build_identity",
-        }
+        not in (
+            {
+                "build_id",
+                "evidence_id",
+                "failure_code",
+                "failure_stage",
+                "diagnostic_codes",
+                "source_sha256",
+                "build_identity",
+            },
+            {
+                "build_id",
+                "failure_code",
+                "failure_stage",
+                "diagnostic_codes",
+                "source_sha256",
+                "build_identity",
+            },
+        )
         or output.get("build_id") != row.build_id
         or receipt.receipt_id
         != workflow_step_receipt_id(row.tenant_id, job.job_id, receipt.step_name)
@@ -1310,6 +1404,14 @@ def _rejected_build_matches(
         or row.build_json.get("certification") is not None
         or row.build_json.get("evidence_refs") != []
         or row.build_json.get("versions") != command_versions
+    ):
+        return False
+    evidence_id = output.get("evidence_id")
+    if evidence_id is None:
+        if evidence_rows:
+            return False
+    elif len(evidence_rows) != 1 or not _rejection_evidence_matches(
+        row, record, authority, evidence_rows[0], evidence_id
     ):
         return False
     return _terminal_phases_match(

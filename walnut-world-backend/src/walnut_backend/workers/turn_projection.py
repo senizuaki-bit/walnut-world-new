@@ -1651,7 +1651,11 @@ async def finish_hint_interaction(
         directive is None
         or decision.response_type not in {"question", "hint"}
         or decision.draft.skill_patch is not None
-        or decision.evidence_refs
+        # A hint produces no Evidence of its own, but it may cite the compile
+        # rejection its event carries -- that citation is what lets 叮当 talk
+        # about the actual error instead of re-asking an opening question. It
+        # must cite exactly that Evidence and nothing else.
+        or decision.evidence_refs != authority.event.evidence_refs
     ):
         raise WorkflowInvariantError("hint projection requires one no-Evidence teaching response")
     decision_wire = cast(dict[str, Any], json_value(decision))
@@ -1796,7 +1800,11 @@ async def finish_hint_interaction(
             "source": decision.source,
             "degraded": decision.degraded,
             "fallback_reason": decision.fallback_reason,
-            "evidence_refs": [],
+            # Whatever the hint cited travels with the feedback, so a teacher
+            # reading this later can see which failure the advice was about.
+            # The decision owns no Evidence; these are the Build rejections it
+            # was allowed to observe.
+            "evidence_refs": decision_wire.get("evidence_refs", []),
             "completed_at": _timestamp(decision.completed_at),
         }
         feedback_sha256 = canonical_json_sha256(feedback)
