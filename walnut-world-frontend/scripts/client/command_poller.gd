@@ -7,7 +7,21 @@ extends RefCounted
 
 const RequestContextFactoryScript = preload("res://autoload/request_context_factory.gd")
 
-const DEFAULT_DEADLINE_SECONDS := 30.0
+## How long a resource may take to settle before the client stops waiting.
+##
+## Thirty seconds was far below what the operation being waited on actually
+## takes: an Agent Turn includes a real provider round-trip, and the recorded
+## controlled acceptance took 301 seconds. The client therefore declared
+## failure while the work was still running, and the learner was told to keep
+## fixing correct code -- while the server went on to commit the World and
+## write the growth summary. Both were telling the truth; only the client had
+## stopped listening.
+##
+## Waiting longer costs nothing for fast operations: polling returns the
+## moment a resource is terminal, so Build and Activation still settle in
+## their usual second or two. The deadline only decides how long the client
+## is willing to wait when the work genuinely takes that long.
+const DEFAULT_DEADLINE_SECONDS := 360.0
 const DEFAULT_INITIAL_DELAY_SECONDS := 0.25
 const DEFAULT_BASE_DELAY_SECONDS := 0.25
 const DEFAULT_MAX_DELAY_SECONDS := 4.0

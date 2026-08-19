@@ -14,7 +14,10 @@ signal patch_decision_resolved(interaction_id: String, patch_id: String, decisio
 const CommandPoller = preload("res://scripts/client/command_poller.gd")
 const ContractValidator = preload("res://addons/yaya_contract_client/contract_validator.gd")
 const ProductInteractionGateway = preload("res://scripts/client/product_interaction_gateway.gd")
-const DEFAULT_INTERACTION_DEADLINE_SECONDS := 15.0
+## The AgentInteraction is written after the provider has answered, so this
+## waits on the same real round-trip the command poller does. Fifteen seconds
+## expired long before the teaching response existed.
+const DEFAULT_INTERACTION_DEADLINE_SECONDS := 360.0
 const DEFAULT_INTERACTION_DELAY_SECONDS := 0.25
 const PENDING_TURN_SLOTS := ["agent_turn", "agent_hint"]
 ## Statuses that prove the gateway refused the request itself, so it never became
