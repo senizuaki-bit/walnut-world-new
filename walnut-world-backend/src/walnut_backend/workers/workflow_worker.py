@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import errno
+import logging
 from collections.abc import Mapping
 from dataclasses import replace
 from datetime import UTC, datetime
@@ -218,6 +219,16 @@ class WorkflowWorker:
         force_dead_letter: bool = False,
     ) -> None:
         sanitized = _sanitized_failure(error, attempt=claim.attempt)
+        # The persisted diagnostic is deliberately bounded and secret-free, which
+        # leaves an operator with only an exception name when a job dies. Send the
+        # traceback to this process's own log instead: it never enters the
+        # database, and without it a reproducible failure cannot be diagnosed.
+        logging.getLogger(__name__).exception(
+            "workflow job %s failed at phase %s on attempt %s",
+            claim.job_id,
+            claim.job.get("phase") if isinstance(claim.job, Mapping) else None,
+            claim.attempt,
+        )
         retry_after_seconds = (
             error.retry_after_seconds if isinstance(error, WorkflowRetryableError) else None
         )

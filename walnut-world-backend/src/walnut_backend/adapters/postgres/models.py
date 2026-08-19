@@ -1689,10 +1689,14 @@ class SkillArtifactRow(Base):
 
     tenant_id: Mapped[str] = mapped_column(String(96), primary_key=True)
     artifact_sha256: Mapped[str] = mapped_column(String(64), primary_key=True)
+    # build_id is part of the identity: the artifact is content-addressed, so a
+    # learner who writes the same correct code twice rebuilds to the same sha,
+    # and both Builds must be able to record the row that certifies them.
     build_id: Mapped[str] = mapped_column(
         String(128),
         ForeignKey("skill_builds.build_id", name="fk_skill_artifact_build"),
         nullable=False,
+        primary_key=True,
     )
     actor_id: Mapped[str] = mapped_column(String(128), nullable=False)
     content_hash: Mapped[str] = mapped_column(String(64), nullable=False)

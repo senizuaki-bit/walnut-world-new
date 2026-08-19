@@ -9,6 +9,7 @@ from collections.abc import Mapping
 from dataclasses import replace
 from datetime import UTC, datetime
 from typing import Any
+from uuid import uuid4
 
 from sqlalchemy import Select, and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
@@ -138,7 +139,16 @@ def system_audit_record(
     context: OperationContext, operation: str, resource_id: str, details: Mapping[str, Any]
 ) -> AuditRecord:
     return AuditRecord(
-        audit_id=f"audit_{datetime.now(UTC).timestamp():.6f}".replace(".", ""),
+        # Not derived from the clock. This id was a microsecond timestamp, which
+        # is only unique if the clock advances between two records -- and on
+        # Windows the system clock moves in ~15.6ms steps, so two audit rows
+        # written in the same transaction collide on the primary key and the
+        # whole operation dies with an IntegrityError. That is what stopped
+        # Builds: their accept phase writes several audit records in one
+        # transaction, retried five times, and dead-lettered every time, while
+        # single-record operations like a hint went on working. The same table is
+        # already written elsewhere with a uuid; ordering comes from occurred_at.
+        audit_id=f"audit_{uuid4().hex}",
         occurred_at=datetime.now(UTC),
         operation=operation,
         outcome="ALLOWED",
