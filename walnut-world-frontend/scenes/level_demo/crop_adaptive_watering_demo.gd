@@ -1212,11 +1212,21 @@ func present_agent_error(message: String) -> void:
 	_reveal_evidence()
 
 
-func fail_agent_submission(_stage: String, _message: String) -> void:
+func fail_agent_submission(stage: String, message: String) -> void:
 	_agent_stage_message_visible = false
 	_set_phase(Phase.FAILED)
 	evidence_title.text = "继续完善规则"
-	evidence_body.text = "可以继续修改代码并重新验证。"
+	# The stage and reason used to be discarded here, so every failure looked
+	# identical -- a compile error, a refused activation and a broken world
+	# cursor all read as "keep improving your rules". A learner cannot act on
+	# that, and neither can anyone helping them.
+	var detail := message.strip_edges()
+	evidence_body.text = (
+		"可以继续修改代码并重新验证。"
+		if detail.is_empty()
+		else "%s
+（%s）" % [detail, stage]
+	)
 	_reveal_evidence()
 
 
