@@ -23,12 +23,8 @@ def test_formal_m2_seed_token_lifetime_covers_both_phases_and_transition_budget(
     wrapper = REAL_PROVIDER_WRAPPER.read_text(encoding="utf-8")
     token_match = re.search(r"\$int1E2eTokenLifetimeSeconds = (\d+)", harness)
     transition_match = re.search(r"\$int1E2eTransitionBudgetSeconds = (\d+)", harness)
-    local_deadline_match = re.search(
-        r"\[int\]\$TotalDeadlineSeconds = (\d+)", harness
-    )
-    live_deadline_match = re.search(
-        r"\[int\]\$TotalDeadlineSeconds = (\d+)", wrapper
-    )
+    local_deadline_match = re.search(r"\[int\]\$TotalDeadlineSeconds = (\d+)", harness)
+    live_deadline_match = re.search(r"\[int\]\$TotalDeadlineSeconds = (\d+)", wrapper)
     assert token_match is not None
     assert transition_match is not None
     assert local_deadline_match is not None
@@ -44,18 +40,13 @@ def test_formal_m2_seed_token_lifetime_covers_both_phases_and_transition_budget(
     assert "$requiredInt1E2eTokenLifetimeSeconds -gt $int1E2eTokenLifetimeSeconds" in harness
     assert "formal two-phase token lifetime budget" in harness
     assert (
-        "$env:WALNUT_AUTH_MAXIMUM_LIFETIME_SECONDS = "
-        "[string]$int1E2eTokenLifetimeSeconds"
+        "$env:WALNUT_AUTH_MAXIMUM_LIFETIME_SECONDS = [string]$int1E2eTokenLifetimeSeconds"
     ) in harness
     assert "[int]$TotalDeadlineSeconds = 720" in wrapper
     assert 2 * local_deadline_seconds + transition_budget_seconds <= token_lifetime_seconds
     assert 2 * live_deadline_seconds + transition_budget_seconds < token_lifetime_seconds
-    assert token_lifetime_seconds - (
-        2 * live_deadline_seconds + transition_budget_seconds
-    ) == 60
-    maximum_deadline_seconds = (
-        token_lifetime_seconds - transition_budget_seconds
-    ) // 2
+    assert token_lifetime_seconds - (2 * live_deadline_seconds + transition_budget_seconds) == 60
+    maximum_deadline_seconds = (token_lifetime_seconds - transition_budget_seconds) // 2
     assert 2 * maximum_deadline_seconds + transition_budget_seconds == token_lifetime_seconds
     assert 2 * (maximum_deadline_seconds + 1) + transition_budget_seconds > token_lifetime_seconds
 
@@ -78,6 +69,8 @@ def test_harness_has_fresh_authority_recovery_and_official_godot_chain() -> None
         "$gatewayPort = 8790",
         "Test-LocalTcpPortAvailable $gatewayPort",
         "WALNUT_RUNTIME_ROOT",
+        "WALNUT_INT1_TASK_MODE",
+        "$env:WALNUT_INT1_TASK_MODE = 'watering'",
         "WALNUT_ENABLE_WORLD_PRESENTATION",
         "sandbox-results",
         "WALNUT_LLM_RELAY_ENDPOINT",
@@ -210,14 +203,17 @@ def test_harness_has_fresh_authority_recovery_and_official_godot_chain() -> None
     assert "to_jsonb(event_row)" in script
     assert "to_jsonb(stream_row)" in script
     assert "$expectedSessionCommandCount = 1" in script
-    assert "$expectedBuildCommandCount = 2" in script
+    assert "$expectedBuildCommandCount = if ($EnableSkillPatch) { 2 } else { 5 }" in script
     assert "$expectedActivationCommandCount = 2" in script
     assert (
         "$expectedCommandCount = $expectedSessionCommandCount + "
         "$expectedBuildCommandCount + $expectedActivationCommandCount + "
         "$expectedTurnCount"
     ) in script
-    assert "$expectedAppliedCommandCount = $expectedCommandCount - $expectedRejectedCommandCount" in script
+    assert (
+        "$expectedAppliedCommandCount = $expectedCommandCount - $expectedRejectedCommandCount"
+        in script
+    )
     assert "$env:WALNUT_WORLD_SUCCESS_SCORE = '8'" in script
     assert "terminal_command_count -ne $expectedCommandCount" in script
     assert "applied_terminal_command_count -ne $expectedAppliedCommandCount" in script
@@ -269,7 +265,7 @@ def test_harness_has_fresh_authority_recovery_and_official_godot_chain() -> None
         re.findall(r"(?m)^  '([^']+)',", value)
         for value in (first_object, second_object, third_object)
     ]
-    assert [len(group) for group in field_groups[:2]] == [50, 33]
+    assert [len(group) for group in field_groups[:2]] == [50, 35]
     assert all(len(group) <= 50 for group in field_groups)
     fields = [field for group in field_groups for field in group]
     assert len(fields) >= 111
@@ -313,26 +309,26 @@ def test_formal_command_accounting_closes_exact_public_operation_equation() -> N
         return int(match.group(1)), int(match.group(2))
 
     session_commands = constant("expectedSessionCommandCount")
-    build_commands = constant("expectedBuildCommandCount")
+    m2_build_commands, non_m2_build_commands = mode_counts("expectedBuildCommandCount")
     activation_commands = constant("expectedActivationCommandCount")
     m2_turn_commands, non_m2_turn_commands = mode_counts("expectedTurnCount")
     m2_rejected, non_m2_rejected = mode_counts("expectedRejectedCommandCount")
-    m2_total = (
-        session_commands + build_commands + activation_commands + m2_turn_commands
-    )
+    m2_total = session_commands + m2_build_commands + activation_commands + m2_turn_commands
     non_m2_total = (
-        session_commands
-        + build_commands
-        + activation_commands
-        + non_m2_turn_commands
+        session_commands + non_m2_build_commands + activation_commands + non_m2_turn_commands
     )
 
-    assert (session_commands, build_commands, activation_commands) == (1, 2, 2)
+    assert (session_commands, m2_build_commands, non_m2_build_commands, activation_commands) == (
+        1,
+        2,
+        5,
+        2,
+    )
     assert (m2_total, m2_total - m2_rejected, m2_rejected) == (11, 7, 4)
     assert (non_m2_total, non_m2_total - non_m2_rejected, non_m2_rejected) == (
-        9,
+        17,
+        11,
         6,
-        3,
     )
     assert "command_type='CREATE_AGENT_SESSION'" in script
     assert "command_type='CREATE_SKILL_BUILD'" in script
@@ -351,9 +347,7 @@ def test_harness_keeps_world_commit_and_presentation_action_counts_distinct() ->
     assert "$expectedWorldCommitEventCount = 1" in script
     assert "$expectedWorldPresentationEventCount = 8" in script
     assert "world_event_count -ne $expectedWorldCommitEventCount" in script
-    assert (
-        "presentation_event_count -ne $expectedWorldPresentationEventCount" in script
-    )
+    assert "presentation_event_count -ne $expectedWorldPresentationEventCount" in script
     assert "world_event_count -ne 8" not in script
 
 
@@ -369,22 +363,22 @@ def test_harness_has_formal_m2_flags_counts_and_full_row_authority() -> None:
         "worker_skill_patch_enabled",
         "$phase1FrontendArguments += '-EnableSkillPatch'",
         "$phase2FrontendArguments += '-EnableSkillPatch'",
-        "$expectedRelayGenerationCount = if ($EnableSkillPatch) { 16 } else { 12 }",
-        "$expectedTurnCount = if ($EnableSkillPatch) { 6 } else { 4 }",
+        "$expectedRelayGenerationCount = if ($EnableSkillPatch) { 16 } else { 27 }",
+        "$expectedTurnCount = if ($EnableSkillPatch) { 6 } else { 9 }",
         "$expectedRunCount = if ($EnableSkillPatch) { 5 } else { 4 }",
-        "$expectedLearnerCount = if ($EnableSkillPatch) { 5 } else { 4 }",
-        "$expectedFrontendPostCount = if ($EnableSkillPatch) { 12 } else { 9 }",
-        "$expectedFrontendPutCount = if ($EnableSkillPatch) { 1 } else { 2 }",
+        "$expectedLearnerCount = if ($EnableSkillPatch) { 5 } else { 9 }",
+        "$expectedFrontendPostCount = if ($EnableSkillPatch) { 12 } else { 20 }",
+        "$expectedFrontendPutCount = if ($EnableSkillPatch) { 1 } else { 3 }",
         "$expectedSessionCommandCount = 1",
-        "$expectedBuildCommandCount = 2",
+        "$expectedBuildCommandCount = if ($EnableSkillPatch) { 2 } else { 5 }",
         "$expectedActivationCommandCount = 2",
         "$expectedCommandCount = $expectedSessionCommandCount + $expectedBuildCommandCount + $expectedActivationCommandCount + $expectedTurnCount",
         "$expectedAppliedCommandCount = $expectedCommandCount - $expectedRejectedCommandCount",
         "$expectedFailureRunCount = if ($EnableSkillPatch) { 4 } else { 3 }",
         "$expectedSandboxReceiptCount = if ($EnableSkillPatch) { 10 } else { 8 }",
         "$expectedProviderResultMinimum = if ($EnableSkillPatch) { 11 } else { 8 }",
-        "$expectedProductReceiptCount = if ($EnableSkillPatch) { 1 } else { 2 }",
-        "$expectedEvidenceCount = if ($EnableSkillPatch) { 13 } else { 11 }",
+        "$expectedProductReceiptCount = if ($EnableSkillPatch) { 1 } else { 3 }",
+        "$expectedEvidenceCount = if ($EnableSkillPatch) { 13 } else { 14 }",
         "$expectedPatchAuthorityCount = if ($EnableSkillPatch) { 1 } else { 0 }",
         "$expectedAssistedAuthorityCount = if ($EnableSkillPatch) { 1 } else { 0 }",
         "$expectedRealProviderGenerationLimit = if ($EnableSkillPatch) { 32 } else { 24 }",
@@ -392,11 +386,13 @@ def test_harness_has_formal_m2_flags_counts_and_full_row_authority() -> None:
         "patch_proposal_count -ne $expectedPatchAuthorityCount",
         "patch_evidence_count -ne $expectedPatchAuthorityCount",
         "patch_decision_count -ne $expectedPatchAuthorityCount",
-        "draft_revision_count -ne 3",
+        "$expectedDraftRevisionCount = if ($EnableSkillPatch) { 3 } else { 4 }",
+        "$expectedRejectedBuildCount = if ($EnableSkillPatch) { 0 } else { 3 }",
+        "draft_revision_count -ne $expectedDraftRevisionCount",
         "draft_assistance_count -ne $expectedPatchAuthorityCount",
         "patch_decision_receipt_count -ne $expectedPatchAuthorityCount",
-        "build_provenance_count -ne 2",
-        "build_terminal_authority_count -ne 2",
+        "build_provenance_count -ne $expectedBuildCommandCount",
+        "build_terminal_authority_count -ne $expectedBuildCommandCount",
         "build_terminal_certified_count -ne 2",
         "certification_provenance_count -ne 2",
         "activation_provenance_count -ne 2",

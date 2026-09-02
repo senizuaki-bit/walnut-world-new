@@ -1785,6 +1785,7 @@ $environmentNames = @(
     'WALNUT_CONTRACT_RELEASE_PATH',
     'WALNUT_RUNTIME_ROOT',
     'WALNUT_INT1_E2E_SEED',
+    'WALNUT_INT1_TASK_MODE',
     'WALNUT_ENABLE_WORLD_PRESENTATION',
     'WALNUT_ENABLE_SKILL_PATCH',
     'WALNUT_DEVELOPMENT_AUTH',
@@ -1912,6 +1913,7 @@ try {
     $env:WALNUT_CONTRACT_RELEASE_PATH = Join-Path $backendRoot 'contract-release.json'
     $env:WALNUT_RUNTIME_ROOT = $runtimeRoot
     $env:WALNUT_INT1_E2E_SEED = 'true'
+    $env:WALNUT_INT1_TASK_MODE = 'watering'
     $env:WALNUT_ENABLE_WORLD_PRESENTATION = if ($EnableWorldPresentation) { 'true' } else { 'false' }
     $env:WALNUT_ENABLE_SKILL_PATCH = if ($EnableSkillPatch) { 'true' } else { 'false' }
     $env:WALNUT_DEVELOPMENT_AUTH = 'false'
@@ -2096,11 +2098,13 @@ try {
     $expectedRelayGenerationCount = if ($EnableSkillPatch) { 16 } else { 27 }
     $expectedTurnCount = if ($EnableSkillPatch) { 6 } else { 9 }
     $expectedRunCount = if ($EnableSkillPatch) { 5 } else { 4 }
-    $expectedLearnerCount = if ($EnableSkillPatch) { 5 } else { 4 }
+    $expectedLearnerCount = if ($EnableSkillPatch) { 5 } else { 9 }
     $expectedFrontendPostCount = if ($EnableSkillPatch) { 12 } else { 20 }
     $expectedFrontendPutCount = if ($EnableSkillPatch) { 1 } else { 3 }
     $expectedSessionCommandCount = 1
     $expectedBuildCommandCount = if ($EnableSkillPatch) { 2 } else { 5 }
+    $expectedDraftRevisionCount = if ($EnableSkillPatch) { 3 } else { 4 }
+    $expectedRejectedBuildCount = if ($EnableSkillPatch) { 0 } else { 3 }
     $expectedActivationCommandCount = 2
     $expectedFailureRunCount = if ($EnableSkillPatch) { 4 } else { 3 }
     $expectedRejectedCommandCount = if ($EnableSkillPatch) { 4 } else { 6 }
@@ -2285,7 +2289,6 @@ SELECT (jsonb_build_object(
   'workspace_count', (SELECT count(*) FROM product_workspaces WHERE tenant_id='tenant_yaya'),
   'draft_count', (SELECT count(*) FROM product_skill_drafts WHERE tenant_id='tenant_yaya'),
   'build_count', (SELECT count(*) FROM skill_builds WHERE tenant_id='tenant_yaya'),
-  'build_rejected_count', (SELECT count(*) FROM skill_builds WHERE tenant_id='tenant_yaya' AND status='REJECTED'),
   'artifact_count', (SELECT count(*) FROM skill_artifacts WHERE tenant_id='tenant_yaya'),
   'certification_count', (SELECT count(*) FROM skill_certifications WHERE tenant_id='tenant_yaya'),
   'activation_count', (SELECT count(*) FROM skill_activations WHERE tenant_id='tenant_yaya'),
@@ -2293,7 +2296,6 @@ SELECT (jsonb_build_object(
   'run_count', (SELECT count(*) FROM game_runs WHERE tenant_id='tenant_yaya'),
   'world_event_count', (SELECT count(*) FROM domain_events WHERE tenant_id='tenant_yaya' AND stream_id LIKE 'world:%'),
   'evidence_count', (SELECT count(*) FROM game_evidence WHERE tenant_id='tenant_yaya'),
-  'build_rejection_evidence_count', (SELECT count(*) FROM game_evidence WHERE tenant_id='tenant_yaya' AND evidence_json->'payload'->>'evidence_kind'='BUILD_REJECTION'),
   'interaction_count', (SELECT count(*) FROM product_agent_interactions WHERE tenant_id='tenant_yaya'),
   'learner_projection_count', (SELECT count(*) FROM learner_projection_jobs WHERE tenant_id='tenant_yaya'),
   'learner_projection_succeeded', (SELECT count(*) FROM learner_projection_jobs WHERE tenant_id='tenant_yaya' AND status='SUCCEEDED'),
@@ -2326,6 +2328,8 @@ SELECT (jsonb_build_object(
   'rejected_terminal_command_count', (SELECT count(*) FROM commands WHERE tenant_id='tenant_yaya' AND terminal AND status='REJECTED'),
   'session_command_count', (SELECT count(*) FROM commands WHERE tenant_id='tenant_yaya' AND command_type='CREATE_AGENT_SESSION'),
   'build_command_count', (SELECT count(*) FROM commands WHERE tenant_id='tenant_yaya' AND command_type='CREATE_SKILL_BUILD'),
+  'build_rejected_count', (SELECT count(*) FROM skill_builds WHERE tenant_id='tenant_yaya' AND status='REJECTED'),
+  'build_rejection_evidence_count', (SELECT count(*) FROM game_evidence WHERE tenant_id='tenant_yaya' AND evidence_json->'payload'->>'evidence_kind'='BUILD_REJECTION'),
   'activation_command_count', (SELECT count(*) FROM commands WHERE tenant_id='tenant_yaya' AND command_type='ACTIVATE_SKILL_VERSION'),
   'turn_command_count', (SELECT count(*) FROM commands WHERE tenant_id='tenant_yaya' AND command_type='EXECUTE_AGENT_TURN'),
   'registry_revision', COALESCE((SELECT max(revision) FROM registry_entries WHERE tenant_id='tenant_yaya'), 0),
@@ -2431,17 +2435,17 @@ SELECT (jsonb_build_object(
         [int]$databaseFingerprint.session_count -ne 1 -or
         [int]$databaseFingerprint.workspace_count -ne 1 -or
         [int]$databaseFingerprint.draft_count -ne 1 -or
-        [int]$databaseFingerprint.draft_revision_count -ne $(if ($EnableSkillPatch) { 3 } else { 4 }) -or
+        [int]$databaseFingerprint.draft_revision_count -ne $expectedDraftRevisionCount -or
         [int]$databaseFingerprint.patch_request_count -ne $expectedPatchAuthorityCount -or
         [int]$databaseFingerprint.patch_proposal_count -ne $expectedPatchAuthorityCount -or
         [int]$databaseFingerprint.patch_evidence_count -ne $expectedPatchAuthorityCount -or
         [int]$databaseFingerprint.patch_decision_count -ne $expectedPatchAuthorityCount -or
         [int]$databaseFingerprint.draft_assistance_count -ne $expectedPatchAuthorityCount -or
         [int]$databaseFingerprint.patch_decision_receipt_count -ne $expectedPatchAuthorityCount -or
-        [int]$databaseFingerprint.build_count -ne $(if ($EnableSkillPatch) { 2 } else { 5 }) -or
-        [int]$databaseFingerprint.build_rejected_count -ne $(if ($EnableSkillPatch) { 0 } else { 3 }) -or
-        [int]$databaseFingerprint.build_provenance_count -ne $(if ($EnableSkillPatch) { 2 } else { 5 }) -or
-        [int]$databaseFingerprint.build_terminal_authority_count -ne $(if ($EnableSkillPatch) { 2 } else { 5 }) -or
+        [int]$databaseFingerprint.build_count -ne $expectedBuildCommandCount -or
+        [int]$databaseFingerprint.build_rejected_count -ne $expectedRejectedBuildCount -or
+        [int]$databaseFingerprint.build_provenance_count -ne $expectedBuildCommandCount -or
+        [int]$databaseFingerprint.build_terminal_authority_count -ne $expectedBuildCommandCount -or
         [int]$databaseFingerprint.build_terminal_certified_count -ne 2 -or
         [int]$databaseFingerprint.artifact_count -ne 2 -or
         [int]$databaseFingerprint.certification_count -ne 2 -or
@@ -2464,7 +2468,7 @@ SELECT (jsonb_build_object(
         [int]$databaseFingerprint.world_snapshot_count -ne 1 -or
         [int]$databaseFingerprint.world_event_count -ne $expectedWorldCommitEventCount -or
         [int]$databaseFingerprint.evidence_count -ne $expectedEvidenceCount -or
-        [int]$databaseFingerprint.build_rejection_evidence_count -ne $(if ($EnableSkillPatch) { 0 } else { 3 }) -or
+        [int]$databaseFingerprint.build_rejection_evidence_count -ne $expectedRejectedBuildCount -or
         [int]$databaseFingerprint.interaction_count -ne $expectedTurnCount -or
         [int]$databaseFingerprint.command_count -ne $expectedCommandCount -or
         [int]$databaseFingerprint.terminal_command_count -ne $expectedCommandCount -or
