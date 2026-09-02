@@ -799,8 +799,15 @@ async def latest_failure_authority_for_hint(
     current_turn: AgentTurnRow,
     context: OperationContext,
     expected_skill_ref: SkillRef | None,
+    require_current_world: bool = True,
 ) -> CurrentRunFailureAuthority | None:
-    """Resolve the latest failed Run across only validated historical hints."""
+    """Resolve the latest failed Run across only validated historical hints.
+
+    Live hint selection requires the referenced Run's World snapshot to remain
+    current.  Historical Product projection validation instead closes the
+    snapshot that was current when the immutable hint was created; a later Run
+    may legitimately have advanced the World head.
+    """
 
     matching_run_commands = (
         select(RunRow.command_id.label("command_id"))
@@ -863,7 +870,7 @@ async def latest_failure_authority_for_hint(
             content_hash=context.content_ref.content_hash,
             command_id=turn.command_id,
             expected_context=historical_context,
-            require_current_world=True,
+            require_current_world=require_current_world,
             validation_state=validation_state,
         )
         _validate_terminal_command(authority)

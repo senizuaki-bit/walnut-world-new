@@ -74,6 +74,25 @@ def test_skill_patch_projection_is_a_distinct_no_run_authority_branch() -> None:
     assert _interaction_projection_kind(value) is None
 
 
+def test_run_bound_projection_defers_current_or_referenced_run_to_durable_ownership() -> None:
+    value = {
+        "role": "teaching_agent",
+        "response_type": "hint",
+        "question": None,
+        "hint_level": 1,
+        "skill_patch": None,
+        "feedback": {"run_id": "run_failure_authority"},
+    }
+
+    # A failed Run's own interaction and a later Hint that cites that Run have
+    # the same public shape.  The database-side authority check distinguishes
+    # them by whether the Run belongs to this interaction's Command.
+    assert _interaction_projection_kind(value) == "RUN_BOUND"
+
+    value["feedback"] = {"run_id": None}
+    assert _interaction_projection_kind(value) == "HINT_NO_RUN"
+
+
 def _receipt(
     step_name: str,
     *,
@@ -191,16 +210,10 @@ def test_patch_reconciliation_receipt_corruption_fails_closed(mutation: str) -> 
         corrupted[-1].output_sha256 = "c" * 64
     elif mutation == "payload_mismatch":
         corrupted[-1].receipt_json["attempt"] = 2
-        corrupted[-1].output_sha256 = workflow_receipt_sha256(
-            corrupted[-1].receipt_json
-        )
+        corrupted[-1].output_sha256 = workflow_receipt_sha256(corrupted[-1].receipt_json)
     elif mutation == "base_exception_type":
-        corrupted[-1].receipt_json["exception_type"] = (
-            "WorkflowReconciliationPending"
-        )
-        corrupted[-1].output_sha256 = workflow_receipt_sha256(
-            corrupted[-1].receipt_json
-        )
+        corrupted[-1].receipt_json["exception_type"] = "WorkflowReconciliationPending"
+        corrupted[-1].output_sha256 = workflow_receipt_sha256(corrupted[-1].receipt_json)
     else:
         raise AssertionError(mutation)
 
@@ -225,11 +238,7 @@ _PATCH_PROVIDER_DRAFT = {
 def test_patch_provider_draft_rebuild_matches_single_terminal_result() -> None:
     proposal: Any = SimpleNamespace(
         agent_proposal_json={
-            "operation": {
-                "content": _PATCH_PROVIDER_DRAFT["skill_patch"][
-                    "replacement_content"
-                ]
-            },
+            "operation": {"content": _PATCH_PROVIDER_DRAFT["skill_patch"]["replacement_content"]},
             "rationale": _PATCH_PROVIDER_DRAFT["skill_patch"]["rationale"],
         }
     )

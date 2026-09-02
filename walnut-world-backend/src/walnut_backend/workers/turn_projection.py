@@ -1122,8 +1122,7 @@ async def finish_skill_patch_proposal(
         existing = await session.scalar(
             select(ProductSkillPatchProposalRow).where(
                 ProductSkillPatchProposalRow.tenant_id == authority.claim.tenant_id,
-                ProductSkillPatchProposalRow.request_command_id
-                == authority.command.command_id,
+                ProductSkillPatchProposalRow.request_command_id == authority.command.command_id,
             )
         )
         if reservation is not None and reservation.status == "PROPOSED":
@@ -1207,8 +1206,7 @@ async def finish_skill_patch_proposal(
                 ProductInteractionRow.session_id == authority.event.session_id,
                 ProductInteractionRow.interaction_id == proposal.failed.interaction_id,
                 ProductInteractionRow.sequence == proposal.failed.interaction_sequence,
-                ProductInteractionRow.interaction_revision
-                == proposal.failed.interaction_revision,
+                ProductInteractionRow.interaction_revision == proposal.failed.interaction_revision,
             )
         )
         current_draft = await session.scalar(
@@ -1322,16 +1320,19 @@ async def finish_skill_patch_proposal(
             for item in proposal.failed.evidence_refs
         ):
             raise WorkflowInvariantError("Patch proposal Evidence bytes drifted")
-        interaction_sequence = int(
-            await session.scalar(
-                select(func.max(ProductInteractionRow.sequence)).where(
-                    ProductInteractionRow.tenant_id == claim.tenant_id,
-                    ProductInteractionRow.actor_id == context.actor.actor_id,
-                    ProductInteractionRow.session_id == authority.event.session_id,
+        interaction_sequence = (
+            int(
+                await session.scalar(
+                    select(func.max(ProductInteractionRow.sequence)).where(
+                        ProductInteractionRow.tenant_id == claim.tenant_id,
+                        ProductInteractionRow.actor_id == context.actor.actor_id,
+                        ProductInteractionRow.session_id == authority.event.session_id,
+                    )
                 )
+                or 0
             )
-            or 0
-        ) + 1
+            + 1
+        )
         if selected.sequence != interaction_sequence - 1:
             raise WorkflowInvariantError("selected failure is no longer the current Interaction")
         now = max(
@@ -1343,16 +1344,19 @@ async def finish_skill_patch_proposal(
             *(item.created_at for item in proposal.failed.evidence_refs),
         )
         interaction_id = _identifier("interaction", claim.tenant_id, claim.job_id)
-        public_patch_id = "patch_" + hashlib.sha256(
-            "\x00".join(
-                (
-                    claim.tenant_id,
-                    command.command_id,
-                    proposal.proposal_id,
-                    proposal.proposal_sha256,
-                )
-            ).encode("utf-8")
-        ).hexdigest()[:32]
+        public_patch_id = (
+            "patch_"
+            + hashlib.sha256(
+                "\x00".join(
+                    (
+                        claim.tenant_id,
+                        command.command_id,
+                        proposal.proposal_id,
+                        proposal.proposal_sha256,
+                    )
+                ).encode("utf-8")
+            ).hexdigest()[:32]
+        )
         operation = {
             "operation": "UPSERT_FILE",
             "path": proposal.operation.path,
@@ -1445,9 +1449,7 @@ async def finish_skill_patch_proposal(
         )
         feedback_event = cast(RuntimeEvent, appended.events[0])
         source = {
-            "receipt_id": workflow_step_receipt_id(
-                claim.tenant_id, claim.job_id, "TURN_COMPLETED"
-            ),
+            "receipt_id": workflow_step_receipt_id(claim.tenant_id, claim.job_id, "TURN_COMPLETED"),
             "source_type": "AGENT_TURN_PRODUCT_PROJECTION",
             "source_revision": 1,
             "actor": cast(dict[str, Any], json_value(context.actor)),
@@ -1467,9 +1469,7 @@ async def finish_skill_patch_proposal(
             "committed_at": _timestamp(now),
         }
         source["source_sha256"] = canonical_json_sha256(source)
-        event_wire = cast(
-            dict[str, Any], json_value(public_domain_event_data(feedback_event))
-        )
+        event_wire = cast(dict[str, Any], json_value(public_domain_event_data(feedback_event)))
         event_wire.pop("payload")
         event_wire["feedback_sha256"] = feedback_sha256
         interaction = {
@@ -1638,12 +1638,14 @@ async def finish_hint_interaction(
     decision: AgentDecision,
     lease_seconds: int,
 ) -> None:
-    """Atomically publish one no-Run teaching hint as an AgentInteraction.
+    """Atomically publish one no-new-Run teaching hint as an AgentInteraction.
 
     A hint explains the current situation to the student.  It never compiles or
-    executes the Skill, so it produces no Run, no Evidence and no World event;
-    the only durable products are one AgentInteraction, its feedback Event and
-    the frozen TeachingDirective receipt that authorized the response.
+    executes the Skill, so it produces no Run, no Evidence and no World event.
+    When it explains a failed Run, ``feedback.run_id`` retains that prior Run's
+    identity; Build rejection hints and opening hints keep it null.  The only
+    new durable products are one AgentInteraction, its feedback Event and the
+    frozen TeachingDirective receipt that authorized the response.
     """
 
     directive = decision.teaching_directive
@@ -1698,9 +1700,10 @@ async def finish_hint_interaction(
                 owner is None
                 or replayed_terminal is None
                 or not isinstance(replayed_feedback, Mapping)
-                or _interaction_projection_kind(replayed.interaction_json) != "HINT_NO_RUN"
+                or _interaction_projection_kind(replayed.interaction_json)
+                not in {"HINT_NO_RUN", "RUN_BOUND"}
                 or replayed_feedback.get("command_id") != authority.command.command_id
-                or replayed_feedback.get("run_id") is not None
+                or replayed_feedback.get("run_id") != authority.event.run_id
                 or replayed.interaction_json.get("projection_source")
                 != replayed_terminal.receipt_json
             ):
@@ -1773,16 +1776,19 @@ async def finish_hint_interaction(
             or request_evidence
         ):
             raise WorkflowInvariantError("hint Command, Turn or no-Run boundary drifted")
-        interaction_sequence = int(
-            await session.scalar(
-                select(func.max(ProductInteractionRow.sequence)).where(
-                    ProductInteractionRow.tenant_id == claim.tenant_id,
-                    ProductInteractionRow.actor_id == context.actor.actor_id,
-                    ProductInteractionRow.session_id == authority.event.session_id,
+        interaction_sequence = (
+            int(
+                await session.scalar(
+                    select(func.max(ProductInteractionRow.sequence)).where(
+                        ProductInteractionRow.tenant_id == claim.tenant_id,
+                        ProductInteractionRow.actor_id == context.actor.actor_id,
+                        ProductInteractionRow.session_id == authority.event.session_id,
+                    )
                 )
+                or 0
             )
-            or 0
-        ) + 1
+            + 1
+        )
         now = max(
             await _database_now(session),
             command.updated_at,
@@ -1794,7 +1800,10 @@ async def finish_hint_interaction(
             "session_id": authority.event.session_id,
             "turn_id": authority.event.turn_id,
             "command_id": command.command_id,
-            "run_id": None,
+            # This Turn creates no Run.  A prior failed Run is nevertheless
+            # part of the feedback authority when the selected failure came
+            # from execution rather than Build rejection.
+            "run_id": authority.event.run_id,
             "message_key": decision.message_key,
             "message": decision.message,
             "source": decision.source,
@@ -1802,8 +1811,8 @@ async def finish_hint_interaction(
             "fallback_reason": decision.fallback_reason,
             # Whatever the hint cited travels with the feedback, so a teacher
             # reading this later can see which failure the advice was about.
-            # The decision owns no Evidence; these are the Build rejections it
-            # was allowed to observe.
+            # The decision owns no Evidence; these are the Build rejection or
+            # failed-Run references it was allowed to observe.
             # Use the same public serializer as Build/Run/Command resources.
             # Dataclass json_value() preserves a UTC datetime as "+00:00",
             # while the public EvidenceRef wire is canonical "Z". Mixing those
@@ -1838,9 +1847,7 @@ async def finish_hint_interaction(
         )
         feedback_event = cast(RuntimeEvent, appended.events[0])
         source = {
-            "receipt_id": workflow_step_receipt_id(
-                claim.tenant_id, claim.job_id, "TURN_COMPLETED"
-            ),
+            "receipt_id": workflow_step_receipt_id(claim.tenant_id, claim.job_id, "TURN_COMPLETED"),
             "source_type": "AGENT_TURN_PRODUCT_PROJECTION",
             "source_revision": 1,
             "actor": cast(dict[str, Any], json_value(context.actor)),
@@ -2112,15 +2119,9 @@ async def _closed_learner_assistance(
             SkillRunProvenanceRow.session_id == session_id,
         )
     )
-    build = (
-        await validate_run_provenance(session, run)
-        if run is not None
-        else None
-    )
+    build = await validate_run_provenance(session, run) if run is not None else None
     if run is None or build is None:
-        raise LearnerProjectionInvariantError(
-            "Learner Run provenance is missing or corrupt"
-        )
+        raise LearnerProjectionInvariantError("Learner Run provenance is missing or corrupt")
     used_skill_patch = run.assistance_authority == "SKILL_PATCH"
     return {
         "authority_version": "1.0.0",
@@ -3076,9 +3077,7 @@ async def _project_learner(
         session_id=result.run.session_id,
         run_id=result.run.run_id,
     )
-    frozen_assistance = _object(
-        claim.projection.get("assistance"), "Learner frozen assistance"
-    )
+    frozen_assistance = _object(claim.projection.get("assistance"), "Learner frozen assistance")
     if assistance != frozen_assistance:
         raise LearnerProjectionInvariantError("Learner assistance hand-off drifted")
     used_skill_patch = assistance.get("used_skill_patch") is True
@@ -3744,9 +3743,7 @@ async def _terminal_learner_result(
         session_id=claim.session_id,
         run_id=result.run.run_id,
     )
-    if assistance != _object(
-        objective.get("assistance"), "terminal frozen assistance"
-    ):
+    if assistance != _object(objective.get("assistance"), "terminal frozen assistance"):
         raise LearnerProjectionInvariantError("terminal Run provenance drifted")
     used_skill_patch = assistance.get("used_skill_patch") is True
     learner_payload = {

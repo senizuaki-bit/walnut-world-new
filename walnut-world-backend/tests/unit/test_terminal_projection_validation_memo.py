@@ -395,6 +395,63 @@ def test_failure_suffix_stops_at_an_unknown_no_run_turn(
     assert count == 1
 
 
+def test_historical_hint_failure_lookup_does_not_require_current_world(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    authority = _authority(1)
+    current_turn = SimpleNamespace(
+        tenant_id="tenant_yaya",
+        actor_id="student_0001",
+        session_id="session_memo_0001",
+        turn_sequence=2,
+        turn_id="turn_memo_0002",
+        command_id="cmd_memo_0002",
+    )
+
+    class Result:
+        def all(self) -> list[tuple[Any, str]]:
+            return [(authority.turn, authority.run.command_id)]
+
+    class Session:
+        async def execute(self, _statement: Any) -> Result:
+            return Result()
+
+    current_world_requirements: list[bool] = []
+
+    async def load_run(
+        _session: object,
+        *,
+        require_current_world: bool,
+        **_kwargs: Any,
+    ) -> Any:
+        current_world_requirements.append(require_current_world)
+        return authority
+
+    async def validate_projection(_session: object, _authority: Any, **_kwargs: Any) -> None:
+        return None
+
+    async def count_suffix(_session: object, **_kwargs: Any) -> int:
+        return 1
+
+    monkeypatch.setattr(run_outcomes, "load_validated_run", load_run)
+    monkeypatch.setattr(run_outcomes, "validate_terminal_projection", validate_projection)
+    monkeypatch.setattr(run_outcomes, "exact_failure_suffix_count", count_suffix)
+
+    failure = asyncio.run(
+        run_outcomes.latest_failure_authority_for_hint(
+            Session(),  # type: ignore[arg-type]
+            current_turn=current_turn,  # type: ignore[arg-type]
+            context=authority.context,
+            expected_skill_ref=cast(Any, authority.run.skill_ref),
+            require_current_world=False,
+        )
+    )
+
+    assert failure is not None
+    assert failure.authority is authority
+    assert current_world_requirements == [False]
+
+
 def test_load_cache_is_exact_and_bound_to_one_database_session(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
