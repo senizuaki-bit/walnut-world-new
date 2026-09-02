@@ -75,7 +75,7 @@ def test_verify_all_rejects_unexpected_static_tool_version_output() -> None:
     assert "reported unexpected version" in script
     assert '"ruff 0.15.22"' in script
     assert '"pyright 1.1.411"' in script
-    assert '"v24.16.0"' in script
+    assert '"v24.18.1"' in script
 
 
 def test_verify_all_overrides_polluted_pyright_environment_and_restores_it() -> None:

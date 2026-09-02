@@ -49,6 +49,7 @@ from yaya_agent_runtime.domain import (
     AgentTraceEvent,
     AgentTurnClaimReceipt,
     AgentTurnCommitReceipt,
+    BuildFailureSnapshot,
     CommittedAgentTurn,
     CompileResultSnapshot,
     CounterexampleSnapshot,
@@ -821,6 +822,39 @@ class PostgresRunRepository:
             ),
         )
         return _scoped_snapshot(row, CompileResultSnapshot, context)
+
+    async def get_build_failure(
+        self,
+        build_id: str,
+        context: OperationContext,
+    ) -> BuildFailureSnapshot:
+        """Fail closed because this embedded backend has no rejection Evidence authority.
+
+        The production Walnut Backend adapter implements this read from its
+        immutable BUILD_REJECTION Evidence.  This legacy embedded store keeps
+        rejected Build resources with an empty ``evidence_refs`` array, so it
+        must not synthesize the Evidence required by ``BuildFailureSnapshot``.
+        """
+
+        del build_id, context
+        raise RepositoryNotFoundError(
+            "rejected Build has no immutable BUILD_REJECTION Evidence authority"
+        )
+
+    async def list_same_build_failures(
+        self,
+        session_id: str,
+        failure_key: str,
+        through_build_id: str,
+        limit: int,
+        context: OperationContext,
+    ) -> tuple[BuildFailureSnapshot, ...]:
+        if limit < 1:
+            raise ValueError("limit must be positive")
+        del session_id, failure_key, through_build_id, context
+        raise RepositoryNotFoundError(
+            "rejected Build history has no immutable BUILD_REJECTION Evidence authority"
+        )
 
     async def get_run(self, run_id: str, context: OperationContext) -> RunResultSnapshot:
         row = await _fetch_one(

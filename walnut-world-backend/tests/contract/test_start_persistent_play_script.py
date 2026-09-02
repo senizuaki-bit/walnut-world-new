@@ -45,7 +45,7 @@ def test_persistent_play_supports_current_and_legacy_workspace_layouts() -> None
         "Join-Path $nestedFrontendRoot 'project.godot'",
         "$bundledAgentRoot = Join-Path $backendRoot 'agent'",
         "$legacyAgentRoot = Join-Path $workspaceRoot 'agent'",
-        "tools\\godot-4.5.2\\Godot_v4.5.2-stable_win64.exe",
+        "tools\\godot-4.7.1\\Godot_v4.7.1-stable_win64.exe",
         "Godot project missing: $frontendRoot",
     ):
         assert required in script

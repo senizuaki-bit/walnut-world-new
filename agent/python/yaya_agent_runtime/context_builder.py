@@ -906,24 +906,6 @@ class ContextBuilder:
                     "CONTEXT_LEARNER_SCOPE_MISMATCH",
                     "learner profile contains concepts outside the current task",
                 )
-            recent_messages = _require_snapshot_sequence(
-                await self._messages.list_recent(event.session_id, 8, operation_context),
-                MessageSnapshot,
-                "recent_messages",
-                maximum=8,
-            )
-            if any(item.session_id != event.session_id for item in recent_messages):
-                raise _context_error(
-                    "CONTEXT_MESSAGE_MISMATCH",
-                    "recent messages contain a different session",
-                )
-            for item in recent_messages:
-                _validate_snapshot_provenance(
-                    item.request_context,
-                    operation_context,
-                    "recent message",
-                )
-
         if role == "bug_agent":
             if event.failure_key is None:
                 raise _context_error(
@@ -1200,6 +1182,25 @@ class ContextBuilder:
                 raise _context_error(
                     "CONTEXT_LEARNER_SCOPE_MISMATCH",
                     "learner profile contains concepts outside the current task",
+                )
+
+        if role == "teaching_agent" and event.event_type != "skill_patch_requested":
+            recent_messages = _require_snapshot_sequence(
+                await self._messages.list_recent(event.session_id, 8, operation_context),
+                MessageSnapshot,
+                "recent_messages",
+                maximum=8,
+            )
+            if any(item.session_id != event.session_id for item in recent_messages):
+                raise _context_error(
+                    "CONTEXT_MESSAGE_MISMATCH",
+                    "recent messages contain a different session",
+                )
+            for item in recent_messages:
+                _validate_snapshot_provenance(
+                    item.request_context,
+                    operation_context,
+                    "recent message",
                 )
 
         directive = None
