@@ -1334,6 +1334,8 @@ func _turn_envelope_integrity(
 	if slot == "agent_build_feedback":
 		required.append("failure_authority")
 	var allowed := required + ["presentation_after_sequence", "recovery"]
+	if slot == "agent_hint":
+		allowed.append("failure_authority")
 	if not _dictionary_has_exact_allowed_fields(envelope, required, allowed):
 		return _integrity_failure("Pending Turn envelope is not closed.")
 	var request: Variant = envelope.get("request")
@@ -1409,6 +1411,12 @@ func _turn_envelope_integrity(
 		if turn_id != "turn_build_feedback_%s" % expected_identity.left(24):
 			return _integrity_failure("Pending Build feedback Turn identity is not authority-derived.")
 	else:
+		if (
+			slot == "agent_hint"
+			and envelope.has("failure_authority")
+			and not _valid_hint_failure_authority(envelope.failure_authority)
+		):
+			return _integrity_failure("Pending Hint failed-Run authority is invalid.")
 		expected_identity = JSON.stringify({
 			"session_id": session_id,
 			"world_revision": int(pre_world.revision),
@@ -1438,6 +1446,13 @@ func _valid_build_feedback_authority(value: Dictionary, session_id: String) -> b
 	):
 		return false
 	return ContractValidator._validate_evidence_ref(references[0]).ok
+
+
+func _valid_hint_failure_authority(value: Variant) -> bool:
+	return (
+		_closed_dictionary(value, ["run_id"])
+		and ContractValidator.validate_identifier(value.get("run_id")).ok
+	)
 
 
 func _valid_turn_recovery(value: Variant, envelope: Dictionary) -> bool:

@@ -1725,8 +1725,31 @@ func request_turn(input_override: Dictionary = {}, requires_skill_binding: bool 
 		else {"type": "ASSIGNED_TASK", "task_id": task.task_id}
 	)
 	var attempted_sequence := int(session.get("last_turn_sequence", 0)) + 1
+	var failure_authority: Dictionary = {}
+	if not requires_skill_binding:
+		# A Hint creates no Run, but after an objective failure its feedback
+		# references the exact failed Run selected by the server. Persist the
+		# client-observed identity before submission so normal execution and
+		# restart recovery correlate the same immutable Interaction.
+		var referenced_run_id := str(store.objective_result.get("run_id", ""))
+		if not referenced_run_id.is_empty():
+			if not ContractValidator.validate_identifier(referenced_run_id).ok:
+				store.report_error(_local_error(
+					"HINT_FAILURE_AUTHORITY_INVALID",
+					"Hint feedback requires a valid failed-Run identity.",
+				))
+				return
+			failure_authority = {"run_id": referenced_run_id}
 	var execution: Dictionary = await _submit_turn_attempt(
-		slot, session, world, turn_input, skill_bindings, attempted_sequence,
+		slot,
+		session,
+		world,
+		turn_input,
+		skill_bindings,
+		attempted_sequence,
+		"",
+		"",
+		failure_authority,
 	)
 	if not execution.get("ok", false) and _turn_refused_before_acceptance(execution):
 		# A Turn declares three cursors -- the Session's next sequence, the World
@@ -1753,6 +1776,9 @@ func request_turn(input_override: Dictionary = {}, requires_skill_binding: bool 
 				turn_input,
 				skill_bindings,
 				resynced if resynced > 0 else attempted_sequence,
+				"",
+				"",
+				failure_authority,
 			)
 	if not execution.get("ok", false):
 		store.report_error(execution.get("error", _local_error("TURN_RECOVERY_FAILED", "Agent Turn reconciliation failed.")))
@@ -1861,7 +1887,11 @@ func _submit_turn_attempt(
 ## envelope in _execute_pending_turn_envelope_inner.
 func _turn_refused_before_acceptance(result: Dictionary) -> bool:
 	var status: Variant = result.get("status")
-	return typeof(status) == TYPE_INT and int(status) in UNACCEPTED_TURN_HTTP_STATUSES
+	return (
+		bool(result.get("turn_refused_before_acceptance", false))
+		and typeof(status) == TYPE_INT
+		and int(status) in UNACCEPTED_TURN_HTTP_STATUSES
+	)
 
 
 ## Re-read ONLY the Session's Turn cursor after the gateway refused a Turn.
@@ -2061,8 +2091,17 @@ func _execute_pending_turn_envelope_inner(slot: String, envelope: Dictionary, re
 			# Return the gateway's own refusal rather than letting the poller
 			# restate it as "the submission has no command_id to reconcile",
 			# which hides the reason the student actually needs.
-			store.clear_pending_operation(slot)
-			return submission
+			if not store.clear_pending_operation(slot):
+				return _local_failure(
+					"PENDING_TURN_REFUSAL_CLEAR_FAILED",
+					"The gateway refused the Turn, but its pending envelope could not be durably cleared.",
+				)
+			var refusal := submission.duplicate(true)
+			# This private marker distinguishes an acceptance-layer refusal from a
+			# later 400/404/409/422 returned while closing an already-created Turn.
+			# Only the former may safely be resubmitted with corrected cursors.
+			refusal["turn_refused_before_acceptance"] = true
+			return refusal
 		command_result = await poller.reconcile({}, submission)
 	if not command_result.get("ok", false):
 		return command_result
@@ -2090,11 +2129,16 @@ func _execute_pending_turn_envelope_inner(slot: String, envelope: Dictionary, re
 				"TURN_OBJECTIVE_RUN_LINK_MISSING" if command_status == "REJECTED" else "TURN_RUN_LINK_MISSING",
 				"A bound Agent Turn reached a terminal objective status without one exact Run link.",
 			)
+		var referenced_run_id := ""
+		if slot == "agent_hint":
+			var failure_authority: Variant = context.get("failure_authority")
+			if failure_authority is Dictionary:
+				referenced_run_id = str(failure_authority.get("run_id", ""))
 		var hint_interactions := await _wait_for_interaction(
 			session_id,
 			turn_id,
 			str(command.command_id),
-			"",
+			referenced_run_id,
 			interaction_cursor_before,
 		)
 		if not hint_interactions.get("ok", false):

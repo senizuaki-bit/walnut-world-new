@@ -27,9 +27,13 @@ class Game:
 	extends RefCounted
 	var accepted_sequences: Array[int] = []
 	var refused_sequences: Array[int] = []
+	var observed_failure_authorities: Array[Dictionary] = []
 	var server_cursor := SERVER_CURSOR
+	var store: WalnutClientStore
 
 	func submit_agent_turn(_a: Dictionary, _s: String, _k: String, request: Dictionary) -> Dictionary:
+		var pending: Dictionary = store.get_pending_operation("agent_hint")
+		observed_failure_authorities.append(pending.get("failure_authority", {}).duplicate(true))
 		var sequence := int(request.client_state.client_turn_sequence)
 		if sequence != server_cursor + 1:
 			refused_sequences.append(sequence)
@@ -127,12 +131,14 @@ func _initialize() -> void:
 	store.replace_world({"world_id": "world_demo_0001", "revision": 4, "last_event_sequence": 7, "state_schema_version": "1.0.0", "state_hash": "a".repeat(64), "world_rules_version": "rules", "state": {}})
 
 	var game := Game.new()
+	game.store = store
 	var product := Product.new()
 	controller.configure(game, product)
 	controller.configure_authority(bootstrap, session)
 	controller.configure_polling({"initial_delay_seconds": 0.0, "base_delay_seconds": 0.0, "max_delay_seconds": 0.0, "jitter_ratio": 0.0, "interaction_delay_seconds": 0.0, "interaction_deadline_seconds": 0.2})
 	controller.configure_draft_context({"attempt": {}})
 	store.set_flow(WalnutClientStore.FlowState.ACTIVE)
+	store.set_objective_result({"run_id": "run_failed_00000001"})
 
 	await controller.request_hint()
 
@@ -144,6 +150,17 @@ func _initialize() -> void:
 		failures.append("序号漂移后必须用重新读到的序号 %d 重试一次，实际 %s" % [
 			SERVER_CURSOR + 1, str(game.accepted_sequences),
 		])
+	if game.observed_failure_authorities != [
+		{"run_id": "run_failed_00000001"},
+		{"run_id": "run_failed_00000001"},
+	]:
+		failures.append("游标纠正重试必须保留同一个失败 Run 引用权威，实际 %s" % str(game.observed_failure_authorities))
+	if bool(controller.call("_turn_refused_before_acceptance", {"ok": false, "status": 409})):
+		failures.append("已受理 Turn 的下游 409 没有提交拒绝标记，不得触发第二次提交。")
+	if not bool(controller.call("_turn_refused_before_acceptance", {
+		"ok": false, "status": 409, "turn_refused_before_acceptance": true,
+	})):
+		failures.append("提交接口明确拒绝的 409 必须允许一次游标纠正重试。")
 	if product.draft_reads != 0:
 		failures.append("纠正序号不得顺带重读 Draft：学生编辑器里可能有未保存的改动。")
 	if int(store.workspace.session.last_turn_sequence) != STALE_CURSOR:
