@@ -1065,16 +1065,21 @@ func _deterministic_compile_failure_draft(source: String) -> String:
 
 
 func _deterministic_failure_draft(source: String) -> String:
-	var fixed_target_anchor := "        int gap = 60 - moisture[i];"
 	if (
 		source.contains(COMPILE_FAILURE_DRAFT_MARKER)
 		or source.contains(DRAFT_MUTATION_MARKER)
 		or source.contains(CORRECTED_DRAFT_MARKER)
 		or source.contains(RUNTIME_SEED_ENV)
-		or source.count(fixed_target_anchor) != 1
 	):
 		return ""
-	return "%s%s%s\n" % [source, "" if source.ends_with("\n") else "\n", DRAFT_MUTATION_MARKER]
+	var compileable_source := _deterministic_fixed_target_source(source)
+	if compileable_source.is_empty():
+		return ""
+	return "%s%s%s\n" % [
+		compileable_source,
+		"" if compileable_source.ends_with("\n") else "\n",
+		DRAFT_MUTATION_MARKER,
+	]
 
 
 func _deterministic_corrected_draft(source: String) -> String:
@@ -1084,12 +1089,24 @@ func _deterministic_corrected_draft(source: String) -> String:
 		source.contains(COMPILE_FAILURE_DRAFT_MARKER)
 		or source.contains(DRAFT_MUTATION_MARKER)
 		or source.contains(CORRECTED_DRAFT_MARKER)
-		or source.count(fixed_target_anchor) != 1
 		or source.contains(adaptive_target_anchor)
 	):
 		return ""
-	var corrected := source.replace(fixed_target_anchor, adaptive_target_anchor)
+	var compileable_source := _deterministic_fixed_target_source(source)
+	if compileable_source.is_empty():
+		return ""
+	var corrected := compileable_source.replace(fixed_target_anchor, adaptive_target_anchor)
 	return "%s%s%s\n" % [corrected, "" if corrected.ends_with("\n") else "\n", CORRECTED_DRAFT_MARKER]
+
+
+func _deterministic_fixed_target_source(source: String) -> String:
+	var normalized := source.replace("\r\n", "\n")
+	if normalized == CropAdaptiveWateringDemo.INITIAL_PRACTICE_CODE:
+		return CropAdaptiveWateringDemo.STARTER_CODE
+	var fixed_target_anchor := "        int gap = 60 - moisture[i];"
+	if source.count(fixed_target_anchor) != 1:
+		return ""
+	return source
 
 
 func _open_crop_formal_run_ui(
