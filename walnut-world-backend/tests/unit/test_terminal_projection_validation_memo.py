@@ -86,6 +86,10 @@ def _authority(
             turn_sequence=index,
             turn_id=effective_turn_id,
             command_id=effective_command_id,
+            request_json={
+                "input": {"type": "UI_ACTION", "action_id": "submit"},
+                "skill_bindings": [{"skill_id": "skill_memo"}],
+            },
         ),
         command=SimpleNamespace(
             terminal=True,
@@ -235,6 +239,154 @@ def test_failure_suffix_prefetches_run_presence_in_one_query(
     assert count == 4
     assert session.execute_calls == 1
     assert session.scalar_calls == 0
+
+
+def test_failure_suffix_crosses_only_fully_validated_hint_turns(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runs = tuple(_authority(index) for index in (1, 3, 5))
+    by_command = {item.run.command_id: item for item in runs}
+    hint_two = SimpleNamespace(
+        tenant_id="tenant_yaya",
+        actor_id="student_0001",
+        session_id="session_memo_0001",
+        turn_sequence=2,
+        turn_id="turn_memo_0002",
+        command_id="cmd_memo_0002",
+        request_json={"input": {"type": "MESSAGE"}, "skill_bindings": []},
+    )
+    hint_four = SimpleNamespace(
+        tenant_id="tenant_yaya",
+        actor_id="student_0001",
+        session_id="session_memo_0001",
+        turn_sequence=4,
+        turn_id="turn_memo_0004",
+        command_id="cmd_memo_0004",
+        request_json={"input": {"type": "MESSAGE"}, "skill_bindings": []},
+    )
+    rows = [
+        (runs[2].turn, runs[2].run.command_id),
+        (hint_four, None),
+        (runs[1].turn, runs[1].run.command_id),
+        (hint_two, None),
+        (runs[0].turn, runs[0].run.command_id),
+    ]
+
+    class Result:
+        def all(self) -> list[tuple[Any, str | None]]:
+            return rows
+
+    class Session:
+        async def execute(self, _statement: Any) -> Result:
+            return Result()
+
+    validated_hints: list[str] = []
+
+    async def load_run(_session: object, *, command_id: str, **_kwargs: Any) -> Any:
+        return by_command[command_id]
+
+    async def validate_projection(_session: object, _authority: Any, **_kwargs: Any) -> None:
+        return None
+
+    async def validate_hint(_session: object, turn: Any, _current: Any) -> bool:
+        validated_hints.append(turn.turn_id)
+        return True
+
+    monkeypatch.setattr(run_outcomes, "load_validated_run", load_run)
+    monkeypatch.setattr(run_outcomes, "validate_terminal_projection", validate_projection)
+    monkeypatch.setattr(run_outcomes, "_terminal_hint_turn_has_authority", validate_hint)
+
+    count = asyncio.run(
+        run_outcomes.exact_failure_suffix_count(
+            Session(),  # type: ignore[arg-type]
+            current=runs[-1],
+            context=runs[-1].context,
+            current_must_be_live=False,
+        )
+    )
+
+    assert count == 3
+    assert validated_hints == ["turn_memo_0004", "turn_memo_0002"]
+
+
+def test_failure_suffix_rejects_a_hint_with_corrupt_terminal_authority(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    current = _authority(2)
+    hint = SimpleNamespace(
+        tenant_id="tenant_yaya",
+        actor_id="student_0001",
+        session_id="session_memo_0001",
+        turn_sequence=1,
+        turn_id="turn_memo_0001",
+        command_id="cmd_memo_0001",
+        request_json={"input": {"type": "MESSAGE"}, "skill_bindings": []},
+    )
+
+    class Result:
+        def all(self) -> list[tuple[Any, str | None]]:
+            return [(current.turn, current.run.command_id), (hint, None)]
+
+    class Session:
+        async def execute(self, _statement: Any) -> Result:
+            return Result()
+
+    async def reject_hint(_session: object, _turn: Any, _current: Any) -> bool:
+        return False
+
+    monkeypatch.setattr(run_outcomes, "_terminal_hint_turn_has_authority", reject_hint)
+
+    with pytest.raises(WorkflowInvariantError, match="hint without terminal authority"):
+        asyncio.run(
+            run_outcomes.exact_failure_suffix_count(
+                Session(),  # type: ignore[arg-type]
+                current=current,
+                context=current.context,
+                current_must_be_live=False,
+            )
+        )
+
+
+def test_failure_suffix_stops_at_an_unknown_no_run_turn(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    prior = _authority(1)
+    current = _authority(3)
+    unknown = SimpleNamespace(
+        tenant_id="tenant_yaya",
+        actor_id="student_0001",
+        session_id="session_memo_0001",
+        turn_sequence=2,
+        turn_id="turn_memo_0002",
+        command_id="cmd_memo_0002",
+        request_json={
+            "input": {"type": "UI_ACTION", "action_id": "unknown"},
+            "skill_bindings": [],
+        },
+    )
+
+    class Result:
+        def all(self) -> list[tuple[Any, str | None]]:
+            return [
+                (current.turn, current.run.command_id),
+                (unknown, None),
+                (prior.turn, prior.run.command_id),
+            ]
+
+    class Session:
+        async def execute(self, _statement: Any) -> Result:
+            return Result()
+
+    count = asyncio.run(
+        run_outcomes.exact_failure_suffix_count(
+            Session(),  # type: ignore[arg-type]
+            current=current,
+            context=current.context,
+            current_must_be_live=False,
+        )
+    )
+
+    assert count == 1
 
 
 def test_load_cache_is_exact_and_bound_to_one_database_session(

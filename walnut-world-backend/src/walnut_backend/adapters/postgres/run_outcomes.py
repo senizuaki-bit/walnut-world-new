@@ -662,7 +662,17 @@ async def exact_failure_suffix_count(
             raise WorkflowInvariantError("failure history turn sequence contains a gap")
         expected_sequence -= 1
         if index > 0 and run_command_id is None:
-            break
+            if not _is_hint_request_turn(turn):
+                break
+            if not await _terminal_hint_turn_has_authority(session, turn, current):
+                raise WorkflowInvariantError(
+                    "failure history contains a hint without terminal authority"
+                )
+            # A settled hint neither adds to nor resets the failure suffix. It
+            # is safe to cross only after the complete no-Run Product
+            # projection has closed the Turn, Command, provider receipts and
+            # side-effect absence in one database snapshot.
+            continue
         authority = (
             current
             if index == 0
@@ -711,6 +721,63 @@ async def exact_failure_suffix_count(
     if count < 1:
         raise WorkflowInvariantError("canonical failure suffix is empty")
     return count
+
+
+def _is_hint_request_turn(turn: AgentTurnRow) -> bool:
+    """Recognise the one accepted no-Run request that may be crossed."""
+
+    turn_input = turn.request_json.get("input")
+    return (
+        isinstance(turn_input, Mapping)
+        and turn_input.get("type") == "MESSAGE"
+        and turn.request_json.get("skill_bindings") == []
+    )
+
+
+async def _terminal_hint_turn_has_authority(
+    session: AsyncSession,
+    turn: AgentTurnRow,
+    current: ValidatedRunAuthority,
+) -> bool:
+    """Close one historical hint through the existing no-Run validator.
+
+    The Product Interaction read boundary already validates every immutable
+    source of a hint projection and proves that it created no Run, Evidence,
+    learner job or World event. Import locally to avoid the module-level cycle:
+    product_interactions uses the provider-receipt readers in this module.
+    """
+
+    from .product_interactions import _interactions_have_authority
+
+    owner = await session.scalar(
+        select(AgentSessionRow).where(
+            AgentSessionRow.tenant_id == turn.tenant_id,
+            AgentSessionRow.actor_id == turn.actor_id,
+            AgentSessionRow.session_id == turn.session_id,
+        )
+    )
+    rows = list(
+        (
+            await session.scalars(
+                select(ProductInteractionRow).where(
+                    ProductInteractionRow.tenant_id == turn.tenant_id,
+                    ProductInteractionRow.actor_id == turn.actor_id,
+                    ProductInteractionRow.session_id == turn.session_id,
+                    ProductInteractionRow.turn_id == turn.turn_id,
+                    ProductInteractionRow.command_id == turn.command_id,
+                )
+            )
+        ).all()
+    )
+    if owner is None or len(rows) != 1:
+        return False
+    if (
+        owner.tenant_id != current.context.actor.tenant_id
+        or owner.actor_id != current.context.actor.actor_id
+        or owner.session_id != current.run.session_id
+    ):
+        return False
+    return await _interactions_have_authority(session, rows, owner)
 
 
 async def list_validated_session_runs(
