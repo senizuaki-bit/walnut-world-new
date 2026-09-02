@@ -42,6 +42,8 @@ from yaya_agent_runtime import (  # noqa: E402
     BuildFailureSnapshot,
     CompileResultSnapshot,
     ContextBuilder,
+    DecisionDraft,
+    LearnerInference,
     LearnerProfileSnapshot,
     PackagedRoleConfigProvider,
     PromptBuilder,
@@ -52,8 +54,10 @@ from yaya_agent_runtime import (  # noqa: E402
     ToolResult,
     TurnContext,
     build_default_tool_registry,
+    validate_decision,
     world_commit_receipt_sha256,
 )
+from yaya_agent_runtime.evidence import build_evidence_aliases  # noqa: E402
 from yaya_agent_runtime.model_output import build_model_output_schema  # noqa: E402
 
 
@@ -422,6 +426,33 @@ class AgentRuntimeContextAndToolTests(unittest.IsolatedAsyncioTestCase):
         self.assertIsNone(context.skill)
         self.assertFalse(context.teaching_directive.patch_eligible)
         self.assertIn("list_counterexamples", reads.calls)
+
+        validated = validate_decision(
+            DecisionDraft(
+                role="bug_agent",
+                response_type="question",
+                message="Provider draft is replaced by canonical Build authority.",
+                question="Which boundary should be checked?",
+                hint_level=None,
+                learner_inference=LearnerInference(
+                    concept="for_loop",
+                    score_delta=-0.1,
+                    confidence=0.9,
+                    reason="The exact repeated Build rejection bounds this inference.",
+                    evidence_ids=(
+                        build_evidence_aliases(context)[0][latest.evidence_refs[0].evidence_id],
+                    ),
+                ),
+                skill_patch=None,
+                requires_student_confirmation=False,
+            ),
+            configs.get("bug_agent"),
+            context,
+            (),
+        )
+        self.assertIn("同类构建失败已连续复现 3 次", validated.message)
+        self.assertIn("构建拒绝证据", validated.message)
+        self.assertNotIn("Run", validated.message)
 
     async def test_run_failed_rejects_success_or_wrong_world_revision(self) -> None:
         operation = make_operation()

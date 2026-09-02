@@ -322,7 +322,7 @@ def validate_decision(
             decision,
             f"规范编译记录确认代码未通过；第一条诊断是：{first_diagnostic}",
         )
-    if context.role == "bug_agent" and len(context.failure_history) < 3:
+    if context.role == "bug_agent" and _reproducible_failure_count(context) < 3:
         raise InvalidAgentOutput(
             "BUG_WITHOUT_REPRODUCIBLE_EVIDENCE",
             "bug role requires three same-class failures",
@@ -451,16 +451,34 @@ def _canonical_bug_copy(
     maximum: int,
 ) -> DecisionDraft:
     failure_key = context.event.failure_key or "当前边界条件"
+    failure_count = _reproducible_failure_count(context)
+    if context.build_failure is not None:
+        failure_label = "同类构建失败"
+        fallback_evidence = "当前没有额外反例，只使用已验证的构建拒绝证据。"
+    else:
+        failure_label = "同类失败"
+        fallback_evidence = "当前没有额外反例，只使用同类失败 Run。"
     if context.counterexamples:
         evidence = f"已验证反例：{context.counterexamples[0].title}。"
     else:
-        evidence = "当前没有额外反例，只使用同类失败 Run。"
+        evidence = fallback_evidence
     message = _bounded(
-        f"同类失败已连续复现 {len(context.failure_history)} 次；失败类型为 {failure_key}。{evidence}",
+        f"{failure_label}已连续复现 {failure_count} 次；失败类型为 {failure_key}。{evidence}",
         maximum,
     )
     question = "当边界输入到达关键条件时，循环或判断是否仍覆盖完整目标范围？"
     return _replace_public_copy(decision, message=message, question=question)
+
+
+def _reproducible_failure_count(context: TurnContext) -> int:
+    """Return the exact repeated-failure authority retained by the context builder."""
+
+    if context.build_failure is not None and context.run_result is None:
+        # ContextBuilder has already matched this count against the immutable
+        # same-class Build rejection suffix. TurnContext intentionally retains
+        # only the selected Build so historical Evidence cannot leak to output.
+        return context.event.failure_count
+    return len(context.failure_history)
 
 
 def _canonical_book_copy(
