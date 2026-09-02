@@ -1831,6 +1831,7 @@ $environmentNames = @(
     'WALNUT_WORLD_RULES_VERSION',
     'WALNUT_WORLD_CONTENT_VERSION',
     'WALNUT_WORLD_SUCCESS_SCORE',
+    'WALNUT_WORLD_WATERING_EXPECTED_UNITS',
     'WALNUT_WORKER_LEASE_SECONDS',
     'WALNUT_WORKER_IDLE_POLL_SECONDS',
     'WALNUT_LEARNER_WORKER_ID',
@@ -1948,6 +1949,7 @@ try {
     $env:WALNUT_WORLD_RULES_VERSION = 'farm-rules-1'
     $env:WALNUT_WORLD_CONTENT_VERSION = '1.0.0'
     $env:WALNUT_WORLD_SUCCESS_SCORE = '8'
+    $env:WALNUT_WORLD_WATERING_EXPECTED_UNITS = '2,1,1,0,0,2,0,1'
     $env:WALNUT_WORKER_LEASE_SECONDS = '120'
     $env:WALNUT_WORKER_IDLE_POLL_SECONDS = '0.1'
     $phase1LearnerWorkerId = "int1-learner-phase1-$($runId.Substring(0, 12))"
@@ -1956,16 +1958,17 @@ try {
     $env:WALNUT_LEARNER_WORKER_IDLE_POLL_SECONDS = '0.1'
     $env:WALNUT_LEARNER_WORKER_MAXIMUM_ATTEMPTS = '5'
 
-    $featureGateText = (& $backendPython -c "import json; from walnut_backend.bootstrap import Settings; from walnut_backend.worker_main import WorkerSettings; print(json.dumps({'gateway_skill_patch_enabled': Settings.from_env().skill_patch_enabled, 'worker_skill_patch_enabled': WorkerSettings.from_env().skill_patch_enabled}, separators=(',', ':')))" | Out-String).Trim()
+    $featureGateText = (& $backendPython -c "import json; from walnut_backend.bootstrap import Settings; from walnut_backend.worker_main import WorkerSettings; worker = WorkerSettings.from_env(); print(json.dumps({'gateway_skill_patch_enabled': Settings.from_env().skill_patch_enabled, 'worker_skill_patch_enabled': worker.skill_patch_enabled, 'worker_watering_expected_units': list(worker.world_watering_expected_units or ())}, separators=(',', ':')))" | Out-String).Trim()
     if ($LASTEXITCODE -ne 0) {
         throw 'Could not read the independently default-closed Gateway and worker feature gates.'
     }
     $featureGates = $featureGateText | ConvertFrom-Json
     if (
         $featureGates.gateway_skill_patch_enabled -ne [bool]$EnableSkillPatch -or
-        $featureGates.worker_skill_patch_enabled -ne [bool]$EnableSkillPatch
+        $featureGates.worker_skill_patch_enabled -ne [bool]$EnableSkillPatch -or
+        (@($featureGates.worker_watering_expected_units) -join ',') -ne '2,1,1,0,0,2,0,1'
     ) {
-        throw 'Gateway and workflow worker did not resolve the exact selected Skill Patch flag.'
+        throw 'Gateway and workflow worker did not resolve the exact selected Skill Patch and watering WorldRules.'
     }
     Write-Output (
         'INT1_LOCAL_DIAGNOSTIC_FEATURE_GATES ' +
@@ -2095,10 +2098,15 @@ try {
         throw 'Godot diagnostic emitted no unique structured PASS fingerprint.'
     }
     $godotFingerprint = $passLines[0].Substring($passPrefix.Length) | ConvertFrom-Json
-    $expectedRelayGenerationCount = if ($EnableSkillPatch) { 16 } else { 27 }
+    # The non-Patch chain has five one-dispatch Hint turns and four Run turns;
+    # each Run owns two root dispatches plus one final dispatch (5 + 4 * 3).
+    $expectedRelayGenerationCount = if ($EnableSkillPatch) { 16 } else { 17 }
     $expectedTurnCount = if ($EnableSkillPatch) { 6 } else { 9 }
     $expectedRunCount = if ($EnableSkillPatch) { 5 } else { 4 }
-    $expectedLearnerCount = if ($EnableSkillPatch) { 5 } else { 9 }
+    # Learner projection follows durable Run outcomes, not no-new-Run Hint
+    # Interactions.  The non-Patch Bug chain has nine Interactions but only
+    # four Runs, so both modes close exactly one learner job per Run.
+    $expectedLearnerCount = $expectedRunCount
     $expectedFrontendPostCount = if ($EnableSkillPatch) { 12 } else { 20 }
     $expectedFrontendPutCount = if ($EnableSkillPatch) { 1 } else { 3 }
     $expectedSessionCommandCount = 1
@@ -2116,11 +2124,18 @@ try {
     $expectedSandboxReceiptCount = if ($EnableSkillPatch) { 10 } else { 8 }
     $expectedProviderResultMinimum = if ($EnableSkillPatch) { 11 } else { 8 }
     $expectedProductReceiptCount = if ($EnableSkillPatch) { 1 } else { 3 }
+    # The public Godot fingerprint lists the eight Evidence resources directly
+    # traversed by the UI. PostgreSQL also retains six additional Build/Run
+    # authority records, so the full durable Evidence total remains fourteen.
     $expectedEvidenceCount = if ($EnableSkillPatch) { 13 } else { 14 }
     # One committed World transaction advances the authoritative World stream
-    # once.  Its eight student-visible actions are separate presentation rows.
+    # once. WATER is intentionally outside the frozen v0.5 HARVEST-only
+    # presentation contract, so this Bug-legion verification runs with the
+    # public presentation capability disabled and proves the durable gap.
     $expectedWorldCommitEventCount = 1
-    $expectedWorldPresentationEventCount = 8
+    $expectedWorldPresentationEventCount = if ($EnableWorldPresentation) { 8 } else { 0 }
+    $expectedWorldPresentationCommitCount = if ($EnableWorldPresentation) { 1 } else { 0 }
+    $expectedWorldPresentationGapCount = if ($EnableWorldPresentation) { 0 } else { 1 }
     $expectedPatchAuthorityCount = if ($EnableSkillPatch) { 1 } else { 0 }
     $expectedAssistedAuthorityCount = if ($EnableSkillPatch) { 1 } else { 0 }
     $expectedFailureCountSequence = if ($EnableSkillPatch) { '[1, 2, 3, 4]' } else { '[1, 2, 3]' }
@@ -2333,7 +2348,7 @@ SELECT (jsonb_build_object(
   'activation_command_count', (SELECT count(*) FROM commands WHERE tenant_id='tenant_yaya' AND command_type='ACTIVATE_SKILL_VERSION'),
   'turn_command_count', (SELECT count(*) FROM commands WHERE tenant_id='tenant_yaya' AND command_type='EXECUTE_AGENT_TURN'),
   'registry_revision', COALESCE((SELECT max(revision) FROM registry_entries WHERE tenant_id='tenant_yaya'), 0),
-  'failure_run_count', (SELECT count(*) FROM game_runs WHERE tenant_id='tenant_yaya' AND run_json->>'status'='REJECTED' AND run_json->'sandbox'->>'status'='SUCCEEDED' AND jsonb_array_length(run_json->'sandbox'->'action_intents')=7 AND run_json->'world_application'->>'status'='REJECTED' AND run_json->'world_application'->'receipt'='null'::jsonb AND run_json->'world_application'->'failure'->>'code'='WORLD_RULE_REJECTED' AND run_json->'world_application'->'failure'->'details'->>'reason'='TASK_INCOMPLETE'),
+  'failure_run_count', (SELECT count(*) FROM game_runs WHERE tenant_id='tenant_yaya' AND run_json->>'status'='REJECTED' AND run_json->'sandbox'->>'status'='SUCCEEDED' AND jsonb_array_length(run_json->'sandbox'->'action_intents')=5 AND run_json->'world_application'->>'status'='REJECTED' AND run_json->'world_application'->'receipt'='null'::jsonb AND run_json->'world_application'->'failure'->>'code'='WORLD_RULE_REJECTED' AND run_json->'world_application'->'failure'->'details'->>'reason'='TASK_INCOMPLETE'),
   'successful_run_count', (SELECT count(*) FROM game_runs WHERE tenant_id='tenant_yaya' AND run_json->>'status'='SUCCEEDED' AND run_json->'sandbox'->>'status'='SUCCEEDED' AND run_json->'world_application'->>'status'='COMMITTED'),
   'same_failure_key_count', (SELECT count(*) FROM job_step_receipts r JOIN workflow_jobs w ON w.tenant_id=r.tenant_id AND w.job_id=r.job_id WHERE w.tenant_id='tenant_yaya' AND w.operation='EXECUTE_AGENT_TURN' AND r.step_name='OUTCOME_DERIVED' AND r.receipt_json->'event'->>'event_type'='run_failed' AND r.receipt_json->'event'->>'failure_key'='task_incomplete'),
   'distinct_failed_failure_keys', (SELECT count(DISTINCT r.receipt_json->'event'->>'failure_key') FROM job_step_receipts r JOIN workflow_jobs w ON w.tenant_id=r.tenant_id AND w.job_id=r.job_id WHERE w.tenant_id='tenant_yaya' AND w.operation='EXECUTE_AGENT_TURN' AND r.step_name='OUTCOME_DERIVED' AND r.receipt_json->'event'->>'event_type'='run_failed'),
@@ -2407,6 +2422,15 @@ SELECT (jsonb_build_object(
 "@
     $databaseFingerprint = Invoke-DatabaseFingerprint $postgresName $databaseSql
     $presentationDatabaseEventIds = @(([string]$databaseFingerprint.presentation_event_id_sequence | ConvertFrom-Json))
+    $databaseScalarFingerprint = [ordered]@{}
+    foreach ($property in $databaseFingerprint.PSObject.Properties) {
+        if (
+            $property.Name -notlike '*_material' -and
+            $property.Name -ne 'presentation_event_id_sequence'
+        ) {
+            $databaseScalarFingerprint[$property.Name] = $property.Value
+        }
+    }
     $expectedTurnJobAttempt = 2
     $providerDispatchCount = [int]$databaseFingerprint.provider_dispatch_receipts
     $providerResultCount = [int]$databaseFingerprint.provider_result_receipts
@@ -2491,14 +2515,15 @@ SELECT (jsonb_build_object(
         [int]$databaseFingerprint.non_world_event_stream_count -lt 2 -or
         [int]$databaseFingerprint.presentation_stream_count -ne 1 -or
         [int]$databaseFingerprint.presentation_event_count -ne $expectedWorldPresentationEventCount -or
-        [int]$databaseFingerprint.presentation_commit_count -ne 1 -or
+        [int]$databaseFingerprint.presentation_commit_count -ne $expectedWorldPresentationCommitCount -or
         [int]$databaseFingerprint.presentation_last_sequence -ne $expectedWorldPresentationEventCount -or
-        [int]$databaseFingerprint.presentation_gap_count -ne 0 -or
+        [int]$databaseFingerprint.presentation_gap_count -ne $expectedWorldPresentationGapCount -or
         $presentationDatabaseEventIds.Count -ne $expectedWorldPresentationEventCount -or
         (@($presentationDatabaseEventIds) -join ',') -cne (@($godotFingerprint.world_presentation.event_ids_started) -join ',') -or
         [int]$godotFingerprint.world_presentation.presentation_high_watermark -ne [int]$databaseFingerprint.presentation_last_sequence
     ) {
-        throw 'Database receipts do not prove the exact selected M1/M2 A8 failure/fix chain and single logical side effects.'
+        $observedDatabaseScalars = ConvertTo-StableJson $databaseScalarFingerprint
+        throw "Database receipts do not prove the exact selected M1/M2 A8 failure/fix chain and single logical side effects. Observed scalars: $observedDatabaseScalars"
     }
     if (
         [int]$relayStats.unique_dispatches -ne $providerDispatchCount -or
@@ -2937,17 +2962,19 @@ SELECT (jsonb_build_object(
         [int]$recoveryFingerprint.world_revision -ne [int]$godotFingerprint.world_revision -or
         [int]$recoveryFingerprint.last_event_sequence -ne [int]$godotFingerprint.last_event_sequence -or
         [string]$recoveryFingerprint.world_state_hash -ne [string]$godotFingerprint.world_state_hash -or
-        $recoveryFingerprint.world_presentation.enabled -ne $true -or
-        $recoveryFingerprint.world_presentation.recovered_by_snapshot -ne $true -or
+        $recoveryFingerprint.world_presentation.enabled -ne [bool]$EnableWorldPresentation -or
+        $recoveryFingerprint.world_presentation.recovered_by_snapshot -ne [bool]$EnableWorldPresentation -or
         [int]$recoveryFingerprint.world_presentation.presentation_high_watermark -ne [int]$godotFingerprint.world_presentation.presentation_high_watermark -or
         [string]$recoveryFingerprint.interaction_id -ne [string]$godotFingerprint.interaction_id -or
         [int]$recoveryFingerprint.interaction_sequence -ne [int]$godotFingerprint.interaction_sequence -or
         [int]$recoveryFingerprint.interaction_revision -ne [int]$godotFingerprint.interaction_revision -or
         [string]$recoveryFingerprint.interaction_role -ne [string]$godotFingerprint.interaction_role -or
         [string]$recoveryFingerprint.interaction_feedback_sha256 -ne [string]$godotFingerprint.interaction_feedback_sha256 -or
-        $recoveryFingerprint.ui_display.task_workspace -ne $true -or
-        $recoveryFingerprint.ui_display.dialogue_panel -ne $true -or
-        $recoveryFingerprint.ui_display.world_viewport -ne $true
+        $recoveryFingerprint.ui_display.crop_adaptive_watering_demo -ne $true -or
+        $recoveryFingerprint.ui_display.crop_agent_bridge -ne $true -or
+        $recoveryFingerprint.ui_display.run_button -ne $true -or
+        $recoveryFingerprint.ui_display.content_draft_interaction_snapshot -ne $true -or
+        $recoveryFingerprint.ui_display.recovered_interaction_replayed -ne $false
     ) {
         throw 'Recovery-only Godot authority differs from the exact phase-1 Session/Workspace/Draft/Activation/Run/World/Interaction fingerprint.'
     }

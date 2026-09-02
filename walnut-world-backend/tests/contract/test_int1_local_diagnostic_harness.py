@@ -71,6 +71,9 @@ def test_harness_has_fresh_authority_recovery_and_official_godot_chain() -> None
         "WALNUT_RUNTIME_ROOT",
         "WALNUT_INT1_TASK_MODE",
         "$env:WALNUT_INT1_TASK_MODE = 'watering'",
+        "WALNUT_WORLD_WATERING_EXPECTED_UNITS",
+        "$env:WALNUT_WORLD_WATERING_EXPECTED_UNITS = '2,1,1,0,0,2,0,1'",
+        "worker_watering_expected_units",
         "WALNUT_ENABLE_WORLD_PRESENTATION",
         "sandbox-results",
         "WALNUT_LLM_RELAY_ENDPOINT",
@@ -194,6 +197,16 @@ def test_harness_has_fresh_authority_recovery_and_official_godot_chain() -> None
     assert "ConvertTo-StableJson $sandboxFingerprintAfterRestart" in script
     assert "ConvertTo-StableJson $artifactFingerprintAfterRestart" in script
     assert "recoveryFingerprint.no_mutating_flow_invoked" not in script
+    for retired_ui_field in ("task_workspace", "dialogue_panel", "world_viewport"):
+        assert f"recoveryFingerprint.ui_display.{retired_ui_field}" not in script
+    for formal_ui_field in (
+        "crop_adaptive_watering_demo",
+        "crop_agent_bridge",
+        "run_button",
+        "content_draft_interaction_snapshot",
+        "recovered_interaction_replayed",
+    ):
+        assert f"recoveryFingerprint.ui_display.{formal_ui_field}" in script
     assert "to_jsonb(command_row)" in script
     assert "to_jsonb(workflow_row)" in script
     assert "to_jsonb(receipt_row)" in script
@@ -215,6 +228,7 @@ def test_harness_has_fresh_authority_recovery_and_official_godot_chain() -> None
         in script
     )
     assert "$env:WALNUT_WORLD_SUCCESS_SCORE = '8'" in script
+    assert "(@($featureGates.worker_watering_expected_units) -join ',') -ne '2,1,1,0,0,2,0,1'" in script
     assert "terminal_command_count -ne $expectedCommandCount" in script
     assert "applied_terminal_command_count -ne $expectedAppliedCommandCount" in script
     assert "rejected_terminal_command_count -ne $expectedRejectedCommandCount" in script
@@ -345,10 +359,29 @@ def test_harness_keeps_world_commit_and_presentation_action_counts_distinct() ->
     script = HARNESS.read_text(encoding="utf-8")
 
     assert "$expectedWorldCommitEventCount = 1" in script
-    assert "$expectedWorldPresentationEventCount = 8" in script
+    assert (
+        "$expectedWorldPresentationEventCount = if ($EnableWorldPresentation) { 8 } else { 0 }"
+        in script
+    )
+    assert (
+        "$expectedWorldPresentationCommitCount = if ($EnableWorldPresentation) { 1 } else { 0 }"
+        in script
+    )
+    assert (
+        "$expectedWorldPresentationGapCount = if ($EnableWorldPresentation) { 0 } else { 1 }"
+        in script
+    )
     assert "world_event_count -ne $expectedWorldCommitEventCount" in script
     assert "presentation_event_count -ne $expectedWorldPresentationEventCount" in script
     assert "world_event_count -ne 8" not in script
+
+
+def test_database_count_failure_reports_compact_observed_scalars() -> None:
+    script = HARNESS.read_text(encoding="utf-8")
+
+    assert "$databaseScalarFingerprint = [ordered]@{}" in script
+    assert "$property.Name -notlike '*_material'" in script
+    assert "Observed scalars: $observedDatabaseScalars" in script
 
 
 def test_harness_has_formal_m2_flags_counts_and_full_row_authority() -> None:
@@ -363,10 +396,10 @@ def test_harness_has_formal_m2_flags_counts_and_full_row_authority() -> None:
         "worker_skill_patch_enabled",
         "$phase1FrontendArguments += '-EnableSkillPatch'",
         "$phase2FrontendArguments += '-EnableSkillPatch'",
-        "$expectedRelayGenerationCount = if ($EnableSkillPatch) { 16 } else { 27 }",
+        "$expectedRelayGenerationCount = if ($EnableSkillPatch) { 16 } else { 17 }",
         "$expectedTurnCount = if ($EnableSkillPatch) { 6 } else { 9 }",
         "$expectedRunCount = if ($EnableSkillPatch) { 5 } else { 4 }",
-        "$expectedLearnerCount = if ($EnableSkillPatch) { 5 } else { 9 }",
+        "$expectedLearnerCount = $expectedRunCount",
         "$expectedFrontendPostCount = if ($EnableSkillPatch) { 12 } else { 20 }",
         "$expectedFrontendPutCount = if ($EnableSkillPatch) { 1 } else { 3 }",
         "$expectedSessionCommandCount = 1",
@@ -421,6 +454,7 @@ def test_harness_has_formal_m2_flags_counts_and_full_row_authority() -> None:
         "registry_entry_count -ne 2",
     ):
         assert required in script
+    assert "jsonb_array_length(run_json->'sandbox'->'action_intents')=5" in script
 
     runbook = re.sub(r"\s+", " ", RUNBOOK.read_text(encoding="utf-8"))
     for documented_equation in (

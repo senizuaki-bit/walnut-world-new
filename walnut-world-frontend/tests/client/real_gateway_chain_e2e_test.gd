@@ -1956,7 +1956,19 @@ func _execute_hint_turn(
 		or feedback.get("evidence_refs") != latest_failed_run.evidence_refs
 		or interaction.get("skill_patch") != null
 	):
-		return _failure("FORMAL_HINT_FAILURE_AUTHORITY_INVALID", "Intermediate Hint did not inherit the exact latest failed Run without opening Patch.")
+		return _failure(
+			"FORMAL_HINT_FAILURE_AUTHORITY_INVALID",
+			"Intermediate Hint authority mismatch: expected_role=teaching_agent actual_role=%s pre_cursor=%s sequence=%s expected_run=%s actual_run=%s evidence_match=%s skill_patch=%s."
+			% [
+				str(interaction.get("role", "")) if interaction is Dictionary else "INVALID_INTERACTION",
+				pre_interaction_cursor,
+				interaction.get("sequence") if interaction is Dictionary else null,
+				str(latest_failed_run.get("run_id", "")),
+				feedback.get("run_id") if feedback is Dictionary else "INVALID_FEEDBACK",
+				feedback.get("evidence_refs") == latest_failed_run.evidence_refs if feedback is Dictionary else false,
+				interaction.get("skill_patch") if interaction is Dictionary else "INVALID_INTERACTION",
+			],
+		)
 	var command_result: Dictionary = await game_gateway.get_command(
 		_new_context(bootstrap), str(feedback.command_id),
 	)

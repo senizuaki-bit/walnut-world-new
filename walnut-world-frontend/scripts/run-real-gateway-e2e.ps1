@@ -288,7 +288,8 @@ try {
             $fingerprint.ui_display.crop_adaptive_watering_demo -ne $true -or
             $fingerprint.ui_display.crop_agent_bridge -ne $true -or
             $fingerprint.ui_display.run_button -ne $true -or
-            $fingerprint.ui_display.content_draft_interaction_snapshot -ne $true
+            $fingerprint.ui_display.content_draft_interaction_snapshot -ne $true -or
+            $fingerprint.ui_display.recovered_interaction_replayed -ne $false
         ) {
             throw 'Recovery-only Godot PASS fingerprint does not prove persisted authority and formal UI recovery.'
         }
@@ -380,7 +381,7 @@ try {
         [int]$fingerprint.saved_draft_revision -ne $(if ($EnableSkillPatch) { 3 } else { 4 }) -or
         [int]$fingerprint.starter_workspace_revision -ne 1 -or
         [int]$fingerprint.compile_failure_workspace_revision -ne $(if ($EnableSkillPatch) { -1 } else { 2 }) -or
-        [int]$fingerprint.failure_workspace_revision -ne $(if ($EnableSkillPatch) { 2 } else { 3 }) -or
+        [int]$fingerprint.failure_workspace_revision -ne $(if ($EnableSkillPatch) { 2 } else { 9 }) -or
         [int]$fingerprint.saved_workspace_revision -le [int]$fingerprint.failure_workspace_revision -or
         [int]$fingerprint.final_workspace_revision -lt [int]$fingerprint.saved_workspace_revision -or
         [string]$fingerprint.final_workspace_sha256 -notmatch '^[0-9a-f]{64}$' -or
@@ -469,6 +470,17 @@ try {
             [int]$fingerprint.world_presentation.presentation_high_watermark -lt 8
         )) {
             throw 'Real Gateway Godot E2E PASS fingerprint does not prove eight ordered formal HARVEST presentations through PLAYING.'
+        }
+        if (-not $EnableWorldPresentation -and (
+            $fingerprint.world_presentation.enabled -ne $false -or
+            [int]$fingerprint.world_presentation.playback_started -ne 0 -or
+            [int]$fingerprint.world_presentation.playback_finished -ne 0 -or
+            $fingerprint.world_presentation.playing_observed -ne $false -or
+            @($fingerprint.world_presentation.event_ids_started).Count -ne 0 -or
+            @($fingerprint.world_presentation.event_ids_finished).Count -ne 0 -or
+            [int]$fingerprint.world_presentation.presentation_high_watermark -ne 0
+        )) {
+            throw 'Disabled World presentation unexpectedly produced client playback authority.'
         }
         if (
             $fingerprint.persistence_reset_performed -ne $true -or
