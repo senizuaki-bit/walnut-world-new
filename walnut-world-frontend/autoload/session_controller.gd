@@ -49,9 +49,10 @@ const STUDENT_ACTION_READY_FLOW_STATES := [
 	WalnutClientStore.FlowState.COMPLETED,
 	WalnutClientStore.FlowState.ERROR,
 ]
-## One retry is enough: it distinguishes a spent identity from a fresh
-## failure, and a genuinely failing Build must not be resubmitted in a loop.
-const BUILD_ATTEMPT_RETRY_LIMIT := 1
+## A learner may retry the exact same rejected source more than twice.  Each
+## settled idempotency key is skipped until the first generation that was not a
+## replay, while this finite ceiling still fails closed if authority is corrupt.
+const BUILD_ATTEMPT_RETRY_LIMIT := 32
 const PENDING_DRAFT_SAVE_SLOT := "draft_save"
 const RETRYABLE_HTTP_STATUSES := [429, 502, 503, 504]
 const RETRYABLE_LOCAL_TRANSPORT_CODES := [
@@ -1033,7 +1034,10 @@ func _recover_rejected_build(command: Dictionary) -> Dictionary:
 		or not command.get("evidence_refs") is Array
 		or command.evidence_refs.size() != 1
 		or game_gateway == null
-		or not game_gateway.has_method("get_evidence")
+		or (
+			not game_gateway.has_method("get_build_rejection_evidence")
+			and not game_gateway.has_method("get_evidence")
+		)
 		or not game_gateway.has_method("get_skill_build")
 	):
 		return _local_failure(
@@ -1046,10 +1050,16 @@ func _recover_rejected_build(command: Dictionary) -> Dictionary:
 			"BUILD_REJECTION_EVIDENCE_INVALID",
 			"Rejected Build command exposes an invalid Evidence reference.",
 		)
-	var evidence_result: Dictionary = await game_gateway.get_evidence(
-		_new_request_context(),
-		str(reference.get("evidence_id", "")),
-	)
+	var evidence_result: Dictionary
+	if game_gateway.has_method("get_build_rejection_evidence"):
+		evidence_result = await game_gateway.get_build_rejection_evidence(
+			_new_request_context(), str(reference.get("evidence_id", "")),
+		)
+	else:
+		# Test doubles created before the additive gateway keep the legacy seam.
+		evidence_result = await game_gateway.get_evidence(
+			_new_request_context(), str(reference.get("evidence_id", "")),
+		)
 	if not evidence_result.get("ok", false):
 		return evidence_result
 	var evidence: Dictionary = evidence_result.value

@@ -46,7 +46,7 @@ v1.0 历史基线中的 `/api/*`、同步 Run、旧 DTO、SSE/WebSocket 设想�
 | Current PASS | 唯一 Gateway/PostgreSQL owner；Backend current head `019_int2_skill_patch_authority`（父 `018_world_presentation_events`）；Agent discovery 601 = 599 non-live PASS + 2 live opt-in `EXCLUDED_NOT_RUN`、0 skip；Backend current-tree full 468/468、0 failure/error/skip；Frontend offline 60/60 + 2 real opt-in excluded；M1 HTTP presentation；deterministic M2 actual10；受控 real-Provider M2 run `868a` | real-Provider run 用时 301.012 秒，18 unique dispatch / 18 generation、单 dispatch 最大 generation 1，Provider relay response-loss 复用同一 dispatch；学生公开 Patch 链 `PUBLIC_UI_CHAIN_CLOSED`，World commit 1、presentation events 8、phase2 17 GET / 0 mutation；live DB full-row SHA-256 `b8bb2b568ac6978d938a98d041f9c5b74ef108167f53790c4bbeecbb6c051e30` |
 | Current NOT PASS / NOT PROVEN | production private DinD、公开 Gateway pending write response-loss | 两者仍为 `NOT_PROVEN`；live harness 的 Provider relay response-loss PASS 不等于公开 Gateway pending write fault 已证 |
 | Historical evidence | v0.4 tag/byte lock、旧573/252/46、后续574/299/46及194.12秒INT1 real Provider host-Docker | 只作历史背景，不计入INT2当前完成标准 |
-| 合同与默认关闭 | 当前三仓descriptor指向v0.6 candidate：147 entries、27,848 bytes、SHA-256 `11dde4ef0fd71de5f78afa8aaeef527ef72775a953b6399929245eb1c4d7ab05` | v0.6 tag不存在；capability GET始终挂载，presentation/Patch routes按flag条件挂载，Patch依赖World flag |
+| 合同与默认关闭 | 当前三仓descriptor指向v0.6 candidate：148 entries、28,042 bytes、SHA-256 `bb4f1c12f34125bcc4b79b6a1330a20848a7f43764d87fa7c8d7668e7994fe14` | v0.6 tag不存在；capability GET始终挂载，presentation/Patch routes按flag条件挂载，Patch依赖World flag |
 | 明确排除 | WSS、Event Batch、Feishu、自动接受/应用/Build/Activate/Run、多文件/删除/重命名/大重构、通用动画平台、第二服务/数据库 | 默认关闭不是未实现，focused实现也不是已启用 |
 
 该快照按证据分级，不逐个 operation 推断“已上线”；后续只有代码、迁移、Adapter 和自动化验收同时完成，才能提升交付状态。
@@ -718,7 +718,7 @@ npm run test:godot
 - [x] 当前 Agent full discovery 601，其中 non-live 599/599 PASS、2 条 live 精确 `EXCLUDED_NOT_RUN`、0 skip；Backend current-tree full 468/468、0 failure/error/skip；Frontend current offline 60/60，另有 2 条真实 E2E opt-in 精确排除；
 - [x] 27.6 秒 direct-POST 仅标记为历史 wiring；repo-owned recoverable-relay full-restart harness 已在 169.836 秒取得 `DETERMINISTIC_LOCAL_RELAY_ONLY_NOT_REAL_PROVIDER` PASS，且 PostgreSQL stop/start（发布端口关闭 4,784 ms）重连与三服务新 PID 重启后的 8 个 recovery-only GET 都没有改变四类业务指纹；当前 authority tuple 的 `side_effect_sha256` 为 `9d9e770a6bf8f9f03fc351c50a3fba2dd3d57971df91237d46f9e49c3335ab05`；
 - [x] 完整 INT2 deterministic/formal/outage/restart 已取得 `DETERMINISTIC_LOCAL_RELAY_ONLY_NOT_REAL_PROVIDER` PASS；受控 real-Provider run `868a` 也在 301.012 秒取得 PASS：18 unique dispatch / 18 generation、单 dispatch 最大 generation 1、Provider relay response-loss 同 dispatch 恢复、`PUBLIC_UI_CHAIN_CLOSED`、World commit 1、presentation events 8、第二进程 17 GET / 0 mutation，并精确恢复运行前原有 3 个 Docker 容器；production private DinD 与公开 Gateway pending write response-loss 仍为 `NOT_PROVEN`；
-- [x] v0.4/v0.5历史字节锁保持；v0.6 candidate为147 entries/27,848 bytes/上述SHA-256，tag仍NOT_PROVEN。
+- [x] v0.4/v0.5历史字节锁保持；v0.6 candidate为148 entries/28,042 bytes/上述SHA-256，tag仍NOT_PROVEN。
 
 ---
 

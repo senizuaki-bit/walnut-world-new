@@ -18,6 +18,7 @@ from yaya_agent_contracts import (
     CommandStatus,
     ContentRef,
     EvidenceRef,
+    EvidenceType,
     Failure,
     FrozenJsonObject,
     OperationContext,
@@ -1383,7 +1384,7 @@ def _evidence_refs_from_wire(value: object) -> tuple[EvidenceRef, ...]:
             refs.append(
                 EvidenceRef(
                     evidence_id=str(item["evidence_id"]),
-                    evidence_type=str(item["evidence_type"]),
+                    evidence_type=EvidenceType(str(item["evidence_type"])),
                     created_at=datetime.fromisoformat(str(item["created_at"]).replace("Z", "+00:00")),
                     sha256=item.get("sha256"),
                     uri=item.get("uri"),
@@ -1645,7 +1646,9 @@ async def _hint_interaction_has_authority(
         # Evidence row was written under this Command -- but it may cite the
         # compile rejection it was answering. The citation has to be identical
         # everywhere it is repeated, or the record would disagree with itself.
-        or decision.get("evidence_refs") != feedback.get("evidence_refs")
+        or not _agent_evidence_refs_match_projection(
+            decision.get("evidence_refs"), feedback.get("evidence_refs")
+        )
         or decision.get("message_key") != feedback.get("message_key")
         or decision_completed_at != completed_at
         or directive.get("patch_eligible") is not False

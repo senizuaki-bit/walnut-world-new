@@ -25,7 +25,7 @@
 
 ## 接口边界
 
-Wire合同唯一权威为sibling `../agent/contracts/manifest.json`及其引用文件。当前Frontend descriptor指向additive v0.6 candidate：147 entries、27,848-byte manifest、SHA-256 `11dde4ef0fd71de5f78afa8aaeef527ef72775a953b6399929245eb1c4d7ab05`；v0.4/v0.5历史字节继续锁定，v0.6 tag尚不存在，release identity为`NOT_PROVEN`。前端不得使用旧`/api/*`、猜authority或本地编译C++。
+Wire合同唯一权威为sibling `../agent/contracts/manifest.json`及其引用文件。当前Frontend descriptor指向additive v0.6 candidate：148 entries、28,042-byte manifest、SHA-256 `bb4f1c12f34125bcc4b79b6a1330a20848a7f43764d87fa7c8d7668e7994fe14`；v0.4/v0.5历史字节继续锁定，v0.6 tag尚不存在，release identity为`NOT_PROVEN`。前端不得使用旧`/api/*`、猜authority或本地编译C++。
 
 AppRoot 的产品链是 `Student Bootstrap → Session + starter Draft/Workspace → Draft CAS → Build/Certification → Activation → exact-version Turn → Run/World receipt/Evidence → HTTP Events/Snapshot → Learner/Product Interaction → recovery/display`。Command polling 使用真实 deadline、退避和 `Retry-After`；ClientStore 持久保存 exact tuple 与响应丢失 envelope。启动时若存在 pending Turn，AppRoot 必须在 READY 前以原 request/key 和 Turn 前 cursor 对账；闭包前不会按恢复后的 Workspace 高水位生成新 Turn identity。
 

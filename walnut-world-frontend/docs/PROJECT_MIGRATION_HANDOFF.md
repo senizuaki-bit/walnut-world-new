@@ -5,7 +5,7 @@
 ## 当前项目与权威
 
 - 当前仓库是唯一 Godot 前端工作目录；旧 `CodeWorld` 仅是历史来源，不参与运行或开发。
-- sibling `../agent/contracts/` 是 Wire 合同源；v0.4.0 继续按138 files、26,127-byte manifest 与 SHA-256 `b62a6152f1f2fd87d1941beecd3a1d47089811e91b067a8b225ff0d7a5ce72b9` 逐字节锁定。当前 additive v0.6 candidate 为147 entries、27,848 bytes、SHA-256 `11dde4ef0fd71de5f78afa8aaeef527ef72775a953b6399929245eb1c4d7ab05`，但 v0.6 Git tag 尚未创建，严格为 `NOT_PROVEN`。
+- sibling `../agent/contracts/` 是 Wire 合同源；v0.4.0 继续按138 files、26,127-byte manifest 与 SHA-256 `b62a6152f1f2fd87d1941beecd3a1d47089811e91b067a8b225ff0d7a5ce72b9` 逐字节锁定。当前 additive v0.6 candidate 为148 entries、28,042 bytes、SHA-256 `bb4f1c12f34125bcc4b79b6a1330a20848a7f43764d87fa7c8d7668e7994fe14`，但 v0.6 Git tag 尚未创建，严格为 `NOT_PROVEN`。
 - sibling `../walnut-world-backend` 是唯一 HTTP Gateway、PostgreSQL/Alembic 写权和 combined durable worker owner。前端不访问 Agent HTTP、数据库、Docker、Provider 或本地编译器。
 
 ## 已完成

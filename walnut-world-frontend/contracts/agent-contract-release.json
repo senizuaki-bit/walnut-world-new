@@ -5,9 +5,9 @@
   "git_release": "refs/tags/agent-contracts-v0.6.0",
   "manifest": {
     "relative_path": "contracts/manifest.json",
-    "sha256": "11dde4ef0fd71de5f78afa8aaeef527ef72775a953b6399929245eb1c4d7ab05",
-    "bytes": 27848,
-    "file_count": 147
+    "sha256": "bb4f1c12f34125bcc4b79b6a1330a20848a7f43764d87fa7c8d7668e7994fe14",
+    "bytes": 28042,
+    "file_count": 148
   },
   "agent_repository": {
     "environment_variable": "YAYA_AGENT_REPOSITORY_ROOT",

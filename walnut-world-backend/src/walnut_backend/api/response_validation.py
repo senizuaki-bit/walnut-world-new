@@ -152,10 +152,15 @@ def evidence_invariant(
     if "sha256" in evidence_ref:
         _require(evidence_ref.get("sha256") == digest)
     source = _object(payload, "source")
-    if _object(payload, "payload").get("evidence_kind") == "WORLD_COMMIT":
+    evidence_payload = _object(payload, "payload")
+    if evidence_payload.get("evidence_kind") == "WORLD_COMMIT":
         _require(
-            source.get("source_id") == source.get("world_id") == _object(payload, "payload").get("world_id")
+            source.get("source_id") == source.get("world_id") == evidence_payload.get("world_id")
         )
+    if evidence_payload.get("evidence_kind") == "BUILD_REJECTION":
+        _require(source.get("source_type") == "SKILL_BUILD")
+        _require(source.get("source_id") == evidence_payload.get("build_id"))
+        _require(source.get("command_id") is not None)
 
 
 def run_invariant(
@@ -306,6 +311,7 @@ SEMANTIC_INVARIANT_REGISTRY: dict[str, tuple[SemanticInvariant, ...]] = {
     "contracts/schemas/common/actor-ref.schema.json": (authenticated_actor_invariant,),
     "contracts/schemas/game/command.schema.json": (command_invariant,),
     "contracts/schemas/game/evidence.schema.json": (evidence_invariant,),
+    "contracts/schemas/game/build-rejection-evidence.schema.json": (evidence_invariant,),
     "contracts/schemas/game/run.schema.json": (run_invariant,),
     "contracts/schemas/game/world-event-page.schema.json": (world_event_page_invariant,),
     "contracts/schemas/game/skill-activation.schema.json": (skill_activation_invariant,),

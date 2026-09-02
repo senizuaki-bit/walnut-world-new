@@ -43,8 +43,8 @@ Backend 当前 `contract-release.json` 指向尚未发布 tag 的 additive v0.6 
 
 - package `0.6.0`；
 - release ref `refs/tags/agent-contracts-v0.6.0`；
-- manifest 27,848 bytes、147 entries；
-- manifest SHA-256 `11dde4ef0fd71de5f78afa8aaeef527ef72775a953b6399929245eb1c4d7ab05`。
+- manifest 28,042 bytes、148 entries；
+- manifest SHA-256 `bb4f1c12f34125bcc4b79b6a1330a20848a7f43764d87fa7c8d7668e7994fe14`。
 
 部署和测试前逐字节验证 sibling Agent：
 

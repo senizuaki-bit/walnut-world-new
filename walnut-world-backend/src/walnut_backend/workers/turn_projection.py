@@ -1804,7 +1804,12 @@ async def finish_hint_interaction(
             # reading this later can see which failure the advice was about.
             # The decision owns no Evidence; these are the Build rejections it
             # was allowed to observe.
-            "evidence_refs": decision_wire.get("evidence_refs", []),
+            # Use the same public serializer as Build/Run/Command resources.
+            # Dataclass json_value() preserves a UTC datetime as "+00:00",
+            # while the public EvidenceRef wire is canonical "Z". Mixing those
+            # spellings made one immutable Build reference compare unequal to
+            # the feedback that cited it even though both named the same row.
+            "evidence_refs": [_evidence_ref_wire(item) for item in decision.evidence_refs],
             "completed_at": _timestamp(decision.completed_at),
         }
         feedback_sha256 = canonical_json_sha256(feedback)

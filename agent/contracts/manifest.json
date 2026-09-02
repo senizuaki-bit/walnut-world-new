@@ -596,6 +596,11 @@
       "sha256": "cba22045a8a898f727e76bac7c03da1dec7fe067edfcca18e86e071c31f44d33"
     },
     {
+      "path": "contracts/schemas/game/build-rejection-evidence.schema.json",
+      "bytes": 3546,
+      "sha256": "c5fe202061225604ef6c0f2d3105236994c286e673fe634a5ea5fa32fc37732b"
+    },
+    {
       "path": "contracts/schemas/game/client-event-batch-request.schema.json",
       "bytes": 6980,
       "sha256": "e080a2958a4217b1607da61eab7d240b9a896208f149d250a285604ba4a38b5c"

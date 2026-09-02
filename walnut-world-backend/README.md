@@ -2,7 +2,7 @@
 
 核桃代码世界唯一生产 HTTP Gateway、PostgreSQL 写入与 Alembic 迁移权威。INT1 生产拓扑只由本仓库的 `backend` 服务公开端口；`postgres`、一次性 `migrate`、私有 `llm-relay`、digest-pinned DinD、镜像预载任务、`workflow-worker` 与独立 `learner-worker` 都不暴露产品 HTTP。`workflow-worker` 闭合 Control、Build/Certification、Activation、Turn 与 Run/World/Event/Evidence，并耐久写入 terminal hand-off；`learner-worker` 独立闭合 Learner、Product AgentInteraction 与 Workspace。DinD 与 `workflow-worker` 共享固定 Linux runtime volume/socket，避免 Windows host path 被误作嵌套容器 bind source；Worker 不挂载 Docker Desktop host socket。Gateway 不代理 sibling Agent 的历史 `yaya_agent_backend` 服务，也不读取或迁移其 `yaya_*` 私表。
 
-当前工作树的 Alembic head 是 `019_int2_skill_patch_authority`，父修订为 `018_world_presentation_events`。Backend 消费 Agent additive v0.6 candidate（147 entries、27,848-byte manifest、SHA-256 `11dde4ef0fd71de5f78afa8aaeef527ef72775a953b6399929245eb1c4d7ab05`）以及 provider-neutral Runtime、Build 和 Sandbox 库；v0.4/v0.5 历史 Wire 继续逐字节锁定，v0.6 tag 尚不存在，release identity 为 `NOT_PROVEN`。Backend 在自己的表/UoW 中实现：
+当前工作树的 Alembic head 是 `019_int2_skill_patch_authority`，父修订为 `018_world_presentation_events`。Backend 消费 Agent additive v0.6 candidate（148 entries、28,042-byte manifest、SHA-256 `bb4f1c12f34125bcc4b79b6a1330a20848a7f43764d87fa7c8d7668e7994fe14`）以及 provider-neutral Runtime、Build 和 Sandbox 库；v0.4/v0.5 历史 Wire 继续逐字节锁定，v0.6 tag 尚不存在，release identity 为 `NOT_PROVEN`。Backend 在自己的表/UoW 中实现：
 
 - Student Bootstrap 的 Session、Build policy、Activation registry 和 HTTP World authority；
 - server-created Session 及同事务 starter Draft/Workspace；

@@ -4,7 +4,7 @@
 
 ## v0.6 candidate 与历史合同漂移门禁
 
-Frontend descriptor当前指向`@yaya/agent-contracts` v0.6 candidate：147 entries、27,848-byte manifest、SHA-256 `11dde4ef0fd71de5f78afa8aaeef527ef72775a953b6399929245eb1c4d7ab05`。v0.4/v0.5历史发布字节继续由release locks校验；v0.6 tag尚不存在，release identity为`NOT_PROVEN`。
+Frontend descriptor当前指向`@yaya/agent-contracts` v0.6 candidate：148 entries、28,042-byte manifest、SHA-256 `bb4f1c12f34125bcc4b79b6a1330a20848a7f43764d87fa7c8d7668e7994fe14`。v0.4/v0.5历史发布字节继续由release locks校验；v0.6 tag尚不存在，release identity为`NOT_PROVEN`。
 
 `contract_release_drift_test.gd` 默认只读解析 frontend 的 sibling `../agent`。非 sibling 布局必须把 Agent 仓库根目录传给 `YAYA_AGENT_REPOSITORY_ROOT`；相对 override 以 frontend 根目录为基准：
 
@@ -13,7 +13,7 @@ $env:YAYA_AGENT_REPOSITORY_ROOT = 'C:\path\to\agent'
 & $env:GODOT_EXE --headless --path . --script res://tests/client/contract_release_drift_test.gd
 ```
 
-门禁逐字节核对 manifest 及其 147 个 entries，核对 package/release/version，并验证 frontend Validator 与 Agent canonical 源一致、Gateway 只有资源路径迁移、HTTP transport 的 Game/Student/Product operation method/path/query exact-set 与 manifested OpenAPI 一致。它不调用 Git、不要求任一工作区干净、不访问网络，也不修改 Agent；路径缺失、hash/version/release/file/client 映射任一漂移都会非零失败。
+门禁逐字节核对 manifest 及其 148 个 entries，核对 package/release/version，并验证 frontend Validator 与 Agent canonical 源一致、Gateway 只有资源路径迁移、HTTP transport 的 Game/Student/Product operation method/path/query exact-set 与 manifested OpenAPI 一致。它不调用 Git、不要求任一工作区干净、不访问网络，也不修改 Agent；路径缺失、hash/version/release/file/client 映射任一漂移都会非零失败。
 
 ## 已验证
 

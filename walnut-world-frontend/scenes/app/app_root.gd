@@ -5,7 +5,7 @@ extends Control
 ## Session/Build/Activation/World authority comes from StudentBootstrap.
 
 const HttpTransport = preload("res://scripts/client/audited_http_agent_api_transport.gd")
-const GameGateway = preload("res://addons/yaya_contract_client/agent_api_gateway.gd")
+const GameGateway = preload("res://scripts/client/extended_agent_api_gateway.gd")
 const ProductGateway = preload("res://scripts/client/product_interaction_gateway.gd")
 const ProductCapabilityGateway = preload("res://scripts/client/product_capability_gateway.gd")
 const WorldPresentationGateway = preload("res://scripts/client/world_presentation_gateway.gd")
