@@ -63,6 +63,62 @@ func _initialize() -> void:
 	if presenter.is_presenting() or presenter.pending_count() != 0 or legion.visible:
 		_abort("队列结束后必须关闭 Bug 军团且不残留待展示 Interaction。")
 		return
+	var stale := _interaction(
+		"interaction_restart_scoped_0003",
+		"bug_agent",
+		"message",
+		"这条反馈不应跨重开残留。",
+		null,
+	)
+	stale["session_id"] = "session_restart_0001"
+	level.present_agent_interactions([stale])
+	await process_frame
+	level.update_agent_submission_stage("临时阶段文案")
+	level.set("_last_chain_error_detail", "RAW_INTERNAL_DETAIL")
+	level.set("_candidate_playing", true)
+	level.set("_candidate_skip_requested", true)
+	level.restart_level()
+	await process_frame
+	if (
+		presenter.is_presenting()
+		or presenter.pending_count() != 0
+		or legion.visible
+		or not level.get("_last_agent_interaction").is_empty()
+		or bool(level.get("_agent_stage_message_visible"))
+		or not str(level.get("_last_chain_error_detail")).is_empty()
+		or bool(level.get("_candidate_playing"))
+		or bool(level.get("_candidate_skip_requested"))
+	):
+		_abort("重开必须清除旧 Interaction、军团、临时文案与候选演示状态。")
+		return
+	level.present_agent_interactions([stale])
+	if presenter.pending_count() != 0:
+		_abort("同一 Session 重开后不得重复播放已经展示过的 interaction_id。")
+		return
+	var next_session := stale.duplicate(true)
+	next_session["session_id"] = "session_restart_0002"
+	level.present_agent_interactions([next_session])
+	if presenter.pending_count() != 1 or presenter.presentation_session_id() != "session_restart_0002":
+		_abort("新 Session 不得继承上一局的 interaction_id 去重账本。")
+		return
+	presenter.clear_queue()
+	overlay.skip_sequence()
+	level.configure_agent_mode(true)
+	level.set("_same_failure_count", 2)
+	level.set("_build_result", {
+		"failure_key": "FIXED_TARGET_VALUE",
+		"message": "LOCAL_FAILURE_MUST_NOT_SELECT_FORMAL_ROLE",
+	})
+	level.call("_fail_run")
+	await process_frame
+	if (
+		int(level.get("_same_failure_count")) != 2
+		or (level.get_node("BugChallengeOverlay") as Control).visible
+		or legion.visible
+		or (level.get_node("Hud/EvidencePanel/Margin/Content/EvidenceBody") as RichTextLabel).text.contains("LOCAL_FAILURE_MUST_NOT_SELECT_FORMAL_ROLE")
+	):
+		_abort("正式 Agent 模式不得用本地失败计数选择 Bug 角色或泄露内部原因。")
+		return
 	print("CROP_AGENT_PRESENTATION_QUEUE_TEST_PASS")
 	quit(0)
 

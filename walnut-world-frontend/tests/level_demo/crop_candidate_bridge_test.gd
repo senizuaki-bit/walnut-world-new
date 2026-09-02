@@ -153,6 +153,8 @@ func _initialize() -> void:
 	var bridge := BridgeScript.new()
 	root.add_child(bridge)
 	await process_frame
+	(level.get_node("StoryDialogueOverlay") as StoryDialogueOverlay).skip_sequence()
+	await process_frame
 	bridge.configure(store, session, level, _candidate_config())
 	if not bool(bridge.activate_initial_projection().get("ok", false)):
 		failures.append("候选兼容测试必须先通过首次权威投影门禁。")

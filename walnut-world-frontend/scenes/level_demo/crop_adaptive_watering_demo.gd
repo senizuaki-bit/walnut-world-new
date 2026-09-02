@@ -225,7 +225,9 @@ func _ready() -> void:
 
 
 func restart_level() -> void:
+	agent_interaction_presenter.clear_queue()
 	story_dialogue.skip_sequence()
+	bug_legion_2d.hide_immediately()
 	if patch_dialog.visible:
 		patch_dialog.hide()
 	_manual_cursor = 0
@@ -246,6 +248,12 @@ func restart_level() -> void:
 	_candidate_skip_requested = false
 	_candidate_playing = false
 	_last_candidate_result.clear()
+	_candidate_playback_speed = 1.0
+	_last_chain_error_detail = ""
+	_agent_stage_message_visible = false
+	_last_agent_interaction.clear()
+	watering_can.stop()
+	watering_can.visible = false
 	if _agent_mode:
 		_synchronizing_agent_draft = true
 		code_editor.text = _agent_source if not _agent_source.is_empty() else INITIAL_PRACTICE_CODE
@@ -633,6 +641,9 @@ func _request_run() -> void:
 
 
 func _fail_run() -> void:
+	if _agent_mode:
+		fail_agent_submission("验证", "LOCAL_FAILURE_ROUTER_DISABLED_IN_FORMAL_AGENT_MODE")
+		return
 	var key := str(_build_result.get("failure_key", "UNKNOWN"))
 	_same_failure_count = _same_failure_count + 1 if key == _same_failure_key else 1
 	_same_failure_key = key
@@ -1061,12 +1072,13 @@ func present_candidate_evaluation(result: Dictionary, replay := false) -> Dictio
 
 
 func present_candidate_chain_error(code: String) -> void:
+	_last_chain_error_detail = code
 	_agent_stage_message_visible = false
 	_candidate_playing = false
 	_candidate_skip_requested = false
 	_set_phase(Phase.CHAIN_ERROR)
 	evidence_title.text = "无法安全生成候选结果"
-	evidence_body.text = "[%s] 本轮保持后端失败结论，世界未提交。" % code
+	evidence_body.text = "这次候选演示没有完成，权威失败结论保持不变，世界也没有提交。\n可以修改代码后再次运行。"
 	_reveal_evidence()
 
 
@@ -1223,20 +1235,19 @@ func present_agent_error(message: String) -> void:
 
 
 func fail_agent_submission(stage: String, message: String) -> void:
+	_last_chain_error_detail = "%s: %s" % [stage, message]
 	_agent_stage_message_visible = false
 	_set_phase(Phase.FAILED)
-	evidence_title.text = "继续完善规则"
-	# The stage and reason used to be discarded here, so every failure looked
-	# identical -- a compile error, a refused activation and a broken world
-	# cursor all read as "keep improving your rules". A learner cannot act on
-	# that, and neither can anyone helping them.
-	var detail := message.strip_edges()
-	evidence_body.text = (
-		"可以继续修改代码并重新验证。"
-		if detail.is_empty()
-		else "%s
-（%s）" % [detail, stage]
-	)
+	match stage:
+		"构建":
+			evidence_title.text = "代码还没准备好"
+			evidence_body.text = "编译检查没有通过，世界没有变化。\n请根据角色提示检查代码，再点一次“直接运行”。"
+		"激活", "运行准备":
+			evidence_title.text = "运行准备暂未完成"
+			evidence_body.text = "这次没有取得可运行版本，世界没有变化。\n请稍后重试；如果仍未完成，可以先请求提示。"
+		_:
+			evidence_title.text = "这次验证没有完成"
+			evidence_body.text = "世界没有变化，你的代码也还在。\n可以再点一次“直接运行”，或者先问问叮当师傅。"
 	_reveal_evidence()
 
 

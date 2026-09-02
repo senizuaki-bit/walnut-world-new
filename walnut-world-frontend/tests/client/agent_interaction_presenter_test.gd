@@ -58,6 +58,26 @@ func _initialize() -> void:
 		push_error("Skill Patch must remain in its dedicated confirmation dialog instead of the story overlay.")
 		quit(1)
 		return
+	overlay.skip_sequence()
+	await process_frame
+	var session_one := _interaction("interaction_session_scoped_0001", "bug_agent", "message", "第一局反馈。", null, null)
+	session_one["session_id"] = "session_presenter_0001"
+	if not presenter.enqueue_interaction(session_one):
+		push_error("The first Interaction in a Session must be presentable.")
+		quit(1)
+		return
+	overlay.skip_sequence()
+	await process_frame
+	if presenter.enqueue_interaction(session_one):
+		push_error("The same interaction_id must remain deduplicated within one Session.")
+		quit(1)
+		return
+	var session_two := session_one.duplicate(true)
+	session_two["session_id"] = "session_presenter_0002"
+	if not presenter.enqueue_interaction(session_two) or presenter.presentation_session_id() != "session_presenter_0002":
+		push_error("A new Session must receive a fresh interaction_id deduplication ledger.")
+		quit(1)
+		return
 	print("AGENT_INTERACTION_PRESENTER_TEST_PASS")
 	quit(0)
 

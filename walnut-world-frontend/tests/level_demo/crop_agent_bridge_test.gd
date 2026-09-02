@@ -106,6 +106,9 @@ func _initialize() -> void:
 	var bridge := BridgeScript.new()
 	root.add_child(bridge)
 	await process_frame
+	var story_overlay := level.get_node("StoryDialogueOverlay") as StoryDialogueOverlay
+	story_overlay.skip_sequence()
+	await process_frame
 	store.local_source = CropAdaptiveWateringDemo.STARTER_CODE
 	bridge.configure(store, session, level)
 	var activation: Dictionary = bridge.activate_initial_projection()
@@ -169,6 +172,8 @@ func _initialize() -> void:
 		or not str(failed_action.get("message", "")).contains("did not reach a terminal state")
 	):
 		failures.append("资源轮询超时必须保留净化后的 code/message，不得折叠成无结构结果。")
+	story_overlay.skip_sequence()
+	await process_frame
 	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.CODE)
 	level.call("_on_hint_pressed")
 	for _frame in range(5):

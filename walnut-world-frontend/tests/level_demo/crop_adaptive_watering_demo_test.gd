@@ -230,6 +230,14 @@ func _initialize() -> void:
 	level.fail_agent_submission("验证", "AGENT_RAW_ERROR_SHOULD_NOT_BE_VISIBLE")
 	if "AGENT_RAW_ERROR_SHOULD_NOT_BE_VISIBLE" in evidence_body.text or "Agent" in (level.get_node("Hud/EvidencePanel/Margin/Content/EvidenceTitle") as Label).text:
 		failures.append("Agent 提交失败时不得显示原始报错或 Agent 字样。")
+	for stage in ["构建", "激活", "验证"]:
+		var raw := "RAW_%s_FAILURE_SHOULD_STAY_INTERNAL" % stage
+		level.fail_agent_submission(stage, raw)
+		if raw in evidence_body.text:
+			failures.append("%s失败不得把原始服务错误显示给学生。" % stage)
+	level.present_candidate_chain_error("RAW_CANDIDATE_ERROR_SHOULD_STAY_INTERNAL")
+	if "RAW_CANDIDATE_ERROR_SHOULD_STAY_INTERNAL" in evidence_body.text:
+		failures.append("候选演示失败不得把内部错误代码显示给学生。")
 	level.queue_free()
 	await process_frame
 	if failures.is_empty():
