@@ -22,6 +22,7 @@ class FakeStore:
 	var flow_state := 1
 	var active_skill_tuple: Dictionary = {}
 	var objective_result: Dictionary = {}
+	var last_interaction_sequence := 1
 
 	func mark_draft_dirty(source: String) -> void:
 		local_source = source
@@ -111,9 +112,29 @@ func _initialize() -> void:
 	await process_frame
 	store.local_source = CropAdaptiveWateringDemo.STARTER_CODE
 	bridge.configure(store, session, level)
+	var historical_interactions: Array[Dictionary] = [{
+		"interaction_id": "interaction_historical_0001",
+		"sequence": 1,
+		"role": "teaching_agent",
+		"response_type": "hint",
+		"hint_level": 1,
+		"question": null,
+		"feedback": {"message": "这是已经展示过的恢复反馈。"},
+	}]
+	session.interactions_recovered.emit(historical_interactions)
 	var activation: Dictionary = bridge.activate_initial_projection()
 	if not activation.get("ok", false):
 		failures.append("权威恢复完成后必须打开作物适配关卡的首次投影门禁。")
+	var presenter := level.get_node("AgentInteractionPresenter") as AgentInteractionPresenter
+	var bug_legion := level.get_node("BugLegion2D") as BugLegion2D
+	var recovered_projection: Dictionary = level.formal_projection_state()
+	if (
+		presenter.is_presenting()
+		or presenter.pending_count() != 0
+		or bug_legion.is_legion_visible()
+		or recovered_projection.get("interaction") != historical_interactions.back()
+	):
+		failures.append("首次恢复必须静态投影已展示 Interaction，不得重播对话或角色军团。")
 	level.call("_enter_code_phase")
 	var source := CropAdaptiveWateringDemo.CORRECT_CODE
 	(level.get_node("CodeDrawer/Surface/Margin/Content/CodeEditor") as CodeEdit).text = source

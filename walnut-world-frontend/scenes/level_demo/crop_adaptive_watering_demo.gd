@@ -1180,16 +1180,26 @@ func present_agent_interactions(interactions: Array[Dictionary]) -> void:
 		agent_interaction_presenter.enqueue_interaction(interaction)
 
 
+func restore_agent_interaction(interaction: Dictionary) -> bool:
+	# Rebuild the persisted HUD projection without replaying its dialogue or
+	# character cue. Newly recovered interactions still use the presenter FIFO.
+	return _project_agent_interaction(interaction)
+
+
 func _on_agent_role_presentation_started(_role_id: StringName, interaction_id: String) -> void:
 	var interaction := agent_interaction_presenter.active_interaction()
 	if str(interaction.get("interaction_id", "")) != interaction_id:
 		return
+	_project_agent_interaction(interaction)
+
+
+func _project_agent_interaction(interaction: Dictionary) -> bool:
 	var feedback: Variant = interaction.get("feedback")
 	if not feedback is Dictionary:
-		return
+		return false
 	var message := str(feedback.get("message", ""))
 	if message.is_empty():
-		return
+		return false
 	_agent_stage_message_visible = false
 	_last_agent_interaction = interaction.duplicate(true)
 	var role_id := StringName(str(interaction.get("role", "")))
@@ -1202,6 +1212,7 @@ func _on_agent_role_presentation_started(_role_id: StringName, interaction_id: S
 	]
 	evidence_body.text = message
 	_reveal_evidence()
+	return true
 
 
 func _on_agent_world_cue_requested(presentation_key: StringName, active: bool) -> void:

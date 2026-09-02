@@ -23,6 +23,7 @@ var _last_error_code := ""
 var _projection_active := false
 var _pending_interactions: Array[Dictionary] = []
 var _pending_submission_interactions: Array[Dictionary] = []
+var _interaction_cursor_at_configuration := 0
 var _candidate_config: Dictionary = {"enabled": false, "content_ref": {}, "plot_rules": {}}
 var _pre_run_snapshot: Dictionary = {}
 var _last_run: Dictionary = {}
@@ -44,6 +45,8 @@ func configure(
 	_projection_active = false
 	_pending_interactions.clear()
 	_pending_submission_interactions.clear()
+	var interaction_cursor: Variant = _store.get("last_interaction_sequence") if _store != null else null
+	_interaction_cursor_at_configuration = int(interaction_cursor) if typeof(interaction_cursor) == TYPE_INT else 0
 	_pre_run_snapshot.clear()
 	_last_run.clear()
 	_local_candidate_result.clear()
@@ -100,7 +103,19 @@ func activate_initial_projection() -> Dictionary:
 	_projection_active = true
 	if not _pending_interactions.is_empty():
 		var visible := _candidate_hints_only(_pending_interactions) if _candidate_mode_enabled() else _pending_interactions
-		_level.present_agent_interactions(visible)
+		var historical: Array[Dictionary] = []
+		var unseen: Array[Dictionary] = []
+		for interaction: Dictionary in visible:
+			if int(interaction.get("sequence", -1)) <= _interaction_cursor_at_configuration:
+				historical.append(interaction)
+			else:
+				unseen.append(interaction)
+		if not historical.is_empty():
+			# Startup recovery must rebuild the final visible projection without
+			# replaying dialogue or Bug-legion cues already consumed in this Session.
+			_level.restore_agent_interaction(historical.back())
+		if not unseen.is_empty():
+			_level.present_agent_interactions(unseen)
 		_pending_interactions.clear()
 	return {"ok": true}
 
