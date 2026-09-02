@@ -1777,6 +1777,7 @@ if (-not $gatewayPortAvailable) {
 $relaySecret = New-RandomHex 32
 $databasePassword = New-RandomHex 24
 $authSecret = New-RandomHex 32
+$feishuPseudonymSecret = New-RandomHex 32
 $environmentNames = @(
     'PYTHONPATH',
     'WALNUT_DATABASE_URL',
@@ -1792,6 +1793,7 @@ $environmentNames = @(
     'WALNUT_AUTH_AUDIENCE',
     'WALNUT_AUTH_CLOCK_SKEW_SECONDS',
     'WALNUT_AUTH_MAXIMUM_LIFETIME_SECONDS',
+    'WALNUT_FEISHU_PSEUDONYM_SECRET',
     'WALNUT_TENANT_ID',
     'WALNUT_WORKER_ID',
     'WALNUT_DOCKER_EXECUTABLE',
@@ -1918,6 +1920,7 @@ try {
     $env:WALNUT_AUTH_AUDIENCE = 'walnut-game-client'
     $env:WALNUT_AUTH_CLOCK_SKEW_SECONDS = '5'
     $env:WALNUT_AUTH_MAXIMUM_LIFETIME_SECONDS = [string]$int1E2eTokenLifetimeSeconds
+    $env:WALNUT_FEISHU_PSEUDONYM_SECRET = $feishuPseudonymSecret
     $env:WALNUT_TENANT_ID = 'tenant_yaya'
     $phase1WorkerId = "int1-local-phase1-$($runId.Substring(0, 12))"
     $env:WALNUT_WORKER_ID = $phase1WorkerId
@@ -2090,17 +2093,17 @@ try {
         throw 'Godot diagnostic emitted no unique structured PASS fingerprint.'
     }
     $godotFingerprint = $passLines[0].Substring($passPrefix.Length) | ConvertFrom-Json
-    $expectedRelayGenerationCount = if ($EnableSkillPatch) { 16 } else { 12 }
-    $expectedTurnCount = if ($EnableSkillPatch) { 6 } else { 4 }
+    $expectedRelayGenerationCount = if ($EnableSkillPatch) { 16 } else { 27 }
+    $expectedTurnCount = if ($EnableSkillPatch) { 6 } else { 9 }
     $expectedRunCount = if ($EnableSkillPatch) { 5 } else { 4 }
     $expectedLearnerCount = if ($EnableSkillPatch) { 5 } else { 4 }
-    $expectedFrontendPostCount = if ($EnableSkillPatch) { 12 } else { 9 }
-    $expectedFrontendPutCount = if ($EnableSkillPatch) { 1 } else { 2 }
+    $expectedFrontendPostCount = if ($EnableSkillPatch) { 12 } else { 20 }
+    $expectedFrontendPutCount = if ($EnableSkillPatch) { 1 } else { 3 }
     $expectedSessionCommandCount = 1
-    $expectedBuildCommandCount = 2
+    $expectedBuildCommandCount = if ($EnableSkillPatch) { 2 } else { 5 }
     $expectedActivationCommandCount = 2
     $expectedFailureRunCount = if ($EnableSkillPatch) { 4 } else { 3 }
-    $expectedRejectedCommandCount = if ($EnableSkillPatch) { 4 } else { 3 }
+    $expectedRejectedCommandCount = if ($EnableSkillPatch) { 4 } else { 6 }
     # Every accepted Session, Build, Activation, and Turn owns exactly one
     # terminal Command and one durable command receipt.  Derive totals from
     # those public operations so the M2 six-Turn path cannot omit Session.
@@ -2108,8 +2111,8 @@ try {
     $expectedAppliedCommandCount = $expectedCommandCount - $expectedRejectedCommandCount
     $expectedSandboxReceiptCount = if ($EnableSkillPatch) { 10 } else { 8 }
     $expectedProviderResultMinimum = if ($EnableSkillPatch) { 11 } else { 8 }
-    $expectedProductReceiptCount = if ($EnableSkillPatch) { 1 } else { 2 }
-    $expectedEvidenceCount = if ($EnableSkillPatch) { 13 } else { 11 }
+    $expectedProductReceiptCount = if ($EnableSkillPatch) { 1 } else { 3 }
+    $expectedEvidenceCount = if ($EnableSkillPatch) { 13 } else { 14 }
     # One committed World transaction advances the authoritative World stream
     # once.  Its eight student-visible actions are separate presentation rows.
     $expectedWorldCommitEventCount = 1
@@ -2121,7 +2124,7 @@ try {
         '["teaching_agent", "teaching_agent", "bug_agent", "bug_agent", "teaching_agent", "book_agent"]'
     }
     else {
-        '["teaching_agent", "teaching_agent", "bug_agent", "book_agent"]'
+        '["teaching_agent", "teaching_agent", "bug_agent", "teaching_agent", "teaching_agent", "teaching_agent", "teaching_agent", "bug_agent", "book_agent"]'
     }
     if ($EnableSkillPatch) {
         if (
@@ -2282,6 +2285,7 @@ SELECT (jsonb_build_object(
   'workspace_count', (SELECT count(*) FROM product_workspaces WHERE tenant_id='tenant_yaya'),
   'draft_count', (SELECT count(*) FROM product_skill_drafts WHERE tenant_id='tenant_yaya'),
   'build_count', (SELECT count(*) FROM skill_builds WHERE tenant_id='tenant_yaya'),
+  'build_rejected_count', (SELECT count(*) FROM skill_builds WHERE tenant_id='tenant_yaya' AND status='REJECTED'),
   'artifact_count', (SELECT count(*) FROM skill_artifacts WHERE tenant_id='tenant_yaya'),
   'certification_count', (SELECT count(*) FROM skill_certifications WHERE tenant_id='tenant_yaya'),
   'activation_count', (SELECT count(*) FROM skill_activations WHERE tenant_id='tenant_yaya'),
@@ -2289,6 +2293,7 @@ SELECT (jsonb_build_object(
   'run_count', (SELECT count(*) FROM game_runs WHERE tenant_id='tenant_yaya'),
   'world_event_count', (SELECT count(*) FROM domain_events WHERE tenant_id='tenant_yaya' AND stream_id LIKE 'world:%'),
   'evidence_count', (SELECT count(*) FROM game_evidence WHERE tenant_id='tenant_yaya'),
+  'build_rejection_evidence_count', (SELECT count(*) FROM game_evidence WHERE tenant_id='tenant_yaya' AND evidence_json->'payload'->>'evidence_kind'='BUILD_REJECTION'),
   'interaction_count', (SELECT count(*) FROM product_agent_interactions WHERE tenant_id='tenant_yaya'),
   'learner_projection_count', (SELECT count(*) FROM learner_projection_jobs WHERE tenant_id='tenant_yaya'),
   'learner_projection_succeeded', (SELECT count(*) FROM learner_projection_jobs WHERE tenant_id='tenant_yaya' AND status='SUCCEEDED'),
@@ -2426,16 +2431,17 @@ SELECT (jsonb_build_object(
         [int]$databaseFingerprint.session_count -ne 1 -or
         [int]$databaseFingerprint.workspace_count -ne 1 -or
         [int]$databaseFingerprint.draft_count -ne 1 -or
-        [int]$databaseFingerprint.draft_revision_count -ne 3 -or
+        [int]$databaseFingerprint.draft_revision_count -ne $(if ($EnableSkillPatch) { 3 } else { 4 }) -or
         [int]$databaseFingerprint.patch_request_count -ne $expectedPatchAuthorityCount -or
         [int]$databaseFingerprint.patch_proposal_count -ne $expectedPatchAuthorityCount -or
         [int]$databaseFingerprint.patch_evidence_count -ne $expectedPatchAuthorityCount -or
         [int]$databaseFingerprint.patch_decision_count -ne $expectedPatchAuthorityCount -or
         [int]$databaseFingerprint.draft_assistance_count -ne $expectedPatchAuthorityCount -or
         [int]$databaseFingerprint.patch_decision_receipt_count -ne $expectedPatchAuthorityCount -or
-        [int]$databaseFingerprint.build_count -ne 2 -or
-        [int]$databaseFingerprint.build_provenance_count -ne 2 -or
-        [int]$databaseFingerprint.build_terminal_authority_count -ne 2 -or
+        [int]$databaseFingerprint.build_count -ne $(if ($EnableSkillPatch) { 2 } else { 5 }) -or
+        [int]$databaseFingerprint.build_rejected_count -ne $(if ($EnableSkillPatch) { 0 } else { 3 }) -or
+        [int]$databaseFingerprint.build_provenance_count -ne $(if ($EnableSkillPatch) { 2 } else { 5 }) -or
+        [int]$databaseFingerprint.build_terminal_authority_count -ne $(if ($EnableSkillPatch) { 2 } else { 5 }) -or
         [int]$databaseFingerprint.build_terminal_certified_count -ne 2 -or
         [int]$databaseFingerprint.artifact_count -ne 2 -or
         [int]$databaseFingerprint.certification_count -ne 2 -or
@@ -2458,6 +2464,7 @@ SELECT (jsonb_build_object(
         [int]$databaseFingerprint.world_snapshot_count -ne 1 -or
         [int]$databaseFingerprint.world_event_count -ne $expectedWorldCommitEventCount -or
         [int]$databaseFingerprint.evidence_count -ne $expectedEvidenceCount -or
+        [int]$databaseFingerprint.build_rejection_evidence_count -ne $(if ($EnableSkillPatch) { 0 } else { 3 }) -or
         [int]$databaseFingerprint.interaction_count -ne $expectedTurnCount -or
         [int]$databaseFingerprint.command_count -ne $expectedCommandCount -or
         [int]$databaseFingerprint.terminal_command_count -ne $expectedCommandCount -or
