@@ -708,11 +708,11 @@ try {
         }
     }
     if ([string]::IsNullOrWhiteSpace($GodotExe) -or -not (Test-Path -LiteralPath $GodotExe -PathType Leaf)) {
-        throw 'Pass the existing Godot 4.5.2 console executable with -GodotExe.'
+        throw 'Pass the existing Godot 4.7.1 stable executable with -GodotExe.'
     }
     $godotVersion = (& $GodotExe --version 2>&1 | Out-String).Trim()
-    if ($LASTEXITCODE -ne 0 -or $godotVersion -notmatch '^4\.5\.2\.stable') {
-        throw 'Godot executable is not the pinned 4.5.2 stable runtime.'
+    if ($LASTEXITCODE -ne 0 -or $godotVersion -notmatch '^4\.7\.1\.stable') {
+        throw 'Godot executable is not the pinned 4.7.1 stable runtime.'
     }
     & $backendPython $contractVerifier --agent-repo $agentRoot *> $null
     if ($LASTEXITCODE -ne 0) {

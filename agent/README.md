@@ -101,7 +101,7 @@ docs/                         合同、部署和故障恢复规则
 - Python 3.12
 - PostgreSQL 15+
 - Docker；生产 Sandbox 镜像必须使用 `name@sha256:<64 hex>`
-- Godot 4.5.2（统一合同门禁）
+- Godot 4.7.1 stable（统一合同门禁）
 - Windows 开发门禁还需要 Visual Studio 2022 C++ Build Tools；原生 Sandbox 只用于证明其不具备生产隔离能力，composition 永远只装配 Docker Sandbox
 
 安装锁定依赖：

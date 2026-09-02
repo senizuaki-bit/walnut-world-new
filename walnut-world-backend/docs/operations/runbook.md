@@ -130,7 +130,7 @@ Authority seed、Gateway 和 worker 使用同一数据库、runtime root、JWT i
 ```powershell
 $env:YAYA_API_BASE_URL = 'http://127.0.0.1:8790'
 $env:YAYA_AUTH_TOKEN = '<short-lived-student-jwt>'
-$env:GODOT_EXE = '<Godot 4.5.2 console executable>'
+$env:GODOT_EXE = '<Godot 4.7.1 stable executable>'
 ..\walnut-world-frontend\scripts\run-real-gateway-e2e.ps1
 ```
 
@@ -180,7 +180,7 @@ INT2 run `868a`。
 [Environment]::SetEnvironmentVariable('WALNUT_LLM_UPSTREAM_API_KEY', $null, 'Process')
 $env:WALNUT_INT1_REAL_PROVIDER_E2E = 'true'
 $env:WALNUT_LLM_UPSTREAM_API_KEY_FILE = (Resolve-Path 'C:\secure\deepseek.key').Path
-$env:GODOT_EXE = 'C:\tools\Godot_v4.5.2-stable_win64_console.exe'
+$env:GODOT_EXE = 'C:\tools\Godot_v4.7.1-stable_win64_console.exe'
 
 .\scripts\run-int1-real-provider-e2e.ps1 `
   -PostgresImage 'postgres:16.9-alpine@sha256:7c688148e5e156d0e86df7ba8ae5a05a2386aaec1e2ad8e6d11bdf10504b1fb7' `

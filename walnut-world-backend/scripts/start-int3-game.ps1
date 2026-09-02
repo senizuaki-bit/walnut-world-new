@@ -23,7 +23,7 @@ else {
     $frontendRoot = $frontendContainerRoot
 }
 if ([string]::IsNullOrWhiteSpace($GodotExe)) {
-    $GodotExe = Join-Path $workspaceRoot 'tools\godot-4.5.2\Godot_v4.5.2-stable_win64.exe'
+    $GodotExe = Join-Path $workspaceRoot 'tools\godot-4.7.1\Godot_v4.7.1-stable_win64.exe'
 }
 $backendLauncher = Join-Path $PSScriptRoot 'run-int3-aily-backend.ps1'
 $statePath = Join-Path $env:LOCALAPPDATA 'WalnutWorld\int3-aily-backend\active.json'

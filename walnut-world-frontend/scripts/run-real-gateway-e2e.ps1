@@ -56,9 +56,9 @@ function Stop-VerifiedSpawnedProcessTree {
 
 $projectPath = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
 if ([string]::IsNullOrWhiteSpace($GodotExe)) {
-    $bundledCandidates = @(
-        (Join-Path (Split-Path -Parent $projectPath) 'tools\godot-4.5.2\Godot_v4.5.2-stable_win64_console.exe'),
-        (Join-Path $projectPath '..\..\tools\godot-4.5.2\Godot_v4.5.2-stable_win64_console.exe')
+	$bundledCandidates = @(
+		(Join-Path (Split-Path -Parent $projectPath) 'tools\godot-4.7.1\Godot_v4.7.1-stable_win64_console.exe'),
+		(Join-Path $projectPath '..\..\tools\godot-4.7.1\Godot_v4.7.1-stable_win64_console.exe')
     )
     foreach ($bundledCandidate in $bundledCandidates) {
         if (Test-Path -LiteralPath $bundledCandidate -PathType Leaf) {
@@ -68,7 +68,12 @@ if ([string]::IsNullOrWhiteSpace($GodotExe)) {
     }
 }
 if ([string]::IsNullOrWhiteSpace($GodotExe) -or -not (Test-Path -LiteralPath $GodotExe)) {
-    throw 'Set GODOT_EXE or pass -GodotExe with the Godot 4.5.2 console executable.'
+	throw 'Set GODOT_EXE or pass -GodotExe with the Godot 4.7.1 stable executable.'
+}
+$godotVersionOutput = @(& $GodotExe --version 2>&1)
+$godotVersion = (($godotVersionOutput | ForEach-Object { [string]$_ }) -join "`n").Trim()
+if ($LASTEXITCODE -ne 0 -or $godotVersion -notmatch '^4\.7\.1\.stable') {
+	throw "Godot 4.7.1 stable is required; observed '$godotVersion'."
 }
 if ([string]::IsNullOrWhiteSpace($env:YAYA_API_BASE_URL)) {
     throw 'YAYA_API_BASE_URL must identify the independently running real Gateway.'

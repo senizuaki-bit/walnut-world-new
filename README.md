@@ -98,7 +98,7 @@
         ┌────────┴────────┐
         ▼                 ▼
 walnut-world-frontend/    miaoda-teacher-workbench/
-   Godot 4.5.2 学生端          NestJS + React 教师工作台
+   Godot 4.7.1 学生端          NestJS + React 教师工作台
 ```
 
 | 目录 | 负责 |
@@ -143,7 +143,7 @@ walnut-world-frontend/    miaoda-teacher-workbench/
 
 - Windows + Docker Desktop
 - Python 3.12（后端 `.venv`）
-- Godot 4.5.2（`tools/godot-4.5.2/`）
+- Godot 4.7.1 stable（`project.godot` 的兼容特征为 `4.7`）
 - 一个 LLM Provider Key（DeepSeek），存成纯文本文件
 
 ### 数据库迁移
@@ -175,10 +175,10 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "[Console]::OutputEnc
 cd walnut-world-backend && .venv/Scripts/python.exe -m pytest tests/unit -q
 ```
 
-前端（62 个用例，逐个跑）：
+前端（脚本自动发现全部离线用例；真实网关用例保持 opt-in）：
 
-```bash
-tools/godot-4.5.2/Godot_v4.5.2-stable_win64.exe --headless --path walnut-world-frontend --script res://tests/client/<name>_test.gd
+```powershell
+.\walnut-world-frontend\scripts\run-offline-tests.ps1 -GodotExe D:\Godot\godot.cmd
 ```
 
 后端集成测试需要一个**全新的** PostgreSQL，并设置 `WALNUT_TEST_DATABASE_URL`。注意：集成套件对共享库状态敏感，在复用过的库上跑会出现互不重合的浮动失败——判断回归时请用全新库。

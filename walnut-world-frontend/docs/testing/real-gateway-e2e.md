@@ -62,7 +62,7 @@ Frontend 只注入 endpoint、seeder 返回的短期 student JWT，以及一个�
 ```powershell
 $env:YAYA_API_BASE_URL = 'http://127.0.0.1:8790'
 $env:YAYA_AUTH_TOKEN = '<short-lived-student-jwt>'
-$env:GODOT_EXE = '<Godot 4.5.2 console executable>'
+$env:GODOT_EXE = '<Godot 4.7.1 stable executable>'
 $phase1Fingerprint = Join-Path $env:TEMP 'walnut-real-phase1-authority.json'
 ```
 

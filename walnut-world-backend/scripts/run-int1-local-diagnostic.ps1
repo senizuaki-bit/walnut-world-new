@@ -1677,10 +1677,10 @@ foreach ($requiredPath in @($backendPython, $relayScript, $realProviderFaultProx
     }
 }
 if ([string]::IsNullOrWhiteSpace($GodotExe)) {
-    $GodotExe = Join-Path $workspaceParent 'tools\godot-4.5.2\Godot_v4.5.2-stable_win64_console.exe'
+    $GodotExe = Join-Path $workspaceParent 'tools\godot-4.7.1\Godot_v4.7.1-stable_win64_console.exe'
 }
 if (-not (Test-Path -LiteralPath $GodotExe)) {
-    Write-NotLive 'Pinned Godot 4.5.2 executable is unavailable.' $null
+    Write-NotLive 'Pinned Godot 4.7.1 executable is unavailable.' $null
     exit 2
 }
 
