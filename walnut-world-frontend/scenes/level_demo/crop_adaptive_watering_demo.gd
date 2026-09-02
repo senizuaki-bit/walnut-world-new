@@ -101,6 +101,8 @@ const CROP_TEXTURES := [
 @onready var reset_button: Button = %ResetButton
 @onready var save_state: Label = %SaveState
 @onready var story_dialogue: StoryDialogueOverlay = %StoryDialogueOverlay
+@onready var agent_interaction_presenter: AgentInteractionPresenter = %AgentInteractionPresenter
+@onready var bug_legion_2d: Control = %BugLegion2D
 @onready var watering_can: AnimatedSprite2D = %WateringCan
 @onready var completion_card: Control = %CompletionCard
 @onready var completion_title: Label = %CompletionTitle
@@ -205,6 +207,8 @@ func _ready() -> void:
 	playback_speed_button.pressed.connect(_on_playback_speed_pressed)
 	skip_playback_button.pressed.connect(_on_skip_playback_pressed)
 	replay_playback_button.pressed.connect(_on_replay_playback_pressed)
+	agent_interaction_presenter.role_presentation_started.connect(_on_agent_role_presentation_started)
+	agent_interaction_presenter.world_cue_requested.connect(_on_agent_world_cue_requested)
 	for index in range(plot_grid.get_child_count()):
 		var card := plot_grid.get_child(index) as CropPlotCard
 		card.configure(index, CROPS[index], MOISTURE[index], TARGET[index], CROP_TEXTURES[index % 4])
@@ -1160,35 +1164,41 @@ func update_agent_submission_stage(message: String, keep_running := true) -> voi
 
 
 func present_agent_interactions(interactions: Array[Dictionary]) -> void:
-	if interactions.is_empty():
+	for interaction: Dictionary in interactions:
+		agent_interaction_presenter.enqueue_interaction(interaction)
+
+
+func _on_agent_role_presentation_started(_role_id: StringName, interaction_id: String) -> void:
+	var interaction := agent_interaction_presenter.active_interaction()
+	if str(interaction.get("interaction_id", "")) != interaction_id:
 		return
-	var latest: Dictionary = interactions.back()
-	var feedback: Variant = latest.get("feedback")
+	var feedback: Variant = interaction.get("feedback")
 	if not feedback is Dictionary:
 		return
 	var message := str(feedback.get("message", ""))
 	if message.is_empty():
 		return
 	_agent_stage_message_visible = false
-	_last_agent_interaction = latest.duplicate(true)
-	var role_id := StringName(str(latest.get("role", "")))
-	var profile = PROFILE_CATALOG.profile_for(role_id)
-	var display_name: String = str(profile.display_name) if profile != null else "系统"
-	var response_type := str(latest.get("response_type", "message"))
-	var hint_level_value: Variant = latest.get("hint_level")
+	_last_agent_interaction = interaction.duplicate(true)
+	var role_id := StringName(str(interaction.get("role", "")))
+	var response_type := str(interaction.get("response_type", "message"))
+	var hint_level_value: Variant = interaction.get("hint_level")
 	var hint_level := int(hint_level_value) if typeof(hint_level_value) == TYPE_INT else 0
-	evidence_title.text = "%s · %s" % [display_name, "L%d" % hint_level if response_type == "hint" else "Agent 反馈"]
+	evidence_title.text = "%s · %s" % [
+		agent_interaction_presenter.display_name_for(role_id),
+		"L%d" % hint_level if response_type == "hint" else "Agent 反馈",
+	]
 	evidence_body.text = message
 	_reveal_evidence()
-	if profile != null:
-		var question_value: Variant = latest.get("question")
-		story_dialogue.play_agent_presentation(
-			profile.display_name,
-			profile.portrait,
-			message,
-			"" if question_value == null else str(question_value),
-			"教学提示" if response_type in ["hint", "question"] else "验证反馈",
-		)
+
+
+func _on_agent_world_cue_requested(presentation_key: StringName, active: bool) -> void:
+	if presentation_key != &"bug_legion":
+		return
+	if active:
+		bug_legion_2d.show_legion()
+	else:
+		bug_legion_2d.hide_legion()
 
 
 ## Agent/Gateway failures must never show the student a raw backend message, and

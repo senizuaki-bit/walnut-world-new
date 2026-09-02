@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=21 format=3]
 
 [ext_resource type="Script" path="res://scenes/level_demo/crop_adaptive_watering_demo.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://scenes/level_demo/crop_plot_card.tscn" id="2_card"]
@@ -7,6 +7,9 @@
 [ext_resource type="Texture2D" path="res://assets/art/generated/facilities/farm_water_pump_station.png" id="5_pump"]
 [ext_resource type="Texture2D" path="res://assets/art/generated/facilities/greenhouse.png" id="6_workshop"]
 [ext_resource type="SpriteFrames" path="res://resources/sprites/watering_can_frames_v2.tres" id="7_can"]
+[ext_resource type="Script" path="res://scenes/ui/agent_interaction_presenter.gd" id="8_presenter"]
+[ext_resource type="Resource" path="res://resources/agent/agent_character_catalog.tres" id="9_catalog"]
+[ext_resource type="PackedScene" path="res://scenes/characters/bug_legion/bug_legion_2d.tscn" id="10_legion"]
 
 [sub_resource type="StyleBoxFlat" id="TaskStyle"]
 bg_color = Color(0.99, 0.95, 0.80, 0.97)
@@ -1315,6 +1318,16 @@ theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("PrimaryStyle")
 text = "完成归档并查看技能树  →"
+
+[node name="BugLegion2D" parent="." instance=ExtResource("10_legion")]
+unique_name_in_owner = true
+
+[node name="AgentInteractionPresenter" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
+layer = 40
+script = ExtResource("8_presenter")
+character_catalog = ExtResource("9_catalog")
+overlay_path = NodePath("../StoryDialogueOverlay")
 
 [node name="StoryDialogueOverlay" parent="." instance=ExtResource("3_dialogue")]
 unique_name_in_owner = true

@@ -7,13 +7,20 @@ func _initialize() -> void:
 	var presenter := PRESENTER_SCENE.instantiate()
 	root.add_child(presenter)
 	await process_frame
+	var overlay := presenter.get_node("StoryDialogueOverlay") as StoryDialogueOverlay
+	overlay.play_sequence("芽芽", null, ["先完成当前关卡叙事。"])
 	var bug := _interaction("interaction_bug_0001", "bug_agent", "message", "边界问题出现了。", null, null)
 	if not presenter.enqueue_interaction(bug):
 		push_error("A valid Bug AgentInteraction must enter the presentation queue.")
 		quit(1)
 		return
+	if presenter.is_presenting() or presenter.pending_count() != 1 or overlay.speaker_label.text != "芽芽":
+		push_error("Agent feedback must wait without overwriting an active narrative sequence.")
+		quit(1)
+		return
+	overlay.skip_sequence()
 	await process_frame
-	var overlay := presenter.get_node("StoryDialogueOverlay") as StoryDialogueOverlay
+	await process_frame
 	if (
 		not overlay.visible
 		or overlay.speaker_label.text != "Bug 先生"

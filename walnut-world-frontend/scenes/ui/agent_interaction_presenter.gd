@@ -7,8 +7,9 @@ signal world_cue_requested(presentation_key: StringName, active: bool)
 signal presentation_rejected(reason: String)
 
 @export var character_catalog: AgentCharacterCatalog
+@export var overlay_path := NodePath("StoryDialogueOverlay")
 
-@onready var overlay: StoryDialogueOverlay = $StoryDialogueOverlay
+@onready var overlay: StoryDialogueOverlay = get_node_or_null(overlay_path) as StoryDialogueOverlay
 
 var _pending: Array[Dictionary] = []
 var _presented_interaction_ids: Dictionary = {}
@@ -18,6 +19,9 @@ var _active_interaction: Dictionary = {}
 func _ready() -> void:
 	if character_catalog == null:
 		push_error("AgentInteractionPresenter requires an AgentCharacterCatalog.")
+		return
+	if overlay == null:
+		push_error("AgentInteractionPresenter requires one shared StoryDialogueOverlay.")
 		return
 	var validation := character_catalog.validate()
 	if not bool(validation.get("ok", false)):
@@ -66,12 +70,16 @@ func is_presenting() -> bool:
 
 func clear_queue() -> void:
 	_pending.clear()
-	if overlay.visible:
+	if not _active_interaction.is_empty() and overlay.visible:
 		overlay.skip_sequence()
 
 
+func active_interaction() -> Dictionary:
+	return _active_interaction.duplicate(true)
+
+
 func _present_next() -> void:
-	if _pending.is_empty():
+	if _pending.is_empty() or overlay == null or overlay.visible:
 		return
 	_active_interaction = _pending.pop_front()
 	var interaction_id := str(_active_interaction.interaction_id)
@@ -99,6 +107,10 @@ func _present_next() -> void:
 
 func _on_sequence_finished() -> void:
 	if _active_interaction.is_empty():
+		# Narrative coroutines awaiting this same signal get one frame to start
+		# their next authored line before queued Agent feedback is considered.
+		# This keeps a multi-part story sequence atomic from the learner's view.
+		call_deferred("_present_next")
 		return
 	var interaction_id := str(_active_interaction.interaction_id)
 	var role_id := StringName(str(_active_interaction.role))

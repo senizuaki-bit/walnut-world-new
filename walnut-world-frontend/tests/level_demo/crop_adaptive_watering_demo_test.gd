@@ -34,7 +34,7 @@ func _initialize() -> void:
 		"Hud/PlaybackRail/PlaybackSpeedButton",
 		"Hud/PlaybackRail/SkipPlaybackButton",
 		"Hud/PlaybackRail/ReplayPlaybackButton",
-		"StoryDialogueOverlay", "PatchDialog",
+		"BugLegion2D", "AgentInteractionPresenter", "StoryDialogueOverlay", "PatchDialog",
 		"SkillTreeOverlay", "WorkshopOverlay", "WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel",
 		"WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode/GapLine/GapTargetInput",
 		"WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/SevereCondition/SevereBoundaryInput",

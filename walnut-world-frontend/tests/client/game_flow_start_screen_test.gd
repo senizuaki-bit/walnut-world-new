@@ -21,6 +21,8 @@ func _initialize() -> void:
 		"CropAdaptiveWateringDemo/SkillTreeOverlay",
 		"CropAdaptiveWateringDemo/WorkshopOverlay",
 		"CropAdaptiveWateringDemo/BugChallengeOverlay",
+		"CropAdaptiveWateringDemo/BugLegion2D",
+		"CropAdaptiveWateringDemo/AgentInteractionPresenter",
 		"CropAdaptiveWateringDemo/GrowthSummaryOverlay",
 		"TransitionLayer/Transition",
 	]:
@@ -71,6 +73,25 @@ func _initialize() -> void:
 			failures.append("正式 AppRoot 必须把作物适配桥接作为唯一 Agent 适配器。")
 		if bool(app_root.get("water_candidate_compatibility_enabled")):
 			failures.append("WATER 前端候选兼容必须默认关闭，只能由明确配置启用。")
+		var formal_level := app_root.get_node("GameFlow/CropAdaptiveWateringDemo") as CropAdaptiveWateringDemo
+		formal_level.visible = true
+		formal_level.present_agent_interactions([{
+			"interaction_id": "interaction_app_root_bug_0001",
+			"role": "bug_agent",
+			"response_type": "message",
+			"question": null,
+			"hint_level": null,
+			"feedback": {
+				"message": "第三次同类失败已经由正式权威确认。",
+				"degraded": false,
+				"evidence_refs": [],
+			},
+		}])
+		await process_frame
+		if not (formal_level.get_node("BugLegion2D") as Control).visible:
+			failures.append("正式 AppRoot 注入 bug_agent Interaction 时必须显示 2D Bug 军团。")
+		(formal_level.get_node("StoryDialogueOverlay") as StoryDialogueOverlay).skip_sequence()
+		await create_timer(0.22).timeout
 		app_root.queue_free()
 		await process_frame
 	start.enter_button.pressed.emit()
