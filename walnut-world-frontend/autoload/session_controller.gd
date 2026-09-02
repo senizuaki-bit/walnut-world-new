@@ -19,7 +19,8 @@ const ProductInteractionGateway = preload("res://scripts/client/product_interact
 ## expired long before the teaching response existed.
 const DEFAULT_INTERACTION_DEADLINE_SECONDS := 360.0
 const DEFAULT_INTERACTION_DELAY_SECONDS := 0.25
-const PENDING_TURN_SLOTS := ["agent_turn", "agent_hint"]
+const PENDING_TURN_SLOTS := ["agent_turn", "agent_hint", "agent_build_feedback"]
+const BUILD_FEEDBACK_MESSAGE := "请根据刚刚被拒绝的构建证据，给出一条可执行的教学反馈。"
 ## Statuses that prove the gateway refused the request itself, so it never became
 ## a Turn. The envelope always replays under its original Idempotency-Key, so an
 ## already-accepted Turn comes back 202 instead of these -- there is therefore no
@@ -878,6 +879,22 @@ func request_build() -> void:
 		# try again is decided inside _submit_build_attempt, which retries under a
 		# new identity when the failure it found belonged to an older attempt.
 		store.set_flow(WalnutClientStore.FlowState.BUILD_FAILED)
+		if str(command.get("status", "")) == "REJECTED":
+			var rejected_build := await _recover_rejected_build(command)
+			if not rejected_build.get("ok", false):
+				store.report_error(rejected_build.get(
+					"error",
+					_local_error("BUILD_REJECTION_RECOVERY_FAILED", "Rejected Build authority could not be recovered."),
+				))
+				return
+			var build: Dictionary = rejected_build.value
+			build_resolved.emit(build.duplicate(true))
+			var feedback := await request_build_feedback(build)
+			if not feedback.get("ok", false):
+				store.report_error(feedback.get(
+					"error",
+					_local_error("BUILD_FEEDBACK_FAILED", "Rejected Build feedback could not be recovered."),
+				))
 		return
 	var resource: Variant = command.get("result")
 	if not resource is Dictionary or str(resource.get("resource_type", "")) != "SKILL_BUILD":
@@ -1010,6 +1027,122 @@ func _submit_activation(request: Dictionary) -> Dictionary:
 	)
 
 
+func _recover_rejected_build(command: Dictionary) -> Dictionary:
+	if (
+		str(command.get("status", "")) != "REJECTED"
+		or not command.get("evidence_refs") is Array
+		or command.evidence_refs.size() != 1
+		or game_gateway == null
+		or not game_gateway.has_method("get_evidence")
+		or not game_gateway.has_method("get_skill_build")
+	):
+		return _local_failure(
+			"BUILD_REJECTION_AUTHORITY_INVALID",
+			"Rejected Build command does not expose one recoverable Evidence authority.",
+		)
+	var reference: Variant = command.evidence_refs[0]
+	if not reference is Dictionary:
+		return _local_failure(
+			"BUILD_REJECTION_EVIDENCE_INVALID",
+			"Rejected Build command exposes an invalid Evidence reference.",
+		)
+	var evidence_result: Dictionary = await game_gateway.get_evidence(
+		_new_request_context(),
+		str(reference.get("evidence_id", "")),
+	)
+	if not evidence_result.get("ok", false):
+		return evidence_result
+	var evidence: Dictionary = evidence_result.value
+	var payload: Variant = evidence.get("payload")
+	var source: Variant = evidence.get("source")
+	if (
+		evidence.get("evidence_ref") != reference
+		or not payload is Dictionary
+		or not source is Dictionary
+		or str(payload.get("evidence_kind", "")) != "BUILD_REJECTION"
+		or str(payload.get("outcome", "")) != "REJECTED"
+		or str(source.get("source_type", "")) != "SKILL_BUILD"
+		or str(source.get("source_id", "")) != str(payload.get("build_id", ""))
+		or str(source.get("command_id", "")) != str(command.get("command_id", ""))
+	):
+		return _local_failure(
+			"BUILD_REJECTION_EVIDENCE_MISMATCH",
+			"BUILD_REJECTION Evidence does not close through the rejected Build command.",
+		)
+	var build_result: Dictionary = await game_gateway.get_skill_build(
+		_new_request_context(),
+		str(payload.build_id),
+	)
+	if not build_result.get("ok", false):
+		return build_result
+	var build: Dictionary = build_result.value
+	if (
+		str(build.get("build_id", "")) != str(payload.build_id)
+		or str(build.get("skill_id", "")) != str(payload.get("skill_id", ""))
+		or str(build.get("status", "")) != "REJECTED"
+		or not bool(build.get("terminal", false))
+		or build.get("evidence_refs") != command.evidence_refs
+	):
+		return _local_failure(
+			"BUILD_REJECTION_RESOURCE_MISMATCH",
+			"Rejected SkillBuild does not match its terminal Command and Evidence.",
+		)
+	return {"ok": true, "status": 200, "headers": {}, "value": build.duplicate(true)}
+
+
+func _build_feedback_authority(build: Dictionary, session_id: String) -> Dictionary:
+	var references: Variant = build.get("evidence_refs")
+	if (
+		session_id.is_empty()
+		or str(build.get("status", "")) != "REJECTED"
+		or not bool(build.get("terminal", false))
+		or not ContractValidator.validate_identifier(build.get("build_id")).ok
+		or not references is Array
+		or references.size() != 1
+		or not ContractValidator._validate_evidence_ref(references[0]).ok
+	):
+		return _local_failure(
+			"BUILD_FEEDBACK_AUTHORITY_INVALID",
+			"Build feedback requires one exact rejected Build and BUILD_REJECTION Evidence reference.",
+		)
+	return {
+		"ok": true,
+		"status": 200,
+		"headers": {},
+		"value": {
+			"session_id": session_id,
+			"build_id": str(build.build_id),
+			"evidence_refs": references.duplicate(true),
+		},
+	}
+
+
+func _find_existing_build_feedback(
+	session_id: String,
+	evidence_refs: Array,
+) -> Dictionary:
+	var recovered := await _fetch_interactions(session_id)
+	if not recovered.get("ok", false):
+		return recovered
+	for interaction: Dictionary in recovered.value:
+		var feedback: Variant = interaction.get("feedback")
+		if (
+			str(interaction.get("session_id", "")) == session_id
+			and str(interaction.get("role", "")) in ["teaching_agent", "bug_agent"]
+			and str(interaction.get("response_type", "")) in ["question", "hint", "message"]
+			and feedback is Dictionary
+			and feedback.get("run_id") == null
+			and feedback.get("evidence_refs") == evidence_refs
+		):
+			return {
+				"ok": true,
+				"status": 200,
+				"headers": {},
+				"value": interaction.duplicate(true),
+			}
+	return {"ok": true, "status": 200, "headers": {}, "value": {}}
+
+
 ## Re-read the Registry revision the server actually holds.
 ##
 ## Only the revision is adopted. Nothing else from the refreshed bootstrap is
@@ -1037,6 +1170,107 @@ func request_hint(message: String = "Please give me the next hint.") -> void:
 	if not _student_action_readiness("Hint").get("ok", false):
 		return
 	await request_turn({"type": "MESSAGE", "text": message, "locale": "zh-CN"}, false)
+
+
+func request_build_feedback(build: Dictionary) -> Dictionary:
+	var readiness := _student_action_readiness("Build feedback")
+	if not readiness.get("ok", false):
+		return readiness
+	var store := _client_store()
+	if (
+		store == null
+		or game_gateway == null
+		or not game_gateway.has_method("submit_agent_turn")
+		or not game_gateway.has_method("get_command")
+		or product_gateway == null
+		or not product_gateway.has_method("list_interactions")
+	):
+		return _local_failure(
+			"BUILD_FEEDBACK_GATEWAY_UNAVAILABLE",
+			"Build feedback requires Agent Turn, Command, and Product Interaction gateways.",
+		)
+	var workspace: Dictionary = store.workspace
+	var session: Variant = workspace.get("session")
+	var task: Variant = workspace.get("current_task")
+	var world: Dictionary = store.world_snapshot
+	if (
+		not session is Dictionary
+		or not task is Dictionary
+		or world.is_empty()
+		or str(session.get("status", "")) != "ACTIVE"
+		or str(session.get("session_id", "")) != str(authoritative_session.get("session_id", ""))
+	):
+		return _local_failure(
+			"BUILD_FEEDBACK_AUTHORITY_UNAVAILABLE",
+			"Build feedback requires the current authoritative Session and World.",
+		)
+	var authority_result := _build_feedback_authority(build, str(session.session_id))
+	if not authority_result.get("ok", false):
+		return authority_result
+	var failure_authority: Dictionary = authority_result.value
+	var pending := await recover_pending_turn_operations(true, ["agent_build_feedback"])
+	if not pending.get("ok", false):
+		return pending
+	if bool(pending.get("value", {}).get("had_pending", false)):
+		return pending
+	var existing := await _find_existing_build_feedback(
+		str(session.session_id),
+		failure_authority.evidence_refs,
+	)
+	if not existing.get("ok", false):
+		return existing
+	var existing_interaction: Dictionary = existing.get("value", {})
+	if not existing_interaction.is_empty():
+		var recovered_interactions: Array[Dictionary] = [existing_interaction.duplicate(true)]
+		interactions_recovered.emit(recovered_interactions)
+		return {
+			"ok": true,
+			"status": 200,
+			"headers": {},
+			"value": {
+				"slot": "agent_build_feedback",
+				"outcome": "BUILD_FEEDBACK_ALREADY_COMPLETED",
+				"interaction": existing_interaction.duplicate(true),
+			},
+		}
+	var identity := ContractValidator.canonical_json_sha256_v1(failure_authority)
+	var turn_id := "turn_build_feedback_%s" % identity.left(24)
+	var turn_input := {
+		"type": "MESSAGE",
+		"text": BUILD_FEEDBACK_MESSAGE,
+		"locale": "zh-CN",
+	}
+	var attempted_sequence := int(session.get("last_turn_sequence", 0)) + 1
+	var execution := await _submit_turn_attempt(
+		"agent_build_feedback",
+		session,
+		world,
+		turn_input,
+		[],
+		attempted_sequence,
+		identity,
+		turn_id,
+		failure_authority,
+	)
+	if not execution.get("ok", false) and _turn_refused_before_acceptance(execution):
+		var resynced := await _resynced_turn_sequence(str(session.session_id), attempted_sequence)
+		var refreshed_world := await _resynced_world_cursor(world)
+		if resynced > 0 or not refreshed_world.is_empty():
+			if not refreshed_world.is_empty():
+				world = refreshed_world
+				store.replace_world(refreshed_world)
+			execution = await _submit_turn_attempt(
+				"agent_build_feedback",
+				session,
+				world,
+				turn_input,
+				[],
+				resynced if resynced > 0 else attempted_sequence,
+				identity,
+				turn_id,
+				failure_authority,
+			)
+	return execution
 
 
 func _request_skill_patch_proposal(turn_input: Dictionary) -> Dictionary:
@@ -1555,19 +1789,26 @@ func _submit_turn_attempt(
 	turn_input: Dictionary,
 	skill_bindings: Array,
 	client_turn_sequence: int,
+	identity_override: String = "",
+	turn_id_override: String = "",
+	failure_authority: Dictionary = {},
 ) -> Dictionary:
 	var store := _client_store()
 	if store == null:
 		return _local_failure("PENDING_TURN_STORE_UNAVAILABLE", "ClientStore is unavailable for Agent Turn submission.")
-	var identity := JSON.stringify({
-		"session_id": session.session_id,
-		"world_revision": world.revision,
-		"last_event_sequence": store.last_applied_sequence,
-		"client_turn_sequence": client_turn_sequence,
-		"input": turn_input,
-		"skill_bindings": skill_bindings,
-	}).sha256_text()
-	var turn_id := _new_turn_id()
+	var identity := (
+		identity_override
+		if not identity_override.is_empty()
+		else JSON.stringify({
+			"session_id": session.session_id,
+			"world_revision": world.revision,
+			"last_event_sequence": store.last_applied_sequence,
+			"client_turn_sequence": client_turn_sequence,
+			"input": turn_input,
+			"skill_bindings": skill_bindings,
+		}).sha256_text()
+	)
+	var turn_id := turn_id_override if not turn_id_override.is_empty() else _new_turn_id()
 	var pre_world := world.duplicate(true)
 	var interaction_cursor_before := store.last_interaction_sequence
 	var request := {
@@ -1590,6 +1831,8 @@ func _submit_turn_attempt(
 		"pre_world": pre_world,
 		"interaction_cursor_before": interaction_cursor_before,
 	}
+	if not failure_authority.is_empty():
+		pending_envelope["failure_authority"] = failure_authority.duplicate(true)
 	if world_presentation_enabled:
 		if world_event_player == null or not world_event_player.has_method("get_cursor"):
 			return _local_failure(
@@ -1846,9 +2089,39 @@ func _execute_pending_turn_envelope_inner(slot: String, envelope: Dictionary, re
 		)
 		if not hint_interactions.get("ok", false):
 			return hint_interactions
+		var build_feedback := slot == "agent_build_feedback"
+		if build_feedback:
+			var feedback_authority: Variant = context.get("failure_authority")
+			var matched_interaction: Variant = (
+				hint_interactions.value[-1]
+				if hint_interactions.get("value") is Array and not hint_interactions.value.is_empty()
+				else null
+			)
+			if (
+				not feedback_authority is Dictionary
+				or not matched_interaction is Dictionary
+				or not _build_feedback_interaction_matches_authority(
+					matched_interaction,
+					feedback_authority,
+				)
+			):
+				return _local_failure(
+					"BUILD_FEEDBACK_INTERACTION_AUTHORITY_MISMATCH",
+					"Build feedback Interaction does not carry the exact rejected Build Evidence authority.",
+				)
 		store.clear_pending_operation(slot)
-		store.set_flow(WalnutClientStore.FlowState.ACTIVE)
-		store.set_objective_result({"summary": "Hint feedback was recovered from the canonical AgentInteraction."})
+		store.set_flow(
+			WalnutClientStore.FlowState.BUILD_FAILED
+			if build_feedback
+			else WalnutClientStore.FlowState.ACTIVE
+		)
+		store.set_objective_result({
+			"summary": (
+				"Rejected Build feedback was recovered from the canonical AgentInteraction."
+				if build_feedback
+				else "Hint feedback was recovered from the canonical AgentInteraction."
+			),
+		})
 		return {
 			"ok": true,
 			"status": 200,
@@ -1857,7 +2130,7 @@ func _execute_pending_turn_envelope_inner(slot: String, envelope: Dictionary, re
 				"slot": slot,
 				"turn_id": turn_id,
 				"command": command.duplicate(true),
-				"outcome": "HINT_COMPLETED",
+				"outcome": "BUILD_FEEDBACK_COMPLETED" if build_feedback else "HINT_COMPLETED",
 				"terminal_failure": false,
 			},
 		}
@@ -2051,7 +2324,7 @@ func _pending_turn_envelope_context(slot: String, envelope: Dictionary) -> Dicti
 		or not client_state is Dictionary
 		or not skill_bindings is Array
 		or (slot == "agent_turn" and skill_bindings.size() != 1)
-		or (slot == "agent_hint" and not skill_bindings.is_empty())
+		or (slot != "agent_turn" and not skill_bindings.is_empty())
 	):
 		return _local_failure("PENDING_TURN_ENVELOPE_INVALID", "Pending Turn envelope identity or closed request body is invalid.")
 	var session_id := str(envelope.get("session_id", authoritative_session.get("session_id", "")))
@@ -2107,6 +2380,12 @@ func _pending_turn_envelope_context(slot: String, envelope: Dictionary) -> Dicti
 		return _local_failure("PENDING_TURN_PRESENTATION_CURSOR_INVALID", "Pending Turn presentation cursor is invalid.")
 	var recovery_value: Variant = envelope.get("recovery")
 	var recovery: Dictionary = recovery_value.duplicate(true) if recovery_value is Dictionary else {}
+	var failure_authority_value: Variant = envelope.get("failure_authority")
+	var failure_authority: Dictionary = (
+		failure_authority_value.duplicate(true)
+		if failure_authority_value is Dictionary
+		else {}
+	)
 	return {
 		"ok": true,
 		"status": 200,
@@ -2120,6 +2399,7 @@ func _pending_turn_envelope_context(slot: String, envelope: Dictionary) -> Dicti
 			"interaction_cursor_before": interaction_cursor_before,
 			"presentation_after_sequence": presentation_after_sequence,
 			"recovery": recovery,
+			"failure_authority": failure_authority,
 		},
 	}
 
@@ -3358,6 +3638,21 @@ func _interaction_matches_turn(interaction: Dictionary, session_id: String, turn
 		and str(feedback.get("source", "")) == "provider"
 		and not bool(feedback.get("degraded", true))
 		and feedback.get("fallback_reason") == null
+	)
+
+
+func _build_feedback_interaction_matches_authority(
+	interaction: Dictionary,
+	failure_authority: Dictionary,
+) -> bool:
+	var feedback: Variant = interaction.get("feedback")
+	return (
+		str(interaction.get("role", "")) in ["teaching_agent", "bug_agent"]
+		and str(interaction.get("response_type", "")) in ["question", "hint", "message"]
+		and interaction.get("skill_patch") == null
+		and feedback is Dictionary
+		and feedback.get("run_id") == null
+		and feedback.get("evidence_refs") == failure_authority.get("evidence_refs")
 	)
 
 

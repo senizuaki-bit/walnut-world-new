@@ -6,7 +6,7 @@ import hashlib
 from collections.abc import Mapping, Sequence
 from dataclasses import replace
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, cast
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
@@ -204,10 +204,8 @@ class PostgresSkillBuildStore:
                     select(IdempotencyReceiptRow).where(
                         IdempotencyReceiptRow.tenant_id == tenant_id,
                         IdempotencyReceiptRow.actor_id == actor_id,
-                        IdempotencyReceiptRow.operation
-                        == effective_command.command_type,
-                        IdempotencyReceiptRow.command_id
-                        == receipt.command.command_id,
+                        IdempotencyReceiptRow.operation == effective_command.command_type,
+                        IdempotencyReceiptRow.command_id == receipt.command.command_id,
                     )
                 )
                 if command_receipt is None:
@@ -225,9 +223,7 @@ class PostgresSkillBuildStore:
                     command_receipt_authority_sha256=(
                         build_command_receipt_authority_sha256(command_receipt)
                     ),
-                    workflow_job_id=workflow_job_id(
-                        tenant_id, receipt.command.command_id
-                    ),
+                    workflow_job_id=workflow_job_id(tenant_id, receipt.command.command_id),
                     workflow_request_sha256=effective_command.request_sha256,
                     session_id=draft_revision.session_id,
                     draft_id=draft_revision.draft_id,
@@ -245,9 +241,7 @@ class PostgresSkillBuildStore:
                     patch_decision_id=(
                         assistance.patch_decision_id if assistance is not None else None
                     ),
-                    assistance_authority=(
-                        "SKILL_PATCH" if assistance is not None else "NONE"
-                    ),
+                    assistance_authority=("SKILL_PATCH" if assistance is not None else "NONE"),
                     authority_sha256="0" * 64,
                     created_at=receipt.command.accepted_at,
                 )
@@ -553,12 +547,9 @@ async def validate_historical_build_authority(
         select(LaunchAuthorityRow).where(
             LaunchAuthorityRow.tenant_id == row.tenant_id,
             LaunchAuthorityRow.actor_id == row.actor_id,
-            LaunchAuthorityRow.content_unit_id
-            == record.request_context.content_ref.unit_id,
-            LaunchAuthorityRow.content_version
-            == record.request_context.content_ref.version,
-            LaunchAuthorityRow.content_hash
-            == record.request_context.content_ref.content_hash,
+            LaunchAuthorityRow.content_unit_id == record.request_context.content_ref.unit_id,
+            LaunchAuthorityRow.content_version == record.request_context.content_ref.version,
+            LaunchAuthorityRow.content_hash == record.request_context.content_ref.content_hash,
             LaunchAuthorityRow.active.is_(True),
         )
     )
@@ -639,8 +630,7 @@ async def _certification_seal_matches(
     certification = certifications[0]
     sealed = await session.scalar(
         select(SkillCertificationProvenanceRow).where(
-            SkillCertificationProvenanceRow.certification_id
-            == certification.certification_id,
+            SkillCertificationProvenanceRow.certification_id == certification.certification_id,
             SkillCertificationProvenanceRow.tenant_id == row.tenant_id,
             SkillCertificationProvenanceRow.actor_id == row.actor_id,
             SkillCertificationProvenanceRow.build_id == row.build_id,
@@ -659,8 +649,7 @@ async def _certification_seal_matches(
         sealed.authority_sha256 == certification_provenance_sha256(sealed)
         and sealed.workflow_job_id == job.job_id
         and sealed.workflow_job_sha256 == certification_workflow_job_sha256(job)
-        and sealed.command_authority_sha256
-        == certification_command_authority_sha256(command)
+        and sealed.command_authority_sha256 == certification_command_authority_sha256(command)
         and sealed.build_receipt_id == terminal[0].receipt_id
         and sealed.build_receipt_authority_sha256
         == certification_receipt_authority_sha256(terminal[0])
@@ -677,9 +666,7 @@ async def _resolve_draft_provenance(
     source_bundle: object,
     authority_id: str,
     content_hash: str,
-) -> Result[
-    tuple[ProductDraftRevisionRow, ProductDraftRevisionAssistanceRow | None]
-]:
+) -> Result[tuple[ProductDraftRevisionRow, ProductDraftRevisionAssistanceRow | None]]:
     """Resolve one current immutable Draft; never infer from a recent Patch."""
 
     if (
@@ -702,10 +689,7 @@ async def _resolve_draft_provenance(
                     & (ProductDraftRow.session_id == ProductDraftRevisionRow.session_id)
                     & (ProductDraftRow.draft_id == ProductDraftRevisionRow.draft_id)
                     & (ProductDraftRow.revision == ProductDraftRevisionRow.revision)
-                    & (
-                        ProductDraftRow.draft_sha256
-                        == ProductDraftRevisionRow.draft_sha256
-                    ),
+                    & (ProductDraftRow.draft_sha256 == ProductDraftRevisionRow.draft_sha256),
                 )
                 .join(
                     AgentSessionRow,
@@ -734,9 +718,7 @@ async def _resolve_draft_provenance(
         ).all()
     )
     if len(rows) != 1:
-        return Failure(
-            _mismatch("Build Draft authority is missing, stale, or ambiguous")
-        )
+        return Failure(_mismatch("Build Draft authority is missing, stale, or ambiguous"))
     row = rows[0]
     if row.draft_json.get("source_bundle") != dict(source_bundle):
         return Failure(_mismatch("Build source bundle differs from current Draft bytes"))
@@ -1347,7 +1329,6 @@ def _rejected_build_matches(
         or record.stage != "VALIDATE"
         or record.updated_at != row.updated_at
         or record.result is not None
-        or record.evidence_refs
         or job.status != "FAILED"
         or job.lease_owner is not None
         or job.lease_expires_at is not None
@@ -1424,16 +1405,22 @@ def _rejected_build_matches(
         or row.build_json.get("skill_version_id") is not None
         or row.build_json.get("artifact") is not None
         or row.build_json.get("certification") is not None
-        or row.build_json.get("evidence_refs") != []
         or row.build_json.get("versions") != command_versions
     ):
         return False
     evidence_id = output.get("evidence_id")
     if evidence_id is None:
-        if evidence_rows:
+        if evidence_rows or row.build_json.get("evidence_refs") != [] or record.evidence_refs:
             return False
     elif len(evidence_rows) != 1 or not _rejection_evidence_matches(
         row, record, authority, evidence_rows[0], evidence_id
+    ):
+        return False
+    elif row.build_json.get("evidence_refs") != [
+        evidence_rows[0].evidence_json.get("evidence_ref")
+    ] or not _command_evidence_matches(
+        record,
+        cast(Mapping[str, Any], evidence_rows[0].evidence_json["evidence_ref"]),
     ):
         return False
     return _terminal_phases_match(

@@ -22,6 +22,7 @@ enum FlowState { BOOTSTRAPPING, READY, BUILDING, BUILD_FAILED, CERTIFIED, ACTIVA
 const PERSISTENCE_SCHEMA_VERSION := "1.2.0"
 const LEGACY_PERSISTENCE_SCHEMA_VERSION := "1.1.0"
 const DEFAULT_PERSISTENCE_PATH := "user://int1_client_authority.json"
+const BUILD_FEEDBACK_MESSAGE := "请根据刚刚被拒绝的构建证据，给出一条可执行的教学反馈。"
 
 var workspace: Dictionary = {}
 var content: Dictionary = {}
@@ -1088,7 +1089,7 @@ func _pending_operation_integrity(
 		return _session_create_envelope_integrity(identity, envelope, bootstrap)
 	if slot == "draft_save":
 		return _draft_save_envelope_integrity(identity, envelope, bootstrap, session)
-	if slot in ["agent_turn", "agent_hint"]:
+	if slot in ["agent_turn", "agent_hint", "agent_build_feedback"]:
 		return _turn_envelope_integrity(
 			slot,
 			identity,
@@ -1330,6 +1331,8 @@ func _turn_envelope_integrity(
 		"session_id", "turn_id", "idempotency_key", "request", "pre_world",
 		"interaction_cursor_before",
 	]
+	if slot == "agent_build_feedback":
+		required.append("failure_authority")
 	var allowed := required + ["presentation_after_sequence", "recovery"]
 	if not _dictionary_has_exact_allowed_fields(envelope, required, allowed):
 		return _integrity_failure("Pending Turn envelope is not closed.")
@@ -1389,14 +1392,31 @@ func _turn_envelope_integrity(
 			return _superseded_failure("Pending bound Turn does not use the exact active Skill tuple.")
 	elif not bindings.is_empty():
 		return _integrity_failure("Pending hint Turn must not carry a Skill binding.")
-	var expected_identity := JSON.stringify({
-		"session_id": session_id,
-		"world_revision": int(pre_world.revision),
-		"last_event_sequence": int(pre_world.last_event_sequence),
-		"client_turn_sequence": int(request.client_state.client_turn_sequence),
-		"input": request.input,
-		"skill_bindings": bindings,
-	}).sha256_text()
+	var expected_identity: String
+	if slot == "agent_build_feedback":
+		var failure_authority: Variant = envelope.get("failure_authority")
+		if (
+			not failure_authority is Dictionary
+			or not _valid_build_feedback_authority(failure_authority, session_id)
+			or request.get("input") != {
+				"type": "MESSAGE",
+				"text": BUILD_FEEDBACK_MESSAGE,
+				"locale": "zh-CN",
+			}
+		):
+			return _integrity_failure("Pending Build feedback authority or fixed input is invalid.")
+		expected_identity = ContractValidator.canonical_json_sha256_v1(failure_authority)
+		if turn_id != "turn_build_feedback_%s" % expected_identity.left(24):
+			return _integrity_failure("Pending Build feedback Turn identity is not authority-derived.")
+	else:
+		expected_identity = JSON.stringify({
+			"session_id": session_id,
+			"world_revision": int(pre_world.revision),
+			"last_event_sequence": int(pre_world.last_event_sequence),
+			"client_turn_sequence": int(request.client_state.client_turn_sequence),
+			"input": request.input,
+			"skill_bindings": bindings,
+		}).sha256_text()
 	var expected_key := RequestContextFactoryScript.idempotency_key_for(
 		"createAgentTurn",
 		"%s:%s" % [session_id, turn_id],
@@ -1404,6 +1424,20 @@ func _turn_envelope_integrity(
 	if identity != expected_identity or str(envelope.idempotency_key) != expected_key:
 		return _integrity_failure("Pending Turn logical identity or Idempotency-Key is inconsistent.")
 	return {"ok": true}
+
+
+func _valid_build_feedback_authority(value: Dictionary, session_id: String) -> bool:
+	if not _closed_dictionary(value, ["session_id", "build_id", "evidence_refs"]):
+		return false
+	var references: Variant = value.get("evidence_refs")
+	if (
+		str(value.get("session_id", "")) != session_id
+		or not _valid_local_identifier(str(value.get("build_id", "")))
+		or not references is Array
+		or references.size() != 1
+	):
+		return false
+	return ContractValidator._validate_evidence_ref(references[0]).ok
 
 
 func _valid_turn_recovery(value: Variant, envelope: Dictionary) -> bool:

@@ -349,6 +349,14 @@ def test_rejected_build_closes_command_error_to_job_failure(
             monkeypatch=monkeypatch,
             succeed=False,
         )
+        command = client.get(f"/v1/commands/{terminal.command_id}", headers=terminal.headers)
+        build = client.get(f"/v1/skill-builds/{terminal.build_id}", headers=terminal.headers)
+        assert command.status_code == 200, command.text
+        assert build.status_code == 200, build.text
+        assert command.json()["evidence_refs"] == build.json()["evidence_refs"]
+        assert tuple(item["evidence_id"] for item in build.json()["evidence_refs"]) == (
+            terminal.evidence_id,
+        )
         _assert_command_read(client, terminal, 200)
         _assert_build_read(client, terminal, 200)
         _tamper_json_and_assert(

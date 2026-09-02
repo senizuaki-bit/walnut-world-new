@@ -191,9 +191,7 @@ class BuildWorkflowHandler:
                     SkillBuildProvenanceRow.actor_id == row.actor_id,
                 )
             )
-            if provenance is None or not await validate_build_provenance(
-                session, provenance
-            ):
+            if provenance is None or not await validate_build_provenance(session, provenance):
                 raise WorkflowInvariantError("Build provenance is missing or corrupt")
             job = _object(owned.job, "job")
             if job.get("build_provenance_sha256") != provenance.authority_sha256:
@@ -454,31 +452,31 @@ class BuildWorkflowHandler:
                 "parameter_schema_sha256": certified_schema_sha256,
             }
             artifact_row = SkillArtifactRow(
-                    tenant_id=claim.tenant_id,
-                    artifact_sha256=result.artifact_sha256,
-                    build_id=authority.build_id,
-                    actor_id=command.request_context.actor.actor_id,
-                    content_hash=command.request_context.content_ref.content_hash,
-                    skill_id=authority.skill_id,
-                    source_sha256=result.source_sha256,
-                    artifact_uri=published.artifact_uri,
-                    metadata_json=artifact_metadata,
-                    created_at=now,
-                )
+                tenant_id=claim.tenant_id,
+                artifact_sha256=result.artifact_sha256,
+                build_id=authority.build_id,
+                actor_id=command.request_context.actor.actor_id,
+                content_hash=command.request_context.content_ref.content_hash,
+                skill_id=authority.skill_id,
+                source_sha256=result.source_sha256,
+                artifact_uri=published.artifact_uri,
+                metadata_json=artifact_metadata,
+                created_at=now,
+            )
             session.add(artifact_row)
             certification_row = SkillCertificationRow(
-                    certification_id=certification_id,
-                    tenant_id=claim.tenant_id,
-                    build_id=authority.build_id,
-                    skill_id=authority.skill_id,
-                    skill_version_id=skill_version_id,
-                    artifact_sha256=result.artifact_sha256,
-                    actor_id=command.request_context.actor.actor_id,
-                    content_hash=command.request_context.content_ref.content_hash,
-                    certification_sha256=canonical_json_sha256(certification),
-                    certification_json=certification,
-                    certified_at=now,
-                )
+                certification_id=certification_id,
+                tenant_id=claim.tenant_id,
+                build_id=authority.build_id,
+                skill_id=authority.skill_id,
+                skill_version_id=skill_version_id,
+                artifact_sha256=result.artifact_sha256,
+                actor_id=command.request_context.actor.actor_id,
+                content_hash=command.request_context.content_ref.content_hash,
+                certification_sha256=canonical_json_sha256(certification),
+                certification_json=certification,
+                certified_at=now,
+            )
             session.add(certification_row)
             session.add(
                 EvidenceRow(
@@ -598,9 +596,7 @@ class BuildWorkflowHandler:
                 workflow_job_id=terminal_job.job_id,
                 workflow_request_sha256=terminal_job.request_sha256,
                 workflow_job_sha256=certification_workflow_job_sha256(terminal_job),
-                command_authority_sha256=certification_command_authority_sha256(
-                    terminal_command
-                ),
+                command_authority_sha256=certification_command_authority_sha256(terminal_command),
                 build_receipt_id=receipt_row.receipt_id,
                 build_receipt_sha256=receipt_row.output_sha256,
                 build_receipt_authority_sha256=(
@@ -613,8 +609,8 @@ class BuildWorkflowHandler:
                 authority_sha256="0" * 64,
                 created_at=now,
             )
-            certification_provenance.authority_sha256 = (
-                certification_provenance_sha256(certification_provenance)
+            certification_provenance.authority_sha256 = certification_provenance_sha256(
+                certification_provenance
             )
             session.add(certification_provenance)
             # The terminal seal has a composite FK to this exact Certification
@@ -629,9 +625,7 @@ class BuildWorkflowHandler:
                     workflow=terminal_job,
                     receipt=receipt_row,
                     certification_id=certification_id,
-                    certification_authority_sha256=(
-                        certification_provenance.authority_sha256
-                    ),
+                    certification_authority_sha256=(certification_provenance.authority_sha256),
                     created_at=now,
                 )
             )
@@ -696,6 +690,15 @@ class BuildWorkflowHandler:
                 "diagnostic_codes": list(diagnostic_codes),
             }
             evidence_sha256 = canonical_json_sha256(evidence_payload)
+            evidence_ref_wire = {
+                "evidence_id": evidence_id,
+                "evidence_type": "TEST_REPORT",
+                "created_at": _iso(now),
+                "sha256": evidence_sha256,
+                "uri": f"/v1/evidence/{evidence_id}",
+            }
+            build["evidence_refs"] = [evidence_ref_wire]
+            row.build_json = build
             versions = dict(cast(Mapping[str, Any], row.build_json["versions"]))
             versions.update(
                 {
@@ -715,13 +718,7 @@ class BuildWorkflowHandler:
                     recorded_at=now,
                     evidence_json={
                         "request_context": request_context_data(command.request_context),
-                        "evidence_ref": {
-                            "evidence_id": evidence_id,
-                            "evidence_type": "TEST_REPORT",
-                            "created_at": _iso(now),
-                            "sha256": evidence_sha256,
-                            "uri": f"/v1/evidence/{evidence_id}",
-                        },
+                        "evidence_ref": evidence_ref_wire,
                         "subject": {"learner_id": authority.learner_id},
                         "source": {
                             "source_type": "SKILL_BUILD",
@@ -763,6 +760,15 @@ class BuildWorkflowHandler:
                 terminal=True,
                 result=None,
                 error=command_error,
+                evidence_refs=(
+                    EvidenceRef(
+                        evidence_id=evidence_id,
+                        evidence_type=EvidenceType.TEST_REPORT,
+                        created_at=now,
+                        sha256=evidence_sha256,
+                        uri=f"/v1/evidence/{evidence_id}",
+                    ),
+                ),
                 revision=command.revision + 1,
                 updated_at=now,
             )
@@ -838,9 +844,7 @@ def _build_terminal_authority_row(
         workflow_job_id=workflow.job_id,
         workflow_job_sha256=build_terminal_workflow_authority_sha256(workflow),
         terminal_receipt_id=receipt.receipt_id,
-        terminal_receipt_authority_sha256=(
-            build_terminal_receipt_authority_sha256(receipt)
-        ),
+        terminal_receipt_authority_sha256=(build_terminal_receipt_authority_sha256(receipt)),
         certification_id=certification_id,
         certification_authority_sha256=certification_authority_sha256,
         authority_sha256="0" * 64,
