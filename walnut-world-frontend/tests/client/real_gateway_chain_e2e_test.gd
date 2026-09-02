@@ -1075,6 +1075,13 @@ func _deterministic_failure_draft(source: String) -> String:
 	var compileable_source := _deterministic_fixed_target_source(source)
 	if compileable_source.is_empty():
 		return ""
+	# The production C++ gate treats warnings as errors. Use target[0] to retain
+	# the intentionally wrong fixed-60 behavior while still consuming the
+	# published target array and producing a genuinely runnable failed Skill.
+	compileable_source = compileable_source.replace(
+		"        int gap = 60 - moisture[i];",
+		"        int gap = target[0] - moisture[i];",
+	)
 	return "%s%s%s\n" % [
 		compileable_source,
 		"" if compileable_source.ends_with("\n") else "\n",

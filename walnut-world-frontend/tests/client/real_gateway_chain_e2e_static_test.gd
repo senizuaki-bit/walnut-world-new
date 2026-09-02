@@ -59,6 +59,7 @@ func _initialize() -> void:
 		'["teaching_agent", "teaching_agent", "bug_agent"]',
 		"EXPECTED_WATERING_FAILURE_INTENT_COUNT := 5",
 		"_deterministic_failure_draft",
+		'"        int gap = target[0] - moisture[i];"',
 		"_deterministic_corrected_draft",
 		"_execute_failed_objective_turn",
 		"_verify_failed_command_and_run",
