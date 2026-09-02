@@ -586,6 +586,36 @@ class CompileResultSnapshot:
 
 
 @dataclass(frozen=True, slots=True)
+class BuildFailureSnapshot:
+    """One rejected Build closed without inventing a certified Skill or Run."""
+
+    build_id: str
+    session_id: str
+    skill_id: str
+    failure_key: str
+    diagnostics: tuple[str, ...]
+    evidence_refs: tuple[EvidenceRef, ...]
+    request_context: RequestContext
+
+    def __post_init__(self) -> None:
+        for name in ("build_id", "session_id", "skill_id"):
+            _require_identifier(getattr(self, name), name)
+        _require_text(self.failure_key, "failure_key", 1, 128)
+        if not isinstance(self.request_context, RequestContext):
+            raise TypeError("request_context must be a RequestContext")
+        diagnostics = tuple(self.diagnostics)
+        if not diagnostics or len(diagnostics) > 100:
+            raise ValueError("a Build failure requires 1..100 diagnostics")
+        for item in diagnostics:
+            _require_text(item, "diagnostic", 1, 2000)
+        object.__setattr__(self, "diagnostics", diagnostics)
+        evidence = _freeze_evidence(self.evidence_refs, "evidence_refs")
+        if not evidence:
+            raise ValueError("a Build failure requires immutable Evidence")
+        object.__setattr__(self, "evidence_refs", evidence)
+
+
+@dataclass(frozen=True, slots=True)
 class RunResultSnapshot:
     run_id: str
     session_id: str
@@ -967,6 +997,7 @@ class TurnContext:
     skill: SkillSnapshot | None = None
     available_skills: tuple[SkillSnapshot, ...] = ()
     compile_result: CompileResultSnapshot | None = None
+    build_failure: BuildFailureSnapshot | None = None
     run_result: RunResultSnapshot | None = None
     failure_history: tuple[RunResultSnapshot, ...] = ()
     counterexamples: tuple[CounterexampleSnapshot, ...] = ()
@@ -999,6 +1030,7 @@ class TurnContext:
             ("world", WorldSummary),
             ("skill", SkillSnapshot),
             ("compile_result", CompileResultSnapshot),
+            ("build_failure", BuildFailureSnapshot),
             ("run_result", RunResultSnapshot),
             ("learner_profile", LearnerProfileSnapshot),
             ("patch_authority", SkillPatchAuthority),
@@ -1018,7 +1050,13 @@ class TurnContext:
             if any(not isinstance(item, expected_type) for item in values):
                 raise TypeError(f"{name} contains an invalid snapshot type")
             object.__setattr__(self, name, values)
-        for name in ("skill", "compile_result", "run_result", "learner_profile"):
+        for name in (
+            "skill",
+            "compile_result",
+            "build_failure",
+            "run_result",
+            "learner_profile",
+        ):
             value = getattr(self, name)
             if value is not None:
                 _require_same_authority(value.request_context, authority, name)

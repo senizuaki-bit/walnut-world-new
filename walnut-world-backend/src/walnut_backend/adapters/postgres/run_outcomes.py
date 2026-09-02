@@ -19,6 +19,7 @@ from yaya_agent_contracts import (
     LlmReply,
     OperationContext,
     RuntimeEventType,
+    SkillRef,
     Success,
     canonical_json_sha256,
 )
@@ -131,6 +132,12 @@ class ValidatedRunAuthority:
         # enriched view, derived only from the already-validated immutable
         # Run-to-Build provenance row.
         return replace(self.result.run, build_id=self.run_provenance.build_id)
+
+
+@dataclass(frozen=True, slots=True)
+class CurrentRunFailureAuthority:
+    authority: ValidatedRunAuthority
+    failure_count: int
 
 
 @dataclass(slots=True)
@@ -664,7 +671,12 @@ async def exact_failure_suffix_count(
         if index > 0 and run_command_id is None:
             if not _is_hint_request_turn(turn):
                 break
-            if not await _terminal_hint_turn_has_authority(session, turn, current):
+            if not await _terminal_hint_turn_has_authority(
+                session,
+                turn,
+                context=current.context,
+                session_id=current.run.session_id,
+            ):
                 raise WorkflowInvariantError(
                     "failure history contains a hint without terminal authority"
                 )
@@ -737,7 +749,9 @@ def _is_hint_request_turn(turn: AgentTurnRow) -> bool:
 async def _terminal_hint_turn_has_authority(
     session: AsyncSession,
     turn: AgentTurnRow,
-    current: ValidatedRunAuthority,
+    *,
+    context: OperationContext,
+    session_id: str,
 ) -> bool:
     """Close one historical hint through the existing no-Run validator.
 
@@ -764,7 +778,6 @@ async def _terminal_hint_turn_has_authority(
                     ProductInteractionRow.actor_id == turn.actor_id,
                     ProductInteractionRow.session_id == turn.session_id,
                     ProductInteractionRow.turn_id == turn.turn_id,
-                    ProductInteractionRow.command_id == turn.command_id,
                 )
             )
         ).all()
@@ -772,12 +785,106 @@ async def _terminal_hint_turn_has_authority(
     if owner is None or len(rows) != 1:
         return False
     if (
-        owner.tenant_id != current.context.actor.tenant_id
-        or owner.actor_id != current.context.actor.actor_id
-        or owner.session_id != current.run.session_id
+        owner.tenant_id != context.actor.tenant_id
+        or owner.actor_id != context.actor.actor_id
+        or owner.session_id != session_id
     ):
         return False
     return await _interactions_have_authority(session, rows, owner)
+
+
+async def latest_failure_authority_for_hint(
+    session: AsyncSession,
+    *,
+    current_turn: AgentTurnRow,
+    context: OperationContext,
+    expected_skill_ref: SkillRef | None,
+) -> CurrentRunFailureAuthority | None:
+    """Resolve the latest failed Run across only validated historical hints."""
+
+    matching_run_commands = (
+        select(RunRow.command_id.label("command_id"))
+        .where(
+            RunRow.tenant_id == context.actor.tenant_id,
+            RunRow.actor_id == context.actor.actor_id,
+            RunRow.content_hash == context.content_ref.content_hash,
+        )
+        .distinct()
+        .subquery()
+    )
+    rows = list(
+        (
+            await session.execute(
+                select(AgentTurnRow, matching_run_commands.c.command_id)
+                .outerjoin(
+                    matching_run_commands,
+                    matching_run_commands.c.command_id == AgentTurnRow.command_id,
+                )
+                .where(
+                    AgentTurnRow.tenant_id == context.actor.tenant_id,
+                    AgentTurnRow.actor_id == context.actor.actor_id,
+                    AgentTurnRow.session_id == current_turn.session_id,
+                    AgentTurnRow.turn_sequence < current_turn.turn_sequence,
+                )
+                .order_by(AgentTurnRow.turn_sequence.desc())
+            )
+        ).all()
+    )
+    expected_sequence = current_turn.turn_sequence - 1
+    validation_state = TerminalProjectionValidationState()
+    validation_state.bind_session(session)
+    for turn, run_command_id in rows:
+        if turn.turn_sequence != expected_sequence:
+            raise WorkflowInvariantError("failure history turn sequence contains a gap")
+        expected_sequence -= 1
+        if run_command_id is None:
+            if not _is_hint_request_turn(turn):
+                return None
+            if not await _terminal_hint_turn_has_authority(
+                session,
+                turn,
+                context=context,
+                session_id=current_turn.session_id,
+            ):
+                raise WorkflowInvariantError(
+                    "failure history contains a hint without terminal authority"
+                )
+            continue
+        historical_context = replace(
+            context,
+            command_id=turn.command_id,
+            causation_id=None,
+            deadline_at=None,
+        )
+        authority = await load_validated_run(
+            session,
+            tenant_id=context.actor.tenant_id,
+            actor_id=context.actor.actor_id,
+            content_hash=context.content_ref.content_hash,
+            command_id=turn.command_id,
+            expected_context=historical_context,
+            require_current_world=True,
+            validation_state=validation_state,
+        )
+        _validate_terminal_command(authority)
+        await validate_terminal_projection(
+            session,
+            authority,
+            validation_state=validation_state,
+        )
+        if authority.run.task_success:
+            return None
+        if expected_skill_ref is None or authority.run.skill_ref != expected_skill_ref:
+            return None
+        failure_count = await exact_failure_suffix_count(
+            session,
+            current=authority,
+            context=historical_context,
+            current_must_be_live=False,
+            validation_state=validation_state,
+        )
+        return CurrentRunFailureAuthority(authority, failure_count)
+    return None
 
 
 async def list_validated_session_runs(
@@ -1870,22 +1977,14 @@ def _bounded_provider_receipt_rows(
     if len(by_name) != len(rows):
         raise WorkflowInvariantError("workflow contains duplicate step receipt names")
     expected_provider_names = {
-        *(
-            f"{provider_prefix}DISPATCH_{item:02d}"
-            for item in range(1, len(results) + 1)
-        ),
-        *(
-            f"{provider_prefix}RESULT_{item:02d}"
-            for item in range(1, len(results) + 1)
-        ),
+        *(f"{provider_prefix}DISPATCH_{item:02d}" for item in range(1, len(results) + 1)),
+        *(f"{provider_prefix}RESULT_{item:02d}" for item in range(1, len(results) + 1)),
     }
     actual_provider_names = {
         row.step_name for row in rows if row.step_name.startswith(provider_prefix)
     }
     if actual_provider_names != expected_provider_names:
-        raise WorkflowInvariantError(
-            f"{authority_label} Provider receipt history drifted"
-        )
+        raise WorkflowInvariantError(f"{authority_label} Provider receipt history drifted")
     return results, by_name
 
 
@@ -1916,9 +2015,7 @@ async def _load_provider_receipts(
     )
     raw_context = job.job_json.get("request_context")
     if not isinstance(raw_context, dict):
-        raise WorkflowInvariantError(
-            f"{authority_label} Provider job lost its OperationContext"
-        )
+        raise WorkflowInvariantError(f"{authority_label} Provider job lost its OperationContext")
     try:
         context_sha256 = operation_context_sha256(_job_operation_context(job))
     except (KeyError, TypeError, ValueError) as error:
@@ -1992,9 +2089,7 @@ async def _load_provider_receipts(
                 )
             )
         ):
-            raise WorkflowInvariantError(
-                f"{authority_label} Provider receipt history drifted"
-            )
+            raise WorkflowInvariantError(f"{authority_label} Provider receipt history drifted")
     return tuple(results)
 
 
@@ -2515,8 +2610,7 @@ def _abandoned_run_attempt(authority: ValidatedRunAuthority) -> bool:
 
     return (
         not authority.command.terminal
-        or authority.command.status
-        not in {CommandStatus.APPLIED, CommandStatus.REJECTED}
+        or authority.command.status not in {CommandStatus.APPLIED, CommandStatus.REJECTED}
         or authority.job.status != "SUCCEEDED"
     )
 
@@ -2882,9 +2976,7 @@ async def _validate_terminal_learner_authority(
             validation_state=validation_state,
         )
     except LearnerProjectionInvariantError as error:
-        raise WorkflowInvariantError(
-            "terminal learner projection authority drifted"
-        ) from error
+        raise WorkflowInvariantError("terminal learner projection authority drifted") from error
 
 
 def _outcome_role(event_type: str, failure_count: object) -> str:
@@ -3100,11 +3192,13 @@ def _iso(value: datetime) -> str:
 
 __all__ = [
     "PostgresRunOutcomeAuthority",
+    "CurrentRunFailureAuthority",
     "ValidatedRunAuthority",
     "decision_feedback_wire",
     "exact_failure_suffix_count",
     "evidence_ref_wire",
     "list_validated_session_runs",
+    "latest_failure_authority_for_hint",
     "load_task_snapshot",
     "load_final_provider_receipts",
     "load_hint_provider_receipts",

@@ -61,22 +61,26 @@ def _authority(
     effective_turn_id = turn_id or f"turn_memo_{index:04d}"
     effective_command_id = command_id or f"cmd_memo_{index:04d}"
     context = _context(index, actor_id=actor_id)
-    context = SimpleNamespace(
-        **{
-            **context.__dict__,
-            "command_id": effective_command_id,
-        }
-    ) if hasattr(context, "__dict__") else OperationContext(
-        request_id=context.request_id,
-        correlation_id=context.correlation_id,
-        trace_id=context.trace_id,
-        requested_at=context.requested_at,
-        actor=context.actor,
-        content_ref=context.content_ref,
-        schema_version=context.schema_version,
-        command_id=effective_command_id,
-        causation_id=context.causation_id,
-        deadline_at=context.deadline_at,
+    context = (
+        SimpleNamespace(
+            **{
+                **context.__dict__,
+                "command_id": effective_command_id,
+            }
+        )
+        if hasattr(context, "__dict__")
+        else OperationContext(
+            request_id=context.request_id,
+            correlation_id=context.correlation_id,
+            trace_id=context.trace_id,
+            requested_at=context.requested_at,
+            actor=context.actor,
+            content_ref=context.content_ref,
+            schema_version=context.schema_version,
+            command_id=effective_command_id,
+            causation_id=context.causation_id,
+            deadline_at=context.deadline_at,
+        )
     )
     evidence_refs: tuple[Any, ...] = ()
     return SimpleNamespace(
@@ -111,7 +115,9 @@ def _authority(
     )
 
 
-def test_four_run_history_validates_each_projection_body_once(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_four_run_history_validates_each_projection_body_once(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     authorities = tuple(_authority(index) for index in range(1, 5))
     authorities_by_command = {item.run.command_id: item for item in authorities}
     projection_calls: list[str] = []
@@ -288,7 +294,7 @@ def test_failure_suffix_crosses_only_fully_validated_hint_turns(
     async def validate_projection(_session: object, _authority: Any, **_kwargs: Any) -> None:
         return None
 
-    async def validate_hint(_session: object, turn: Any, _current: Any) -> bool:
+    async def validate_hint(_session: object, turn: Any, **_kwargs: Any) -> bool:
         validated_hints.append(turn.turn_id)
         return True
 
@@ -331,7 +337,7 @@ def test_failure_suffix_rejects_a_hint_with_corrupt_terminal_authority(
         async def execute(self, _statement: Any) -> Result:
             return Result()
 
-    async def reject_hint(_session: object, _turn: Any, _current: Any) -> bool:
+    async def reject_hint(_session: object, _turn: Any, **_kwargs: Any) -> bool:
         return False
 
     monkeypatch.setattr(run_outcomes, "_terminal_hint_turn_has_authority", reject_hint)
@@ -756,9 +762,7 @@ def test_failed_projection_is_not_memoized(monkeypatch: pytest.MonkeyPatch) -> N
 
     with pytest.raises(WorkflowInvariantError, match="corrupt projection"):
         asyncio.run(
-            run_outcomes.validate_terminal_projection(
-                session, authority, validation_state=state
-            )
+            run_outcomes.validate_terminal_projection(session, authority, validation_state=state)
         )
     asyncio.run(
         run_outcomes.validate_terminal_projection(session, authority, validation_state=state)

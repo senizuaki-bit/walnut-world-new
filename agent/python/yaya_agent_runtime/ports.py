@@ -17,6 +17,7 @@ from .domain import (
     AgentTraceEvent,
     AgentTurnClaimReceipt,
     AgentTurnCommitReceipt,
+    BuildFailureSnapshot,
     CommittedAgentTurn,
     CompileResultSnapshot,
     CounterexampleSnapshot,
@@ -108,6 +109,21 @@ class RunReadPort(Protocol):
         build_id: str,
         context: OperationContext,
     ) -> CompileResultSnapshot: ...
+
+    async def get_build_failure(
+        self,
+        build_id: str,
+        context: OperationContext,
+    ) -> BuildFailureSnapshot: ...
+
+    async def list_same_build_failures(
+        self,
+        session_id: str,
+        failure_key: str,
+        through_build_id: str,
+        limit: int,
+        context: OperationContext,
+    ) -> tuple[BuildFailureSnapshot, ...]: ...
 
     async def get_run(
         self,

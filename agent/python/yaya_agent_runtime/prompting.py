@@ -304,6 +304,15 @@ def _context_payload(context: TurnContext) -> dict[str, object]:
                 evidence_aliases,
             ),
         }
+    if context.build_failure is not None:
+        payload["compile_result"] = {
+            "succeeded": False,
+            "diagnostics": context.build_failure.diagnostics,
+            "evidence_refs": alias_evidence_refs(
+                context.build_failure.evidence_refs,
+                evidence_aliases,
+            ),
+        }
     if context.run_result is not None:
         payload["run_result"] = _run_payload(context.run_result, evidence_aliases)
     if context.failure_history:

@@ -17,6 +17,7 @@ from yaya_agent_contracts import (
 )
 
 from .domain import (
+    BuildFailureSnapshot,
     CompileResultSnapshot,
     CounterexampleSnapshot,
     DraftSnapshot,
@@ -180,7 +181,7 @@ def _validate_run_identity(
         "world_id": run.world_id,
         "world_revision_before": run.world_revision_before,
     }
-    if event.event_type != "skill_patch_requested":
+    if event.event_type not in {"hint_requested", "skill_patch_requested"}:
         expected.update(turn_id=event.turn_id, command_id=event.command_id)
         actual.update(turn_id=run.turn_id, command_id=run.command_id)
     if actual != expected:
@@ -517,6 +518,7 @@ class ContextBuilder:
         skill: SkillSnapshot | None = None
         available_skills: tuple[SkillSnapshot, ...] = ()
         compile_result: CompileResultSnapshot | None = None
+        build_failure: BuildFailureSnapshot | None = None
         run_result: RunResultSnapshot | None = None
         failure_history: tuple[RunResultSnapshot, ...] = ()
         counterexamples: tuple[CounterexampleSnapshot, ...] = ()
@@ -784,13 +786,102 @@ class ContextBuilder:
                     "run result",
                 )
                 _validate_run_identity(run_result, event, session)
-                if event.event_type == "run_failed" and (
-                    run_result.task_success or run_result.failure_key != event.failure_key
+                if event.event_type in {"run_failed", "hint_requested"} and (
+                    run_result.task_success
+                    or run_result.failure_key != event.failure_key
+                    or run_result.evidence_refs != event.evidence_refs
                 ):
                     raise _context_error(
                         "CONTEXT_FAILURE_KEY_MISMATCH",
-                        "run_failed must reference an unsuccessful Run with the same failure key",
+                        "teaching failure must reference the exact unsuccessful Run and Evidence",
                     )
+
+        if (
+            role in {"teaching_agent", "bug_agent"}
+            and event.event_type == "hint_requested"
+            and event.build_id is not None
+            and event.run_id is None
+        ):
+            build_failure = _require_snapshot(
+                await self._runs.get_build_failure(event.build_id, operation_context),
+                BuildFailureSnapshot,
+                "build_failure",
+            )
+            _validate_snapshot_provenance(
+                build_failure.request_context,
+                operation_context,
+                "Build failure",
+            )
+            if (
+                build_failure.build_id != event.build_id
+                or build_failure.session_id != event.session_id
+                or build_failure.failure_key != event.failure_key
+                or build_failure.evidence_refs != event.evidence_refs
+            ):
+                raise _context_error(
+                    "CONTEXT_BUILD_FAILURE_MISMATCH",
+                    "hint_requested does not reference the exact rejected Build and Evidence",
+                )
+            build_history = _require_snapshot_sequence(
+                await self._runs.list_same_build_failures(
+                    event.session_id,
+                    build_failure.failure_key,
+                    event.build_id,
+                    event.failure_count + 1,
+                    operation_context,
+                ),
+                BuildFailureSnapshot,
+                "build_failure_history",
+                maximum=event.failure_count + 1,
+            )
+            if (
+                len(build_history) != event.failure_count
+                or not build_history
+                or build_history[-1] != build_failure
+                or len({item.build_id for item in build_history}) != len(build_history)
+                or any(
+                    item.session_id != event.session_id
+                    or item.skill_id != build_failure.skill_id
+                    or item.failure_key != build_failure.failure_key
+                    for item in build_history
+                )
+            ):
+                raise _context_error(
+                    "CONTEXT_BUILD_FAILURE_HISTORY_MISMATCH",
+                    "Build failure count is not the exact canonical same-class suffix",
+                )
+
+        if (
+            role == "teaching_agent"
+            and event.event_type == "hint_requested"
+            and event.run_id is not None
+        ):
+            if run_result is None or event.failure_key is None:
+                raise _context_error(
+                    "CONTEXT_RUN_REQUIRED",
+                    "hint_requested failure authority requires the exact failed Run",
+                )
+            teaching_history = _require_snapshot_sequence(
+                await self._runs.list_same_failure_runs(
+                    event.session_id,
+                    event.failure_key,
+                    event.run_id,
+                    event.failure_count + 1,
+                    operation_context,
+                ),
+                RunResultSnapshot,
+                "teaching_failure_history",
+                maximum=event.failure_count + 1,
+            )
+            if (
+                len(teaching_history) != event.failure_count
+                or not teaching_history
+                or teaching_history[-1] != run_result
+            ):
+                raise _context_error(
+                    "CONTEXT_FAILURE_HISTORY_COUNT_MISMATCH",
+                    "teaching failure count is not the exact canonical same-class suffix",
+                )
             learner_profile = _require_snapshot(
                 await self._learners.get_profile(
                     event.student_id,
@@ -815,115 +906,127 @@ class ContextBuilder:
                     "CONTEXT_LEARNER_SCOPE_MISMATCH",
                     "learner profile contains concepts outside the current task",
                 )
-            if event.event_type != "skill_patch_requested":
-                recent_messages = _require_snapshot_sequence(
-                    await self._messages.list_recent(event.session_id, 8, operation_context),
-                    MessageSnapshot,
-                    "recent_messages",
-                    maximum=8,
-                )
-                if any(item.session_id != event.session_id for item in recent_messages):
-                    raise _context_error(
-                        "CONTEXT_MESSAGE_MISMATCH",
-                        "recent messages contain a different session",
-                    )
-                for item in recent_messages:
-                    _validate_snapshot_provenance(
-                        item.request_context,
-                        operation_context,
-                        "recent message",
-                    )
-
-        if role == "bug_agent":
-            if event.run_id is None or event.failure_key is None:
-                raise _context_error(
-                    "CONTEXT_FAILURE_EVIDENCE_REQUIRED",
-                    "bug_agent requires an exact run and same-failure key",
-                )
-            run_result = _require_snapshot(
-                await self._runs.get_run(event.run_id, operation_context),
-                RunResultSnapshot,
-                "run_result",
+            recent_messages = _require_snapshot_sequence(
+                await self._messages.list_recent(event.session_id, 8, operation_context),
+                MessageSnapshot,
+                "recent_messages",
+                maximum=8,
             )
-            _validate_snapshot_provenance(
-                run_result.request_context,
-                operation_context,
-                "run result",
-            )
-            _validate_run_identity(run_result, event, session)
-            if run_result.task_success or run_result.failure_key != event.failure_key:
+            if any(item.session_id != event.session_id for item in recent_messages):
                 raise _context_error(
-                    "CONTEXT_FAILURE_KEY_MISMATCH",
-                    "current run is not the declared reproducible failure",
+                    "CONTEXT_MESSAGE_MISMATCH",
+                    "recent messages contain a different session",
                 )
-            history_limit = event.failure_count + 1
-            failure_history = _require_snapshot_sequence(
-                await self._runs.list_same_failure_runs(
-                    event.session_id,
-                    event.failure_key,
-                    event.run_id,
-                    history_limit,
-                    operation_context,
-                ),
-                RunResultSnapshot,
-                "failure_history",
-                maximum=history_limit,
-            )
-            if len(failure_history) != event.failure_count:
-                raise _context_error(
-                    "CONTEXT_FAILURE_HISTORY_COUNT_MISMATCH",
-                    "bug_agent failure count is not the exact canonical same-class suffix",
-                    required=event.failure_count,
-                    actual=len(failure_history),
-                )
-            run_ids: set[str] = set()
-            turn_ids: set[str] = set()
-            command_ids: set[str] = set()
-            for item in failure_history:
+            for item in recent_messages:
                 _validate_snapshot_provenance(
                     item.request_context,
                     operation_context,
-                    "failure history run",
+                    "recent message",
                 )
+
+        if role == "bug_agent":
+            if event.failure_key is None:
+                raise _context_error(
+                    "CONTEXT_FAILURE_EVIDENCE_REQUIRED",
+                    "bug_agent requires exact failed-attempt authority",
+                )
+            if event.run_id is None:
+                if event.build_id is None or build_failure is None:
+                    raise _context_error(
+                        "CONTEXT_BUILD_FAILURE_REQUIRED",
+                        "build-only bug_agent requires an exact rejected Build",
+                    )
+            else:
+                run_result = _require_snapshot(
+                    await self._runs.get_run(event.run_id, operation_context),
+                    RunResultSnapshot,
+                    "run_result",
+                )
+                _validate_snapshot_provenance(
+                    run_result.request_context,
+                    operation_context,
+                    "run result",
+                )
+                _validate_run_identity(run_result, event, session)
                 if (
-                    item.session_id != event.session_id
-                    or item.world_id != session.world_id
-                    or item.failure_key != event.failure_key
-                    or item.task_success
-                    or item.skill_ref != event.skill_ref
+                    run_result.task_success
+                    or run_result.failure_key != event.failure_key
+                    or run_result.evidence_refs != event.evidence_refs
                 ):
+                    raise _context_error(
+                        "CONTEXT_FAILURE_KEY_MISMATCH",
+                        "current run is not the declared reproducible failure",
+                    )
+                history_limit = event.failure_count + 1
+                failure_history = _require_snapshot_sequence(
+                    await self._runs.list_same_failure_runs(
+                        event.session_id,
+                        event.failure_key,
+                        event.run_id,
+                        history_limit,
+                        operation_context,
+                    ),
+                    RunResultSnapshot,
+                    "failure_history",
+                    maximum=history_limit,
+                )
+                if len(failure_history) != event.failure_count:
+                    raise _context_error(
+                        "CONTEXT_FAILURE_HISTORY_COUNT_MISMATCH",
+                        "bug_agent failure count is not the exact canonical same-class suffix",
+                        required=event.failure_count,
+                        actual=len(failure_history),
+                    )
+                run_ids: set[str] = set()
+                turn_ids: set[str] = set()
+                command_ids: set[str] = set()
+                for item in failure_history:
+                    _validate_snapshot_provenance(
+                        item.request_context,
+                        operation_context,
+                        "failure history run",
+                    )
+                    if (
+                        item.session_id != event.session_id
+                        or item.world_id != session.world_id
+                        or item.failure_key != event.failure_key
+                        or item.task_success
+                        or item.skill_ref != event.skill_ref
+                    ):
+                        raise _context_error(
+                            "CONTEXT_FAILURE_HISTORY_MISMATCH",
+                            "failure history contains an unrelated run",
+                        )
+                    if (
+                        item.run_id in run_ids
+                        or item.turn_id in turn_ids
+                        or item.command_id in command_ids
+                    ):
+                        raise _context_error(
+                            "CONTEXT_FAILURE_HISTORY_DUPLICATE",
+                            "failure history duplicates a run, turn or command",
+                        )
+                    run_ids.add(item.run_id)
+                    turn_ids.add(item.turn_id)
+                    command_ids.add(item.command_id)
+                if event.run_id not in run_ids:
                     raise _context_error(
                         "CONTEXT_FAILURE_HISTORY_MISMATCH",
-                        "failure history contains an unrelated run",
+                        "failure history does not include the current run",
                     )
-                if (
-                    item.run_id in run_ids
-                    or item.turn_id in turn_ids
-                    or item.command_id in command_ids
-                ):
+                if failure_history[-1].run_id != event.run_id:
                     raise _context_error(
-                        "CONTEXT_FAILURE_HISTORY_DUPLICATE",
-                        "failure history duplicates a run, turn or command",
+                        "CONTEXT_FAILURE_HISTORY_ORDER_MISMATCH",
+                        "same-failure history is not ordered through the current run",
                     )
-                run_ids.add(item.run_id)
-                turn_ids.add(item.turn_id)
-                command_ids.add(item.command_id)
-            if event.run_id not in run_ids:
-                raise _context_error(
-                    "CONTEXT_FAILURE_HISTORY_MISMATCH",
-                    "failure history does not include the current run",
+                history_current = next(
+                    item for item in failure_history if item.run_id == event.run_id
                 )
-            if failure_history[-1].run_id != event.run_id:
-                raise _context_error(
-                    "CONTEXT_FAILURE_HISTORY_ORDER_MISMATCH",
-                    "same-failure history is not ordered through the current run",
-                )
-            history_current = next(item for item in failure_history if item.run_id == event.run_id)
-            if history_current != run_result:
-                raise _context_error(
-                    "CONTEXT_RUN_FACT_COLLISION",
-                    "current run has conflicting facts in the failure history",
-                )
+                if history_current != run_result:
+                    raise _context_error(
+                        "CONTEXT_RUN_FACT_COLLISION",
+                        "current run has conflicting facts in the failure history",
+                    )
             counterexamples = _require_snapshot_sequence(
                 await self._counterexamples.list_counterexamples(
                     event.task_id,
@@ -1159,6 +1262,7 @@ class ContextBuilder:
             skill=skill,
             available_skills=available_skills,
             compile_result=compile_result,
+            build_failure=build_failure,
             run_result=run_result,
             failure_history=failure_history,
             counterexamples=counterexamples,
@@ -1187,6 +1291,7 @@ def validate_context_for_role(context: TurnContext) -> None:
             (
                 context.skill,
                 context.compile_result,
+                context.build_failure,
                 context.run_result,
                 context.available_skills,
                 context.failure_history,
@@ -1210,6 +1315,7 @@ def validate_context_for_role(context: TurnContext) -> None:
         if any(
             (
                 context.compile_result,
+                context.build_failure,
                 context.run_result,
                 context.failure_history,
                 context.counterexamples,
@@ -1243,6 +1349,16 @@ def validate_context_for_role(context: TurnContext) -> None:
                 "CONTEXT_RUN_REQUIRED",
                 "run_failed teaching requires the exact run result",
             )
+        if (
+            context.event.event_type == "hint_requested"
+            and context.event.build_id is not None
+            and context.event.run_id is None
+            and context.build_failure is None
+        ):
+            raise _context_error(
+                "CONTEXT_BUILD_FAILURE_REQUIRED",
+                "Build failure teaching requires the exact rejected Build",
+            )
         if context.event.event_type == "skill_patch_requested" and (
             context.patch_authority is None
             or context.compile_result is None
@@ -1271,15 +1387,22 @@ def validate_context_for_role(context: TurnContext) -> None:
             )
         return
     if role == "bug_agent":
-        if (
-            context.skill is None
-            or context.run_result is None
-            or context.learner_profile is None
-            or len(context.failure_history) < 3
-        ):
+        run_authority = (
+            context.skill is not None
+            and context.run_result is not None
+            and len(context.failure_history) >= 3
+            and context.build_failure is None
+        )
+        build_authority = (
+            context.build_failure is not None
+            and context.run_result is None
+            and not context.failure_history
+            and context.skill is None
+        )
+        if context.learner_profile is None or not (run_authority or build_authority):
             raise _context_error(
                 "CONTEXT_BUG_EVIDENCE_INCOMPLETE",
-                "bug_agent requires source, current run and repeated canonical failures",
+                "bug_agent requires exact repeated Run or rejected-Build authority",
             )
         if any(
             (
@@ -1313,6 +1436,7 @@ def validate_context_for_role(context: TurnContext) -> None:
                 context.skill,
                 context.available_skills,
                 context.compile_result,
+                context.build_failure,
                 context.failure_history,
                 context.counterexamples,
                 context.recent_messages,

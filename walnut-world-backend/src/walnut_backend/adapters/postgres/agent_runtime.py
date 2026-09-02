@@ -22,6 +22,7 @@ from yaya_agent_contracts import (
 )
 from yaya_agent_runtime import (
     AgentTraceEvent,
+    BuildFailureSnapshot,
     CompileResultSnapshot,
     CounterexampleSnapshot,
     DraftAuthority,
@@ -51,6 +52,10 @@ from .agent_trace_identity import (
 from .agent_trace_identity import (
     AgentTraceIdentityError,
     agent_trace_audit_id,
+)
+from .build_failures import (
+    list_current_build_failure_streak,
+    load_validated_build_failure,
 )
 from .models import (
     AgentSessionRow,
@@ -385,6 +390,62 @@ class PostgresAgentRuntimeReads:
             request_context=_wire_context(wire),
             draft_authority=draft_authority,
         )
+
+    async def get_build_failure(
+        self,
+        build_id: str,
+        context: OperationContext,
+    ) -> BuildFailureSnapshot:
+        async with self._sessions() as session:
+            provenance = await session.scalar(
+                select(SkillBuildProvenanceRow).where(
+                    SkillBuildProvenanceRow.build_id == build_id,
+                    SkillBuildProvenanceRow.tenant_id == context.actor.tenant_id,
+                    SkillBuildProvenanceRow.actor_id == context.actor.actor_id,
+                )
+            )
+            if provenance is None or provenance.session_id is None:
+                raise AgentRuntimeAuthorityError("rejected Build provenance was not found")
+            try:
+                authority = await load_validated_build_failure(
+                    session,
+                    build_id=build_id,
+                    session_id=provenance.session_id,
+                    context=context,
+                )
+            except WorkflowInvariantError as error:
+                raise AgentRuntimeAuthorityError(str(error)) from error
+        return authority.snapshot
+
+    async def list_same_build_failures(
+        self,
+        session_id: str,
+        failure_key: str,
+        through_build_id: str,
+        limit: int,
+        context: OperationContext,
+    ) -> tuple[BuildFailureSnapshot, ...]:
+        if not 1 <= limit <= 100:
+            raise AgentRuntimeAuthorityError("Build failure history limit is invalid")
+        async with self._sessions() as session:
+            try:
+                authorities = await list_current_build_failure_streak(
+                    session,
+                    session_id=session_id,
+                    context=context,
+                )
+            except WorkflowInvariantError as error:
+                raise AgentRuntimeAuthorityError(str(error)) from error
+        snapshots = tuple(item.snapshot for item in authorities)
+        if (
+            not snapshots
+            or snapshots[-1].build_id != through_build_id
+            or snapshots[-1].failure_key != failure_key
+        ):
+            raise AgentRuntimeAuthorityError(
+                "through_build_id is outside the current Build failure suffix"
+            )
+        return snapshots[-limit:]
 
     async def get_run(self, run_id: str, context: OperationContext) -> RunResultSnapshot:
         async with self._sessions() as session:

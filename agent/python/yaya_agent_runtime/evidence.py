@@ -14,6 +14,8 @@ def collect_context_evidence(context: TurnContext) -> tuple[EvidenceRef, ...]:
     refs = list(context.event.evidence_refs)
     if context.compile_result is not None:
         refs.extend(context.compile_result.evidence_refs)
+    if context.build_failure is not None:
+        refs.extend(context.build_failure.evidence_refs)
     if context.run_result is not None:
         refs.extend(context.run_result.evidence_refs)
     for run in (*context.failure_history, *context.session_runs):
@@ -42,6 +44,8 @@ def collect_decision_evidence(context: TurnContext) -> tuple[EvidenceRef, ...]:
     refs = list(context.event.evidence_refs)
     if context.compile_result is not None:
         refs.extend(context.compile_result.evidence_refs)
+    if context.build_failure is not None:
+        refs.extend(context.build_failure.evidence_refs)
     if context.run_result is not None:
         refs.extend(context.run_result.evidence_refs)
     merged: dict[str, EvidenceRef] = {}

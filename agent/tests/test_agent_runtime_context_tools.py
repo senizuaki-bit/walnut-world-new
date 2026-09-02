@@ -39,6 +39,7 @@ from yaya_agent_runtime import (  # noqa: E402
     AgentToolAuthorizationError,
     AgentToolExecutionError,
     AgentToolInputError,
+    BuildFailureSnapshot,
     CompileResultSnapshot,
     ContextBuilder,
     LearnerProfileSnapshot,
@@ -57,9 +58,19 @@ from yaya_agent_runtime.model_output import build_model_output_schema  # noqa: E
 
 
 class _TeachingReads(RecordingReads):
-    def __init__(self, *, compile_result=None, run_result=None, **kwargs) -> None:
+    def __init__(
+        self,
+        *,
+        compile_result=None,
+        build_failure=None,
+        build_history=(),
+        run_result=None,
+        **kwargs,
+    ) -> None:
         super().__init__(**kwargs)
         self.compile_result = compile_result
+        self.build_failure = build_failure
+        self.build_history = build_history
         self.run_result = run_result
 
     async def get_compile_result(self, build_id, context):
@@ -71,6 +82,23 @@ class _TeachingReads(RecordingReads):
         del run_id, context
         self.calls.append("get_run")
         return self.run_result
+
+    async def get_build_failure(self, build_id, context):
+        del build_id, context
+        self.calls.append("get_build_failure")
+        return self.build_failure
+
+    async def list_same_build_failures(
+        self, session_id, failure_key, through_build_id, limit, context
+    ):
+        del session_id, failure_key, through_build_id, limit, context
+        self.calls.append("list_same_build_failures")
+        return self.build_history
+
+    async def list_counterexamples(self, task_id, failure_key, context):
+        del task_id, failure_key, context
+        self.calls.append("list_counterexamples")
+        return ()
 
     async def get_profile(self, student_id, knowledge_points, context):
         del student_id, knowledge_points, context
@@ -302,6 +330,98 @@ class AgentRuntimeContextAndToolTests(unittest.IsolatedAsyncioTestCase):
             )
 
         self.assertEqual(raised.exception.code, "CONTEXT_EVIDENCE_MISMATCH")
+
+    async def test_build_failure_hint_uses_exact_no_run_authority(self) -> None:
+        operation = make_operation()
+        first_evidence = make_evidence("evidence_build_failure_0001")
+        latest_evidence = make_evidence("evidence_build_failure_0002")
+        first = BuildFailureSnapshot(
+            build_id="build_failure_0001",
+            session_id="session_watering_0001",
+            skill_id="watering_skill",
+            failure_key="compile:COMPILE:SANDBOX_COMPILE_ERROR:error",
+            diagnostics=("error",),
+            evidence_refs=(first_evidence,),
+            request_context=operation,
+        )
+        latest = replace(
+            first,
+            build_id="build_failure_0002",
+            evidence_refs=(latest_evidence,),
+        )
+        event = replace(
+            make_event("hint_requested", failure_count=2),
+            skill_ref=None,
+            build_id=latest.build_id,
+            failure_key=latest.failure_key,
+            evidence_refs=latest.evidence_refs,
+        )
+        reads = _TeachingReads(
+            operation=operation,
+            build_failure=latest,
+            build_history=(first, latest),
+        )
+        configs = StaticRoleConfigs(
+            make_role_config("teaching_agent", allowed_events=("hint_requested",))
+        )
+
+        context = await _context_builder(reads, configs).build(
+            event,
+            "teaching_agent",
+            operation,
+        )
+
+        self.assertEqual(context.build_failure, latest)
+        self.assertIsNone(context.run_result)
+        self.assertIsNone(context.skill)
+        self.assertFalse(context.teaching_directive.patch_eligible)
+        self.assertIn("get_build_failure", reads.calls)
+        self.assertIn("list_same_build_failures", reads.calls)
+
+    async def test_bug_agent_accepts_third_exact_build_failure_without_patch_or_run(self) -> None:
+        operation = make_operation()
+        failures = tuple(
+            BuildFailureSnapshot(
+                build_id=f"build_failure_000{index}",
+                session_id="session_watering_0001",
+                skill_id="watering_skill",
+                failure_key="compile:COMPILE:SANDBOX_COMPILE_ERROR:error",
+                diagnostics=("error",),
+                evidence_refs=(make_evidence(f"evidence_build_failure_000{index}"),),
+                request_context=operation,
+            )
+            for index in range(1, 4)
+        )
+        latest = failures[-1]
+        event = replace(
+            make_event("hint_requested", failure_count=3),
+            skill_ref=None,
+            run_id=None,
+            build_id=latest.build_id,
+            failure_key=latest.failure_key,
+            evidence_refs=latest.evidence_refs,
+        )
+        reads = _TeachingReads(
+            operation=operation,
+            build_failure=latest,
+            build_history=failures,
+        )
+        configs = StaticRoleConfigs(
+            make_role_config("bug_agent", allowed_events=("hint_requested",))
+        )
+
+        context = await _context_builder(reads, configs).build(
+            event,
+            "bug_agent",
+            operation,
+        )
+
+        self.assertEqual(context.build_failure, latest)
+        self.assertIsNone(context.run_result)
+        self.assertEqual(context.failure_history, ())
+        self.assertIsNone(context.skill)
+        self.assertFalse(context.teaching_directive.patch_eligible)
+        self.assertIn("list_counterexamples", reads.calls)
 
     async def test_run_failed_rejects_success_or_wrong_world_revision(self) -> None:
         operation = make_operation()
