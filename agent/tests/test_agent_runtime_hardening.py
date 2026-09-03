@@ -791,6 +791,51 @@ class AgentRuntimeSecondHardeningTests(unittest.IsolatedAsyncioTestCase):
             <= {evidence.evidence_id for evidence in decision.evidence_refs}
         )
 
+    async def test_failed_run_teaching_rejects_foreign_or_relabelled_event_evidence(self) -> None:
+        operation = make_operation()
+        event = make_event("run_failed")
+        canonical_evidence = event.evidence_refs[0]
+        run = _failed_run(event, operation, canonical_evidence)
+        configs = StaticRoleConfigs(
+            make_role_config("teaching_agent", allowed_events=("run_failed",))
+        )
+        for evidence in (
+            make_evidence("evidence_foreign_run_0001"),
+            replace(canonical_evidence, sha256="f" * 64),
+            replace(canonical_evidence, evidence_type=EvidenceType.TEST_REPORT),
+        ):
+            with self.subTest(evidence=evidence):
+                reads = _TeachingReads(operation=operation, run_result=run)
+                with self.assertRaises(AgentContextError) as error:
+                    await _context_builder(reads, configs).build(
+                        replace(event, evidence_refs=(evidence,)),
+                        "teaching_agent",
+                        operation,
+                    )
+                self.assertEqual(error.exception.code, "CONTEXT_EVIDENCE_MISMATCH")
+
+    async def test_failure_hint_rejects_partial_run_evidence(self) -> None:
+        operation = make_operation()
+        failed_event = make_event("run_failed")
+        run = _failed_run(
+            failed_event,
+            operation,
+            *failed_event.evidence_refs,
+            make_evidence("evidence_hint_extra_0001", EvidenceType.TEST_REPORT),
+        )
+        hint = replace(
+            make_event("hint_requested", failure_count=1),
+            run_id=run.run_id,
+            evidence_refs=failed_event.evidence_refs,
+        )
+        configs = StaticRoleConfigs(
+            make_role_config("teaching_agent", allowed_events=("hint_requested",))
+        )
+        reads = _TeachingReads(operation=operation, run_result=run)
+        with self.assertRaises(AgentContextError) as error:
+            await _context_builder(reads, configs).build(hint, "teaching_agent", operation)
+        self.assertEqual(error.exception.code, "CONTEXT_FAILURE_KEY_MISMATCH")
+
     async def test_decision_completion_covers_future_tool_evidence_clock_skew(self) -> None:
         future_evidence = replace(
             make_evidence(

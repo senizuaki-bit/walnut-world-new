@@ -786,10 +786,15 @@ class ContextBuilder:
                     "run result",
                 )
                 _validate_run_identity(run_result, event, session)
+                # A run_failed directive may select a canonical Evidence subset;
+                # explicit hints must retain the entire failed-Run envelope.
                 if event.event_type in {"run_failed", "hint_requested"} and (
                     run_result.task_success
                     or run_result.failure_key != event.failure_key
-                    or run_result.evidence_refs != event.evidence_refs
+                    or (
+                        event.event_type == "hint_requested"
+                        and run_result.evidence_refs != event.evidence_refs
+                    )
                 ):
                     raise _context_error(
                         "CONTEXT_FAILURE_KEY_MISMATCH",
