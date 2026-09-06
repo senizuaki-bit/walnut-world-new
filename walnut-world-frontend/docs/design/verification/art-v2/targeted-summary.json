@@ -1,0 +1,11 @@
+{
+  "engine": "4.7.1.stable",
+  "date": "2026-09-06",
+  "after_full_suite": [
+    "art_v2_presentation_test: PASS (includes long message scroll, click expand, reduced watering clock)",
+    "crop_adaptive_watering_demo_test: PASS",
+    "agent_interaction_presenter_test: PASS",
+    "crop_agent_presentation_queue_test: PASS"
+  ],
+  "real_gateway": "NOT_RUN"
+}

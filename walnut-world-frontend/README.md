@@ -6,6 +6,10 @@
 
 使用 Godot 4.7.1 stable 打开 `project.godot`，运行 `scenes/app/app_root.tscn`。`project.godot` 的 `config/features` 固定为 `4.7`；测试和正式启动脚本统一校验 4.7.1。学生端只访问唯一 `walnut-world-backend` Gateway；不直接调用模型、Docker、数据库、本地编译器或 sibling Agent HTTP。
 
+## 作物关卡美术 V2
+
+当前分支已接入静态 V2.2 与动态 V1，包含绘本场景、角色状态、土地轮廓、技能树和原生输入皮肤。布局与动画仍消费原控制器状态；详细范围、运行入口、验证与导出注意事项见 [接入说明](docs/design/art-v2-integration.md)。实际渲染截图见 [验证目录](docs/design/verification/art-v2/)。
+
 ## 角色 2D 提示与权威世界演出
 
 这两条表现链彼此独立，不能混用：
