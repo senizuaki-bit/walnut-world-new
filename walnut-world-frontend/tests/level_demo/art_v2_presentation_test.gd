@@ -13,6 +13,7 @@ func _run() -> void:
 	root.add_child(level)
 	await process_frame
 	level.story_dialogue.skip_sequence()
+	await _verify_second_review(level, failures)
 	await _verify_review_regressions(level, failures)
 	var card := level.plot_grid.get_child(0) as CropPlotCard
 	var moisture := card.current_moisture
@@ -225,3 +226,61 @@ func _verify_review_regressions(level: CropAdaptiveWateringDemo, failures: Array
 		failures.append("减少动态不能阻塞水泵状态回收。")
 	Engine.remove_meta("art_reduced_motion")
 	pump.playback_speed = 1.0
+
+
+func _verify_second_review(level: CropAdaptiveWateringDemo, failures: Array[String]) -> void:
+	if level.get_node_or_null("Hud/ReduceMotion") != null:
+		failures.append("不再提供用户不需要的减少动态开关。")
+	var dialogue := level.story_dialogue
+	var counts := [0]
+	var finished := func() -> void: counts[0] += 1
+	dialogue.sequence_finished.connect(finished)
+	dialogue.play_sequence("书书", null, ["结束这一段对话。"])
+	dialogue.advance()
+	dialogue.advance()
+	await create_timer(0.05).timeout
+	dialogue.skip_sequence()
+	dialogue.skip_sequence()
+	await create_timer(0.3).timeout
+	if counts[0] != 1:
+		failures.append("退场途中中断及重复中断，只能通知结束一次。")
+	dialogue.play_sequence("书书", null, ["新对话必须不受旧回调影响。"])
+	await create_timer(0.25).timeout
+	if not dialogue.visible or counts[0] != 1:
+		failures.append("中断旧对话后，新对话不能被旧回调提前关闭。")
+	dialogue.skip_sequence()
+	dialogue.sequence_finished.disconnect(finished)
+	level.call("_begin_workshop_experiments")
+	dialogue.skip_sequence()
+	level.gap_target_input.text = "target"
+	level.gap_target_input.text_changed.emit("target")
+	level.call("_show_workshop_step")
+	if not level.gap_target_input.text.is_empty() or level.gap_target_input.get_theme_stylebox("normal").resource_path.contains("filled"):
+		failures.append("重新显示第一步必须同时清空内容和已填写皮肤。")
+	var button := level.workshop_action_button
+	await process_frame
+	await process_frame
+	var before := button.get_global_rect()
+	level.call("_on_workshop_action_pressed")
+	var skin := button.get_theme_stylebox("normal") as StyleBoxTexture
+	var motion := button.get_node("Feedback") as ArtMotionTexture
+	if skin.texture != motion.texture or motion.motion_id != "button-error-motion":
+		failures.append("错误动画必须成为原按钮的皮肤。")
+	if level.get_node_or_null("WorkshopOverlay/WorkshopFeedback") != null:
+		failures.append("不能保留远离按钮的装饰反馈色条。")
+	button.call("show_feedback", true)
+	if motion.motion_id != "button-success-motion":
+		failures.append("成功反馈必须复用同一按钮。")
+	# Wait for actual atlas completion, not just the first poster frame.
+	var deadline := Time.get_ticks_msec() + 5000
+	while motion.visible and Time.get_ticks_msec() < deadline:
+		await process_frame
+	await process_frame
+	if button.has_theme_stylebox_override("normal"):
+		failures.append("反馈结束后必须恢复普通/悬停皮肤。")
+	if not button.get_global_rect().is_equal_approx(before):
+		failures.append("按钮反馈不能改变布局或点击范围：%s → %s。" % [before, button.get_global_rect()])
+	button.call("show_feedback", false)
+	level.call("_hide_lesson_overlays")
+	if motion.visible or button.has_theme_stylebox_override("normal"):
+		failures.append("离开工坊必须清除旧按钮反馈。")
