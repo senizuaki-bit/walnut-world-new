@@ -216,6 +216,10 @@ func _pulse_card() -> void:
 
 
 func _finish_sequence(immediate: bool) -> void:
+	if not visible or (_finishing and not immediate):
+		return
+	# Cancel the old exit callback before an immediate close can emit completion.
+	_stop_active_tweens()
 	_finishing = true
 	_typing = false
 	typewriter_timer.stop()
@@ -226,12 +230,11 @@ func _finish_sequence(immediate: bool) -> void:
 		visible = false
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 		modulate.a = 1.0
+		dialogue_card.position = _card_rest_position
 		_finishing = false
 		_restore_focus()
 		sequence_finished.emit()
 		return
-	if _transition_tween != null and _transition_tween.is_valid():
-		_transition_tween.kill()
 	_transition_tween = create_tween().set_parallel(true)
 	_transition_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	_transition_tween.tween_property(self, "modulate:a", 0.0, 0.20)
