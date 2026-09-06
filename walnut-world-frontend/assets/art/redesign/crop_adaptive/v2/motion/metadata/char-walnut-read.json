@@ -1,0 +1,214 @@
+{
+  "group": "characters",
+  "id": "char-walnut-read",
+  "source": [
+    "components/char-walnut-thinking.png"
+  ],
+  "state": "读取湿度",
+  "effect": "新绘湿度镜读取姿态，传感器向土地探测后回看；绝不喷水",
+  "width": 448,
+  "height": 576,
+  "frames": 16,
+  "fps": 8,
+  "loop": true,
+  "trigger": "当前土地进入读取阶段",
+  "pivot": [
+    0.5,
+    0.95
+  ],
+  "durationMs": 2000,
+  "delayMs": 125,
+  "files": {
+    "webp": "characters/char-walnut-read.webp",
+    "poster": "characters/char-walnut-read-poster.png",
+    "atlas": "characters/char-walnut-read-atlas.png",
+    "metadata": "metadata/char-walnut-read.json"
+  },
+  "atlas": {
+    "columns": 6,
+    "rows": 3,
+    "frameWidth": 448,
+    "frameHeight": 576,
+    "frames": [
+      {
+        "index": 0,
+        "rect": [
+          0,
+          0,
+          448,
+          576
+        ],
+        "durationMs": 125
+      },
+      {
+        "index": 1,
+        "rect": [
+          448,
+          0,
+          448,
+          576
+        ],
+        "durationMs": 125
+      },
+      {
+        "index": 2,
+        "rect": [
+          896,
+          0,
+          448,
+          576
+        ],
+        "durationMs": 125
+      },
+      {
+        "index": 3,
+        "rect": [
+          1344,
+          0,
+          448,
+          576
+        ],
+        "durationMs": 125
+      },
+      {
+        "index": 4,
+        "rect": [
+          1792,
+          0,
+          448,
+          576
+        ],
+        "durationMs": 125
+      },
+      {
+        "index": 5,
+        "rect": [
+          2240,
+          0,
+          448,
+          576
+        ],
+        "durationMs": 125
+      },
+      {
+        "index": 6,
+        "rect": [
+          0,
+          576,
+          448,
+          576
+        ],
+        "durationMs": 125
+      },
+      {
+        "index": 7,
+        "rect": [
+          448,
+          576,
+          448,
+          576
+        ],
+        "durationMs": 125
+      },
+      {
+        "index": 8,
+        "rect": [
+          896,
+          576,
+          448,
+          576
+        ],
+        "durationMs": 125
+      },
+      {
+        "index": 9,
+        "rect": [
+          1344,
+          576,
+          448,
+          576
+        ],
+        "durationMs": 125
+      },
+      {
+        "index": 10,
+        "rect": [
+          1792,
+          576,
+          448,
+          576
+        ],
+        "durationMs": 125
+      },
+      {
+        "index": 11,
+        "rect": [
+          2240,
+          576,
+          448,
+          576
+        ],
+        "durationMs": 125
+      },
+      {
+        "index": 12,
+        "rect": [
+          0,
+          1152,
+          448,
+          576
+        ],
+        "durationMs": 125
+      },
+      {
+        "index": 13,
+        "rect": [
+          448,
+          1152,
+          448,
+          576
+        ],
+        "durationMs": 125
+      },
+      {
+        "index": 14,
+        "rect": [
+          896,
+          1152,
+          448,
+          576
+        ],
+        "durationMs": 125
+      },
+      {
+        "index": 15,
+        "rect": [
+          1344,
+          1152,
+          448,
+          576
+        ],
+        "durationMs": 125
+      }
+    ]
+  },
+  "encoded": {
+    "frames": 16,
+    "durationMs": 2000,
+    "bytes": 748972
+  },
+  "playback": {
+    "frameDurationMs": 125,
+    "loop": true,
+    "endBehavior": "continue-until-state-change",
+    "reducedMotion": "characters/char-walnut-read-poster.png",
+    "alpha": "straight-alpha",
+    "sizing": "preserve aspect; use contentBounds and pivot, do not stretch the whole padded canvas into old art bounds"
+  },
+  "contentBounds": [
+    50,
+    130,
+    376,
+    418
+  ]
+}

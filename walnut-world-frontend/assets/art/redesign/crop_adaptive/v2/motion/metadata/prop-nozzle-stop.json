@@ -1,0 +1,234 @@
+{
+  "group": "equipment",
+  "id": "prop-nozzle-stop",
+  "source": [
+    "components/prop-nozzle.png"
+  ],
+  "state": "关闭喷头",
+  "effect": "关闭时仅最后几滴落下，然后保持无水状态",
+  "width": 448,
+  "height": 480,
+  "frames": 18,
+  "fps": 12,
+  "loop": false,
+  "trigger": "关闭喷头",
+  "pivot": [
+    0.5,
+    0.95
+  ],
+  "durationMs": 1494,
+  "delayMs": 83,
+  "files": {
+    "webp": "equipment/prop-nozzle-stop.webp",
+    "poster": "equipment/prop-nozzle-stop-poster.png",
+    "atlas": "equipment/prop-nozzle-stop-atlas.png",
+    "metadata": "metadata/prop-nozzle-stop.json"
+  },
+  "atlas": {
+    "columns": 6,
+    "rows": 3,
+    "frameWidth": 448,
+    "frameHeight": 480,
+    "frames": [
+      {
+        "index": 0,
+        "rect": [
+          0,
+          0,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 1,
+        "rect": [
+          448,
+          0,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 2,
+        "rect": [
+          896,
+          0,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 3,
+        "rect": [
+          1344,
+          0,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 4,
+        "rect": [
+          1792,
+          0,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 5,
+        "rect": [
+          2240,
+          0,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 6,
+        "rect": [
+          0,
+          480,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 7,
+        "rect": [
+          448,
+          480,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 8,
+        "rect": [
+          896,
+          480,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 9,
+        "rect": [
+          1344,
+          480,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 10,
+        "rect": [
+          1792,
+          480,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 11,
+        "rect": [
+          2240,
+          480,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 12,
+        "rect": [
+          0,
+          960,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 13,
+        "rect": [
+          448,
+          960,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 14,
+        "rect": [
+          896,
+          960,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 15,
+        "rect": [
+          1344,
+          960,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 16,
+        "rect": [
+          1792,
+          960,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 17,
+        "rect": [
+          2240,
+          960,
+          448,
+          480
+        ],
+        "durationMs": 83
+      }
+    ]
+  },
+  "encoded": {
+    "frames": 12,
+    "durationMs": 1494,
+    "bytes": 86844
+  },
+  "playback": {
+    "frameDurationMs": 83,
+    "loop": false,
+    "endBehavior": "hold-last-frame-until-state-controller-switches",
+    "reducedMotion": "equipment/prop-nozzle-stop-poster.png",
+    "alpha": "straight-alpha",
+    "sizing": "preserve aspect; use contentBounds and pivot, do not stretch the whole padded canvas into old art bounds"
+  },
+  "contentBounds": [
+    3,
+    51,
+    400,
+    384
+  ]
+}

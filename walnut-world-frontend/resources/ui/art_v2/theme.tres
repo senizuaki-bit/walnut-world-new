@@ -1,0 +1,30 @@
+[gd_resource type="Theme" load_steps=9 format=3]
+
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/button_normal.tres" id="button_normal"]
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/button_hover.tres" id="button_hover"]
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/button_pressed.tres" id="button_pressed"]
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/button_disabled.tres" id="button_disabled"]
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/button_focus.tres" id="button_focus"]
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/input_normal.tres" id="input_normal"]
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/input_focus.tres" id="input_focus"]
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/input_disabled.tres" id="input_disabled"]
+
+[resource]
+default_font_size = 17
+Button/styles/normal = ExtResource("button_normal")
+Button/styles/hover = ExtResource("button_hover")
+Button/styles/pressed = ExtResource("button_pressed")
+Button/styles/disabled = ExtResource("button_disabled")
+Button/styles/focus = ExtResource("button_focus")
+LineEdit/styles/normal = ExtResource("input_normal")
+LineEdit/styles/focus = ExtResource("input_focus")
+LineEdit/styles/read_only = ExtResource("input_disabled")
+Button/colors/font_color = Color(0.09, 0.24, 0.19, 1)
+Label/colors/font_color = Color(0.09, 0.24, 0.19, 1)
+LineEdit/colors/font_color = Color(0.09, 0.24, 0.19, 1)
+RichTextLabel/colors/default_color = Color(0.09, 0.24, 0.19, 1)
+Button/colors/font_hover_color = Color(0.08, 0.22, 0.16, 1)
+Button/colors/font_pressed_color = Color(0.08, 0.22, 0.16, 1)
+Button/colors/font_focus_color = Color(0.08, 0.22, 0.16, 1)
+Button/colors/font_disabled_color = Color(0.43, 0.40, 0.33, 1)
+Button/font_sizes/font_size = 17

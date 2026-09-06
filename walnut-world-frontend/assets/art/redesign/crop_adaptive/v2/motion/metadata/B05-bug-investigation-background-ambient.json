@@ -1,0 +1,44 @@
+{
+  "group": "environment",
+  "id": "B05-bug-investigation-background-ambient",
+  "source": [
+    "components/B05-bug-investigation-background.png"
+  ],
+  "state": "环境待机",
+  "effect": "测试帐篷：门边藤叶与帆布轻动，煤油灯低频暖光、少量浮尘",
+  "width": 1280,
+  "height": 720,
+  "frames": 72,
+  "fps": 12,
+  "loop": true,
+  "trigger": "场景可见且未暂停时循环；切出页面暂停",
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "video": true,
+  "atlas": false,
+  "durationMs": 5976,
+  "delayMs": 83,
+  "files": {
+    "webp": "environment/B05-bug-investigation-background-ambient.webp",
+    "poster": "environment/B05-bug-investigation-background-ambient-poster.png",
+    "mp4": "environment/B05-bug-investigation-background-ambient.mp4",
+    "webm": "environment/B05-bug-investigation-background-ambient.webm",
+    "godotVideo": "environment/B05-bug-investigation-background-ambient.ogv",
+    "metadata": "metadata/B05-bug-investigation-background-ambient.json"
+  },
+  "encoded": {
+    "frames": 72,
+    "durationMs": 5976,
+    "bytes": 607846
+  },
+  "playback": {
+    "frameDurationMs": 83,
+    "loop": true,
+    "endBehavior": "continue-until-state-change",
+    "reducedMotion": "environment/B05-bug-investigation-background-ambient-poster.png",
+    "alpha": "opaque",
+    "sizing": "1280x720: fit to original background rectangle; fixed camera"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "group": "environment",
+  "id": "B04-workshop-exterior-background-ambient",
+  "source": [
+    "components/B04-workshop-exterior-background.png"
+  ],
+  "state": "环境待机",
+  "effect": "工坊门口：树叶、左侧小瀑布与水波，两盏门灯异步微亮",
+  "width": 1280,
+  "height": 720,
+  "frames": 72,
+  "fps": 12,
+  "loop": true,
+  "trigger": "场景可见且未暂停时循环；切出页面暂停",
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "video": true,
+  "atlas": false,
+  "durationMs": 5976,
+  "delayMs": 83,
+  "files": {
+    "webp": "environment/B04-workshop-exterior-background-ambient.webp",
+    "poster": "environment/B04-workshop-exterior-background-ambient-poster.png",
+    "mp4": "environment/B04-workshop-exterior-background-ambient.mp4",
+    "webm": "environment/B04-workshop-exterior-background-ambient.webm",
+    "godotVideo": "environment/B04-workshop-exterior-background-ambient.ogv",
+    "metadata": "metadata/B04-workshop-exterior-background-ambient.json"
+  },
+  "encoded": {
+    "frames": 72,
+    "durationMs": 5976,
+    "bytes": 1678538
+  },
+  "playback": {
+    "frameDurationMs": 83,
+    "loop": true,
+    "endBehavior": "continue-until-state-change",
+    "reducedMotion": "environment/B04-workshop-exterior-background-ambient-poster.png",
+    "alpha": "opaque",
+    "sizing": "1280x720: fit to original background rectangle; fixed camera"
+  }
+}

@@ -1,0 +1,534 @@
+{
+  "group": "equipment",
+  "id": "tool-adaptive-water-two",
+  "source": [
+    "components/icon-skill-watering.png"
+  ],
+  "state": "浇 2 份",
+  "effect": "压力脉动与喷水；2 份通过更长的工作时长表达，不改变教学份数",
+  "width": 512,
+  "height": 512,
+  "frames": 48,
+  "fps": 12,
+  "loop": false,
+  "trigger": "合法 WATER 动作的 2 份表现，完成事件由逻辑发出",
+  "pivot": [
+    0.5,
+    0.87
+  ],
+  "durationMs": 3984,
+  "delayMs": 83,
+  "files": {
+    "webp": "equipment/tool-adaptive-water-two.webp",
+    "poster": "equipment/tool-adaptive-water-two-poster.png",
+    "atlas": "equipment/tool-adaptive-water-two-atlas.png",
+    "metadata": "metadata/tool-adaptive-water-two.json"
+  },
+  "atlas": {
+    "columns": 6,
+    "rows": 8,
+    "frameWidth": 512,
+    "frameHeight": 512,
+    "frames": [
+      {
+        "index": 0,
+        "rect": [
+          0,
+          0,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 1,
+        "rect": [
+          512,
+          0,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 2,
+        "rect": [
+          1024,
+          0,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 3,
+        "rect": [
+          1536,
+          0,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 4,
+        "rect": [
+          2048,
+          0,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 5,
+        "rect": [
+          2560,
+          0,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 6,
+        "rect": [
+          0,
+          512,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 7,
+        "rect": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 8,
+        "rect": [
+          1024,
+          512,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 9,
+        "rect": [
+          1536,
+          512,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 10,
+        "rect": [
+          2048,
+          512,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 11,
+        "rect": [
+          2560,
+          512,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 12,
+        "rect": [
+          0,
+          1024,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 13,
+        "rect": [
+          512,
+          1024,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 14,
+        "rect": [
+          1024,
+          1024,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 15,
+        "rect": [
+          1536,
+          1024,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 16,
+        "rect": [
+          2048,
+          1024,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 17,
+        "rect": [
+          2560,
+          1024,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 18,
+        "rect": [
+          0,
+          1536,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 19,
+        "rect": [
+          512,
+          1536,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 20,
+        "rect": [
+          1024,
+          1536,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 21,
+        "rect": [
+          1536,
+          1536,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 22,
+        "rect": [
+          2048,
+          1536,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 23,
+        "rect": [
+          2560,
+          1536,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 24,
+        "rect": [
+          0,
+          2048,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 25,
+        "rect": [
+          512,
+          2048,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 26,
+        "rect": [
+          1024,
+          2048,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 27,
+        "rect": [
+          1536,
+          2048,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 28,
+        "rect": [
+          2048,
+          2048,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 29,
+        "rect": [
+          2560,
+          2048,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 30,
+        "rect": [
+          0,
+          2560,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 31,
+        "rect": [
+          512,
+          2560,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 32,
+        "rect": [
+          1024,
+          2560,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 33,
+        "rect": [
+          1536,
+          2560,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 34,
+        "rect": [
+          2048,
+          2560,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 35,
+        "rect": [
+          2560,
+          2560,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 36,
+        "rect": [
+          0,
+          3072,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 37,
+        "rect": [
+          512,
+          3072,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 38,
+        "rect": [
+          1024,
+          3072,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 39,
+        "rect": [
+          1536,
+          3072,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 40,
+        "rect": [
+          2048,
+          3072,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 41,
+        "rect": [
+          2560,
+          3072,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 42,
+        "rect": [
+          0,
+          3584,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 43,
+        "rect": [
+          512,
+          3584,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 44,
+        "rect": [
+          1024,
+          3584,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 45,
+        "rect": [
+          1536,
+          3584,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 46,
+        "rect": [
+          2048,
+          3584,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 47,
+        "rect": [
+          2560,
+          3584,
+          512,
+          512
+        ],
+        "durationMs": 83
+      }
+    ]
+  },
+  "encoded": {
+    "frames": 48,
+    "durationMs": 3984,
+    "bytes": 2301758
+  },
+  "playback": {
+    "frameDurationMs": 83,
+    "loop": false,
+    "endBehavior": "hold-last-frame-until-state-controller-switches",
+    "reducedMotion": "equipment/tool-adaptive-water-two-poster.png",
+    "alpha": "straight-alpha",
+    "sizing": "preserve aspect; use contentBounds and pivot, do not stretch the whole padded canvas into old art bounds"
+  },
+  "contentBounds": [
+    66,
+    60,
+    379,
+    355
+  ]
+}

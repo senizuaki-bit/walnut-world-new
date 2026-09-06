@@ -1,0 +1,294 @@
+{
+  "group": "equipment",
+  "id": "tool-adaptive-fault",
+  "source": [
+    "components/icon-skill-watering.png"
+  ],
+  "state": "错误锁止",
+  "effect": "无喷水；读数时表盘亮，故障时停止并一次橙红提示",
+  "width": 512,
+  "height": 512,
+  "frames": 24,
+  "fps": 12,
+  "loop": false,
+  "trigger": "错误锁止",
+  "pivot": [
+    0.5,
+    0.87
+  ],
+  "durationMs": 1992,
+  "delayMs": 83,
+  "files": {
+    "webp": "equipment/tool-adaptive-fault.webp",
+    "poster": "equipment/tool-adaptive-fault-poster.png",
+    "atlas": "equipment/tool-adaptive-fault-atlas.png",
+    "metadata": "metadata/tool-adaptive-fault.json"
+  },
+  "atlas": {
+    "columns": 6,
+    "rows": 4,
+    "frameWidth": 512,
+    "frameHeight": 512,
+    "frames": [
+      {
+        "index": 0,
+        "rect": [
+          0,
+          0,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 1,
+        "rect": [
+          512,
+          0,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 2,
+        "rect": [
+          1024,
+          0,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 3,
+        "rect": [
+          1536,
+          0,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 4,
+        "rect": [
+          2048,
+          0,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 5,
+        "rect": [
+          2560,
+          0,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 6,
+        "rect": [
+          0,
+          512,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 7,
+        "rect": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 8,
+        "rect": [
+          1024,
+          512,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 9,
+        "rect": [
+          1536,
+          512,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 10,
+        "rect": [
+          2048,
+          512,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 11,
+        "rect": [
+          2560,
+          512,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 12,
+        "rect": [
+          0,
+          1024,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 13,
+        "rect": [
+          512,
+          1024,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 14,
+        "rect": [
+          1024,
+          1024,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 15,
+        "rect": [
+          1536,
+          1024,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 16,
+        "rect": [
+          2048,
+          1024,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 17,
+        "rect": [
+          2560,
+          1024,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 18,
+        "rect": [
+          0,
+          1536,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 19,
+        "rect": [
+          512,
+          1536,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 20,
+        "rect": [
+          1024,
+          1536,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 21,
+        "rect": [
+          1536,
+          1536,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 22,
+        "rect": [
+          2048,
+          1536,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 23,
+        "rect": [
+          2560,
+          1536,
+          512,
+          512
+        ],
+        "durationMs": 83
+      }
+    ]
+  },
+  "encoded": {
+    "frames": 23,
+    "durationMs": 1992,
+    "bytes": 97556
+  },
+  "playback": {
+    "frameDurationMs": 83,
+    "loop": false,
+    "endBehavior": "hold-last-frame-until-state-controller-switches",
+    "reducedMotion": "equipment/tool-adaptive-fault-poster.png",
+    "alpha": "straight-alpha",
+    "sizing": "preserve aspect; use contentBounds and pivot, do not stretch the whole padded canvas into old art bounds"
+  },
+  "contentBounds": [
+    66,
+    60,
+    379,
+    355
+  ]
+}

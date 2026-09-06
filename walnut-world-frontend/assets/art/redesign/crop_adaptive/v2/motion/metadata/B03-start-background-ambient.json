@@ -1,0 +1,44 @@
+{
+  "group": "environment",
+  "id": "B03-start-background-ambient",
+  "source": [
+    "components/B03-start-background.png"
+  ],
+  "state": "环境待机",
+  "effect": "开始页：树冠迎风、近景花叶错相摇曳、溪流折光；镜头固定",
+  "width": 1280,
+  "height": 720,
+  "frames": 72,
+  "fps": 12,
+  "loop": true,
+  "trigger": "场景可见且未暂停时循环；切出页面暂停",
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "video": true,
+  "atlas": false,
+  "durationMs": 5976,
+  "delayMs": 83,
+  "files": {
+    "webp": "environment/B03-start-background-ambient.webp",
+    "poster": "environment/B03-start-background-ambient-poster.png",
+    "mp4": "environment/B03-start-background-ambient.mp4",
+    "webm": "environment/B03-start-background-ambient.webm",
+    "godotVideo": "environment/B03-start-background-ambient.ogv",
+    "metadata": "metadata/B03-start-background-ambient.json"
+  },
+  "encoded": {
+    "frames": 72,
+    "durationMs": 5976,
+    "bytes": 2550192
+  },
+  "playback": {
+    "frameDurationMs": 83,
+    "loop": true,
+    "endBehavior": "continue-until-state-change",
+    "reducedMotion": "environment/B03-start-background-ambient-poster.png",
+    "alpha": "opaque",
+    "sizing": "1280x720: fit to original background rectangle; fixed camera"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "group": "environment",
+  "id": "B06-archive-background-ambient",
+  "source": [
+    "components/B06-archive-background.png"
+  ],
+  "state": "环境待机",
+  "effect": "档案馆：窗边藤叶、书桌灯的局部光晕和浮尘；书架与阅读区稳定",
+  "width": 1280,
+  "height": 720,
+  "frames": 72,
+  "fps": 12,
+  "loop": true,
+  "trigger": "场景可见且未暂停时循环；切出页面暂停",
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "video": true,
+  "atlas": false,
+  "durationMs": 5976,
+  "delayMs": 83,
+  "files": {
+    "webp": "environment/B06-archive-background-ambient.webp",
+    "poster": "environment/B06-archive-background-ambient-poster.png",
+    "mp4": "environment/B06-archive-background-ambient.mp4",
+    "webm": "environment/B06-archive-background-ambient.webm",
+    "godotVideo": "environment/B06-archive-background-ambient.ogv",
+    "metadata": "metadata/B06-archive-background-ambient.json"
+  },
+  "encoded": {
+    "frames": 72,
+    "durationMs": 5976,
+    "bytes": 741246
+  },
+  "playback": {
+    "frameDurationMs": 83,
+    "loop": true,
+    "endBehavior": "continue-until-state-change",
+    "reducedMotion": "environment/B06-archive-background-ambient-poster.png",
+    "alpha": "opaque",
+    "sizing": "1280x720: fit to original background rectangle; fixed camera"
+  }
+}

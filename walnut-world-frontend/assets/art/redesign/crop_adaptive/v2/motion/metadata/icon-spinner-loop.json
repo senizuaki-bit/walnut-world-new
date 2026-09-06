@@ -1,0 +1,295 @@
+{
+  "group": "ui",
+  "id": "icon-spinner-loop",
+  "source": [
+    "components/icon-spinner.png"
+  ],
+  "state": "处理中",
+  "effect": "独立叶片转子匀速转动，不移动按钮文字",
+  "width": 256,
+  "height": 256,
+  "frames": 24,
+  "fps": 12,
+  "loop": true,
+  "trigger": "处理中",
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "overlay": true,
+  "durationMs": 1992,
+  "delayMs": 83,
+  "files": {
+    "webp": "ui/icon-spinner-loop.webp",
+    "poster": "ui/icon-spinner-loop-poster.png",
+    "atlas": "ui/icon-spinner-loop-atlas.png",
+    "metadata": "metadata/icon-spinner-loop.json"
+  },
+  "atlas": {
+    "columns": 6,
+    "rows": 4,
+    "frameWidth": 256,
+    "frameHeight": 256,
+    "frames": [
+      {
+        "index": 0,
+        "rect": [
+          0,
+          0,
+          256,
+          256
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 1,
+        "rect": [
+          256,
+          0,
+          256,
+          256
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 2,
+        "rect": [
+          512,
+          0,
+          256,
+          256
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 3,
+        "rect": [
+          768,
+          0,
+          256,
+          256
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 4,
+        "rect": [
+          1024,
+          0,
+          256,
+          256
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 5,
+        "rect": [
+          1280,
+          0,
+          256,
+          256
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 6,
+        "rect": [
+          0,
+          256,
+          256,
+          256
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 7,
+        "rect": [
+          256,
+          256,
+          256,
+          256
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 8,
+        "rect": [
+          512,
+          256,
+          256,
+          256
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 9,
+        "rect": [
+          768,
+          256,
+          256,
+          256
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 10,
+        "rect": [
+          1024,
+          256,
+          256,
+          256
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 11,
+        "rect": [
+          1280,
+          256,
+          256,
+          256
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 12,
+        "rect": [
+          0,
+          512,
+          256,
+          256
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 13,
+        "rect": [
+          256,
+          512,
+          256,
+          256
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 14,
+        "rect": [
+          512,
+          512,
+          256,
+          256
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 15,
+        "rect": [
+          768,
+          512,
+          256,
+          256
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 16,
+        "rect": [
+          1024,
+          512,
+          256,
+          256
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 17,
+        "rect": [
+          1280,
+          512,
+          256,
+          256
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 18,
+        "rect": [
+          0,
+          768,
+          256,
+          256
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 19,
+        "rect": [
+          256,
+          768,
+          256,
+          256
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 20,
+        "rect": [
+          512,
+          768,
+          256,
+          256
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 21,
+        "rect": [
+          768,
+          768,
+          256,
+          256
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 22,
+        "rect": [
+          1024,
+          768,
+          256,
+          256
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 23,
+        "rect": [
+          1280,
+          768,
+          256,
+          256
+        ],
+        "durationMs": 83
+      }
+    ]
+  },
+  "encoded": {
+    "frames": 24,
+    "durationMs": 1992,
+    "bytes": 241952
+  },
+  "playback": {
+    "frameDurationMs": 83,
+    "loop": true,
+    "endBehavior": "continue-until-state-change",
+    "reducedMotion": "ui/icon-spinner-loop-poster.png",
+    "alpha": "straight-alpha",
+    "sizing": "preserve aspect; use contentBounds and pivot, do not stretch the whole padded canvas into old art bounds"
+  },
+  "contentBounds": [
+    48,
+    48,
+    160,
+    160
+  ]
+}

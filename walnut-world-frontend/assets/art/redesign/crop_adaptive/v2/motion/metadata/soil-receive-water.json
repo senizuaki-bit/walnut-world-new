@@ -1,0 +1,234 @@
+{
+  "group": "soil",
+  "id": "soil-receive-water",
+  "source": [
+    "components/soil-light-thirst.png"
+  ],
+  "state": "浇水落点",
+  "effect": "两圈小水纹随落点扩散后消失；结束湿度由状态数据决定",
+  "width": 640,
+  "height": 400,
+  "frames": 18,
+  "fps": 12,
+  "loop": false,
+  "trigger": "浇水落点",
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "durationMs": 1494,
+  "delayMs": 83,
+  "files": {
+    "webp": "soil/soil-receive-water.webp",
+    "poster": "soil/soil-receive-water-poster.png",
+    "atlas": "soil/soil-receive-water-atlas.png",
+    "metadata": "metadata/soil-receive-water.json"
+  },
+  "atlas": {
+    "columns": 6,
+    "rows": 3,
+    "frameWidth": 640,
+    "frameHeight": 400,
+    "frames": [
+      {
+        "index": 0,
+        "rect": [
+          0,
+          0,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 1,
+        "rect": [
+          640,
+          0,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 2,
+        "rect": [
+          1280,
+          0,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 3,
+        "rect": [
+          1920,
+          0,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 4,
+        "rect": [
+          2560,
+          0,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 5,
+        "rect": [
+          3200,
+          0,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 6,
+        "rect": [
+          0,
+          400,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 7,
+        "rect": [
+          640,
+          400,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 8,
+        "rect": [
+          1280,
+          400,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 9,
+        "rect": [
+          1920,
+          400,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 10,
+        "rect": [
+          2560,
+          400,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 11,
+        "rect": [
+          3200,
+          400,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 12,
+        "rect": [
+          0,
+          800,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 13,
+        "rect": [
+          640,
+          800,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 14,
+        "rect": [
+          1280,
+          800,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 15,
+        "rect": [
+          1920,
+          800,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 16,
+        "rect": [
+          2560,
+          800,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 17,
+        "rect": [
+          3200,
+          800,
+          640,
+          400
+        ],
+        "durationMs": 83
+      }
+    ]
+  },
+  "encoded": {
+    "frames": 18,
+    "durationMs": 1494,
+    "bytes": 86302
+  },
+  "playback": {
+    "frameDurationMs": 83,
+    "loop": false,
+    "endBehavior": "hold-last-frame-until-state-controller-switches",
+    "reducedMotion": "soil/soil-receive-water-poster.png",
+    "alpha": "straight-alpha",
+    "sizing": "preserve aspect; use contentBounds and pivot, do not stretch the whole padded canvas into old art bounds"
+  },
+  "contentBounds": [
+    39,
+    35,
+    563,
+    329
+  ]
+}

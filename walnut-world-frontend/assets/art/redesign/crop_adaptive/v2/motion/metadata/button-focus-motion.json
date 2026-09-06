@@ -1,0 +1,294 @@
+{
+  "group": "ui",
+  "id": "button-focus-motion",
+  "source": [
+    "components/button-focus.png"
+  ],
+  "state": "键盘聚焦",
+  "effect": "只对皮肤轻微位移／缩放或边缘亮度变化；文字必须继续由前端独立绘制",
+  "width": 640,
+  "height": 224,
+  "frames": 24,
+  "fps": 12,
+  "loop": true,
+  "trigger": "键盘聚焦；disabled 状态不播放",
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "durationMs": 1992,
+  "delayMs": 83,
+  "files": {
+    "webp": "ui/button-focus-motion.webp",
+    "poster": "ui/button-focus-motion-poster.png",
+    "atlas": "ui/button-focus-motion-atlas.png",
+    "metadata": "metadata/button-focus-motion.json"
+  },
+  "atlas": {
+    "columns": 6,
+    "rows": 4,
+    "frameWidth": 640,
+    "frameHeight": 224,
+    "frames": [
+      {
+        "index": 0,
+        "rect": [
+          0,
+          0,
+          640,
+          224
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 1,
+        "rect": [
+          640,
+          0,
+          640,
+          224
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 2,
+        "rect": [
+          1280,
+          0,
+          640,
+          224
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 3,
+        "rect": [
+          1920,
+          0,
+          640,
+          224
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 4,
+        "rect": [
+          2560,
+          0,
+          640,
+          224
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 5,
+        "rect": [
+          3200,
+          0,
+          640,
+          224
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 6,
+        "rect": [
+          0,
+          224,
+          640,
+          224
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 7,
+        "rect": [
+          640,
+          224,
+          640,
+          224
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 8,
+        "rect": [
+          1280,
+          224,
+          640,
+          224
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 9,
+        "rect": [
+          1920,
+          224,
+          640,
+          224
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 10,
+        "rect": [
+          2560,
+          224,
+          640,
+          224
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 11,
+        "rect": [
+          3200,
+          224,
+          640,
+          224
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 12,
+        "rect": [
+          0,
+          448,
+          640,
+          224
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 13,
+        "rect": [
+          640,
+          448,
+          640,
+          224
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 14,
+        "rect": [
+          1280,
+          448,
+          640,
+          224
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 15,
+        "rect": [
+          1920,
+          448,
+          640,
+          224
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 16,
+        "rect": [
+          2560,
+          448,
+          640,
+          224
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 17,
+        "rect": [
+          3200,
+          448,
+          640,
+          224
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 18,
+        "rect": [
+          0,
+          672,
+          640,
+          224
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 19,
+        "rect": [
+          640,
+          672,
+          640,
+          224
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 20,
+        "rect": [
+          1280,
+          672,
+          640,
+          224
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 21,
+        "rect": [
+          1920,
+          672,
+          640,
+          224
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 22,
+        "rect": [
+          2560,
+          672,
+          640,
+          224
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 23,
+        "rect": [
+          3200,
+          672,
+          640,
+          224
+        ],
+        "durationMs": 83
+      }
+    ]
+  },
+  "encoded": {
+    "frames": 17,
+    "durationMs": 1992,
+    "bytes": 239092
+  },
+  "playback": {
+    "frameDurationMs": 83,
+    "loop": true,
+    "endBehavior": "continue-until-state-change",
+    "reducedMotion": "ui/button-focus-motion-poster.png",
+    "alpha": "straight-alpha",
+    "sizing": "preserve aspect; use contentBounds and pivot, do not stretch the whole padded canvas into old art bounds"
+  },
+  "contentBounds": [
+    41,
+    27,
+    558,
+    170
+  ]
+}

@@ -1,0 +1,2489 @@
+{
+  "version": "2.2",
+  "generatedBy": "Built-in ImageGen; mechanical crop and chroma extraction",
+  "purpose": "Visual prototype handoff; no backend or game logic modifications",
+  "assets": [
+    {
+      "id": "ui-panel",
+      "file": "components/ui-panel.png",
+      "source": "A06-ui-surfaces-keyed.png",
+      "sourceRegion": [
+        35,
+        142,
+        452,
+        443
+      ],
+      "width": 472,
+      "height": 463,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "nineSliceSuggested": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/ui-panel.png"
+    },
+    {
+      "id": "ui-dialogue",
+      "file": "components/ui-dialogue.png",
+      "source": "A06-ui-surfaces-keyed.png",
+      "sourceRegion": [
+        526,
+        255,
+        471,
+        244
+      ],
+      "width": 491,
+      "height": 264,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "nineSliceSuggested": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/ui-dialogue.png"
+    },
+    {
+      "id": "ui-code",
+      "file": "components/ui-code.png",
+      "source": "A06-ui-surfaces-keyed.png",
+      "sourceRegion": [
+        44,
+        674,
+        426,
+        344
+      ],
+      "width": 446,
+      "height": 364,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "nineSliceSuggested": [
+        24,
+        24,
+        24,
+        24
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/ui-code.png"
+    },
+    {
+      "id": "ui-hud",
+      "file": "components/ui-hud.png",
+      "source": "A06-ui-surfaces-keyed.png",
+      "sourceRegion": [
+        523,
+        755,
+        467,
+        193
+      ],
+      "width": 487,
+      "height": 213,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "nineSliceSuggested": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/ui-hud.png"
+    },
+    {
+      "id": "ui-nameplate",
+      "file": "components/ui-nameplate.png",
+      "source": "A06-ui-surfaces-keyed.png",
+      "sourceRegion": [
+        42,
+        1221,
+        416,
+        119
+      ],
+      "width": 436,
+      "height": 139,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "nineSliceSuggested": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/ui-nameplate.png"
+    },
+    {
+      "id": "ui-data-plaque",
+      "file": "components/ui-data-plaque.png",
+      "source": "A06-ui-surfaces-keyed.png",
+      "sourceRegion": [
+        530,
+        1226,
+        453,
+        116
+      ],
+      "width": 473,
+      "height": 136,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "nineSliceSuggested": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/ui-data-plaque.png"
+    },
+    {
+      "id": "button-normal",
+      "file": "components/button-normal.png",
+      "source": "A07-button-states-keyed.png",
+      "sourceRegion": [
+        37,
+        98,
+        560,
+        165
+      ],
+      "width": 580,
+      "height": 185,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "nineSliceSuggested": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/button-normal.png"
+    },
+    {
+      "id": "button-hover",
+      "file": "components/button-hover.png",
+      "source": "A07-button-states-keyed.png",
+      "sourceRegion": [
+        658,
+        98,
+        559,
+        165
+      ],
+      "width": 579,
+      "height": 185,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "nineSliceSuggested": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/button-hover.png"
+    },
+    {
+      "id": "button-pressed",
+      "file": "components/button-pressed.png",
+      "source": "A07-button-states-keyed.png",
+      "sourceRegion": [
+        37,
+        398,
+        560,
+        167
+      ],
+      "width": 580,
+      "height": 187,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "nineSliceSuggested": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/button-pressed.png"
+    },
+    {
+      "id": "button-disabled",
+      "file": "components/button-disabled.png",
+      "source": "A07-button-states-keyed.png",
+      "sourceRegion": [
+        658,
+        398,
+        559,
+        167
+      ],
+      "width": 579,
+      "height": 187,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "nineSliceSuggested": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/button-disabled.png"
+    },
+    {
+      "id": "button-loading",
+      "file": "components/button-loading.png",
+      "source": "A07-button-states-keyed.png",
+      "sourceRegion": [
+        37,
+        699,
+        560,
+        167
+      ],
+      "width": 580,
+      "height": 187,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "nineSliceSuggested": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/button-loading.png"
+    },
+    {
+      "id": "button-success",
+      "file": "components/button-success.png",
+      "source": "A07-button-states-keyed.png",
+      "sourceRegion": [
+        658,
+        699,
+        559,
+        167
+      ],
+      "width": 579,
+      "height": 187,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "nineSliceSuggested": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/button-success.png"
+    },
+    {
+      "id": "button-focus",
+      "file": "components/button-focus.png",
+      "source": "A07-button-states-keyed.png",
+      "sourceRegion": [
+        33,
+        999,
+        569,
+        172
+      ],
+      "width": 589,
+      "height": 192,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "nineSliceSuggested": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/button-focus.png"
+    },
+    {
+      "id": "button-error",
+      "file": "components/button-error.png",
+      "source": "A07-button-states-keyed.png",
+      "sourceRegion": [
+        658,
+        1002,
+        559,
+        166
+      ],
+      "width": 579,
+      "height": 186,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "nineSliceSuggested": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/button-error.png"
+    },
+    {
+      "id": "input-normal",
+      "file": "components/input-normal.png",
+      "source": "A08-input-states-keyed.png",
+      "sourceRegion": [
+        32,
+        183,
+        657,
+        156
+      ],
+      "width": 677,
+      "height": 176,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "nineSliceSuggested": [
+        22,
+        22,
+        22,
+        22
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/input-normal.png"
+    },
+    {
+      "id": "input-hover",
+      "file": "components/input-hover.png",
+      "source": "A08-input-states-keyed.png",
+      "sourceRegion": [
+        755,
+        183,
+        657,
+        156
+      ],
+      "width": 677,
+      "height": 176,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "nineSliceSuggested": [
+        22,
+        22,
+        22,
+        22
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/input-hover.png"
+    },
+    {
+      "id": "input-focus",
+      "file": "components/input-focus.png",
+      "source": "A08-input-states-keyed.png",
+      "sourceRegion": [
+        30,
+        465,
+        658,
+        160
+      ],
+      "width": 678,
+      "height": 180,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "nineSliceSuggested": [
+        22,
+        22,
+        22,
+        22
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/input-focus.png"
+    },
+    {
+      "id": "input-filled",
+      "file": "components/input-filled.png",
+      "source": "A08-input-states-keyed.png",
+      "sourceRegion": [
+        755,
+        464,
+        656,
+        159
+      ],
+      "width": 676,
+      "height": 179,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "nineSliceSuggested": [
+        22,
+        22,
+        22,
+        22
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/input-filled.png"
+    },
+    {
+      "id": "input-error",
+      "file": "components/input-error.png",
+      "source": "A08-input-states-keyed.png",
+      "sourceRegion": [
+        30,
+        751,
+        658,
+        159
+      ],
+      "width": 678,
+      "height": 179,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "nineSliceSuggested": [
+        22,
+        22,
+        22,
+        22
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/input-error.png"
+    },
+    {
+      "id": "input-disabled",
+      "file": "components/input-disabled.png",
+      "source": "A08-input-states-keyed.png",
+      "sourceRegion": [
+        755,
+        750,
+        656,
+        159
+      ],
+      "width": 676,
+      "height": 179,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "nineSliceSuggested": [
+        22,
+        22,
+        22,
+        22
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/input-disabled.png"
+    },
+    {
+      "id": "crop-carrot-severe-dry",
+      "file": "components/crop-carrot-severe-dry.png",
+      "source": "A04-crop-states-keyed.png",
+      "sourceRegion": [
+        78,
+        81,
+        167,
+        187
+      ],
+      "width": 187,
+      "height": 207,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9516908212560387
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/crop-carrot-severe-dry.png"
+    },
+    {
+      "id": "crop-carrot-light-thirst",
+      "file": "components/crop-carrot-light-thirst.png",
+      "source": "A04-crop-states-keyed.png",
+      "sourceRegion": [
+        390,
+        97,
+        165,
+        172
+      ],
+      "width": 185,
+      "height": 192,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9479166666666666
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/crop-carrot-light-thirst.png"
+    },
+    {
+      "id": "crop-carrot-target-met",
+      "file": "components/crop-carrot-target-met.png",
+      "source": "A04-crop-states-keyed.png",
+      "sourceRegion": [
+        690,
+        35,
+        166,
+        234
+      ],
+      "width": 186,
+      "height": 254,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9606299212598425
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/crop-carrot-target-met.png"
+    },
+    {
+      "id": "crop-carrot-waterlogged",
+      "file": "components/crop-carrot-waterlogged.png",
+      "source": "A04-crop-states-keyed.png",
+      "sourceRegion": [
+        989,
+        82,
+        172,
+        186
+      ],
+      "width": 192,
+      "height": 206,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9514563106796117
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/crop-carrot-waterlogged.png"
+    },
+    {
+      "id": "crop-tomato-severe-dry",
+      "file": "components/crop-tomato-severe-dry.png",
+      "source": "A04-crop-states-keyed.png",
+      "sourceRegion": [
+        75,
+        370,
+        177,
+        191
+      ],
+      "width": 197,
+      "height": 211,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.95260663507109
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/crop-tomato-severe-dry.png"
+    },
+    {
+      "id": "crop-tomato-light-thirst",
+      "file": "components/crop-tomato-light-thirst.png",
+      "source": "A04-crop-states-keyed.png",
+      "sourceRegion": [
+        380,
+        358,
+        191,
+        207
+      ],
+      "width": 211,
+      "height": 227,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9559471365638766
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/crop-tomato-light-thirst.png"
+    },
+    {
+      "id": "crop-tomato-target-met",
+      "file": "components/crop-tomato-target-met.png",
+      "source": "A04-crop-states-keyed.png",
+      "sourceRegion": [
+        672,
+        345,
+        203,
+        222
+      ],
+      "width": 223,
+      "height": 242,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9586776859504132
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/crop-tomato-target-met.png"
+    },
+    {
+      "id": "crop-tomato-waterlogged",
+      "file": "components/crop-tomato-waterlogged.png",
+      "source": "A04-crop-states-keyed.png",
+      "sourceRegion": [
+        978,
+        366,
+        198,
+        195
+      ],
+      "width": 218,
+      "height": 215,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9534883720930233
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/crop-tomato-waterlogged.png"
+    },
+    {
+      "id": "crop-potato-severe-dry",
+      "file": "components/crop-potato-severe-dry.png",
+      "source": "A04-crop-states-keyed.png",
+      "sourceRegion": [
+        66,
+        646,
+        182,
+        195
+      ],
+      "width": 202,
+      "height": 215,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9534883720930233
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/crop-potato-severe-dry.png"
+    },
+    {
+      "id": "crop-potato-light-thirst",
+      "file": "components/crop-potato-light-thirst.png",
+      "source": "A04-crop-states-keyed.png",
+      "sourceRegion": [
+        377,
+        648,
+        186,
+        196
+      ],
+      "width": 206,
+      "height": 216,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9537037037037037
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/crop-potato-light-thirst.png"
+    },
+    {
+      "id": "crop-potato-target-met",
+      "file": "components/crop-potato-target-met.png",
+      "source": "A04-crop-states-keyed.png",
+      "sourceRegion": [
+        674,
+        641,
+        205,
+        198
+      ],
+      "width": 225,
+      "height": 218,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9541284403669725
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/crop-potato-target-met.png"
+    },
+    {
+      "id": "crop-potato-waterlogged",
+      "file": "components/crop-potato-waterlogged.png",
+      "source": "A04-crop-states-keyed.png",
+      "sourceRegion": [
+        977,
+        649,
+        191,
+        192
+      ],
+      "width": 211,
+      "height": 212,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9528301886792453
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/crop-potato-waterlogged.png"
+    },
+    {
+      "id": "crop-corn-severe-dry",
+      "file": "components/crop-corn-severe-dry.png",
+      "source": "A04-crop-states-keyed.png",
+      "sourceRegion": [
+        72,
+        959,
+        173,
+        214
+      ],
+      "width": 193,
+      "height": 234,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9572649572649573
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/crop-corn-severe-dry.png"
+    },
+    {
+      "id": "crop-corn-light-thirst",
+      "file": "components/crop-corn-light-thirst.png",
+      "source": "A04-crop-states-keyed.png",
+      "sourceRegion": [
+        367,
+        932,
+        198,
+        243
+      ],
+      "width": 218,
+      "height": 263,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9619771863117871
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/crop-corn-light-thirst.png"
+    },
+    {
+      "id": "crop-corn-target-met",
+      "file": "components/crop-corn-target-met.png",
+      "source": "A04-crop-states-keyed.png",
+      "sourceRegion": [
+        665,
+        903,
+        213,
+        271
+      ],
+      "width": 233,
+      "height": 291,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9656357388316151
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/crop-corn-target-met.png"
+    },
+    {
+      "id": "crop-corn-waterlogged",
+      "file": "components/crop-corn-waterlogged.png",
+      "source": "A04-crop-states-keyed.png",
+      "sourceRegion": [
+        962,
+        934,
+        205,
+        241
+      ],
+      "width": 225,
+      "height": 261,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9616858237547893
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/crop-corn-waterlogged.png"
+    },
+    {
+      "id": "soil-severe-dry",
+      "file": "components/soil-severe-dry.png",
+      "source": "A05-soil-states-keyed.png",
+      "sourceRegion": [
+        36,
+        164,
+        570,
+        335
+      ],
+      "width": 590,
+      "height": 355,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/soil-severe-dry.png"
+    },
+    {
+      "id": "soil-light-thirst",
+      "file": "components/soil-light-thirst.png",
+      "source": "A05-soil-states-keyed.png",
+      "sourceRegion": [
+        637,
+        171,
+        569,
+        332
+      ],
+      "width": 589,
+      "height": 352,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/soil-light-thirst.png"
+    },
+    {
+      "id": "soil-target-met",
+      "file": "components/soil-target-met.png",
+      "source": "A05-soil-states-keyed.png",
+      "sourceRegion": [
+        29,
+        710,
+        569,
+        343
+      ],
+      "width": 589,
+      "height": 363,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/soil-target-met.png"
+    },
+    {
+      "id": "soil-waterlogged",
+      "file": "components/soil-waterlogged.png",
+      "source": "A05-soil-states-keyed.png",
+      "sourceRegion": [
+        639,
+        718,
+        574,
+        339
+      ],
+      "width": 594,
+      "height": 359,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/soil-waterlogged.png"
+    },
+    {
+      "id": "char-player-idle",
+      "file": "components/char-player-idle.png",
+      "source": "A01-characters-idle-keyed.png",
+      "sourceRegion": [
+        106,
+        28,
+        279,
+        523
+      ],
+      "width": 299,
+      "height": 543,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9815837937384899
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/char-player-idle.png"
+    },
+    {
+      "id": "char-walnut-idle",
+      "file": "components/char-walnut-idle.png",
+      "source": "A01-characters-idle-keyed.png",
+      "sourceRegion": [
+        586,
+        103,
+        303,
+        363
+      ],
+      "width": 323,
+      "height": 383,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9738903394255874
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/char-walnut-idle.png"
+    },
+    {
+      "id": "char-dingdang-idle",
+      "file": "components/char-dingdang-idle.png",
+      "source": "A01-characters-idle-keyed.png",
+      "sourceRegion": [
+        115,
+        551,
+        268,
+        519
+      ],
+      "width": 288,
+      "height": 539,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9814471243042672
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/char-dingdang-idle.png"
+    },
+    {
+      "id": "char-yaya-idle",
+      "file": "components/char-yaya-idle.png",
+      "source": "A01-characters-idle-keyed.png",
+      "sourceRegion": [
+        574,
+        590,
+        299,
+        386
+      ],
+      "width": 319,
+      "height": 406,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9753694581280788
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/char-yaya-idle.png"
+    },
+    {
+      "id": "char-shushu-idle",
+      "file": "components/char-shushu-idle.png",
+      "source": "A01-characters-idle-keyed.png",
+      "sourceRegion": [
+        117,
+        1100,
+        278,
+        385
+      ],
+      "width": 298,
+      "height": 405,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9753086419753086
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/char-shushu-idle.png"
+    },
+    {
+      "id": "char-bug-idle",
+      "file": "components/char-bug-idle.png",
+      "source": "A01-characters-idle-keyed.png",
+      "sourceRegion": [
+        595,
+        1055,
+        274,
+        422
+      ],
+      "width": 294,
+      "height": 442,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9773755656108597
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/char-bug-idle.png"
+    },
+    {
+      "id": "char-player-thinking",
+      "file": "components/char-player-thinking.png",
+      "source": "A02-characters-thinking-keyed.png",
+      "sourceRegion": [
+        133,
+        29,
+        270,
+        523
+      ],
+      "width": 290,
+      "height": 543,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9815837937384899
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/char-player-thinking.png"
+    },
+    {
+      "id": "char-walnut-thinking",
+      "file": "components/char-walnut-thinking.png",
+      "source": "A02-characters-thinking-keyed.png",
+      "sourceRegion": [
+        577,
+        124,
+        307,
+        358
+      ],
+      "width": 327,
+      "height": 378,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9735449735449735
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/char-walnut-thinking.png"
+    },
+    {
+      "id": "char-dingdang-thinking",
+      "file": "components/char-dingdang-thinking.png",
+      "source": "A02-characters-thinking-keyed.png",
+      "sourceRegion": [
+        83,
+        558,
+        404,
+        491
+      ],
+      "width": 424,
+      "height": 511,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9804305283757339
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/char-dingdang-thinking.png"
+    },
+    {
+      "id": "char-yaya-thinking",
+      "file": "components/char-yaya-thinking.png",
+      "source": "A02-characters-thinking-keyed.png",
+      "sourceRegion": [
+        576,
+        609,
+        301,
+        373
+      ],
+      "width": 321,
+      "height": 393,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9745547073791349
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/char-yaya-thinking.png"
+    },
+    {
+      "id": "char-shushu-thinking",
+      "file": "components/char-shushu-thinking.png",
+      "source": "A02-characters-thinking-keyed.png",
+      "sourceRegion": [
+        132,
+        1100,
+        299,
+        392
+      ],
+      "width": 319,
+      "height": 412,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9757281553398058
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/char-shushu-thinking.png"
+    },
+    {
+      "id": "char-bug-thinking",
+      "file": "components/char-bug-thinking.png",
+      "source": "A02-characters-thinking-keyed.png",
+      "sourceRegion": [
+        594,
+        1066,
+        274,
+        422
+      ],
+      "width": 294,
+      "height": 442,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9773755656108597
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/char-bug-thinking.png"
+    },
+    {
+      "id": "char-player-success",
+      "file": "components/char-player-success.png",
+      "source": "A03-characters-success-keyed.png",
+      "sourceRegion": [
+        109,
+        31,
+        281,
+        525
+      ],
+      "width": 301,
+      "height": 545,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.981651376146789
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/char-player-success.png"
+    },
+    {
+      "id": "char-walnut-success",
+      "file": "components/char-walnut-success.png",
+      "source": "A03-characters-success-keyed.png",
+      "sourceRegion": [
+        585,
+        111,
+        315,
+        366
+      ],
+      "width": 335,
+      "height": 386,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9740932642487047
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/char-walnut-success.png"
+    },
+    {
+      "id": "char-dingdang-success",
+      "file": "components/char-dingdang-success.png",
+      "source": "A03-characters-success-keyed.png",
+      "sourceRegion": [
+        98,
+        576,
+        313,
+        478
+      ],
+      "width": 333,
+      "height": 498,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9799196787148594
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/char-dingdang-success.png"
+    },
+    {
+      "id": "char-yaya-success",
+      "file": "components/char-yaya-success.png",
+      "source": "A03-characters-success-keyed.png",
+      "sourceRegion": [
+        572,
+        608,
+        319,
+        399
+      ],
+      "width": 339,
+      "height": 419,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9761336515513126
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/char-yaya-success.png"
+    },
+    {
+      "id": "char-shushu-success",
+      "file": "components/char-shushu-success.png",
+      "source": "A03-characters-success-keyed.png",
+      "sourceRegion": [
+        82,
+        1095,
+        334,
+        384
+      ],
+      "width": 354,
+      "height": 404,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9752475247524752
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/char-shushu-success.png"
+    },
+    {
+      "id": "char-bug-success",
+      "file": "components/char-bug-success.png",
+      "source": "A03-characters-success-keyed.png",
+      "sourceRegion": [
+        578,
+        1073,
+        303,
+        409
+      ],
+      "width": 323,
+      "height": 429,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9766899766899767
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/char-bug-success.png"
+    },
+    {
+      "id": "prop-pump",
+      "file": "components/prop-pump.png",
+      "source": "A11-props-keyed.png",
+      "sourceRegion": [
+        79,
+        65,
+        363,
+        470
+      ],
+      "width": 383,
+      "height": 490,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9795918367346939
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/prop-pump.png"
+    },
+    {
+      "id": "prop-nozzle",
+      "file": "components/prop-nozzle.png",
+      "source": "A11-props-keyed.png",
+      "sourceRegion": [
+        577,
+        128,
+        355,
+        380
+      ],
+      "width": 375,
+      "height": 400,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.975
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/prop-nozzle.png"
+    },
+    {
+      "id": "prop-archive-book",
+      "file": "components/prop-archive-book.png",
+      "source": "A11-props-keyed.png",
+      "sourceRegion": [
+        57,
+        660,
+        416,
+        289
+      ],
+      "width": 436,
+      "height": 309,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9676375404530745
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/prop-archive-book.png"
+    },
+    {
+      "id": "prop-skill-tree",
+      "file": "components/prop-skill-tree.png",
+      "source": "A11-props-keyed.png",
+      "sourceRegion": [
+        545,
+        580,
+        409,
+        414
+      ],
+      "width": 429,
+      "height": 434,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9769585253456221
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/prop-skill-tree.png",
+      "usage": "V2.0四插槽历史底座，不再用于E03/E10；改用prop-skill-tree-v2并叠加五个图标。",
+      "supersededBy": "prop-skill-tree-v2"
+    },
+    {
+      "id": "prop-blueprint",
+      "file": "components/prop-blueprint.png",
+      "source": "A11-props-keyed.png",
+      "sourceRegion": [
+        63,
+        1097,
+        414,
+        297
+      ],
+      "width": 434,
+      "height": 317,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9684542586750788
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/prop-blueprint.png"
+    },
+    {
+      "id": "prop-leaf-corner",
+      "file": "components/prop-leaf-corner.png",
+      "source": "A11-props-keyed.png",
+      "sourceRegion": [
+        624,
+        1115,
+        233,
+        289
+      ],
+      "width": 253,
+      "height": 309,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.9676375404530745
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/prop-leaf-corner.png"
+    },
+    {
+      "id": "icon-drop",
+      "file": "components/icon-drop.png",
+      "source": "A09-icons-keyed.png",
+      "sourceRegion": [
+        98,
+        76,
+        133,
+        195
+      ],
+      "width": 153,
+      "height": 215,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/icon-drop.png"
+    },
+    {
+      "id": "icon-drops-two",
+      "file": "components/icon-drops-two.png",
+      "source": "A09-icons-keyed.png",
+      "sourceRegion": [
+        390,
+        83,
+        184,
+        194
+      ],
+      "width": 204,
+      "height": 214,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/icon-drops-two.png"
+    },
+    {
+      "id": "icon-star",
+      "file": "components/icon-star.png",
+      "source": "A09-icons-keyed.png",
+      "sourceRegion": [
+        688,
+        76,
+        204,
+        198
+      ],
+      "width": 224,
+      "height": 218,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/icon-star.png"
+    },
+    {
+      "id": "icon-check",
+      "file": "components/icon-check.png",
+      "source": "A09-icons-keyed.png",
+      "sourceRegion": [
+        1004,
+        97,
+        190,
+        168
+      ],
+      "width": 210,
+      "height": 188,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/icon-check.png"
+    },
+    {
+      "id": "icon-warning",
+      "file": "components/icon-warning.png",
+      "source": "A09-icons-keyed.png",
+      "sourceRegion": [
+        73,
+        377,
+        189,
+        186
+      ],
+      "width": 209,
+      "height": 206,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/icon-warning.png"
+    },
+    {
+      "id": "icon-close",
+      "file": "components/icon-close.png",
+      "source": "A09-icons-keyed.png",
+      "sourceRegion": [
+        387,
+        385,
+        171,
+        171
+      ],
+      "width": 191,
+      "height": 191,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/icon-close.png"
+    },
+    {
+      "id": "icon-play",
+      "file": "components/icon-play.png",
+      "source": "A09-icons-keyed.png",
+      "sourceRegion": [
+        723,
+        384,
+        141,
+        178
+      ],
+      "width": 161,
+      "height": 198,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/icon-play.png"
+    },
+    {
+      "id": "icon-replay",
+      "file": "components/icon-replay.png",
+      "source": "A09-icons-keyed.png",
+      "sourceRegion": [
+        985,
+        374,
+        206,
+        198
+      ],
+      "width": 226,
+      "height": 218,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/icon-replay.png"
+    },
+    {
+      "id": "icon-lock",
+      "file": "components/icon-lock.png",
+      "source": "A09-icons-keyed.png",
+      "sourceRegion": [
+        83,
+        650,
+        163,
+        210
+      ],
+      "width": 183,
+      "height": 230,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/icon-lock.png"
+    },
+    {
+      "id": "icon-bulb",
+      "file": "components/icon-bulb.png",
+      "source": "A09-icons-keyed.png",
+      "sourceRegion": [
+        398,
+        645,
+        149,
+        223
+      ],
+      "width": 169,
+      "height": 243,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/icon-bulb.png"
+    },
+    {
+      "id": "icon-book",
+      "file": "components/icon-book.png",
+      "source": "A09-icons-keyed.png",
+      "sourceRegion": [
+        657,
+        678,
+        249,
+        184
+      ],
+      "width": 269,
+      "height": 204,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/icon-book.png"
+    },
+    {
+      "id": "icon-array",
+      "file": "components/icon-array.png",
+      "source": "A09-icons-keyed.png",
+      "sourceRegion": [
+        1005,
+        675,
+        170,
+        169
+      ],
+      "width": 190,
+      "height": 189,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/icon-array.png"
+    },
+    {
+      "id": "icon-scroll",
+      "file": "components/icon-scroll.png",
+      "source": "A09-icons-keyed.png",
+      "sourceRegion": [
+        62,
+        962,
+        205,
+        188
+      ],
+      "width": 225,
+      "height": 208,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/icon-scroll.png"
+    },
+    {
+      "id": "icon-arrow",
+      "file": "components/icon-arrow.png",
+      "source": "A09-icons-keyed.png",
+      "sourceRegion": [
+        372,
+        976,
+        194,
+        163
+      ],
+      "width": 214,
+      "height": 183,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/icon-arrow.png"
+    },
+    {
+      "id": "icon-spinner",
+      "file": "components/icon-spinner.png",
+      "source": "A09-icons-keyed.png",
+      "sourceRegion": [
+        680,
+        955,
+        192,
+        201
+      ],
+      "width": 212,
+      "height": 221,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/icon-spinner.png"
+    },
+    {
+      "id": "icon-skip",
+      "file": "components/icon-skip.png",
+      "source": "A09-icons-keyed.png",
+      "sourceRegion": [
+        967,
+        945,
+        221,
+        212
+      ],
+      "width": 241,
+      "height": 232,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/icon-skip.png"
+    },
+    {
+      "id": "fx-water-one",
+      "file": "components/fx-water-one.png",
+      "source": "A10-effects-keyed.png",
+      "sourceRegion": [
+        109,
+        125,
+        415,
+        141
+      ],
+      "width": 435,
+      "height": 161,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/fx-water-one.png"
+    },
+    {
+      "id": "fx-water-two",
+      "file": "components/fx-water-two.png",
+      "source": "A10-effects-keyed.png",
+      "sourceRegion": [
+        676,
+        92,
+        474,
+        190
+      ],
+      "width": 494,
+      "height": 210,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/fx-water-two.png"
+    },
+    {
+      "id": "fx-splash",
+      "file": "components/fx-splash.png",
+      "source": "A10-effects-keyed.png",
+      "sourceRegion": [
+        180,
+        404,
+        254,
+        141
+      ],
+      "width": 274,
+      "height": 161,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/fx-splash.png"
+    },
+    {
+      "id": "fx-puddle",
+      "file": "components/fx-puddle.png",
+      "source": "A10-effects-keyed.png",
+      "sourceRegion": [
+        653,
+        441,
+        506,
+        123
+      ],
+      "width": 526,
+      "height": 143,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/fx-puddle.png"
+    },
+    {
+      "id": "fx-selected",
+      "file": "components/fx-selected.png",
+      "source": "A10-effects-keyed.png",
+      "sourceRegion": [
+        74,
+        649,
+        495,
+        256
+      ],
+      "width": 515,
+      "height": 276,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/fx-selected.png",
+      "deprecated": true,
+      "replacement": {
+        "source": "current-soil-image-alpha",
+        "effect": "selected",
+        "stylePath": "./soil-glow.css",
+        "separateTexture": false
+      },
+      "usage": "旧选中框停用，仅保留历史文件。选中/扫描改用当前土地PNG自身的金色外发光。"
+    },
+    {
+      "id": "fx-focus",
+      "file": "components/fx-focus.png",
+      "source": "A10-effects-keyed.png",
+      "sourceRegion": [
+        658,
+        648,
+        504,
+        269
+      ],
+      "width": 524,
+      "height": 289,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/fx-focus.png",
+      "deprecated": true,
+      "replacement": {
+        "source": "current-soil-image-alpha",
+        "effect": "focus",
+        "stylePath": "./soil-glow.css",
+        "separateTexture": false
+      },
+      "usage": "旧焦点框停用，仅保留历史文件。键盘焦点改用当前土地PNG自身的浅青色外发光。"
+    },
+    {
+      "id": "fx-error",
+      "file": "components/fx-error.png",
+      "source": "A10-effects-keyed.png",
+      "sourceRegion": [
+        68,
+        945,
+        502,
+        269
+      ],
+      "width": 522,
+      "height": 289,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/fx-error.png",
+      "deprecated": true,
+      "replacement": {
+        "source": "current-soil-image-alpha",
+        "effect": "error",
+        "stylePath": "./soil-glow.css",
+        "separateTexture": false
+      },
+      "usage": "旧错误框停用，仅保留历史文件。错误改用当前土地PNG自身的红色外发光，并保留文字解释。"
+    },
+    {
+      "id": "fx-celebrate",
+      "file": "components/fx-celebrate.png",
+      "source": "A10-effects-keyed.png",
+      "sourceRegion": [
+        681,
+        950,
+        464,
+        255
+      ],
+      "width": 484,
+      "height": 275,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/fx-celebrate.png"
+    },
+    {
+      "id": "ui-hero-crest",
+      "file": "components/ui-hero-crest.png",
+      "source": "A12-extra-ui-keyed.png",
+      "sourceRegion": [
+        35,
+        113,
+        443,
+        322
+      ],
+      "width": 463,
+      "height": 342,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "nineSliceSuggested": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/ui-hero-crest.png"
+    },
+    {
+      "id": "ui-hero-frame",
+      "file": "components/ui-hero-frame.png",
+      "source": "A12-extra-ui-keyed.png",
+      "sourceRegion": [
+        531,
+        101,
+        467,
+        368
+      ],
+      "width": 487,
+      "height": 388,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "nineSliceSuggested": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/ui-hero-frame.png"
+    },
+    {
+      "id": "button-water-blue",
+      "file": "components/button-water-blue.png",
+      "source": "A12-extra-ui-keyed.png",
+      "sourceRegion": [
+        34,
+        712,
+        443,
+        172
+      ],
+      "width": 463,
+      "height": 192,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "nineSliceSuggested": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/button-water-blue.png"
+    },
+    {
+      "id": "button-water-green",
+      "file": "components/button-water-green.png",
+      "source": "A12-extra-ui-keyed.png",
+      "sourceRegion": [
+        544,
+        713,
+        443,
+        172
+      ],
+      "width": 463,
+      "height": 192,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "nineSliceSuggested": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/button-water-green.png"
+    },
+    {
+      "id": "ui-portrait-ring",
+      "file": "components/ui-portrait-ring.png",
+      "source": "A12-extra-ui-keyed.png",
+      "sourceRegion": [
+        70,
+        1043,
+        365,
+        409
+      ],
+      "width": 385,
+      "height": 429,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "nineSliceSuggested": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/ui-portrait-ring.png"
+    },
+    {
+      "id": "ui-four-star-seal",
+      "file": "components/ui-four-star-seal.png",
+      "source": "A12-extra-ui-keyed.png",
+      "sourceRegion": [
+        536,
+        1154,
+        450,
+        261
+      ],
+      "width": 470,
+      "height": 281,
+      "padding": 10,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "edgeContactPixels": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "nineSliceSuggested": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/ui-four-star-seal.png"
+    },
+    {
+      "id": "B01-farm-background",
+      "file": "components/B01-farm-background.png",
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": false,
+      "role": "opaque_scenery",
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/B01-farm-background.png"
+    },
+    {
+      "id": "B02-workshop-background",
+      "file": "components/B02-workshop-background.png",
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": false,
+      "role": "opaque_scenery",
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/B02-workshop-background.png"
+    },
+    {
+      "id": "B03-start-background",
+      "file": "components/B03-start-background.png",
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": false,
+      "role": "opaque_scenery",
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/B03-start-background.png"
+    },
+    {
+      "id": "B04-workshop-exterior-background",
+      "file": "components/B04-workshop-exterior-background.png",
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": false,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/B04-workshop-exterior-background.png",
+      "source": "Built-in ImageGen guide supplement",
+      "usage": "Background only; native UI and characters composited separately"
+    },
+    {
+      "id": "B05-bug-investigation-background",
+      "file": "components/B05-bug-investigation-background.png",
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": false,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/B05-bug-investigation-background.png",
+      "source": "Built-in ImageGen guide supplement",
+      "usage": "Background only; native UI and characters composited separately"
+    },
+    {
+      "id": "B06-archive-background",
+      "file": "components/B06-archive-background.png",
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": false,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/B06-archive-background.png",
+      "source": "Built-in ImageGen guide supplement",
+      "usage": "Background only; native UI and characters composited separately"
+    },
+    {
+      "id": "prop-skill-tree-v2",
+      "file": "components/prop-skill-tree-v2.png",
+      "width": 1024,
+      "height": 1536,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 254,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "Built-in ImageGen / prompts/prop-skill-tree-v2.txt",
+      "generatedPrompt": "./prompts/prop-skill-tree-v2.txt",
+      "standalone": true,
+      "usage": "五节点技能树底图；必须按skill-tree-data.json逐一叠加图标，不单独展示空木牌。",
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/prop-skill-tree-v2.png",
+      "editPrompt": "./prompts/prop-skill-tree-v2-alpha.txt"
+    },
+    {
+      "id": "icon-skill-watering",
+      "file": "components/icon-skill-watering.png",
+      "width": 1254,
+      "height": 1254,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "Built-in ImageGen / prompts/icon-skill-watering.txt",
+      "generatedPrompt": "./prompts/icon-skill-watering.txt",
+      "standalone": true,
+      "usage": "当前4星技能节点的青铜浇水核心。",
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/icon-skill-watering.png"
+    },
+    {
+      "id": "icon-skill-action",
+      "file": "components/icon-skill-action.png",
+      "width": 1254,
+      "height": 1254,
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "Built-in ImageGen / prompts/icon-skill-action.txt",
+      "generatedPrompt": "./prompts/icon-skill-action.txt",
+      "standalone": true,
+      "usage": "分级动作节点与能力卡共用的手套图标。",
+      "originalProjectFile": "assets/art/redesign/crop_adaptive/v2/components/icon-skill-action.png"
+    }
+  ],
+  "missing": [],
+  "dataFiles": [
+    {
+      "id": "crop-adaptive-skill-tree",
+      "file": "skill-tree-data.json",
+      "browserGlobal": "skill-tree-data.js",
+      "renderer": "skill-tree.js",
+      "views": [
+        "E03",
+        "E10",
+        "E07"
+      ]
+    }
+  ]
+}
