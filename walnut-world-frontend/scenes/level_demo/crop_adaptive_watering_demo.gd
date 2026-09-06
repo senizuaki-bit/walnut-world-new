@@ -1301,7 +1301,7 @@ func _authoritative_snapshot_line() -> String:
 func _set_phase(value: Phase) -> void:
 	_phase = value
 	$Hud/BusyMotion.visible = value in [Phase.BUILDING, Phase.ACTIVATING, Phase.CANDIDATE_VALIDATING]
-	($Pump as ArtMotionTexture).play_clip("prop-pump-fault" if value == Phase.CHAIN_ERROR else "prop-pump-standby")
+	$Pump.set_activity(value in [Phase.OLD_TOOL, Phase.CANDIDATE_PRESENTING] or (value == Phase.RUNNING and not _agent_mode), value == Phase.CHAIN_ERROR)
 	var backdrop: String = {Phase.WORKSHOP: "B02-workshop-background", Phase.SKILL_TREE: "B04-workshop-exterior-background", Phase.SKILL_UNLOCKED: "B04-workshop-exterior-background", Phase.GROWTH_SUMMARY: "B06-archive-background"}.get(value, "B01-farm-background")
 	$FarmBackdrop.set_background(backdrop)
 	($PlayerCompanion as ArtMotionTexture).play_clip("char-player-write" if value == Phase.CODE else ("char-player-recover" if value in [Phase.FAILED, Phase.LOCAL_FAILED, Phase.CHAIN_ERROR] else "char-player-idle"))

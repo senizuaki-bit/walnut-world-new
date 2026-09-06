@@ -1,4 +1,4 @@
-[gd_scene load_steps=46 format=3]
+[gd_scene load_steps=47 format=3]
 
 [ext_resource type="Script" path="res://scenes/level_demo/crop_adaptive_watering_demo.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://scenes/level_demo/crop_plot_card.tscn" id="2_card"]
@@ -79,6 +79,8 @@
 
 [ext_resource type="Script" path="res://scenes/ui/art_watering_sprite.gd" id="watering_art_script"]
 
+[ext_resource type="Script" path="res://scenes/ui/art_pump.gd" id="pump_script"]
+
 [sub_resource type="StyleBoxFlat" id="EditorStyle"]
 bg_color = Color(0.10, 0.17, 0.14, 1)
 border_width_left = 3
@@ -157,7 +159,7 @@ expand_mode = 1
 stretch_mode = 5
 texture = ExtResource("pump_v2")
 modulate = Color(1, 1, 1, 1)
-script = ExtResource("art_motion")
+script = ExtResource("pump_script")
 motion_id = "prop-pump-standby"
 layout_mode = 0
 offset_left = 5.0
