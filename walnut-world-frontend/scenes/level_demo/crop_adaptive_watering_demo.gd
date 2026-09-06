@@ -498,9 +498,6 @@ func _begin_workshop_experiments() -> void:
 
 
 func _show_workshop_step() -> void:
-	for field in _workshop_inputs():
-		field.clear_validation()
-	_refresh_workshop_errors()
 	var experiment: Dictionary = WORKSHOP_EXPERIMENTS[_workshop_step]
 	workshop_badge.text = str(experiment.badge)
 	workshop_title.text = str(experiment.title)
@@ -526,10 +523,13 @@ func _show_workshop_step() -> void:
 		2:
 			evidence_title.text = "水量单位已经对应"
 			evidence_body.text = "1份 = 250 ml　2份 = 500 ml；达到目标的土地保持喷头关闭。"
+	# Programmatic text assignment does not emit LineEdit.text_changed.
+	for field in _workshop_inputs():
+		field.clear_validation()
+	_refresh_workshop_errors()
 
 
 func _on_workshop_action_pressed() -> void:
-	_bounce(workshop_action_button)
 	var first_error: LineEdit = null
 	var fields: Array = _workshop_inputs().slice(0, 2) if _workshop_step == 0 else (_workshop_inputs().slice(2) if _workshop_step == 1 else [])
 	for field in fields:
@@ -1386,6 +1386,4 @@ func _duration(seconds: float) -> float:
 
 
 func _show_workshop_feedback(success: bool) -> void:
-	var feedback := $WorkshopOverlay/WorkshopFeedback as ArtMotionTexture
-	feedback.visible = true
-	feedback.play_clip("button-success-motion" if success else "button-error-motion", true)
+	workshop_action_button.show_feedback(success)

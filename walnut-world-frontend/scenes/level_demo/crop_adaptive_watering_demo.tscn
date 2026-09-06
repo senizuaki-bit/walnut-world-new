@@ -1,4 +1,4 @@
-[gd_scene load_steps=50 format=3]
+[gd_scene load_steps=51 format=3]
 
 [ext_resource type="Script" path="res://scenes/level_demo/crop_adaptive_watering_demo.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://scenes/level_demo/crop_plot_card.tscn" id="2_card"]
@@ -73,6 +73,7 @@
 
 [ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/icon-skill-watering.png" id="reward_tool"]
 
+[ext_resource type="Script" path="res://scenes/ui/art_feedback_button.gd" id="feedback_button"]
 
 [ext_resource type="StyleBox" path="res://resources/ui/art_v2/ui-data-plaque.tres" id="phase_plaque"]
 
@@ -1514,7 +1515,11 @@ theme_override_colors/font_color = Color(0.92, 0.97, 0.90, 1)
 theme_override_font_sizes/font_size = 18
 text = "// 下一页：按关卡文档的两步练习，自己把理解写进完整 C++ 卷轴"
 
-[node name="WorkshopError" type="Label" parent="WorkshopOverlay/Card/Margin/Content"]
+[node name="ErrorSlot" type="MarginContainer" parent="WorkshopOverlay/Card/Margin/Content"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+
+[node name="WorkshopError" type="Label" parent="WorkshopOverlay/Card/Margin/Content/ErrorSlot"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
@@ -1524,6 +1529,7 @@ autowrap_mode = 2
 
 [node name="WorkshopActionButton" type="Button" parent="WorkshopOverlay/Card/Margin/Content"]
 unique_name_in_owner = true
+script = ExtResource("feedback_button")
 custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
@@ -1531,13 +1537,15 @@ theme_override_font_sizes/font_size = 20
 text = "继续  →"
 
 
-[node name="WorkshopFeedback" type="TextureRect" parent="WorkshopOverlay"]
+[node name="Feedback" type="TextureRect" parent="WorkshopOverlay/Card/Margin/Content/WorkshopActionButton"]
 visible = false
-layout_mode = 0
-offset_left = 990.0
-offset_top = 76.0
-offset_right = 1068.0
-offset_bottom = 104.0
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+self_modulate = Color(1, 1, 1, 0)
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
