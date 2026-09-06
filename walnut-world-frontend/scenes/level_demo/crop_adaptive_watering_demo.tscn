@@ -1,4 +1,4 @@
-[gd_scene load_steps=51 format=3]
+[gd_scene load_steps=50 format=3]
 
 [ext_resource type="Script" path="res://scenes/level_demo/crop_adaptive_watering_demo.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://scenes/level_demo/crop_plot_card.tscn" id="2_card"]
@@ -73,7 +73,6 @@
 
 [ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/icon-skill-watering.png" id="reward_tool"]
 
-[ext_resource type="Script" path="res://scenes/ui/art_motion_toggle.gd" id="motion_toggle"]
 
 [ext_resource type="StyleBox" path="res://resources/ui/art_v2/ui-data-plaque.tres" id="phase_plaque"]
 
@@ -365,16 +364,6 @@ tooltip_text = "重播最近一次已验证结果（等待逻辑接入）"
 theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 theme_override_font_sizes/font_size = 17
 text = "重播"
-
-[node name="ReduceMotion" type="CheckButton" parent="Hud"]
-layout_mode = 0
-offset_left = 18.0
-offset_top = 103.0
-offset_right = 190.0
-offset_bottom = 139.0
-text = "减少动态"
-script = ExtResource("motion_toggle")
-theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 
 [node name="BusyMotion" type="TextureRect" parent="Hud"]
 visible = false
