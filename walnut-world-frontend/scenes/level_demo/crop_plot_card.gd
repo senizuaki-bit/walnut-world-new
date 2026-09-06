@@ -58,7 +58,7 @@ func refresh_data() -> void:
 	current_label.text = "当前湿度 %d" % current_moisture
 	target_label.text = "目标湿度 %d" % target_moisture
 	moisture_bar.value = current_moisture
-	_update_art(target_moisture - current_moisture)
+	_update_art(target_moisture - current_moisture, current_moisture > target_moisture + 8)
 	_error_active = false
 	_refresh_glow()
 
@@ -150,7 +150,14 @@ func play_scan(duration: float = 0.34) -> void:
 
 func pulse_attention() -> void:
 	set_attention(true)
-	_bounce()
+	if _attention_tween != null and _attention_tween.is_valid():
+		_attention_tween.kill()
+	soil_glow.modulate.a = 1.0
+	if bool(Engine.get_meta("art_reduced_motion", false)):
+		return
+	_attention_tween = create_tween()
+	_attention_tween.tween_property(soil_glow, "modulate:a", 0.6, 0.16)
+	_attention_tween.tween_property(soil_glow, "modulate:a", 1.0, 0.24)
 
 
 func set_attention(active: bool) -> void:
@@ -162,12 +169,16 @@ func set_attention(active: bool) -> void:
 func _bounce() -> void:
 	if _card_tween != null and _card_tween.is_valid():
 		_card_tween.kill()
-	pivot_offset = size * 0.5
-	scale = Vector2(0.96, 0.96)
+	# Keep soil, crop and input hitbox fixed; only emphasize the separate result badge.
+	scale = Vector2.ONE
+	water_badge.scale = Vector2.ONE
+	if bool(Engine.get_meta("art_reduced_motion", false)):
+		return
+	water_badge.pivot_offset = water_badge.size * 0.5
 	_card_tween = create_tween()
 	_card_tween.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	_card_tween.tween_property(self, "scale", Vector2(1.035, 1.035), 0.18)
-	_card_tween.tween_property(self, "scale", Vector2.ONE, 0.16)
+	_card_tween.tween_property(water_badge, "scale", Vector2(1.035, 1.035), 0.18)
+	_card_tween.tween_property(water_badge, "scale", Vector2.ONE, 0.16)
 
 
 func _on_hovered() -> void:
