@@ -27,15 +27,45 @@ for control, prefix, states in [('Button', 'button', ['normal', 'hover', 'presse
                                 ('LineEdit', 'input', ['normal', 'focus', 'disabled'])]:
     for state in states:
         resource_id = f'{prefix}_{state}'
-        (OUT / f'{resource_id}.tres').write_text(style(f'{prefix}-{state}', 14 if prefix == 'button' else 10, 8), encoding='utf-8')
+        visual = style(f'{prefix}-{state}', 14 if prefix == 'button' else 10, 8)
+        if prefix == 'input' and state == 'focus':
+            # LineEdit draws focus over its contents: keep the center transparent.
+            visual = ('[gd_resource type="StyleBoxFlat" format=3]\n\n[resource]\n'
+                      'draw_center = false\nborder_color = Color(0.12, 0.40, 0.25, 1)\n' +
+                      ''.join(f'border_width_{side} = 3\n' for side in ('left', 'top', 'right', 'bottom')) +
+                      ''.join(f'corner_radius_{corner} = 8\n' for corner in ('top_left', 'top_right', 'bottom_left', 'bottom_right')))
+        (OUT / f'{resource_id}.tres').write_text(visual, encoding='utf-8')
         ext.append(f'[ext_resource type="StyleBox" path="res://resources/ui/art_v2/{resource_id}.tres" id="{resource_id}"]')
         settings.append(f'{control}/styles/{"read_only" if control == "LineEdit" and state == "disabled" else state} = ExtResource("{resource_id}")')
-for control in ('Button', 'Label', 'LineEdit', 'RichTextLabel'):
-    settings.append(f'{control}/colors/{"default_color" if control == "RichTextLabel" else "font_color"} = Color(0.09, 0.24, 0.19, 1)')
+for weight, filename in [('body', 'NotoSansSC-Medium'), ('bold', 'NotoSansSC-Bold'), ('mono', 'NotoSansMonoCJKsc-Regular')]:
+    ext.append(f'[ext_resource type="FontFile" path="res://assets/fonts/noto-sans-sc/{filename}.otf" id="{weight}"]')
+for control in ('Button', 'CheckButton', 'Label', 'LineEdit', 'RichTextLabel'):
+    settings.append(f'{control}/colors/{"default_color" if control == "RichTextLabel" else "font_color"} = Color(0.075, 0.145, 0.11, 1)')
 for color in ['font_hover_color', 'font_pressed_color', 'font_focus_color']:
     settings.append(f'Button/colors/{color} = Color(0.08, 0.22, 0.16, 1)')
-settings += ['Button/colors/font_disabled_color = Color(0.43, 0.40, 0.33, 1)', 'Button/font_sizes/font_size = 17']
-(OUT / 'theme.tres').write_text(f'[gd_resource type="Theme" load_steps={len(ext)+1} format=3]\n\n' + '\n'.join(ext) + '\n\n[resource]\ndefault_font_size = 17\n' + '\n'.join(settings) + '\n', encoding='utf-8')
+settings += [
+    'Button/colors/font_disabled_color = Color(0.34, 0.31, 0.26, 1)',
+    'Button/fonts/font = ExtResource("bold")', 'Button/font_sizes/font_size = 20',
+    'CheckButton/fonts/font = ExtResource("bold")', 'CheckButton/font_sizes/font_size = 18',
+    'LineEdit/colors/font_placeholder_color = Color(0.29, 0.32, 0.27, 1)',
+    'LineEdit/colors/font_uneditable_color = Color(0.29, 0.32, 0.27, 1)',
+    'LineEdit/colors/font_selected_color = Color(1, 1, 0.96, 1)',
+    'LineEdit/colors/selection_color = Color(0.12, 0.32, 0.22, 1)',
+    'LineEdit/colors/caret_color = Color(0.075, 0.145, 0.11, 1)',
+    'LineEdit/constants/caret_width = 2', 'LineEdit/font_sizes/font_size = 20',
+    'CodeEdit/fonts/font = ExtResource("mono")', 'CodeEdit/font_sizes/font_size = 20',
+    'CodeEdit/colors/line_number_color = Color(0.73, 0.82, 0.76, 1)',
+    'CodeEdit/constants/line_spacing = 4',
+    'Label/constants/line_spacing = 3',
+    'RichTextLabel/fonts/normal_font = ExtResource("body")',
+    'RichTextLabel/fonts/bold_font = ExtResource("bold")',
+    'RichTextLabel/fonts/mono_font = ExtResource("mono")',
+    'RichTextLabel/font_sizes/normal_font_size = 20',
+    'RichTextLabel/font_sizes/bold_font_size = 20',
+    'RichTextLabel/constants/line_separation = 4',
+    'TitleLabel/base_type = &"Label"', 'TitleLabel/fonts/font = ExtResource("bold")',
+]
+(OUT / 'theme.tres').write_text(f'[gd_resource type="Theme" load_steps={len(ext)+1} format=3]\n\n' + '\n'.join(ext) + '\n\n[resource]\ndefault_font = ExtResource("body")\ndefault_font_size = 20\n' + '\n'.join(settings) + '\n', encoding='utf-8')
 
 # Preserve the existing AnimatedSprite2D and its completion await. Only its visual
 # resource changes; WATER decisions still belong to the existing controller.

@@ -375,7 +375,7 @@ func _play_old_tool_demo() -> void:
 		var units: int = 2 if gap >= 30 else (1 if gap > 0 else 0)
 		card.set_result(units, true, units != EXPECTED_UNITS[index])
 		evidence_title.text = "旧工具把 60 当作所有土地的目标湿度"
-		evidence_body.text = "[color=#c45622]1号番茄漏浇[/color]　[color=#c45622]5号番茄水量不足[/color]　[color=#c45622]6号土豆被多浇[/color]"
+		evidence_body.text = "[color=#963519]1号番茄漏浇[/color]　[color=#963519]5号番茄水量不足[/color]　[color=#963519]6号土豆被多浇[/color]"
 	_reveal_evidence()
 	primary_button.disabled = false
 	primary_button.text = "亲自比较三块土地  →"
@@ -449,15 +449,15 @@ func _show_skill_tree(unlocked: bool) -> void:
 	skill_tree_title.text = "作物适配浇水器"
 	if unlocked:
 		skill_tree_body.text = (
-			"[center][color=#2a8a4f][font_size=28]★★★★  已解锁[/font_size][/color][/center]\n"
-			+ "[center]读取每块土地的当前湿度与作物目标湿度，计算缺口并决定 0 / 1 / 2 份水。[/center]\n\n"
+			"[center][color=#205b36][font_size=28]★★★★  已解锁[/font_size][/color][/center]\n"
+			+ "[center]读取每块土地的当前湿度与作物目标湿度，计算缺口并决定 0 / 1 / 2 份水。[/center]"
 			+ ""
 		)
 		skill_tree_continue_button.text = "进入完成后的自由状态  →"
 	else:
 		skill_tree_body.text = (
-			"[center][color=#d28a18][font_size=28]★★★★  剧情可学习[/font_size][/color][/center]\n"
-			+ "[center]能力槽：数据配对　缺口计算　分级动作[/center]\n\n"
+			"[center][color=#79420c][font_size=28]★★★★  剧情可学习[/font_size][/color][/center]\n"
+			+ "[center]能力槽：数据配对　缺口计算　分级动作[/center]"
 			+ ""
 		)
 		skill_tree_continue_button.text = "进入清泉工坊  →"
@@ -1075,7 +1075,7 @@ func present_candidate_evaluation(result: Dictionary, replay := false) -> Dictio
 	else:
 		_set_phase(Phase.LOCAL_FAILED)
 		evidence_title.text = "本地候选结果 · 仍需修改"
-	evidence_body.text = "%s\n[color=#c45622]权威后端仍为 TASK_INCOMPLETE，世界未提交；该结果不会写入 ClientStore。[/color]" % str(result.get("summary", "候选判题已完成。"))
+	evidence_body.text = "%s\n[color=#963519]权威后端仍为 TASK_INCOMPLETE，世界未提交；该结果不会写入 ClientStore。[/color]" % str(result.get("summary", "候选判题已完成。"))
 	_reveal_evidence()
 	return {"ok": true, "skipped": _candidate_skip_requested}
 

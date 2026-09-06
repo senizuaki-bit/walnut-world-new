@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scenes/level_demo/crop_plot_card.gd" id="1_script"]
 
@@ -44,6 +44,17 @@ corner_radius_bottom_left = 21
 shadow_color = Color(1, 0.61, 0.05, 0.72)
 shadow_size = 10
 
+[sub_resource type="StyleBoxFlat" id="ReadableData"]
+content_margin_left = 5.0
+content_margin_right = 5.0
+content_margin_top = 1.0
+content_margin_bottom = 1.0
+bg_color = Color(1, 0.96, 0.82, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+
 [node name="CropPlotCard" type="PanelContainer"]
 offset_right = 190.0
 offset_bottom = 194.0
@@ -51,7 +62,7 @@ theme_override_styles/panel = SubResource("CardStyle")
 script = ExtResource("1_script")
 theme = ExtResource("art_theme")
 mouse_filter = 2
-custom_minimum_size = Vector2(180, 166)
+custom_minimum_size = Vector2(202, 180)
 
 [node name="ScanClip" type="Control" parent="."]
 layout_mode = 2
@@ -103,27 +114,28 @@ theme_override_constants/separation = 8
 [node name="NumberLabel" type="Label" parent="Margin/Content/Header"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.74, 0.34, 0.08, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/font_size = 17
 text = "00"
-theme_override_colors/font_outline_color = Color(1, 0.96, 0.8, 1)
-theme_override_constants/outline_size = 4
+theme_type_variation = &"TitleLabel"
+theme_override_styles/normal = SubResource("ReadableData")
 
 [node name="CropLabel" type="Label" parent="Margin/Content/Header"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.12, 0.31, 0.21, 1)
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 text = "胡萝卜"
 theme_override_styles/normal = ExtResource("header_plaque")
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 17
 horizontal_alignment = 1
 custom_minimum_size = Vector2(0, 24)
+theme_type_variation = &"TitleLabel"
 
 [node name="ArtRow" type="Control" parent="Margin/Content"]
 layout_mode = 2
 mouse_filter = 2
-custom_minimum_size = Vector2(0, 92)
+custom_minimum_size = Vector2(0, 78)
 
 [node name="SoilArt" type="TextureRect" parent="Margin/Content/ArtRow"]
 unique_name_in_owner = true
@@ -186,46 +198,46 @@ custom_minimum_size = Vector2(0, 6)
 [node name="Values" type="HBoxContainer" parent="Margin/Content"]
 layout_mode = 2
 mouse_filter = 2
+theme_override_constants/separation = 4
 
 [node name="CurrentLabel" type="Label" parent="Margin/Content/Values"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.19, 0.43, 0.48, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.06, 0.25, 0.32, 1)
+theme_override_font_sizes/font_size = 17
 text = "当前湿度 20"
-theme_override_colors/font_outline_color = Color(1, 0.96, 0.8, 1)
-theme_override_constants/outline_size = 4
+theme_override_styles/normal = SubResource("ReadableData")
 
 [node name="TargetLabel" type="Label" parent="Margin/Content/Values"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.59, 0.31, 0.08, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.45, 0.22, 0.04, 1)
+theme_override_font_sizes/font_size = 17
 text = "目标湿度 60"
 horizontal_alignment = 2
-theme_override_colors/font_outline_color = Color(1, 0.96, 0.8, 1)
-theme_override_constants/outline_size = 4
+theme_override_styles/normal = SubResource("ReadableData")
 
 [node name="WaterBadge" type="Label" parent="Margin/Content"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_outline_color = Color(1, 0.97, 0.82, 1)
-theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 17
 text = "💧 × 2 · 500 ml"
 horizontal_alignment = 1
 vertical_alignment = 1
 custom_minimum_size = Vector2(0, 20)
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_styles/normal = SubResource("ReadableData")
 
 [node name="GapLabel" type="Label" parent="Margin/Content"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
-theme_override_colors/font_color = Color(0.13, 0.39, 0.26, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/font_size = 17
 text = "缺口 +40"
 horizontal_alignment = 1
+theme_override_styles/normal = SubResource("ReadableData")
 
 [node name="HitButton" type="Button" parent="."]
 unique_name_in_owner = true
@@ -243,3 +255,4 @@ theme_override_styles/hover = SubResource("CardStyle")
 theme_override_styles/pressed = SubResource("CardStyle")
 theme_override_styles/focus = SubResource("CardStyle")
 theme_override_styles/disabled = SubResource("CardStyle")
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)

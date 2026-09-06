@@ -1,16 +1,13 @@
-[gd_resource type="StyleBoxTexture" load_steps=2 format=3]
-
-[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/input-focus.png" id="1"]
+[gd_resource type="StyleBoxFlat" format=3]
 
 [resource]
-texture = ExtResource("1")
-texture_margin_left = 10.0
-content_margin_left = 8.0
-texture_margin_top = 10.0
-content_margin_top = 8.0
-texture_margin_right = 10.0
-content_margin_right = 8.0
-texture_margin_bottom = 10.0
-content_margin_bottom = 8.0
-axis_stretch_horizontal = 0
-axis_stretch_vertical = 0
+draw_center = false
+border_color = Color(0.12, 0.40, 0.25, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_left = 8
+corner_radius_bottom_right = 8

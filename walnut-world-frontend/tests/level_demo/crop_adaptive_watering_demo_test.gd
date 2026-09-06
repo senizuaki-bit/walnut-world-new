@@ -4,6 +4,7 @@ const LEVEL_PATH := "res://scenes/level_demo/crop_adaptive_watering_demo.tscn"
 
 
 func _initialize() -> void:
+	root.size = Vector2i(1280, 720)
 	var failures: Array[String] = []
 	var level := (load(LEVEL_PATH) as PackedScene).instantiate() as CropAdaptiveWateringDemo
 	level.timing_scale = 0.05

@@ -240,15 +240,16 @@ theme_override_constants/separation = 2
 [node name="TaskTitle" type="Label" parent="Hud/TaskCard/Margin/Content"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.11, 0.31, 0.21, 1)
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 text = "作物适配浇水器"
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 22
+theme_type_variation = &"TitleLabel"
 
 [node name="TaskProgress" type="Label" parent="Hud/TaskCard/Margin/Content"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.67, 0.34, 0.07, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.45, 0.22, 0.04, 1)
+theme_override_font_sizes/font_size = 17
 text = "进入试验田"
 
 [node name="PhasePill" type="PanelContainer" parent="Hud"]
@@ -268,8 +269,8 @@ layout_mode = 2
 text = "观察旧工具  →  理解数据  →  编写规则  →  世界验证"
 horizontal_alignment = 1
 vertical_alignment = 1
-theme_override_colors/font_color = Color(0.09, 0.24, 0.19, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/font_size = 17
 
 [node name="ToolRail" type="HBoxContainer" parent="Hud"]
 layout_mode = 1
@@ -288,8 +289,8 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(112, 50)
 layout_mode = 2
 focus_mode = 2
-theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/font_size = 17
 text = "</> 代码"
 
 [node name="HintButton" type="Button" parent="Hud/ToolRail"]
@@ -297,8 +298,8 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(112, 50)
 layout_mode = 2
 focus_mode = 2
-theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/font_size = 17
 text = "? 问叮当"
 
 [node name="RequestPatchButton" type="Button" parent="Hud/ToolRail"]
@@ -308,8 +309,8 @@ custom_minimum_size = Vector2(142, 50)
 layout_mode = 2
 focus_mode = 2
 tooltip_text = "查看并决定是否采用 AI 修改提案"
-theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/font_size = 17
 text = "AI 修改提案"
 
 [node name="PlaybackRail" type="HBoxContainer" parent="Hud"]
@@ -331,8 +332,8 @@ layout_mode = 2
 disabled = true
 focus_mode = 2
 tooltip_text = "切换权威世界演出的播放速度（等待逻辑接入）"
-theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/font_size = 17
 text = "1x"
 
 [node name="SkipPlaybackButton" type="Button" parent="Hud/PlaybackRail"]
@@ -342,8 +343,8 @@ layout_mode = 2
 disabled = true
 focus_mode = 2
 tooltip_text = "跳过当前权威世界演出（等待逻辑接入）"
-theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/font_size = 17
 text = "跳过"
 
 [node name="ReplayPlaybackButton" type="Button" parent="Hud/PlaybackRail"]
@@ -353,8 +354,8 @@ layout_mode = 2
 disabled = true
 focus_mode = 2
 tooltip_text = "重播最近一次已验证结果（等待逻辑接入）"
-theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/font_size = 17
 text = "重播"
 
 [node name="ReduceMotion" type="CheckButton" parent="Hud"]
@@ -365,7 +366,7 @@ offset_right = 190.0
 offset_bottom = 139.0
 text = "减少动态"
 script = ExtResource("motion_toggle")
-
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 
 [node name="BusyMotion" type="TextureRect" parent="Hud"]
 visible = false
@@ -391,7 +392,7 @@ grow_vertical = 2
 theme_override_constants/separation = 18
 offset_left = 220.0
 offset_right = -145.0
-offset_top = 145.0
+offset_top = 138.0
 offset_bottom = -220.0
 
 [node name="PlotGrid" type="GridContainer" parent="Hud/FarmLayout"]
@@ -443,44 +444,45 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -420.0
-offset_right = 420.0
+offset_left = -450.0
+offset_right = 450.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_styles/panel = ExtResource("style_EvidenceStyle")
-offset_top = -173.0
-offset_bottom = -91.0
+offset_top = -196.0
+offset_bottom = -88.0
 
 [node name="Margin" type="MarginContainer" parent="Hud/EvidencePanel"]
 layout_mode = 2
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_right = 20
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_bottom = 4
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_bottom = 0
 
 [node name="Content" type="VBoxContainer" parent="Hud/EvidencePanel/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 4
+theme_override_constants/separation = 0
 
 [node name="EvidenceTitle" type="Label" parent="Hud/EvidencePanel/Margin/Content"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.15, 0.36, 0.24, 1)
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 text = "清泉试验田"
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 20
+theme_type_variation = &"TitleLabel"
 
 [node name="EvidenceBody" type="RichTextLabel" parent="Hud/EvidencePanel/Margin/Content"]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
-theme_override_colors/default_color = Color(0.25, 0.33, 0.22, 1)
+theme_override_colors/default_color = Color(0.075, 0.145, 0.11, 1)
 bbcode_enabled = true
 text = "八块土地正在等待检查。"
 fit_content = false
-theme_override_font_sizes/normal_font_size = 14
-custom_minimum_size = Vector2(0, 40)
-theme_override_font_sizes/bold_font_size = 14
-theme_override_font_sizes/italics_font_size = 14
+theme_override_font_sizes/normal_font_size = 18
+custom_minimum_size = Vector2(0, 56)
+theme_override_font_sizes/bold_font_size = 18
+theme_override_font_sizes/italics_font_size = 18
 theme_override_constants/line_separation = 0
 
 [node name="PrimaryButton" type="Button" parent="Hud"]
@@ -499,8 +501,8 @@ grow_horizontal = 0
 grow_vertical = 0
 focus_mode = 2
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/font_size = 20
 text = "查看旧工具演示  →"
 
 [node name="WaterChoices" type="HBoxContainer" parent="Hud"]
@@ -523,24 +525,24 @@ theme_override_constants/separation = 10
 unique_name_in_owner = true
 custom_minimum_size = Vector2(156, 58)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/font_size = 20
 text = "不浇水"
 
 [node name="OneWaterButton" type="Button" parent="Hud/WaterChoices"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(156, 58)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/font_size = 20
 text = "浇 1 份"
 
 [node name="TwoWaterButton" type="Button" parent="Hud/WaterChoices"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(156, 58)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/font_size = 20
 text = "浇 2 份"
 
 [node name="WateringCan" type="AnimatedSprite2D" parent="Hud"]
@@ -575,6 +577,7 @@ grow_horizontal = 2
 grow_vertical = 2
 focus_mode = 0
 flat = true
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 
 [node name="Surface" type="PanelContainer" parent="CodeDrawer"]
 layout_mode = 1
@@ -582,7 +585,7 @@ anchors_preset = 11
 anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -540.0
+offset_left = -660.0
 grow_horizontal = 0
 grow_vertical = 2
 theme_override_styles/panel = ExtResource("style_DrawerStyle")
@@ -604,15 +607,16 @@ layout_mode = 2
 [node name="Title" type="Label" parent="CodeDrawer/Surface/Margin/Content/Header"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.11, 0.31, 0.21, 1)
-theme_override_font_sizes/font_size = 23
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/font_size = 26
 text = "C++ 技能卷轴"
+theme_type_variation = &"TitleLabel"
 
 [node name="SaveState" type="Label" parent="CodeDrawer/Surface/Margin/Content/Header"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.35, 0.48, 0.28, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.24, 0.29, 0.23, 1)
+theme_override_font_sizes/font_size = 17
 text = "✓ 草稿已保存"
 vertical_alignment = 1
 
@@ -622,25 +626,26 @@ custom_minimum_size = Vector2(44, 42)
 layout_mode = 2
 focus_mode = 2
 tooltip_text = "关闭代码界面"
-theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 theme_override_font_sizes/font_size = 22
 text = "×"
 
 [node name="PrototypeNotice" type="Label" parent="CodeDrawer/Surface/Margin/Content"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.69, 0.35, 0.08, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.24, 0.29, 0.23, 1)
+theme_override_font_sizes/font_size = 17
 text = "前端教学预演：不会冒充正式 Agent Run 或世界回执"
+autowrap_mode = 2
 
 [node name="CodeEditor" type="CodeEdit" parent="CodeDrawer/Surface/Margin/Content"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 450)
+custom_minimum_size = Vector2(0, 390)
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
+theme_override_colors/font_color = Color(0.92, 0.97, 0.90, 1)
 theme_override_colors/caret_color = Color(1, 0.72, 0.24, 1)
 theme_override_colors/selection_color = Color(0.28, 0.55, 0.38, 0.75)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("EditorStyle")
 line_folding = true
 gutters_draw_line_numbers = true
@@ -655,7 +660,7 @@ theme_override_constants/separation = 7
 unique_name_in_owner = true
 custom_minimum_size = Vector2(90, 52)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 text = "重置"
 
 [node name="RunButton" type="Button" parent="CodeDrawer/Surface/Margin/Content/Actions"]
@@ -665,8 +670,8 @@ layout_mode = 2
 size_flags_horizontal = 3
 focus_mode = 2
 tooltip_text = "保存当前代码并直接运行"
-theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/font_size = 17
 text = "直接运行  ▶"
 
 [node name="CompletionCard" type="PanelContainer" parent="."]
@@ -699,10 +704,11 @@ theme_override_constants/separation = 14
 [node name="CompletionTitle" type="Label" parent="CompletionCard/Margin/Content"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.38, 0.23, 1)
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 text = "作物适配浇水器已通过验证！"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 30
+theme_type_variation = &"TitleLabel"
 
 [node name="RewardTool" type="TextureRect" parent="CompletionCard/Margin/Content"]
 layout_mode = 2
@@ -716,8 +722,8 @@ mouse_filter = 2
 [node name="CompletionSummary" type="Label" parent="CompletionCard/Margin/Content"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.24, 0.38, 0.22, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/font_size = 20
 text = "8块土地全部检查 · 5块正确浇水 · 3块正确跳过\n你让同一个下标把当前湿度与目标湿度配对起来了。"
 horizontal_alignment = 1
 
@@ -730,15 +736,15 @@ theme_override_constants/separation = 10
 unique_name_in_owner = true
 custom_minimum_size = Vector2(180, 58)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/font_size = 20
 text = "重玩本关"
 
 [node name="NextButton" type="Button" parent="CompletionCard/Margin/Content/Actions"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/font_size = 20
 text = "下一关  →"
 custom_minimum_size = Vector2(240, 58)
 
@@ -746,8 +752,8 @@ custom_minimum_size = Vector2(240, 58)
 unique_name_in_owner = true
 custom_minimum_size = Vector2(180, 58)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/font_size = 20
 text = "返回农场"
 
 [node name="SkillTreeOverlay" type="Control" parent="."]
@@ -888,12 +894,13 @@ offset_left = 32.0
 offset_right = 332.0
 mouse_filter = 2
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 17
+theme_override_font_sizes/font_size = 20
 offset_top = 490.0
 offset_bottom = 552.0
-text = "三项理解，共同组成作物适配浇水器"
+text = "三项理解，共同组成\n作物适配浇水器"
 autowrap_mode = 2
 theme_override_constants/line_spacing = 0
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 
 [node name="Margin" type="MarginContainer" parent="SkillTreeOverlay/Card"]
 layout_mode = 2
@@ -904,37 +911,38 @@ theme_override_constants/margin_bottom = 26
 
 [node name="Content" type="VBoxContainer" parent="SkillTreeOverlay/Card/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 14
+theme_override_constants/separation = 10
 
 [node name="SkillTreeBadge" type="Label" parent="SkillTreeOverlay/Card/Margin/Content"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.72, 0.36, 0.08, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.45, 0.22, 0.04, 1)
+theme_override_font_sizes/font_size = 18
 text = "技能树 · 4★ 节点"
 horizontal_alignment = 1
 
 [node name="SkillTreeTitle" type="Label" parent="SkillTreeOverlay/Card/Margin/Content"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.36, 0.22, 1)
-theme_override_font_sizes/font_size = 31
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/font_size = 32
 text = "作物适配浇水器"
 horizontal_alignment = 1
+theme_type_variation = &"TitleLabel"
 
 [node name="SkillTreeBody" type="RichTextLabel" parent="SkillTreeOverlay/Card/Margin/Content"]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
-theme_override_colors/default_color = Color(0.22, 0.36, 0.22, 1)
+theme_override_colors/default_color = Color(0.075, 0.145, 0.11, 1)
 bbcode_enabled = true
 text = "技能节点"
-fit_content = false
+fit_content = true
 size_flags_vertical = 1
-theme_override_font_sizes/normal_font_size = 17
-custom_minimum_size = Vector2(0, 76)
+theme_override_font_sizes/normal_font_size = 20
+custom_minimum_size = Vector2(0, 104)
 scroll_active = false
-theme_override_font_sizes/bold_font_size = 17
+theme_override_font_sizes/bold_font_size = 20
 
 [node name="ConceptCards" type="HBoxContainer" parent="SkillTreeOverlay/Card/Margin/Content"]
 layout_mode = 2
@@ -955,7 +963,9 @@ mouse_filter = 2
 layout_mode = 2
 text = "数据配对"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_type_variation = &"TitleLabel"
 
 [node name="Icon" type="TextureRect" parent="SkillTreeOverlay/Card/Margin/Content/ConceptCards/Concept0/Content"]
 layout_mode = 2
@@ -969,14 +979,16 @@ mouse_filter = 2
 layout_mode = 2
 text = "同一块土地\n使用同一个 i"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 
 [node name="Completed" type="Label" parent="SkillTreeOverlay/Card/Margin/Content/ConceptCards/Concept0/Content"]
 layout_mode = 2
 visible = false
 text = "✓ 已掌握"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 
 [node name="Concept1" type="PanelContainer" parent="SkillTreeOverlay/Card/Margin/Content/ConceptCards"]
 layout_mode = 2
@@ -992,7 +1004,9 @@ mouse_filter = 2
 layout_mode = 2
 text = "缺口计算"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_type_variation = &"TitleLabel"
 
 [node name="Icon" type="TextureRect" parent="SkillTreeOverlay/Card/Margin/Content/ConceptCards/Concept1/Content"]
 layout_mode = 2
@@ -1006,14 +1020,16 @@ mouse_filter = 2
 layout_mode = 2
 text = "目标湿度\n减去当前湿度"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 
 [node name="Completed" type="Label" parent="SkillTreeOverlay/Card/Margin/Content/ConceptCards/Concept1/Content"]
 layout_mode = 2
 visible = false
 text = "✓ 已掌握"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 
 [node name="Concept2" type="PanelContainer" parent="SkillTreeOverlay/Card/Margin/Content/ConceptCards"]
 layout_mode = 2
@@ -1029,7 +1045,9 @@ mouse_filter = 2
 layout_mode = 2
 text = "分级动作"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_type_variation = &"TitleLabel"
 
 [node name="Icon" type="TextureRect" parent="SkillTreeOverlay/Card/Margin/Content/ConceptCards/Concept2/Content"]
 layout_mode = 2
@@ -1043,32 +1061,33 @@ mouse_filter = 2
 layout_mode = 2
 text = "按缺口选择\n0 / 1 / 2 份水"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 
 [node name="Completed" type="Label" parent="SkillTreeOverlay/Card/Margin/Content/ConceptCards/Concept2/Content"]
 layout_mode = 2
 visible = false
 text = "✓ 已掌握"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 14
-
+theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 
 [node name="FutureSkill" type="Label" parent="SkillTreeOverlay/Card/Margin/Content"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 55)
 text = "🔒 5★ 区域灌溉 · 功能预告\n等待后续剧情，不能提前学习"
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 18
 autowrap_mode = 2
 horizontal_alignment = 1
 mouse_filter = 2
-
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 
 [node name="SkillTreeContinueButton" type="Button" parent="SkillTreeOverlay/Card/Margin/Content"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/font_size = 20
 text = "进入清泉工坊  →"
 
 
@@ -1162,27 +1181,29 @@ theme_override_constants/separation = 14
 [node name="WorkshopBadge" type="Label" parent="WorkshopOverlay/Card/Margin/Content"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.72, 0.36, 0.08, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.45, 0.22, 0.04, 1)
+theme_override_font_sizes/font_size = 18
 text = "实验 1 / 3"
 
 [node name="WorkshopTitle" type="Label" parent="WorkshopOverlay/Card/Margin/Content"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.36, 0.22, 1)
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 text = "同一个下标，找到同一块土地"
-theme_override_font_sizes/font_size = 26
+theme_override_font_sizes/font_size = 28
+theme_type_variation = &"TitleLabel"
 
 [node name="WorkshopBody" type="RichTextLabel" parent="WorkshopOverlay/Card/Margin/Content"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 82)
 layout_mode = 2
 mouse_filter = 2
-theme_override_colors/default_color = Color(0.23, 0.34, 0.22, 1)
-theme_override_font_sizes/normal_font_size = 17
+theme_override_colors/default_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/normal_font_size = 20
 bbcode_enabled = true
 text = "实验内容"
 fit_content = false
+theme_override_font_sizes/bold_font_size = 20
 
 [node name="WorkshopCodePanel" type="PanelContainer" parent="WorkshopOverlay/Card/Margin/Content"]
 custom_minimum_size = Vector2(0, 300)
@@ -1213,8 +1234,8 @@ theme_override_constants/separation = 12
 
 [node name="LoopStart" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.92, 0.97, 0.90, 1)
+theme_override_font_sizes/font_size = 20
 text = "for (int i = 0; i < 8; i++) {"
 
 [node name="GapLine" type="HBoxContainer" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode"]
@@ -1227,8 +1248,8 @@ layout_mode = 2
 
 [node name="Prefix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode/GapLine"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.92, 0.97, 0.90, 1)
+theme_override_font_sizes/font_size = 20
 text = "int gap ="
 vertical_alignment = 1
 
@@ -1236,10 +1257,10 @@ vertical_alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(145, 42)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.31, 0.21, 1)
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 theme_override_colors/caret_color = Color(0.10, 0.31, 0.21, 1)
-theme_override_colors/font_placeholder_color = Color(0.41, 0.51, 0.39, 0.85)
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_placeholder_color = Color(0.29, 0.32, 0.27, 1)
+theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = ExtResource("style_WorkshopInputStyle")
 theme_override_styles/focus = ExtResource("style_WorkshopInputFocusStyle")
 placeholder_text = "目标数组"
@@ -1248,8 +1269,8 @@ select_all_on_focus = true
 
 [node name="Middle" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode/GapLine"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.92, 0.97, 0.90, 1)
+theme_override_font_sizes/font_size = 20
 text = "[i]  -"
 vertical_alignment = 1
 
@@ -1257,10 +1278,10 @@ vertical_alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(160, 42)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.31, 0.21, 1)
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 theme_override_colors/caret_color = Color(0.10, 0.31, 0.21, 1)
-theme_override_colors/font_placeholder_color = Color(0.41, 0.51, 0.39, 0.85)
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_placeholder_color = Color(0.29, 0.32, 0.27, 1)
+theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = ExtResource("style_WorkshopInputStyle")
 theme_override_styles/focus = ExtResource("style_WorkshopInputFocusStyle")
 placeholder_text = "当前数组"
@@ -1269,21 +1290,21 @@ select_all_on_focus = true
 
 [node name="Suffix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode/GapLine"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.92, 0.97, 0.90, 1)
+theme_override_font_sizes/font_size = 20
 text = "[i];"
 vertical_alignment = 1
 
 [node name="Reserved" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.56, 0.75, 0.62, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.92, 0.97, 0.90, 1)
+theme_override_font_sizes/font_size = 18
 text = "    // 下一步：根据 gap 在这里补充 0 / 1 / 2 份的分级判断\n    // if (...) { ... } else if (...) { ... }"
 
 [node name="LoopEnd" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.92, 0.97, 0.90, 1)
+theme_override_font_sizes/font_size = 20
 text = "}"
 
 [node name="WorkshopBranchCode" type="VBoxContainer" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack"]
@@ -1303,8 +1324,8 @@ theme_override_constants/separation = 7
 
 [node name="Prefix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/SevereCondition"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.92, 0.97, 0.90, 1)
+theme_override_font_sizes/font_size = 20
 text = "if (gap >="
 vertical_alignment = 1
 
@@ -1312,19 +1333,20 @@ vertical_alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(78, 36)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.31, 0.21, 1)
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 theme_override_colors/caret_color = Color(0.10, 0.31, 0.21, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = ExtResource("style_WorkshopInputStyle")
 theme_override_styles/focus = ExtResource("style_WorkshopInputFocusStyle")
 placeholder_text = "边界"
 max_length = 3
 select_all_on_focus = true
+theme_override_colors/font_placeholder_color = Color(0.29, 0.32, 0.27, 1)
 
 [node name="Suffix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/SevereCondition"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.92, 0.97, 0.90, 1)
+theme_override_font_sizes/font_size = 20
 text = ") {"
 vertical_alignment = 1
 
@@ -1334,8 +1356,8 @@ theme_override_constants/separation = 7
 
 [node name="Prefix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/SevereOutput"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.92, 0.97, 0.90, 1)
+theme_override_font_sizes/font_size = 20
 text = "    cout << \"WATER \" << i << \""
 vertical_alignment = 1
 
@@ -1343,19 +1365,20 @@ vertical_alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(68, 36)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.31, 0.21, 1)
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 theme_override_colors/caret_color = Color(0.10, 0.31, 0.21, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = ExtResource("style_WorkshopInputStyle")
 theme_override_styles/focus = ExtResource("style_WorkshopInputFocusStyle")
 placeholder_text = "份数"
 max_length = 1
 select_all_on_focus = true
+theme_override_colors/font_placeholder_color = Color(0.29, 0.32, 0.27, 1)
 
 [node name="Suffix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/SevereOutput"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.92, 0.97, 0.90, 1)
+theme_override_font_sizes/font_size = 20
 text = "\\n\";"
 vertical_alignment = 1
 
@@ -1365,8 +1388,8 @@ theme_override_constants/separation = 7
 
 [node name="Prefix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/LightCondition"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.92, 0.97, 0.90, 1)
+theme_override_font_sizes/font_size = 20
 text = "} else if (gap >"
 vertical_alignment = 1
 
@@ -1374,19 +1397,20 @@ vertical_alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(78, 36)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.31, 0.21, 1)
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 theme_override_colors/caret_color = Color(0.10, 0.31, 0.21, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = ExtResource("style_WorkshopInputStyle")
 theme_override_styles/focus = ExtResource("style_WorkshopInputFocusStyle")
 placeholder_text = "边界"
 max_length = 3
 select_all_on_focus = true
+theme_override_colors/font_placeholder_color = Color(0.29, 0.32, 0.27, 1)
 
 [node name="Suffix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/LightCondition"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.92, 0.97, 0.90, 1)
+theme_override_font_sizes/font_size = 20
 text = ") {"
 vertical_alignment = 1
 
@@ -1396,8 +1420,8 @@ theme_override_constants/separation = 7
 
 [node name="Prefix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/LightOutput"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.92, 0.97, 0.90, 1)
+theme_override_font_sizes/font_size = 20
 text = "    cout << \"WATER \" << i << \""
 vertical_alignment = 1
 
@@ -1405,26 +1429,27 @@ vertical_alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(68, 36)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.31, 0.21, 1)
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 theme_override_colors/caret_color = Color(0.10, 0.31, 0.21, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = ExtResource("style_WorkshopInputStyle")
 theme_override_styles/focus = ExtResource("style_WorkshopInputFocusStyle")
 placeholder_text = "份数"
 max_length = 1
 select_all_on_focus = true
+theme_override_colors/font_placeholder_color = Color(0.29, 0.32, 0.27, 1)
 
 [node name="Suffix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/LightOutput"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.92, 0.97, 0.90, 1)
+theme_override_font_sizes/font_size = 20
 text = "\\n\";"
 vertical_alignment = 1
 
 [node name="CloseAndHint" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.56, 0.75, 0.62, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.92, 0.97, 0.90, 1)
+theme_override_font_sizes/font_size = 17
 text = "}\n// gap <= 0 时不输出 WATER\n// 完成后，将这段判断放回 for 循环中"
 
 [node name="WorkshopSummaryCode" type="VBoxContainer" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack"]
@@ -1440,40 +1465,40 @@ theme_override_constants/separation = 14
 
 [node name="Comment" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopSummaryCode"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.56, 0.75, 0.62, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.92, 0.97, 0.90, 1)
+theme_override_font_sizes/font_size = 18
 text = "// 把刚才的两条理解结合成一条世界规则"
 
 [node name="PairRule" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopSummaryCode"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.92, 0.97, 0.90, 1)
+theme_override_font_sizes/font_size = 22
 text = "① 同一块土地：target[i] - moisture[i]  →  gap"
 
 [node name="BranchRule" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopSummaryCode"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.92, 0.97, 0.90, 1)
+theme_override_font_sizes/font_size = 22
 text = "② gap ≥ 30 → 2 份   |   gap > 0 → 1 份   |   gap ≤ 0 → 跳过"
 
 [node name="WorldRule" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopSummaryCode"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.98, 0.72, 0.28, 1)
+theme_override_colors/font_color = Color(0.92, 0.97, 0.90, 1)
 theme_override_font_sizes/font_size = 19
 text = "③ 数据配对 → 计算缺口 → 选择 0 / 1 / 2 份水"
 
 [node name="NextHint" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopSummaryCode"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.56, 0.75, 0.62, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.92, 0.97, 0.90, 1)
+theme_override_font_sizes/font_size = 18
 text = "// 下一页：按关卡文档的两步练习，自己把理解写进完整 C++ 卷轴"
 
 [node name="WorkshopActionButton" type="Button" parent="WorkshopOverlay/Card/Margin/Content"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/font_size = 20
 text = "继续  →"
 
 
@@ -1566,10 +1591,11 @@ theme_override_constants/separation = 14
 
 [node name="Title" type="Label" parent="BugChallengeOverlay/Card/Margin/Content"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.67, 0.22, 0.10, 1)
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 theme_override_font_sizes/font_size = 29
 text = "Bug 先生的双作物挑战"
 horizontal_alignment = 1
+theme_type_variation = &"TitleLabel"
 
 [node name="BugChallengeBody" type="RichTextLabel" parent="BugChallengeOverlay/Card/Margin/Content"]
 unique_name_in_owner = true
@@ -1577,18 +1603,19 @@ custom_minimum_size = Vector2(0, 290)
 layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
-theme_override_colors/default_color = Color(0.28, 0.28, 0.18, 1)
-theme_override_font_sizes/normal_font_size = 18
+theme_override_colors/default_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/normal_font_size = 20
 bbcode_enabled = true
 text = "真实反例"
 fit_content = false
+theme_override_font_sizes/bold_font_size = 20
 
 [node name="BugContinueButton" type="Button" parent="BugChallengeOverlay/Card/Margin/Content"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/font_size = 20
 text = "带着反例继续修改  →"
 
 [node name="GrowthSummaryOverlay" type="Control" parent="."]
@@ -1666,10 +1693,11 @@ theme_override_constants/separation = 14
 
 [node name="Title" type="Label" parent="GrowthSummaryOverlay/Card/Margin/Content"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.38, 0.23, 1)
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
 theme_override_font_sizes/font_size = 30
 text = "书书 · 成长档案"
 horizontal_alignment = 1
+theme_type_variation = &"TitleLabel"
 
 [node name="GrowthSummaryBody" type="RichTextLabel" parent="GrowthSummaryOverlay/Card/Margin/Content"]
 unique_name_in_owner = true
@@ -1677,18 +1705,19 @@ custom_minimum_size = Vector2(0, 330)
 layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
-theme_override_colors/default_color = Color(0.23, 0.35, 0.22, 1)
-theme_override_font_sizes/normal_font_size = 18
+theme_override_colors/default_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/normal_font_size = 20
 bbcode_enabled = true
 text = "成长总结"
 fit_content = false
+theme_override_font_sizes/bold_font_size = 20
 
 [node name="ArchiveButton" type="Button" parent="GrowthSummaryOverlay/Card/Margin/Content"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+theme_override_font_sizes/font_size = 20
 text = "完成归档并查看技能树  →"
 
 [node name="BugLegion2D" parent="." instance=ExtResource("10_legion")]

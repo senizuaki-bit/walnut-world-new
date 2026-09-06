@@ -96,7 +96,7 @@ func set_result(water_units: int, animate: bool = true, is_error: bool = false) 
 		self_modulate = Color.WHITE
 		return
 	water_badge.text = "跳过" if water_units == 0 else ("💧 × %d · %d ml" % [water_units, water_units * 250])
-	water_badge.modulate = Color(0.93, 0.25, 0.16, 1) if is_error else Color(0.08, 0.48, 0.42, 1)
+	water_badge.add_theme_color_override("font_color", Color(0.55, 0.13, 0.07, 1) if is_error else Color(0.06, 0.27, 0.20, 1))
 	self_modulate = Color(1.0, 0.88, 0.83, 1.0) if is_error else Color.WHITE
 	if animate:
 		_bounce()
@@ -105,7 +105,7 @@ func set_result(water_units: int, animate: bool = true, is_error: bool = false) 
 func show_candidate_action(amount_ml: int, hydration_after: int, animate: bool = true) -> void:
 	water_badge.visible = true
 	water_badge.text = "+%d ml · 候选 %d" % [amount_ml, hydration_after]
-	water_badge.modulate = Color(0.08, 0.48, 0.42, 1)
+	water_badge.add_theme_color_override("font_color", Color(0.06, 0.27, 0.20, 1))
 	current_label.text = "候选湿度 %d" % hydration_after
 	moisture_bar.value = clampf(float(hydration_after) / 100.0, 0.0, 100.0)
 	self_modulate = Color.WHITE
@@ -122,7 +122,7 @@ func show_candidate_outcome(hydration: int, status: String) -> void:
 	var is_error := status != "CORRECT"
 	water_badge.visible = true
 	water_badge.text = "候选 %d · %s" % [hydration, label]
-	water_badge.modulate = Color(0.93, 0.25, 0.16, 1) if is_error else Color(0.08, 0.48, 0.42, 1)
+	water_badge.add_theme_color_override("font_color", Color(0.55, 0.13, 0.07, 1) if is_error else Color(0.06, 0.27, 0.20, 1))
 	current_label.text = "候选湿度 %d" % hydration
 	moisture_bar.value = clampf(float(hydration) / 100.0, 0.0, 100.0)
 	self_modulate = Color(1.0, 0.88, 0.83, 1.0) if is_error else Color.WHITE
