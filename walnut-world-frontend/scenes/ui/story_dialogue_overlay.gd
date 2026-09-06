@@ -26,6 +26,7 @@ var _hint_tween: Tween
 var _transition_tween: Tween
 var _card_rest_position := Vector2.ZERO
 var _avatar_rest_position := Vector2.ZERO
+var _previous_focus: WeakRef
 
 
 func _ready() -> void:
@@ -61,6 +62,9 @@ func _start_sequence(
 		sequence_finished.emit()
 		return
 	_stop_active_tweens()
+	if not visible:
+		var owner := get_viewport().gui_get_focus_owner()
+		_previous_focus = weakref(owner) if owner != null else null
 	_lines = lines.duplicate()
 	_line_index = -1
 	($DialogueCard/ContentRoot/ContentMargin as ScrollContainer).scroll_vertical = 0
@@ -77,6 +81,8 @@ func _start_sequence(
 	continue_hint.visible = false
 	modulate.a = 0.0
 	visible = true
+	dialogue_card.focus_mode = Control.FOCUS_ALL
+	dialogue_card.grab_focus()
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	avatar_stage.position = _avatar_rest_position + Vector2(0.0, 28.0)
 	avatar_stage.scale = Vector2(0.72, 0.72)
@@ -128,6 +134,28 @@ func _gui_input(event: InputEvent) -> void:
 	elif touch_event != null and touch_event.pressed:
 		advance()
 		accept_event()
+
+
+func _input(event: InputEvent) -> void:
+	if not is_visible_in_tree():
+		return
+	if event is InputEventKey or event is InputEventJoypadButton or event is InputEventJoypadMotion:
+		# Consume before GUI dispatch: Tab and typing must never reach the lesson behind us.
+		get_viewport().set_input_as_handled()
+		if event.is_action_pressed("ui_accept") and not event.is_echo():
+			advance()
+		elif event.is_action_pressed("ui_up") or event.is_action_pressed("ui_down"):
+			var scroll := $DialogueCard/ContentRoot/ContentMargin as ScrollContainer
+			scroll.scroll_vertical += -48 if event.is_action_pressed("ui_up") else 48
+		if visible:
+			dialogue_card.grab_focus()
+
+
+func _restore_focus() -> void:
+	var owner: Control = _previous_focus.get_ref() as Control if _previous_focus != null else null
+	_previous_focus = null
+	if is_instance_valid(owner) and owner.is_visible_in_tree() and owner.focus_mode != Control.FOCUS_NONE:
+		owner.grab_focus()
 
 
 func _advance_to_next_line() -> void:
@@ -199,6 +227,7 @@ func _finish_sequence(immediate: bool) -> void:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 		modulate.a = 1.0
 		_finishing = false
+		_restore_focus()
 		sequence_finished.emit()
 		return
 	if _transition_tween != null and _transition_tween.is_valid():
@@ -213,6 +242,7 @@ func _finish_sequence(immediate: bool) -> void:
 		modulate.a = 1.0
 		dialogue_card.position = _card_rest_position
 		_finishing = false
+		_restore_focus()
 		sequence_finished.emit()
 	)
 
