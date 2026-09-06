@@ -13,6 +13,7 @@ func _run() -> void:
 	root.add_child(level)
 	await process_frame
 	level.story_dialogue.skip_sequence()
+	await _verify_review_regressions(level, failures)
 	var card := level.plot_grid.get_child(0) as CropPlotCard
 	var moisture := card.current_moisture
 	var target := card.target_moisture
@@ -110,3 +111,117 @@ func _run() -> void:
 		for failure in failures:
 			push_error(failure)
 		quit(1)
+
+
+func _verify_review_regressions(level: CropAdaptiveWateringDemo, failures: Array[String]) -> void:
+	var corn := level.plot_grid.get_child(3) as CropPlotCard
+	if not (corn.crop_art as ArtMotionTexture).motion_id.contains("waterlogged"):
+		failures.append("初始湿度90/目标65的玉米必须显示积水。")
+	corn.configure(3, "玉米", 73, 65, null)
+	if (corn.crop_art as ArtMotionTexture).motion_id.contains("waterlogged"):
+		failures.append("超出目标恰好8不应显示积水。")
+	corn.configure(3, "玉米", 74, 65, null)
+	if not (corn.crop_art as ArtMotionTexture).motion_id.contains("waterlogged"):
+		failures.append("超出目标9必须显示积水。")
+	corn.configure(3, "玉米", 90, 65, null)
+	level.call("_begin_workshop_experiments")
+	await process_frame
+	var dialogue := level.story_dialogue
+	var field := level.gap_target_input
+	for keycode in [KEY_A, KEY_TAB]:
+		var key := InputEventKey.new()
+		key.keycode = keycode
+		key.unicode = 97 if keycode == KEY_A else 0
+		key.pressed = true
+		root.push_input(key, true)
+		await process_frame
+	if not field.text.is_empty() or field.has_focus():
+		failures.append("对话期间键盘和Tab不能穿透到底层输入。")
+	# Real keyboard input must complete the line, not type a newline underneath.
+	var enter := InputEventKey.new()
+	enter.keycode = KEY_ENTER
+	enter.pressed = true
+	root.push_input(enter, true)
+	if dialogue.is_typing():
+		failures.append("对话必须支持键盘继续。")
+	dialogue.skip_sequence()
+	if not field.has_focus():
+		failures.append("关闭对话后应恢复原输入焦点。")
+	field.text = "wrong"
+	level.gap_moisture_input.text = "moisture"
+	level.call("_on_workshop_action_pressed")
+	if not bool(field.get("has_error")) or bool(level.gap_moisture_input.get("has_error")):
+		failures.append("错误外观必须只标记不正确字段。")
+	if field.text != "wrong" or not (level.get_node("%WorkshopError") as Label).visible:
+		failures.append("校验失败必须保留输入并显示独立说明。")
+	field.text = "target"
+	field.text_changed.emit(field.text)
+	if bool(field.get("has_error")) or (level.get_node("%WorkshopError") as Label).visible:
+		failures.append("重新编辑后必须清除旧字段错误与提示。")
+	level.call("_on_workshop_action_pressed")
+	level.call("_on_workshop_action_pressed")
+	var messages := (level.get_node("%WorkshopError") as Label).text
+	if not bool(level.severe_boundary_input.get("has_error")) or not bool(level.light_units_input.get("has_error")) or messages.is_empty():
+		failures.append("四个数值字段也必须独立校验并提供原因。")
+	level.call("_hide_lesson_overlays")
+	level.call("_begin_manual_compare")
+	var card := level.plot_grid.get_child(1) as CropPlotCard
+	for reduced in [false, true]:
+		Engine.set_meta("art_reduced_motion", reduced)
+		level.call("_on_plot_pressed", 0)
+		if card.scale != Vector2.ONE or not card.soil_glow.visible or int(level.get("_manual_cursor")) != 0:
+			failures.append("误点只能增强目标土地光晕，不缩放卡片或推进序号。")
+	Engine.remove_meta("art_reduced_motion")
+	level.set("_same_failure_count", 4)
+	level.set("_same_failure_key", "FIXED_TARGET_VALUE")
+	level.set("_hint_level", 3)
+	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.FAILED)
+	await process_frame
+	await process_frame
+	var tools := level.get_node("Hud/ToolRail") as Control
+	var playback := level.get_node("Hud/PlaybackRail") as Control
+	if tools.get_global_rect().intersects(playback.get_global_rect()):
+		failures.append("提案按钮可见时，工具栏与播放控件仍不能重叠。")
+	level.call("_on_patch_requested")
+	await process_frame
+	await process_frame
+	if level.patch_dialog.size.y > 680:
+		failures.append("提案弹窗必须完整放入720高的视口，实际大小 %s。" % level.patch_dialog.size)
+	if level.patch_dialog.get_node_or_null("Content/Rows/Columns/Before/Rows/Code") == null or level.patch_dialog.get_node_or_null("Content/Rows/Columns/After/Rows/Code") == null:
+		failures.append("提案必须提供独立的前后对照栏。")
+	level.patch_dialog.hide()
+	var pump := level.get_node("Pump") as ArtMotionTexture
+	pump.playback_speed = 30.0
+	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.RUNNING)
+	if pump.motion_id != "prop-pump-start":
+		failures.append("本地执行开始应触发水泵启动。")
+	# Headless rendering also loads atlases asynchronously; wait with a bounded deadline.
+	var deadline := Time.get_ticks_msec() + 5000
+	while pump.motion_id == "prop-pump-start" and Time.get_ticks_msec() < deadline:
+		await process_frame
+	if pump.motion_id != "prop-pump-working":
+		failures.append("水泵启动完成后必须进入工作循环。")
+	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.FAILED)
+	if pump.motion_id != "prop-pump-stop":
+		failures.append("执行结束应触发水泵停机。")
+	deadline = Time.get_ticks_msec() + 5000
+	while pump.motion_id == "prop-pump-stop" and Time.get_ticks_msec() < deadline:
+		await process_frame
+	if pump.motion_id != "prop-pump-standby":
+		failures.append("水泵停机结束后必须回到待机。")
+	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.RUNNING)
+	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.FAILED)
+	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.CHAIN_ERROR)
+	await create_timer(0.15).timeout
+	if pump.motion_id != "prop-pump-fault":
+		failures.append("故障必须中断停机过渡，不能被旧动画切回待机。")
+	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.CODE)
+	if pump.motion_id != "prop-pump-standby":
+		failures.append("故障恢复后应回到待机。")
+	Engine.set_meta("art_reduced_motion", true)
+	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.RUNNING)
+	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.CODE)
+	if pump.motion_id != "prop-pump-standby":
+		failures.append("减少动态不能阻塞水泵状态回收。")
+	Engine.remove_meta("art_reduced_motion")
+	pump.playback_speed = 1.0
