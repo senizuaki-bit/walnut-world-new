@@ -451,17 +451,22 @@ func _show_skill_tree(unlocked: bool) -> void:
 		skill_tree_body.text = (
 			"[center][color=#2a8a4f][font_size=28]★★★★  已解锁[/font_size][/color][/center]\n"
 			+ "[center]读取每块土地的当前湿度与作物目标湿度，计算缺口并决定 0 / 1 / 2 份水。[/center]\n\n"
-			+ "[color=#738276]★★★★★  区域灌溉 · 未来能力（尚未解锁）[/color]"
+			+ ""
 		)
 		skill_tree_continue_button.text = "进入完成后的自由状态  →"
 	else:
 		skill_tree_body.text = (
 			"[center][color=#d28a18][font_size=28]★★★★  剧情可学习[/font_size][/color][/center]\n"
 			+ "[center]能力槽：数据配对　缺口计算　分级动作[/center]\n\n"
-			+ "[color=#738276]★★★★★  区域灌溉 · 功能预告（不能提前学习）[/color]"
+			+ ""
 		)
 		skill_tree_continue_button.text = "进入清泉工坊  →"
+	for concept in $SkillTreeOverlay/Card/Margin/Content/ConceptCards.get_children():
+		concept.get_node("Content/Completed").visible = unlocked
 	skill_tree_overlay.visible = true
+	$SkillTreeOverlay/UnlockSeal.visible = unlocked
+	if unlocked:
+		($SkillTreeOverlay/UnlockSeal as ArtMotionTexture).play_clip("ui-four-star-seal-unlock", true)
 
 
 func _on_skill_tree_continue_pressed() -> void:
@@ -525,6 +530,7 @@ func _on_workshop_action_pressed() -> void:
 		or gap_moisture_input.text.strip_edges() != "moisture"
 	):
 		workshop_body.text = str(WORKSHOP_EXPERIMENTS[0].body) + "\n⚠ 请在两个输入框中依次填入 target 和 moisture。"
+		_show_workshop_feedback(false)
 		gap_target_input.grab_focus()
 		return
 	if _workshop_step == 1 and not (
@@ -534,8 +540,10 @@ func _on_workshop_action_pressed() -> void:
 		and light_units_input.text.strip_edges() == "1"
 	):
 		workshop_body.text = str(WORKSHOP_EXPERIMENTS[1].body) + "\n⚠ 请检查四个输入框：30、2、0、1。"
+		_show_workshop_feedback(false)
 		severe_boundary_input.grab_focus()
 		return
+	_show_workshop_feedback(true)
 	_workshop_step += 1
 	if _workshop_step >= WORKSHOP_EXPERIMENTS.size():
 		workshop_overlay.visible = false
@@ -627,9 +635,10 @@ func _request_run() -> void:
 		if units > 0:
 			watering_can.visible = true
 			watering_can.position = card.global_position + Vector2(card.size.x * 0.50, 68.0)
-			watering_can.scale = Vector2.ONE * 0.22
+			watering_can.scale = Vector2.ONE * 0.32
 			watering_can.frame = 0
-			watering_can.play(&"pour")
+			watering_can.speed_scale = 1.0 / maxf(timing_scale, 0.05)
+			watering_can.play(&"pour_two" if units >= 2 else &"pour")
 			await watering_can.animation_finished
 			watering_can.visible = false
 		card.set_result(units, true, units != EXPECTED_UNITS[index])
@@ -1026,10 +1035,10 @@ func present_candidate_evaluation(result: Dictionary, replay := false) -> Dictio
 				return {"ok": false, "code": "CANDIDATE_PRESENTATION_CANCELLED"}
 			watering_can.visible = true
 			watering_can.position = card.global_position + Vector2(card.size.x * 0.50, 68.0)
-			watering_can.scale = Vector2.ONE * 0.22
+			watering_can.scale = Vector2.ONE * 0.32
 			watering_can.frame = 0
 			watering_can.speed_scale = _candidate_playback_speed / maxf(timing_scale, 0.05)
-			watering_can.play(&"pour")
+			watering_can.play(&"pour_two" if int(action.get("amount_ml", 0)) >= 500 else &"pour")
 			await watering_can.animation_finished
 			if not is_instance_valid(self):
 				return {"ok": false, "code": "CANDIDATE_PRESENTATION_CANCELLED"}
@@ -1291,6 +1300,12 @@ func _authoritative_snapshot_line() -> String:
 
 func _set_phase(value: Phase) -> void:
 	_phase = value
+	$Hud/BusyMotion.visible = value in [Phase.BUILDING, Phase.ACTIVATING, Phase.CANDIDATE_VALIDATING]
+	($Pump as ArtMotionTexture).play_clip("prop-pump-fault" if value == Phase.CHAIN_ERROR else "prop-pump-standby")
+	var backdrop: String = {Phase.WORKSHOP: "B02-workshop-background", Phase.SKILL_TREE: "B04-workshop-exterior-background", Phase.SKILL_UNLOCKED: "B04-workshop-exterior-background", Phase.GROWTH_SUMMARY: "B06-archive-background"}.get(value, "B01-farm-background")
+	$FarmBackdrop.set_background(backdrop)
+	($PlayerCompanion as ArtMotionTexture).play_clip("char-player-write" if value == Phase.CODE else ("char-player-recover" if value in [Phase.FAILED, Phase.LOCAL_FAILED, Phase.CHAIN_ERROR] else "char-player-idle"))
+	($WalnutCompanion as ArtMotionTexture).play_clip("char-walnut-read" if value == Phase.CANDIDATE_PRESENTING else "char-walnut-idle")
 	task_title.text = _agent_task_title if _agent_mode and not _agent_task_title.is_empty() else "作物适配浇水器"
 	var names := {
 		Phase.INTRO: "进入试验田",
@@ -1358,3 +1373,9 @@ func _bounce(control: Control) -> void:
 
 func _duration(seconds: float) -> float:
 	return maxf(0.01, seconds * timing_scale)
+
+
+func _show_workshop_feedback(success: bool) -> void:
+	var feedback := $WorkshopOverlay/WorkshopFeedback as ArtMotionTexture
+	feedback.visible = true
+	feedback.play_clip("button-success-motion" if success else "button-error-motion", true)

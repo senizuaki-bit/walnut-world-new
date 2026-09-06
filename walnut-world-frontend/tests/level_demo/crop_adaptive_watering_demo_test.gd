@@ -62,7 +62,7 @@ func _initialize() -> void:
 	var patch_dialog := level.get_node("PatchDialog") as ConfirmationDialog
 	if patch_dialog.get_cancel_button().text != "关闭预览":
 		failures.append("关闭 Patch 预览必须与明确拒绝操作区分。")
-	var grass := level.get_node("Grass") as TextureRect
+	var grass := level.get_node("FarmBackdrop") as TextureRect
 	if grass.anchor_right != 1.0 or grass.anchor_bottom != 1.0 or grass.stretch_mode != TextureRect.STRETCH_KEEP_ASPECT_COVERED:
 		failures.append("土地背景必须完整覆盖关卡摄像机范围。")
 	var evidence_panel := level.get_node("Hud/EvidencePanel") as Control
@@ -86,7 +86,7 @@ func _initialize() -> void:
 	var expected_manual_order := [1, 6, 5]
 	for expected_index in expected_manual_order:
 		for card_index in range(grid.get_child_count()):
-			var attention := grid.get_child(card_index).get_node("AttentionFrame") as Panel
+			var attention := grid.get_child(card_index).get_node("Margin/Content/ArtRow/SoilGlow") as TextureRect
 			if attention.visible != (card_index == expected_index):
 				failures.append("手动验证阶段必须持续高亮当前土地%d。" % expected_index)
 		level.call("_on_plot_pressed", expected_index)

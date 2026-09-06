@@ -19,9 +19,9 @@ func _initialize() -> void:
 			not member is TextureRect
 			or member.mouse_filter != Control.MOUSE_FILTER_IGNORE
 			or member.texture == null
-			or not member.texture.resource_path.ends_with("pest_bug.png")
+			or not member.texture.resource_path.ends_with("char-bug-idle.png")
 		):
-			_abort("四个 2D 成员必须复用 pest_bug.png，且全部忽略鼠标。")
+			_abort("四个 2D 成员必须复用 char-bug-idle.png，且全部忽略鼠标。")
 			return
 	legion.show_legion()
 	if not legion.visible:

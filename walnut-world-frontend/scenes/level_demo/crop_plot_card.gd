@@ -24,12 +24,20 @@ signal plot_pressed(plot_index: int)
 var _card_tween: Tween
 var _scan_tween: Tween
 var _attention_tween: Tween
+var _soil_state := "severe-dry"
+var _attention_active := false
+var _error_active := false
+var _scanning := false
+@onready var soil_art: ArtMotionTexture = %SoilArt
+@onready var soil_glow: ArtMotionTexture = %SoilGlow
 
 
 func _ready() -> void:
 	hit_button.pressed.connect(func() -> void: plot_pressed.emit(plot_index))
 	hit_button.mouse_entered.connect(_on_hovered)
 	hit_button.mouse_exited.connect(_on_unhovered)
+	hit_button.focus_entered.connect(_refresh_glow)
+	hit_button.focus_exited.connect(_refresh_glow)
 	refresh_data()
 	set_result(-1, false)
 
@@ -50,7 +58,28 @@ func refresh_data() -> void:
 	current_label.text = "当前湿度 %d" % current_moisture
 	target_label.text = "目标湿度 %d" % target_moisture
 	moisture_bar.value = current_moisture
-	crop_art.texture = crop_texture
+	_update_art(target_moisture - current_moisture)
+	_error_active = false
+	_refresh_glow()
+
+
+func _update_art(gap: int, waterlogged := false) -> void:
+	_soil_state = "waterlogged" if waterlogged else ("severe-dry" if gap >= 30 else ("light-thirst" if gap > 0 else "target-met"))
+	var crop_id: String = {"胡萝卜": "carrot", "番茄": "tomato", "土豆": "potato", "玉米": "corn"}.get(crop_name, "carrot")
+	(crop_art as ArtMotionTexture).play_clip("crop-%s-%s-sway" % [crop_id, _soil_state])
+	soil_art.play_clip("soil-%s-ambient" % _soil_state if _soil_state in ["target-met", "waterlogged"] else "")
+	if _soil_state not in ["target-met", "waterlogged"]:
+		soil_art.texture = load("res://assets/art/redesign/crop_adaptive/v2/components/soil-%s.png" % _soil_state)
+	_refresh_glow()
+
+
+func _refresh_glow() -> void:
+	if not is_node_ready():
+		return
+	var mode := "error" if _error_active else ("focus" if hit_button.has_focus() or hit_button.is_hovered() else "selected")
+	soil_glow.visible = _error_active or _attention_active or _scanning or hit_button.has_focus() or hit_button.is_hovered()
+	if soil_glow.visible:
+		soil_glow.play_clip("soil-%s-%s-glow" % [_soil_state, mode])
 
 
 func show_gap(show_value: bool) -> void:
@@ -59,6 +88,8 @@ func show_gap(show_value: bool) -> void:
 
 
 func set_result(water_units: int, animate: bool = true, is_error: bool = false) -> void:
+	_error_active = is_error and water_units >= 0
+	_refresh_glow()
 	water_badge.visible = water_units >= 0
 	if water_units < 0:
 		water_badge.text = ""
@@ -95,6 +126,13 @@ func show_candidate_outcome(hydration: int, status: String) -> void:
 	current_label.text = "候选湿度 %d" % hydration
 	moisture_bar.value = clampf(float(hydration) / 100.0, 0.0, 100.0)
 	self_modulate = Color(1.0, 0.88, 0.83, 1.0) if is_error else Color.WHITE
+	# Presentation statuses come from the candidate evaluator; never write moisture.
+	if status == "CORRECT":
+		_update_art(0)
+	elif status == "OVERWATERED":
+		_update_art(0, true)
+	_error_active = is_error
+	_refresh_glow()
 
 
 func reset_candidate_display() -> void:
@@ -103,18 +141,11 @@ func reset_candidate_display() -> void:
 
 
 func play_scan(duration: float = 0.34) -> void:
-	if _scan_tween != null and _scan_tween.is_valid():
-		_scan_tween.kill()
-	scan_glow.visible = true
-	scan_glow.modulate.a = 0.0
-	scan_glow.position.x = -size.x * 0.65
-	_scan_tween = create_tween().set_parallel(true)
-	_scan_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	_scan_tween.tween_property(scan_glow, "modulate:a", 0.54, duration * 0.34)
-	_scan_tween.tween_property(scan_glow, "position:x", size.x * 0.70, duration)
-	_scan_tween.chain().tween_property(scan_glow, "modulate:a", 0.0, duration * 0.22)
-	await _scan_tween.finished
-	scan_glow.visible = false
+	_scanning = true
+	_refresh_glow()
+	await get_tree().create_timer(duration, false).timeout
+	_scanning = false
+	_refresh_glow()
 
 
 func pulse_attention() -> void:
@@ -123,17 +154,9 @@ func pulse_attention() -> void:
 
 
 func set_attention(active: bool) -> void:
-	if _attention_tween != null and _attention_tween.is_valid():
-		_attention_tween.kill()
-	attention_frame.visible = active
-	if not active:
-		attention_frame.modulate = Color.WHITE
-		return
-	attention_frame.modulate = Color(1.0, 1.0, 1.0, 0.72)
-	_attention_tween = create_tween().set_loops()
-	_attention_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	_attention_tween.tween_property(attention_frame, "modulate:a", 1.0, 0.48)
-	_attention_tween.tween_property(attention_frame, "modulate:a", 0.72, 0.48)
+	_attention_active = active
+	attention_frame.visible = false
+	_refresh_glow()
 
 
 func _bounce() -> void:
@@ -148,17 +171,8 @@ func _bounce() -> void:
 
 
 func _on_hovered() -> void:
-	if _card_tween != null and _card_tween.is_valid():
-		_card_tween.kill()
-	pivot_offset = size * 0.5
-	_card_tween = create_tween()
-	_card_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	_card_tween.tween_property(self, "scale", Vector2(1.025, 1.025), 0.13)
+	_refresh_glow()
 
 
 func _on_unhovered() -> void:
-	if _card_tween != null and _card_tween.is_valid():
-		_card_tween.kill()
-	_card_tween = create_tween()
-	_card_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	_card_tween.tween_property(self, "scale", Vector2.ONE, 0.13)
+	_refresh_glow()

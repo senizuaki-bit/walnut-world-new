@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3]
+[gd_scene load_steps=46 format=3]
 
 [ext_resource type="Script" path="res://scenes/level_demo/crop_adaptive_watering_demo.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://scenes/level_demo/crop_plot_card.tscn" id="2_card"]
@@ -6,89 +6,78 @@
 [ext_resource type="Texture2D" path="res://assets/art/generated/terrain/grass_plot.png" id="4_grass"]
 [ext_resource type="Texture2D" path="res://assets/art/generated/facilities/farm_water_pump_station.png" id="5_pump"]
 [ext_resource type="Texture2D" path="res://assets/art/generated/facilities/greenhouse.png" id="6_workshop"]
-[ext_resource type="SpriteFrames" path="res://resources/sprites/watering_can_frames_v2.tres" id="7_can"]
+[ext_resource type="SpriteFrames" path="res://resources/ui/art_v2/watering_frames.tres" id="7_can"]
 [ext_resource type="Script" path="res://scenes/ui/agent_interaction_presenter.gd" id="8_presenter"]
 [ext_resource type="Resource" path="res://resources/agent/agent_character_catalog.tres" id="9_catalog"]
 [ext_resource type="PackedScene" path="res://scenes/characters/bug_legion/bug_legion_2d.tscn" id="10_legion"]
 
-[sub_resource type="StyleBoxFlat" id="TaskStyle"]
-bg_color = Color(0.99, 0.95, 0.80, 0.97)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.18, 0.40, 0.28, 1)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
-shadow_color = Color(0.04, 0.12, 0.08, 0.28)
-shadow_size = 7
-shadow_offset = Vector2(0, 4)
+[ext_resource type="Theme" path="res://resources/ui/art_v2/theme.tres" id="art_theme"]
 
-[sub_resource type="StyleBoxFlat" id="DarkPill"]
-bg_color = Color(0.09, 0.26, 0.19, 0.96)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
-shadow_color = Color(0.03, 0.09, 0.06, 0.26)
-shadow_size = 5
-shadow_offset = Vector2(0, 3)
+[ext_resource type="Script" path="res://scenes/ui/art_motion_texture.gd" id="art_motion"]
 
-[sub_resource type="StyleBoxFlat" id="EvidenceStyle"]
-bg_color = Color(1, 0.976, 0.88, 0.98)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0.93, 0.58, 0.16, 1)
-corner_radius_top_left = 22
-corner_radius_top_right = 22
-corner_radius_bottom_right = 22
-corner_radius_bottom_left = 22
-shadow_color = Color(0.08, 0.15, 0.10, 0.26)
-shadow_size = 7
-shadow_offset = Vector2(0, 4)
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/ui-hud.tres" id="style_TaskStyle"]
 
-[sub_resource type="StyleBoxFlat" id="PrimaryStyle"]
-bg_color = Color(0.98, 0.68, 0.19, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.13, 0.35, 0.24, 1)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
-shadow_color = Color(0.24, 0.14, 0.04, 0.30)
-shadow_size = 5
-shadow_offset = Vector2(0, 3)
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/ui-hud.tres" id="style_DarkPill"]
 
-[sub_resource type="StyleBoxFlat" id="SecondaryStyle"]
-bg_color = Color(0.98, 0.93, 0.75, 0.98)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.15, 0.38, 0.26, 1)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/ui-dialogue.tres" id="style_EvidenceStyle"]
 
-[sub_resource type="StyleBoxFlat" id="DrawerStyle"]
-bg_color = Color(0.985, 0.949, 0.84, 1)
-border_width_left = 7
-border_width_top = 4
-border_width_bottom = 4
-border_color = Color(0.21, 0.49, 0.33, 1)
-corner_radius_top_left = 28
-corner_radius_bottom_left = 28
-shadow_color = Color(0.03, 0.09, 0.06, 0.46)
-shadow_size = 14
-shadow_offset = Vector2(-7, 0)
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/button_normal.tres" id="style_PrimaryStyle"]
+
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/button_normal.tres" id="style_SecondaryStyle"]
+
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/ui-panel.tres" id="style_DrawerStyle"]
+
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/ui-panel.tres" id="style_CompletionStyle"]
+
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/input_normal.tres" id="style_WorkshopInputStyle"]
+
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/input_focus.tres" id="style_WorkshopInputFocusStyle"]
+
+[ext_resource type="Script" path="res://scenes/ui/art_ambient.gd" id="ambient_FarmBackdrop"]
+
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/B01-farm-background.png" id="bg_FarmBackdrop"]
+
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/prop-pump.png" id="pump_v2"]
+
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/char-player-idle.png" id="player_v2"]
+
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/char-walnut-idle.png" id="walnut_v2"]
+
+[ext_resource type="Script" path="res://scenes/ui/art_ambient.gd" id="ambient_SkillTreeOverlayBackdrop"]
+
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/B04-workshop-exterior-background.png" id="bg_SkillTreeOverlayBackdrop"]
+
+[ext_resource type="Script" path="res://scenes/ui/art_ambient.gd" id="ambient_WorkshopOverlayBackdrop"]
+
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/B02-workshop-background.png" id="bg_WorkshopOverlayBackdrop"]
+
+[ext_resource type="Script" path="res://scenes/ui/art_ambient.gd" id="ambient_BugChallengeOverlayBackdrop"]
+
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/B05-bug-investigation-background.png" id="bg_BugChallengeOverlayBackdrop"]
+
+[ext_resource type="Script" path="res://scenes/ui/art_ambient.gd" id="ambient_GrowthSummaryOverlayBackdrop"]
+
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/B06-archive-background.png" id="bg_GrowthSummaryOverlayBackdrop"]
+
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/prop-skill-tree-v2.png" id="skill_tree_v2"]
+
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/icon-skill-watering.png" id="skill_icon_0"]
+
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/icon-array.png" id="skill_icon_1"]
+
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/icon-drop.png" id="skill_icon_2"]
+
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/icon-skill-action.png" id="skill_icon_3"]
+
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/icon-lock.png" id="skill_icon_4"]
+
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/icon-skill-watering.png" id="reward_tool"]
+
+[ext_resource type="Script" path="res://scenes/ui/art_motion_toggle.gd" id="motion_toggle"]
+
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/ui-data-plaque.tres" id="phase_plaque"]
+
+[ext_resource type="Script" path="res://scenes/ui/art_watering_sprite.gd" id="watering_art_script"]
 
 [sub_resource type="StyleBoxFlat" id="EditorStyle"]
 bg_color = Color(0.10, 0.17, 0.14, 1)
@@ -102,45 +91,6 @@ corner_radius_top_right = 15
 corner_radius_bottom_right = 15
 corner_radius_bottom_left = 15
 
-[sub_resource type="StyleBoxFlat" id="WorkshopInputStyle"]
-bg_color = Color(0.96, 0.93, 0.72, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.45, 0.72, 0.50, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
-[sub_resource type="StyleBoxFlat" id="WorkshopInputFocusStyle"]
-bg_color = Color(1, 0.97, 0.78, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.98, 0.68, 0.19, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
-[sub_resource type="StyleBoxFlat" id="CompletionStyle"]
-bg_color = Color(0.92, 1, 0.82, 0.985)
-border_width_left = 5
-border_width_top = 5
-border_width_right = 5
-border_width_bottom = 5
-border_color = Color(0.18, 0.61, 0.37, 1)
-corner_radius_top_left = 30
-corner_radius_top_right = 30
-corner_radius_bottom_right = 30
-corner_radius_bottom_left = 30
-shadow_color = Color(0.04, 0.14, 0.08, 0.42)
-shadow_size = 14
-shadow_offset = Vector2(0, 8)
-
 [node name="CropAdaptiveWateringDemo" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -149,6 +99,33 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
+theme = ExtResource("art_theme")
+
+[node name="FarmBackdrop" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("bg_FarmBackdrop")
+expand_mode = 1
+stretch_mode = 6
+script = ExtResource("ambient_FarmBackdrop")
+background_id = "B01-farm-background"
+
+[node name="Video" type="VideoStreamPlayer" parent="FarmBackdrop"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand = true
+volume_db = -80.0
+
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
@@ -159,6 +136,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(0.77, 0.93, 0.84, 1)
+visible = false
 
 [node name="Grass" type="TextureRect" parent="."]
 layout_mode = 1
@@ -172,18 +150,21 @@ modulate = Color(1, 1, 1, 0.58)
 texture = ExtResource("4_grass")
 expand_mode = 1
 stretch_mode = 6
+visible = false
 
 [node name="Pump" type="TextureRect" parent="."]
-layout_mode = 0
-offset_left = -28.0
-offset_top = 345.0
-offset_right = 196.0
-offset_bottom = 610.0
-mouse_filter = 2
-modulate = Color(1, 1, 1, 0.82)
-texture = ExtResource("5_pump")
 expand_mode = 1
 stretch_mode = 5
+texture = ExtResource("pump_v2")
+modulate = Color(1, 1, 1, 1)
+script = ExtResource("art_motion")
+motion_id = "prop-pump-standby"
+layout_mode = 0
+offset_left = 5.0
+offset_top = 285.0
+offset_right = 130.0
+offset_bottom = 475.0
+mouse_filter = 2
 
 [node name="Workshop" type="TextureRect" parent="."]
 layout_mode = 1
@@ -200,6 +181,34 @@ modulate = Color(1, 1, 1, 0.78)
 texture = ExtResource("6_workshop")
 expand_mode = 1
 stretch_mode = 5
+visible = false
+
+[node name="PlayerCompanion" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 350.0
+offset_right = 212.0
+offset_bottom = 620.0
+mouse_filter = 2
+texture = ExtResource("player_v2")
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("art_motion")
+motion_id = "char-player-idle"
+
+[node name="WalnutCompanion" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 475.0
+offset_right = 112.0
+offset_bottom = 630.0
+mouse_filter = 2
+texture = ExtResource("walnut_v2")
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("art_motion")
+motion_id = "char-walnut-idle"
+
 
 [node name="Hud" type="Control" parent="."]
 layout_mode = 1
@@ -213,9 +222,9 @@ grow_vertical = 2
 layout_mode = 0
 offset_left = 18.0
 offset_top = 16.0
-offset_right = 330.0
-offset_bottom = 102.0
-theme_override_styles/panel = SubResource("TaskStyle")
+theme_override_styles/panel = ExtResource("style_TaskStyle")
+offset_right = 275.0
+offset_bottom = 95.0
 
 [node name="Margin" type="MarginContainer" parent="Hud/TaskCard"]
 layout_mode = 2
@@ -232,8 +241,8 @@ theme_override_constants/separation = 2
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.11, 0.31, 0.21, 1)
-theme_override_font_sizes/font_size = 22
 text = "作物适配浇水器"
+theme_override_font_sizes/font_size = 20
 
 [node name="TaskProgress" type="Label" parent="Hud/TaskCard/Margin/Content"]
 unique_name_in_owner = true
@@ -246,21 +255,21 @@ text = "进入试验田"
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_left = 355.0
 offset_top = 18.0
-offset_right = -355.0
-offset_bottom = 62.0
 grow_horizontal = 2
-theme_override_styles/panel = SubResource("DarkPill")
+offset_left = 286.0
+offset_right = -18.0
+offset_bottom = 57.0
+theme_override_styles/panel = ExtResource("phase_plaque")
 
 [node name="PhaseStrip" type="Label" parent="Hud/PhasePill"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.91, 0.97, 0.78, 1)
-theme_override_font_sizes/font_size = 15
 text = "观察旧工具  →  理解数据  →  编写规则  →  世界验证"
 horizontal_alignment = 1
 vertical_alignment = 1
+theme_override_colors/font_color = Color(0.09, 0.24, 0.19, 1)
+theme_override_font_sizes/font_size = 14
 
 [node name="ToolRail" type="HBoxContainer" parent="Hud"]
 layout_mode = 1
@@ -268,11 +277,11 @@ anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -405.0
-offset_top = 16.0
 offset_right = -18.0
-offset_bottom = 66.0
 grow_horizontal = 0
 theme_override_constants/separation = 8
+offset_top = 66.0
+offset_bottom = 110.0
 
 [node name="CodeButton" type="Button" parent="Hud/ToolRail"]
 unique_name_in_owner = true
@@ -281,8 +290,6 @@ layout_mode = 2
 focus_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
 theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("SecondaryStyle")
-theme_override_styles/hover = SubResource("PrimaryStyle")
 text = "</> 代码"
 
 [node name="HintButton" type="Button" parent="Hud/ToolRail"]
@@ -292,8 +299,6 @@ layout_mode = 2
 focus_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
 theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("SecondaryStyle")
-theme_override_styles/hover = SubResource("PrimaryStyle")
 text = "? 问叮当"
 
 [node name="RequestPatchButton" type="Button" parent="Hud/ToolRail"]
@@ -305,8 +310,6 @@ focus_mode = 2
 tooltip_text = "查看并决定是否采用 AI 修改提案"
 theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
 theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("PrimaryStyle")
-theme_override_styles/hover = SubResource("PrimaryStyle")
 text = "AI 修改提案"
 
 [node name="PlaybackRail" type="HBoxContainer" parent="Hud"]
@@ -315,11 +318,11 @@ anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -242.0
-offset_top = 70.0
 offset_right = -18.0
-offset_bottom = 112.0
 grow_horizontal = 0
 theme_override_constants/separation = 8
+offset_top = 66.0
+offset_bottom = 108.0
 
 [node name="PlaybackSpeedButton" type="Button" parent="Hud/PlaybackRail"]
 unique_name_in_owner = true
@@ -330,8 +333,6 @@ focus_mode = 2
 tooltip_text = "切换权威世界演出的播放速度（等待逻辑接入）"
 theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
 theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("SecondaryStyle")
-theme_override_styles/hover = SubResource("PrimaryStyle")
 text = "1x"
 
 [node name="SkipPlaybackButton" type="Button" parent="Hud/PlaybackRail"]
@@ -343,8 +344,6 @@ focus_mode = 2
 tooltip_text = "跳过当前权威世界演出（等待逻辑接入）"
 theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
 theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("SecondaryStyle")
-theme_override_styles/hover = SubResource("PrimaryStyle")
 text = "跳过"
 
 [node name="ReplayPlaybackButton" type="Button" parent="Hud/PlaybackRail"]
@@ -356,22 +355,44 @@ focus_mode = 2
 tooltip_text = "重播最近一次已验证结果（等待逻辑接入）"
 theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
 theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("SecondaryStyle")
-theme_override_styles/hover = SubResource("PrimaryStyle")
 text = "重播"
+
+[node name="ReduceMotion" type="CheckButton" parent="Hud"]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 103.0
+offset_right = 190.0
+offset_bottom = 139.0
+text = "减少动态"
+script = ExtResource("motion_toggle")
+
+
+[node name="BusyMotion" type="TextureRect" parent="Hud"]
+visible = false
+layout_mode = 0
+offset_left = 195.0
+offset_top = 106.0
+offset_right = 221.0
+offset_bottom = 132.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("art_motion")
+motion_id = "icon-spinner-loop"
+hide_when_finished = false
 
 [node name="FarmLayout" type="HBoxContainer" parent="Hud"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 190.0
-offset_top = 112.0
-offset_right = -190.0
-offset_bottom = -185.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 18
+offset_left = 220.0
+offset_right = -145.0
+offset_top = 145.0
+offset_bottom = -220.0
 
 [node name="PlotGrid" type="GridContainer" parent="Hud/FarmLayout"]
 unique_name_in_owner = true
@@ -423,19 +444,19 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -420.0
-offset_top = -175.0
 offset_right = 420.0
-offset_bottom = -95.0
 grow_horizontal = 2
 grow_vertical = 0
-theme_override_styles/panel = SubResource("EvidenceStyle")
+theme_override_styles/panel = ExtResource("style_EvidenceStyle")
+offset_top = -173.0
+offset_bottom = -91.0
 
 [node name="Margin" type="MarginContainer" parent="Hud/EvidencePanel"]
 layout_mode = 2
 theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 8
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_bottom = 4
 
 [node name="Content" type="VBoxContainer" parent="Hud/EvidencePanel/Margin"]
 layout_mode = 2
@@ -445,19 +466,22 @@ theme_override_constants/separation = 4
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.15, 0.36, 0.24, 1)
-theme_override_font_sizes/font_size = 18
 text = "清泉试验田"
+theme_override_font_sizes/font_size = 16
 
 [node name="EvidenceBody" type="RichTextLabel" parent="Hud/EvidencePanel/Margin/Content"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 mouse_filter = 2
 theme_override_colors/default_color = Color(0.25, 0.33, 0.22, 1)
-theme_override_font_sizes/normal_font_size = 14
 bbcode_enabled = true
 text = "八块土地正在等待检查。"
 fit_content = false
+theme_override_font_sizes/normal_font_size = 14
+custom_minimum_size = Vector2(0, 40)
+theme_override_font_sizes/bold_font_size = 14
+theme_override_font_sizes/italics_font_size = 14
+theme_override_constants/line_separation = 0
 
 [node name="PrimaryButton" type="Button" parent="Hud"]
 unique_name_in_owner = true
@@ -477,8 +501,6 @@ focus_mode = 2
 mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
 theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("PrimaryStyle")
-theme_override_styles/hover = SubResource("PrimaryStyle")
 text = "查看旧工具演示  →"
 
 [node name="WaterChoices" type="HBoxContainer" parent="Hud"]
@@ -503,7 +525,6 @@ custom_minimum_size = Vector2(156, 58)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
 theme_override_font_sizes/font_size = 17
-theme_override_styles/normal = SubResource("SecondaryStyle")
 text = "不浇水"
 
 [node name="OneWaterButton" type="Button" parent="Hud/WaterChoices"]
@@ -512,7 +533,6 @@ custom_minimum_size = Vector2(156, 58)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
 theme_override_font_sizes/font_size = 17
-theme_override_styles/normal = SubResource("SecondaryStyle")
 text = "浇 1 份"
 
 [node name="TwoWaterButton" type="Button" parent="Hud/WaterChoices"]
@@ -521,7 +541,6 @@ custom_minimum_size = Vector2(156, 58)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
 theme_override_font_sizes/font_size = 17
-theme_override_styles/normal = SubResource("SecondaryStyle")
 text = "浇 2 份"
 
 [node name="WateringCan" type="AnimatedSprite2D" parent="Hud"]
@@ -530,6 +549,11 @@ visible = false
 sprite_frames = ExtResource("7_can")
 animation = &"pour"
 centered = true
+script = ExtResource("watering_art_script")
+
+[node name="Still" type="Sprite2D" parent="Hud/WateringCan"]
+visible = false
+
 
 [node name="CodeDrawer" type="Control" parent="."]
 unique_name_in_owner = true
@@ -561,7 +585,7 @@ anchor_bottom = 1.0
 offset_left = -540.0
 grow_horizontal = 0
 grow_vertical = 2
-theme_override_styles/panel = SubResource("DrawerStyle")
+theme_override_styles/panel = ExtResource("style_DrawerStyle")
 
 [node name="Margin" type="MarginContainer" parent="CodeDrawer/Surface"]
 layout_mode = 2
@@ -600,8 +624,6 @@ focus_mode = 2
 tooltip_text = "关闭代码界面"
 theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
 theme_override_font_sizes/font_size = 22
-theme_override_styles/normal = SubResource("SecondaryStyle")
-theme_override_styles/hover = SubResource("PrimaryStyle")
 text = "×"
 
 [node name="PrototypeNotice" type="Label" parent="CodeDrawer/Surface/Margin/Content"]
@@ -634,7 +656,6 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(90, 52)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
-theme_override_styles/normal = SubResource("SecondaryStyle")
 text = "重置"
 
 [node name="RunButton" type="Button" parent="CodeDrawer/Surface/Margin/Content/Actions"]
@@ -646,7 +667,6 @@ focus_mode = 2
 tooltip_text = "保存当前代码并直接运行"
 theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
 theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("PrimaryStyle")
 text = "直接运行  ▶"
 
 [node name="CompletionCard" type="PanelContainer" parent="."]
@@ -657,13 +677,13 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -370.0
-offset_top = -190.0
-offset_right = 370.0
-offset_bottom = 190.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("CompletionStyle")
+theme_override_styles/panel = ExtResource("style_CompletionStyle")
+offset_left = -405.0
+offset_right = 405.0
+offset_top = -250.0
+offset_bottom = 250.0
 
 [node name="Margin" type="MarginContainer" parent="CompletionCard"]
 layout_mode = 2
@@ -680,9 +700,18 @@ theme_override_constants/separation = 14
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.10, 0.38, 0.23, 1)
-theme_override_font_sizes/font_size = 32
 text = "作物适配浇水器已通过验证！"
 horizontal_alignment = 1
+theme_override_font_sizes/font_size = 28
+
+[node name="RewardTool" type="TextureRect" parent="CompletionCard/Margin/Content"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 150)
+texture = ExtResource("reward_tool")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
 
 [node name="CompletionSummary" type="Label" parent="CompletionCard/Margin/Content"]
 unique_name_in_owner = true
@@ -703,17 +732,15 @@ custom_minimum_size = Vector2(180, 58)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
 theme_override_font_sizes/font_size = 17
-theme_override_styles/normal = SubResource("SecondaryStyle")
 text = "重玩本关"
 
 [node name="NextButton" type="Button" parent="CompletionCard/Margin/Content/Actions"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(180, 58)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
 theme_override_font_sizes/font_size = 17
-theme_override_styles/normal = SubResource("PrimaryStyle")
 text = "下一关  →"
+custom_minimum_size = Vector2(240, 58)
 
 [node name="ReturnButton" type="Button" parent="CompletionCard/Margin/Content/Actions"]
 unique_name_in_owner = true
@@ -721,7 +748,6 @@ custom_minimum_size = Vector2(180, 58)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
 theme_override_font_sizes/font_size = 17
-theme_override_styles/normal = SubResource("SecondaryStyle")
 text = "返回农场"
 
 [node name="SkillTreeOverlay" type="Control" parent="."]
@@ -735,6 +761,32 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
 
+[node name="SkillTreeOverlayBackdrop" type="TextureRect" parent="SkillTreeOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("bg_SkillTreeOverlayBackdrop")
+expand_mode = 1
+stretch_mode = 6
+script = ExtResource("ambient_SkillTreeOverlayBackdrop")
+background_id = "B04-workshop-exterior-background"
+
+[node name="Video" type="VideoStreamPlayer" parent="SkillTreeOverlay/SkillTreeOverlayBackdrop"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand = true
+volume_db = -80.0
+
+
 [node name="Dimmer" type="ColorRect" parent="SkillTreeOverlay"]
 layout_mode = 1
 anchors_preset = 15
@@ -742,7 +794,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.035, 0.12, 0.08, 0.72)
+mouse_filter = 2
+color = Color(0.03, 0.09, 0.06, 0.12)
 
 [node name="Card" type="PanelContainer" parent="SkillTreeOverlay"]
 layout_mode = 1
@@ -751,20 +804,103 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -390.0
-offset_top = -255.0
-offset_right = 390.0
-offset_bottom = 255.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("CompletionStyle")
+theme_override_styles/panel = ExtResource("style_CompletionStyle")
+offset_left = -460.0
+offset_right = 500.0
+offset_top = -310.0
+offset_bottom = 310.0
+
+[node name="TreeStage" type="Control" parent="SkillTreeOverlay/Card"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Tree" type="TextureRect" parent="SkillTreeOverlay/Card/TreeStage"]
+layout_mode = 0
+offset_left = 26.0
+offset_top = 45.0
+offset_right = 336.0
+offset_bottom = 510.0
+mouse_filter = 2
+texture = ExtResource("skill_tree_v2")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Node0" type="TextureRect" parent="SkillTreeOverlay/Card/TreeStage"]
+layout_mode = 0
+offset_left = 132.23595505617976
+offset_top = 91.56095505617976
+offset_right = 229.7640449438202
+offset_bottom = 189.08904494382023
+mouse_filter = 2
+texture = ExtResource("skill_icon_0")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Node1" type="TextureRect" parent="SkillTreeOverlay/Card/TreeStage"]
+layout_mode = 0
+offset_left = 58.717191011235954
+offset_top = 279.21719101123597
+offset_right = 109.22280898876404
+offset_bottom = 329.7228089887641
+mouse_filter = 2
+texture = ExtResource("skill_icon_1")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Node2" type="TextureRect" parent="SkillTreeOverlay/Card/TreeStage"]
+layout_mode = 0
+offset_left = 160.5365168539326
+offset_top = 278.34640449438206
+offset_right = 201.46348314606743
+offset_bottom = 330.593595505618
+mouse_filter = 2
+texture = ExtResource("skill_icon_2")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Node3" type="TextureRect" parent="SkillTreeOverlay/Card/TreeStage"]
+layout_mode = 0
+offset_left = 245.56011235955054
+offset_top = 271.3801123595506
+offset_right = 311.7398876404494
+offset_bottom = 337.55988764044946
+mouse_filter = 2
+texture = ExtResource("skill_icon_3")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Node4" type="TextureRect" parent="SkillTreeOverlay/Card/TreeStage"]
+layout_mode = 0
+offset_left = 160.97191011235955
+offset_top = 395.7841573033708
+offset_right = 201.02808988764045
+offset_bottom = 441.93584269662927
+mouse_filter = 2
+texture = ExtResource("skill_icon_4")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Caption" type="Label" parent="SkillTreeOverlay/Card/TreeStage"]
+layout_mode = 0
+offset_left = 32.0
+offset_right = 332.0
+mouse_filter = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 17
+offset_top = 490.0
+offset_bottom = 552.0
+text = "三项理解，共同组成作物适配浇水器"
+autowrap_mode = 2
+theme_override_constants/line_spacing = 0
 
 [node name="Margin" type="MarginContainer" parent="SkillTreeOverlay/Card"]
 layout_mode = 2
-theme_override_constants/margin_left = 42
-theme_override_constants/margin_top = 32
-theme_override_constants/margin_right = 42
-theme_override_constants/margin_bottom = 30
+theme_override_constants/margin_left = 360
+theme_override_constants/margin_right = 36
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_bottom = 26
 
 [node name="Content" type="VBoxContainer" parent="SkillTreeOverlay/Card/Margin"]
 layout_mode = 2
@@ -788,15 +924,144 @@ horizontal_alignment = 1
 
 [node name="SkillTreeBody" type="RichTextLabel" parent="SkillTreeOverlay/Card/Margin/Content"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 285)
 layout_mode = 2
-size_flags_vertical = 3
 mouse_filter = 2
 theme_override_colors/default_color = Color(0.22, 0.36, 0.22, 1)
-theme_override_font_sizes/normal_font_size = 18
 bbcode_enabled = true
 text = "技能节点"
 fit_content = false
+size_flags_vertical = 1
+theme_override_font_sizes/normal_font_size = 17
+custom_minimum_size = Vector2(0, 76)
+scroll_active = false
+theme_override_font_sizes/bold_font_size = 17
+
+[node name="ConceptCards" type="HBoxContainer" parent="SkillTreeOverlay/Card/Margin/Content"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 180)
+theme_override_constants/separation = 10
+
+[node name="Concept0" type="PanelContainer" parent="SkillTreeOverlay/Card/Margin/Content/ConceptCards"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = ExtResource("style_CompletionStyle")
+
+[node name="Content" type="VBoxContainer" parent="SkillTreeOverlay/Card/Margin/Content/ConceptCards/Concept0"]
+layout_mode = 2
+theme_override_constants/separation = 8
+mouse_filter = 2
+
+[node name="Title" type="Label" parent="SkillTreeOverlay/Card/Margin/Content/ConceptCards/Concept0/Content"]
+layout_mode = 2
+text = "数据配对"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 18
+
+[node name="Icon" type="TextureRect" parent="SkillTreeOverlay/Card/Margin/Content/ConceptCards/Concept0/Content"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 55)
+texture = ExtResource("skill_icon_1")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
+[node name="Description" type="Label" parent="SkillTreeOverlay/Card/Margin/Content/ConceptCards/Concept0/Content"]
+layout_mode = 2
+text = "同一块土地\n使用同一个 i"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 15
+
+[node name="Completed" type="Label" parent="SkillTreeOverlay/Card/Margin/Content/ConceptCards/Concept0/Content"]
+layout_mode = 2
+visible = false
+text = "✓ 已掌握"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+
+[node name="Concept1" type="PanelContainer" parent="SkillTreeOverlay/Card/Margin/Content/ConceptCards"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = ExtResource("style_CompletionStyle")
+
+[node name="Content" type="VBoxContainer" parent="SkillTreeOverlay/Card/Margin/Content/ConceptCards/Concept1"]
+layout_mode = 2
+theme_override_constants/separation = 8
+mouse_filter = 2
+
+[node name="Title" type="Label" parent="SkillTreeOverlay/Card/Margin/Content/ConceptCards/Concept1/Content"]
+layout_mode = 2
+text = "缺口计算"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 18
+
+[node name="Icon" type="TextureRect" parent="SkillTreeOverlay/Card/Margin/Content/ConceptCards/Concept1/Content"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 55)
+texture = ExtResource("skill_icon_2")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
+[node name="Description" type="Label" parent="SkillTreeOverlay/Card/Margin/Content/ConceptCards/Concept1/Content"]
+layout_mode = 2
+text = "目标湿度\n减去当前湿度"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 15
+
+[node name="Completed" type="Label" parent="SkillTreeOverlay/Card/Margin/Content/ConceptCards/Concept1/Content"]
+layout_mode = 2
+visible = false
+text = "✓ 已掌握"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+
+[node name="Concept2" type="PanelContainer" parent="SkillTreeOverlay/Card/Margin/Content/ConceptCards"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = ExtResource("style_CompletionStyle")
+
+[node name="Content" type="VBoxContainer" parent="SkillTreeOverlay/Card/Margin/Content/ConceptCards/Concept2"]
+layout_mode = 2
+theme_override_constants/separation = 8
+mouse_filter = 2
+
+[node name="Title" type="Label" parent="SkillTreeOverlay/Card/Margin/Content/ConceptCards/Concept2/Content"]
+layout_mode = 2
+text = "分级动作"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 18
+
+[node name="Icon" type="TextureRect" parent="SkillTreeOverlay/Card/Margin/Content/ConceptCards/Concept2/Content"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 55)
+texture = ExtResource("skill_icon_3")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
+[node name="Description" type="Label" parent="SkillTreeOverlay/Card/Margin/Content/ConceptCards/Concept2/Content"]
+layout_mode = 2
+text = "按缺口选择\n0 / 1 / 2 份水"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 15
+
+[node name="Completed" type="Label" parent="SkillTreeOverlay/Card/Margin/Content/ConceptCards/Concept2/Content"]
+layout_mode = 2
+visible = false
+text = "✓ 已掌握"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+
+
+[node name="FutureSkill" type="Label" parent="SkillTreeOverlay/Card/Margin/Content"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 55)
+text = "🔒 5★ 区域灌溉 · 功能预告\n等待后续剧情，不能提前学习"
+theme_override_font_sizes/font_size = 16
+autowrap_mode = 2
+horizontal_alignment = 1
+mouse_filter = 2
+
 
 [node name="SkillTreeContinueButton" type="Button" parent="SkillTreeOverlay/Card/Margin/Content"]
 unique_name_in_owner = true
@@ -804,8 +1069,22 @@ custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
 theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("PrimaryStyle")
 text = "进入清泉工坊  →"
+
+
+[node name="UnlockSeal" type="TextureRect" parent="SkillTreeOverlay"]
+visible = false
+layout_mode = 0
+offset_left = 510.0
+offset_top = 45.0
+offset_right = 670.0
+offset_bottom = 110.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("art_motion")
+motion_id = "ui-four-star-seal-unlock"
+hide_when_finished = true
 
 [node name="WorkshopOverlay" type="Control" parent="."]
 unique_name_in_owner = true
@@ -818,6 +1097,32 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
 
+[node name="WorkshopOverlayBackdrop" type="TextureRect" parent="WorkshopOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("bg_WorkshopOverlayBackdrop")
+expand_mode = 1
+stretch_mode = 6
+script = ExtResource("ambient_WorkshopOverlayBackdrop")
+background_id = "B02-workshop-background"
+
+[node name="Video" type="VideoStreamPlayer" parent="WorkshopOverlay/WorkshopOverlayBackdrop"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand = true
+volume_db = -80.0
+
+
 [node name="Dimmer" type="ColorRect" parent="WorkshopOverlay"]
 layout_mode = 1
 anchors_preset = 15
@@ -825,7 +1130,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.035, 0.12, 0.08, 0.66)
+mouse_filter = 2
+color = Color(0.03, 0.09, 0.06, 0.12)
 
 [node name="Card" type="PanelContainer" parent="WorkshopOverlay"]
 layout_mode = 1
@@ -834,13 +1140,13 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -420.0
-offset_top = -300.0
-offset_right = 420.0
-offset_bottom = 300.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("TaskStyle")
+theme_override_styles/panel = ExtResource("style_CompletionStyle")
+offset_left = -450.0
+offset_right = 450.0
+offset_top = -310.0
+offset_bottom = 310.0
 
 [node name="Margin" type="MarginContainer" parent="WorkshopOverlay/Card"]
 layout_mode = 2
@@ -864,8 +1170,8 @@ text = "实验 1 / 3"
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.10, 0.36, 0.22, 1)
-theme_override_font_sizes/font_size = 29
 text = "同一个下标，找到同一块土地"
+theme_override_font_sizes/font_size = 26
 
 [node name="WorkshopBody" type="RichTextLabel" parent="WorkshopOverlay/Card/Margin/Content"]
 unique_name_in_owner = true
@@ -932,10 +1238,10 @@ custom_minimum_size = Vector2(145, 42)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.10, 0.31, 0.21, 1)
 theme_override_colors/caret_color = Color(0.10, 0.31, 0.21, 1)
-theme_override_colors/placeholder_color = Color(0.41, 0.51, 0.39, 0.85)
+theme_override_colors/font_placeholder_color = Color(0.41, 0.51, 0.39, 0.85)
 theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("WorkshopInputStyle")
-theme_override_styles/focus = SubResource("WorkshopInputFocusStyle")
+theme_override_styles/normal = ExtResource("style_WorkshopInputStyle")
+theme_override_styles/focus = ExtResource("style_WorkshopInputFocusStyle")
 placeholder_text = "目标数组"
 max_length = 16
 select_all_on_focus = true
@@ -953,10 +1259,10 @@ custom_minimum_size = Vector2(160, 42)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.10, 0.31, 0.21, 1)
 theme_override_colors/caret_color = Color(0.10, 0.31, 0.21, 1)
-theme_override_colors/placeholder_color = Color(0.41, 0.51, 0.39, 0.85)
+theme_override_colors/font_placeholder_color = Color(0.41, 0.51, 0.39, 0.85)
 theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("WorkshopInputStyle")
-theme_override_styles/focus = SubResource("WorkshopInputFocusStyle")
+theme_override_styles/normal = ExtResource("style_WorkshopInputStyle")
+theme_override_styles/focus = ExtResource("style_WorkshopInputFocusStyle")
 placeholder_text = "当前数组"
 max_length = 16
 select_all_on_focus = true
@@ -1009,8 +1315,8 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.10, 0.31, 0.21, 1)
 theme_override_colors/caret_color = Color(0.10, 0.31, 0.21, 1)
 theme_override_font_sizes/font_size = 17
-theme_override_styles/normal = SubResource("WorkshopInputStyle")
-theme_override_styles/focus = SubResource("WorkshopInputFocusStyle")
+theme_override_styles/normal = ExtResource("style_WorkshopInputStyle")
+theme_override_styles/focus = ExtResource("style_WorkshopInputFocusStyle")
 placeholder_text = "边界"
 max_length = 3
 select_all_on_focus = true
@@ -1040,8 +1346,8 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.10, 0.31, 0.21, 1)
 theme_override_colors/caret_color = Color(0.10, 0.31, 0.21, 1)
 theme_override_font_sizes/font_size = 17
-theme_override_styles/normal = SubResource("WorkshopInputStyle")
-theme_override_styles/focus = SubResource("WorkshopInputFocusStyle")
+theme_override_styles/normal = ExtResource("style_WorkshopInputStyle")
+theme_override_styles/focus = ExtResource("style_WorkshopInputFocusStyle")
 placeholder_text = "份数"
 max_length = 1
 select_all_on_focus = true
@@ -1071,8 +1377,8 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.10, 0.31, 0.21, 1)
 theme_override_colors/caret_color = Color(0.10, 0.31, 0.21, 1)
 theme_override_font_sizes/font_size = 17
-theme_override_styles/normal = SubResource("WorkshopInputStyle")
-theme_override_styles/focus = SubResource("WorkshopInputFocusStyle")
+theme_override_styles/normal = ExtResource("style_WorkshopInputStyle")
+theme_override_styles/focus = ExtResource("style_WorkshopInputFocusStyle")
 placeholder_text = "边界"
 max_length = 3
 select_all_on_focus = true
@@ -1102,8 +1408,8 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.10, 0.31, 0.21, 1)
 theme_override_colors/caret_color = Color(0.10, 0.31, 0.21, 1)
 theme_override_font_sizes/font_size = 17
-theme_override_styles/normal = SubResource("WorkshopInputStyle")
-theme_override_styles/focus = SubResource("WorkshopInputFocusStyle")
+theme_override_styles/normal = ExtResource("style_WorkshopInputStyle")
+theme_override_styles/focus = ExtResource("style_WorkshopInputFocusStyle")
 placeholder_text = "份数"
 max_length = 1
 select_all_on_focus = true
@@ -1168,8 +1474,22 @@ custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
 theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("PrimaryStyle")
 text = "继续  →"
+
+
+[node name="WorkshopFeedback" type="TextureRect" parent="WorkshopOverlay"]
+visible = false
+layout_mode = 0
+offset_left = 990.0
+offset_top = 76.0
+offset_right = 1068.0
+offset_bottom = 104.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("art_motion")
+motion_id = "button-error-motion"
+hide_when_finished = true
 
 [node name="BugChallengeOverlay" type="Control" parent="."]
 unique_name_in_owner = true
@@ -1182,6 +1502,32 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
 
+[node name="BugChallengeOverlayBackdrop" type="TextureRect" parent="BugChallengeOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("bg_BugChallengeOverlayBackdrop")
+expand_mode = 1
+stretch_mode = 6
+script = ExtResource("ambient_BugChallengeOverlayBackdrop")
+background_id = "B05-bug-investigation-background"
+
+[node name="Video" type="VideoStreamPlayer" parent="BugChallengeOverlay/BugChallengeOverlayBackdrop"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand = true
+volume_db = -80.0
+
+
 [node name="Dimmer" type="ColorRect" parent="BugChallengeOverlay"]
 layout_mode = 1
 anchors_preset = 15
@@ -1189,7 +1535,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.12, 0.055, 0.035, 0.72)
+mouse_filter = 2
+color = Color(0.03, 0.09, 0.06, 0.12)
 
 [node name="Card" type="PanelContainer" parent="BugChallengeOverlay"]
 layout_mode = 1
@@ -1204,7 +1551,7 @@ offset_right = 430.0
 offset_bottom = 245.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("EvidenceStyle")
+theme_override_styles/panel = ExtResource("style_EvidenceStyle")
 
 [node name="Margin" type="MarginContainer" parent="BugChallengeOverlay/Card"]
 layout_mode = 2
@@ -1242,7 +1589,6 @@ custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
 theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("PrimaryStyle")
 text = "带着反例继续修改  →"
 
 [node name="GrowthSummaryOverlay" type="Control" parent="."]
@@ -1256,6 +1602,32 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
 
+[node name="GrowthSummaryOverlayBackdrop" type="TextureRect" parent="GrowthSummaryOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("bg_GrowthSummaryOverlayBackdrop")
+expand_mode = 1
+stretch_mode = 6
+script = ExtResource("ambient_GrowthSummaryOverlayBackdrop")
+background_id = "B06-archive-background"
+
+[node name="Video" type="VideoStreamPlayer" parent="GrowthSummaryOverlay/GrowthSummaryOverlayBackdrop"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand = true
+volume_db = -80.0
+
+
 [node name="Dimmer" type="ColorRect" parent="GrowthSummaryOverlay"]
 layout_mode = 1
 anchors_preset = 15
@@ -1263,7 +1635,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.035, 0.12, 0.08, 0.72)
+mouse_filter = 2
+color = Color(0.03, 0.09, 0.06, 0.12)
 
 [node name="Card" type="PanelContainer" parent="GrowthSummaryOverlay"]
 layout_mode = 1
@@ -1278,7 +1651,7 @@ offset_right = 430.0
 offset_bottom = 260.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("CompletionStyle")
+theme_override_styles/panel = ExtResource("style_CompletionStyle")
 
 [node name="Margin" type="MarginContainer" parent="GrowthSummaryOverlay/Card"]
 layout_mode = 2
@@ -1316,7 +1689,6 @@ custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
 theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("PrimaryStyle")
 text = "完成归档并查看技能树  →"
 
 [node name="BugLegion2D" parent="." instance=ExtResource("10_legion")]
@@ -1331,6 +1703,21 @@ overlay_path = NodePath("../StoryDialogueOverlay")
 
 [node name="StoryDialogueOverlay" parent="." instance=ExtResource("3_dialogue")]
 unique_name_in_owner = true
+
+
+[node name="ArchiveArt" type="TextureRect" parent="GrowthSummaryOverlay"]
+visible = true
+layout_mode = 0
+offset_left = 38.0
+offset_top = 220.0
+offset_right = 238.0
+offset_bottom = 510.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("art_motion")
+motion_id = "prop-archive-book-record"
+hide_when_finished = false
 
 [node name="PatchDialog" type="ConfirmationDialog" parent="."]
 unique_name_in_owner = true

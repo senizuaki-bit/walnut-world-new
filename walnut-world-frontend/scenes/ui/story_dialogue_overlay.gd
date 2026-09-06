@@ -17,6 +17,7 @@ signal line_changed(line_index: int, line_text: String)
 @onready var continue_hint: Label = $DialogueCard/ContentRoot/ContinueHint
 @onready var typewriter_timer: Timer = $TypewriterTimer
 
+var _art_role := ""
 var _lines: Array[String] = []
 var _line_index := -1
 var _typing := false
@@ -32,6 +33,7 @@ func _ready() -> void:
 	_card_rest_position = dialogue_card.position
 	_avatar_rest_position = avatar_stage.position
 	typewriter_timer.timeout.connect(_on_typewriter_tick)
+	($DialogueCard/ContentRoot/ContentMargin as ScrollContainer).gui_input.connect(_gui_input)
 
 
 func play_sequence(speaker_name: String, portrait_texture: Texture2D, lines: Array[String]) -> void:
@@ -61,10 +63,13 @@ func _start_sequence(
 	_stop_active_tweens()
 	_lines = lines.duplicate()
 	_line_index = -1
+	($DialogueCard/ContentRoot/ContentMargin as ScrollContainer).scroll_vertical = 0
 	_typing = false
 	_finishing = false
 	speaker_label.text = speaker_name
 	portrait.texture = portrait_texture
+	_art_role = {"芽芽": "yaya", "小核桃": "walnut", "叮当师傅": "dingdang", "Bug 先生": "bug", "书书": "shushu", "主角": "player"}.get(speaker_name, "")
+	(portrait as ArtMotionTexture).play_clip("" if _art_role.is_empty() else "char-%s-talk" % _art_role)
 	response_badge.visible = not response_label_text.is_empty()
 	response_badge.text = response_label_text
 	question_label.visible = not question.is_empty()
@@ -137,6 +142,8 @@ func _advance_to_next_line() -> void:
 	body_label.text = _lines[_line_index]
 	body_label.visible_characters = 0
 	_typing = true
+	if not _art_role.is_empty():
+		(portrait as ArtMotionTexture).play_clip("char-%s-talk" % _art_role)
 	typewriter_timer.wait_time = 1.0 / characters_per_second
 	typewriter_timer.start()
 	line_changed.emit(_line_index, body_label.text)
@@ -156,6 +163,8 @@ func _on_typewriter_tick() -> void:
 
 
 func _show_continue_hint() -> void:
+	if not _art_role.is_empty():
+		(portrait as ArtMotionTexture).play_clip("char-%s-idle" % _art_role)
 	if _hint_tween != null and _hint_tween.is_valid():
 		_hint_tween.kill()
 	continue_hint.visible = true

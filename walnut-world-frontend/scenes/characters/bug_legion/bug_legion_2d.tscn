@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scenes/characters/bug_legion/bug_legion_2d.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://assets/art/generated/characters/pest_bug.png" id="2_bug"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/char-bug-idle.png" id="2_bug"]
 
 [sub_resource type="Animation" id="Animation_reset"]
 resource_name = "RESET"

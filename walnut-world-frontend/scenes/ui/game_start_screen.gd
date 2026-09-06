@@ -69,14 +69,8 @@ func play_exit() -> void:
 
 
 func _start_idle_motion() -> void:
-	walnut_art.pivot_offset = walnut_art.size * 0.5
-	_idle_tween = create_tween().set_loops().set_parallel(true)
-	_idle_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	_idle_tween.tween_property(walnut_art, "position:y", walnut_art.position.y - 8.0, 1.25)
-	_idle_tween.tween_property(walnut_art, "rotation", 0.025, 1.25)
-	_idle_tween.chain().set_parallel(true)
-	_idle_tween.tween_property(walnut_art, "position:y", walnut_art.position.y, 1.25)
-	_idle_tween.tween_property(walnut_art, "rotation", -0.018, 1.25)
+	# Breathing and gestures are authored in the delivered atlas.
+	(walnut_art as ArtMotionTexture).play_clip("char-walnut-idle")
 
 
 func _on_enter_pressed() -> void:

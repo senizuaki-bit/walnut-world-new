@@ -1,7 +1,15 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scenes/ui/story_dialogue_overlay.gd" id="1_script"]
 [ext_resource type="Texture2D" path="res://assets/art/generated/ui/leaf_dialogue_frame.png" id="2_frame"]
+
+[ext_resource type="Theme" path="res://resources/ui/art_v2/theme.tres" id="art_theme"]
+
+[ext_resource type="Script" path="res://scenes/ui/art_motion_texture.gd" id="art_motion"]
+
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/ui-dialogue.tres" id="style_DialogueCardStyle"]
+
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/ui-nameplate.tres" id="style_SpeakerPillStyle"]
 
 [sub_resource type="StyleBoxFlat" id="PortraitGlowStyle"]
 bg_color = Color(0.945098, 1, 0.815686, 0.94)
@@ -17,28 +25,6 @@ corner_radius_bottom_left = 130
 shadow_color = Color(0.0313726, 0.160784, 0.105882, 0.38)
 shadow_size = 18
 
-[sub_resource type="StyleBoxFlat" id="DialogueCardStyle"]
-bg_color = Color(1, 0.980392, 0.862745, 0.985)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0.243137, 0.568627, 0.341176, 1)
-corner_radius_top_left = 30
-corner_radius_top_right = 30
-corner_radius_bottom_right = 30
-corner_radius_bottom_left = 30
-shadow_color = Color(0.0235294, 0.12549, 0.0862745, 0.42)
-shadow_size = 20
-shadow_offset = Vector2(0, 8)
-
-[sub_resource type="StyleBoxFlat" id="SpeakerPillStyle"]
-bg_color = Color(0.180392, 0.52549, 0.309804, 1)
-corner_radius_top_left = 14
-corner_radius_top_right = 14
-corner_radius_bottom_right = 14
-corner_radius_bottom_left = 14
-
 [node name="StoryDialogueOverlay" type="Control"]
 visible = false
 layout_mode = 3
@@ -49,6 +35,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
 script = ExtResource("1_script")
+theme = ExtResource("art_theme")
 
 [node name="Dimmer" type="ColorRect" parent="."]
 layout_mode = 1
@@ -58,22 +45,22 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.101961, 0.133333, 0.12549, 0.64)
+color = Color(0.03, 0.09, 0.06, 0.22)
 
 [node name="AvatarStage" type="Control" parent="."]
 layout_mode = 0
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -130.0
-offset_top = -260.0
-offset_right = 130.0
-offset_bottom = 0.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 pivot_offset = Vector2(130, 130)
+anchor_left = 0.0
+anchor_right = 0.0
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_right = 238.0
+offset_top = -435.0
+offset_bottom = -115.0
 
 [node name="PortraitGlow" type="Panel" parent="AvatarStage"]
 layout_mode = 1
@@ -90,6 +77,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("PortraitGlowStyle")
+visible = false
 
 [node name="Portrait" type="TextureRect" parent="AvatarStage"]
 layout_mode = 1
@@ -101,21 +89,22 @@ grow_vertical = 2
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
+script = ExtResource("art_motion")
 
 [node name="DialogueCard" type="PanelContainer" parent="."]
 layout_mode = 0
-anchor_left = 0.5
 anchor_top = 1.0
-anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -465.0
-offset_top = -390.0
-offset_right = 465.0
-offset_bottom = -25.0
 grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
-theme_override_styles/panel = SubResource("DialogueCardStyle")
+theme_override_styles/panel = ExtResource("style_DialogueCardStyle")
+anchor_left = 0.0
+anchor_right = 1.0
+offset_left = 225.0
+offset_right = -20.0
+offset_bottom = -22.0
+offset_top = -340.0
 
 [node name="ContentRoot" type="Control" parent="DialogueCard"]
 layout_mode = 2
@@ -132,36 +121,45 @@ mouse_filter = 2
 texture = ExtResource("2_frame")
 expand_mode = 1
 stretch_mode = 0
+visible = false
 
-[node name="ContentMargin" type="MarginContainer" parent="DialogueCard/ContentRoot"]
+[node name="ContentMargin" type="ScrollContainer" parent="DialogueCard/ContentRoot"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
-theme_override_constants/margin_left = 100
-theme_override_constants/margin_top = 44
-theme_override_constants/margin_right = 100
-theme_override_constants/margin_bottom = 90
+theme_override_constants/margin_left = 36
+theme_override_constants/margin_right = 36
+theme_override_constants/margin_top = 26
+theme_override_constants/margin_bottom = 75
+offset_left = 36.0
+offset_right = -36.0
+offset_top = 26.0
+offset_bottom = -75.0
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 1
+mouse_filter = 1
 
 [node name="Content" type="VBoxContainer" parent="DialogueCard/ContentRoot/ContentMargin"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 10
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [node name="Speaker" type="Label" parent="DialogueCard/ContentRoot/ContentMargin/Content"]
 custom_minimum_size = Vector2(150, 36)
 layout_mode = 2
 size_flags_horizontal = 0
 mouse_filter = 2
-theme_override_colors/font_color = Color(1, 0.980392, 0.839216, 1)
-theme_override_font_sizes/font_size = 20
-theme_override_styles/normal = SubResource("SpeakerPillStyle")
+theme_override_styles/normal = ExtResource("style_SpeakerPillStyle")
 text = "芽芽"
 horizontal_alignment = 1
 vertical_alignment = 1
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(1, 0.97, 0.8, 1)
 
 [node name="ResponseBadge" type="Label" parent="DialogueCard/ContentRoot/ContentMargin/Content"]
 visible = false
@@ -174,17 +172,17 @@ theme_override_font_sizes/font_size = 14
 text = "概念提示"
 
 [node name="Body" type="Label" parent="DialogueCard/ContentRoot/ContentMargin/Content"]
-custom_minimum_size = Vector2(0, 94)
 layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.0823529, 0.254902, 0.164706, 1)
 theme_override_colors/font_outline_color = Color(1, 0.984314, 0.862745, 0.8)
 theme_override_constants/outline_size = 4
-theme_override_font_sizes/font_size = 25
 text = "我刚刚种了一排幼苗"
 autowrap_mode = 2
 vertical_alignment = 0
+theme_override_font_sizes/font_size = 21
+custom_minimum_size = Vector2(0, 65)
 
 [node name="Question" type="Label" parent="DialogueCard/ContentRoot/ContentMargin/Content"]
 visible = false
@@ -205,9 +203,6 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -310.0
-offset_top = -163.0
-offset_right = -100.0
-offset_bottom = -123.0
 grow_horizontal = 0
 grow_vertical = 0
 mouse_filter = 2
@@ -216,6 +211,9 @@ theme_override_font_sizes/font_size = 14
 text = "▼点击继续"
 horizontal_alignment = 2
 vertical_alignment = 1
+offset_top = -42.0
+offset_bottom = -14.0
+offset_right = -32.0
 
 [node name="TypewriterTimer" type="Timer" parent="."]
 wait_time = 0.03

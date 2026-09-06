@@ -3,11 +3,11 @@ extends SceneTree
 const CATALOG: AgentCharacterCatalog = preload("res://resources/agent/agent_character_catalog.tres")
 
 const EXPECTED := {
-	&"world_agent": ["芽芽", "yaya_sprout.png", &"yaya"],
-	&"xiaohutao": ["小核桃", "little_walnut.png", &"little_walnut"],
-	&"teaching_agent": ["叮当师傅", "master_ding_dang.png", &"master_ding_dang"],
-	&"bug_agent": ["Bug 先生", "pest_bug.png", &"bug_legion"],
-	&"book_agent": ["书书", "shu_shu.png", &"shu_shu"],
+	&"world_agent": ["芽芽", "char-yaya-idle.png", &"yaya"],
+	&"xiaohutao": ["小核桃", "char-walnut-idle.png", &"little_walnut"],
+	&"teaching_agent": ["叮当师傅", "char-dingdang-idle.png", &"master_ding_dang"],
+	&"bug_agent": ["Bug 先生", "char-bug-idle.png", &"bug_legion"],
+	&"book_agent": ["书书", "char-shushu-idle.png", &"shu_shu"],
 }
 
 
