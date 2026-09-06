@@ -1,4 +1,4 @@
-[gd_scene load_steps=47 format=3]
+[gd_scene load_steps=51 format=3]
 
 [ext_resource type="Script" path="res://scenes/level_demo/crop_adaptive_watering_demo.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://scenes/level_demo/crop_plot_card.tscn" id="2_card"]
@@ -80,6 +80,10 @@
 [ext_resource type="Script" path="res://scenes/ui/art_watering_sprite.gd" id="watering_art_script"]
 
 [ext_resource type="Script" path="res://scenes/ui/art_pump.gd" id="pump_script"]
+[ext_resource type="Script" path="res://scenes/ui/art_workshop_input.gd" id="workshop_input"]
+[ext_resource type="Script" path="res://scenes/ui/art_patch_dialog.gd" id="patch_script"]
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/ui-code.tres" id="patch_code"]
+[ext_resource type="FontFile" path="res://assets/fonts/noto-sans-sc/NotoSansMonoCJKsc-Regular.otf" id="patch_font"]
 
 [sub_resource type="StyleBoxFlat" id="EditorStyle"]
 bg_color = Color(0.10, 0.17, 0.14, 1)
@@ -279,12 +283,14 @@ layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -405.0
-offset_right = -18.0
+offset_left = -830.0
+offset_right = -260.0
 grow_horizontal = 0
 theme_override_constants/separation = 8
 offset_top = 66.0
 offset_bottom = 110.0
+
+alignment = 2
 
 [node name="CodeButton" type="Button" parent="Hud/ToolRail"]
 unique_name_in_owner = true
@@ -1269,6 +1275,10 @@ placeholder_text = "目标数组"
 max_length = 16
 select_all_on_focus = true
 
+script = ExtResource("workshop_input")
+expected_value = "target"
+error_message = "目标数组应为 target"
+
 [node name="Middle" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode/GapLine"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.92, 0.97, 0.90, 1)
@@ -1289,6 +1299,10 @@ theme_override_styles/focus = ExtResource("style_WorkshopInputFocusStyle")
 placeholder_text = "当前数组"
 max_length = 16
 select_all_on_focus = true
+
+script = ExtResource("workshop_input")
+expected_value = "moisture"
+error_message = "当前数组应为 moisture"
 
 [node name="Suffix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode/GapLine"]
 layout_mode = 2
@@ -1345,6 +1359,10 @@ max_length = 3
 select_all_on_focus = true
 theme_override_colors/font_placeholder_color = Color(0.29, 0.32, 0.27, 1)
 
+script = ExtResource("workshop_input")
+expected_value = "30"
+error_message = "严重缺水边界应为 30"
+
 [node name="Suffix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/SevereCondition"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.92, 0.97, 0.90, 1)
@@ -1376,6 +1394,10 @@ placeholder_text = "份数"
 max_length = 1
 select_all_on_focus = true
 theme_override_colors/font_placeholder_color = Color(0.29, 0.32, 0.27, 1)
+
+script = ExtResource("workshop_input")
+expected_value = "2"
+error_message = "严重缺水应浇 2 份"
 
 [node name="Suffix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/SevereOutput"]
 layout_mode = 2
@@ -1409,6 +1431,10 @@ max_length = 3
 select_all_on_focus = true
 theme_override_colors/font_placeholder_color = Color(0.29, 0.32, 0.27, 1)
 
+script = ExtResource("workshop_input")
+expected_value = "0"
+error_message = "轻度缺水下限应为 0"
+
 [node name="Suffix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/LightCondition"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.92, 0.97, 0.90, 1)
@@ -1440,6 +1466,10 @@ placeholder_text = "份数"
 max_length = 1
 select_all_on_focus = true
 theme_override_colors/font_placeholder_color = Color(0.29, 0.32, 0.27, 1)
+
+script = ExtResource("workshop_input")
+expected_value = "1"
+error_message = "轻度缺水应浇 1 份"
 
 [node name="Suffix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/LightOutput"]
 layout_mode = 2
@@ -1494,6 +1524,14 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.92, 0.97, 0.90, 1)
 theme_override_font_sizes/font_size = 18
 text = "// 下一页：按关卡文档的两步练习，自己把理解写进完整 C++ 卷轴"
+
+[node name="WorkshopError" type="Label" parent="WorkshopOverlay/Card/Margin/Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.13, 0.07, 1)
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 2
 
 [node name="WorkshopActionButton" type="Button" parent="WorkshopOverlay/Card/Margin/Content"]
 unique_name_in_owner = true
@@ -1755,7 +1793,94 @@ unique_name_in_owner = true
 title = "AI 修改提案（尚未应用）"
 ok_button_text = "接受并生成新草稿"
 cancel_button_text = "关闭预览"
-dialog_text = "等待真实失败记录。"
+size = Vector2i(980, 510)
+min_size = Vector2i(980, 510)
+dialog_text = ""
+script = ExtResource("patch_script")
+
+[node name="Content" type="MarginContainer" parent="PatchDialog"]
+theme = ExtResource("art_theme")
+theme_override_constants/margin_left = 22
+theme_override_constants/margin_right = 22
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_bottom = 16
+
+[node name="Rows" type="VBoxContainer" parent="PatchDialog/Content"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="Heading" type="Label" parent="PatchDialog/Content/Rows"]
+layout_mode = 2
+text = "AI 修改提案 · 尚未应用"
+theme_type_variation = &"TitleLabel"
+theme_override_font_sizes/font_size = 26
+
+[node name="Columns" type="HBoxContainer" parent="PatchDialog/Content/Rows"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Before" type="PanelContainer" parent="PatchDialog/Content/Rows/Columns"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = ExtResource("patch_code")
+
+[node name="Rows" type="VBoxContainer" parent="PatchDialog/Content/Rows/Columns/Before"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="PatchDialog/Content/Rows/Columns/Before/Rows"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.98, 0.88, 1)
+text = "修改前 · 固定目标"
+
+[node name="Code" type="Label" parent="PatchDialog/Content/Rows/Columns/Before/Rows"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.98, 0.88, 1)
+text = "int gap =
+    60 - moisture[i];"
+theme_override_fonts/font = ExtResource("patch_font")
+theme_override_font_sizes/font_size = 20
+
+[node name="After" type="PanelContainer" parent="PatchDialog/Content/Rows/Columns"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = ExtResource("patch_code")
+
+[node name="Rows" type="VBoxContainer" parent="PatchDialog/Content/Rows/Columns/After"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="PatchDialog/Content/Rows/Columns/After/Rows"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.98, 0.88, 1)
+text = "修改后 · 使用对应作物的目标"
+
+[node name="Code" type="Label" parent="PatchDialog/Content/Rows/Columns/After/Rows"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.98, 0.88, 1)
+text = "int gap =
+    target[i] - moisture[i];"
+theme_override_fonts/font = ExtResource("patch_font")
+theme_override_font_sizes/font_size = 20
+
+[node name="Reason" type="Label" parent="PatchDialog/Content/Rows"]
+layout_mode = 2
+custom_minimum_size = Vector2(850, 0)
+text = "依据：1 号漏浇、5 号不足、6 号多浇，以及 Bug 先生的同为 55 公开测试。"
+autowrap_mode = 2
+
+[node name="Scope" type="Label" parent="PatchDialog/Content/Rows"]
+layout_mode = 2
+custom_minimum_size = Vector2(850, 0)
+text = "影响范围：只修改缺口计算这一行。"
+autowrap_mode = 2
+
+[node name="Reminder" type="Label" parent="PatchDialog/Content/Rows"]
+layout_mode = 2
+custom_minimum_size = Vector2(850, 0)
+text = "接受后只生成新草稿，仍需你点击“直接运行”验证。"
+autowrap_mode = 2
+
 
 [node name="AutosaveTimer" type="Timer" parent="."]
 unique_name_in_owner = true

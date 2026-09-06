@@ -23,6 +23,8 @@ for asset, margin, content in [('ui-panel', 28, 16), ('ui-dialogue', 28, 12),
     (OUT / f'{asset}.tres').write_text(style(asset, margin, content), encoding='utf-8')
 
 ext, settings = [], []
+for state in ['hover', 'filled', 'error']:
+    (OUT / f'input_{state}.tres').write_text(style(f'input-{state}', 10, 8), encoding='utf-8')
 for control, prefix, states in [('Button', 'button', ['normal', 'hover', 'pressed', 'disabled', 'focus']),
                                 ('LineEdit', 'input', ['normal', 'focus', 'disabled'])]:
     for state in states:

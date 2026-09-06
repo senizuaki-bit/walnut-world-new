@@ -200,6 +200,8 @@ func _ready() -> void:
 	reject_patch_button.tooltip_text = "拒绝当前提案，并保留自己的代码"
 	skill_tree_continue_button.pressed.connect(_on_skill_tree_continue_pressed)
 	workshop_action_button.pressed.connect(_on_workshop_action_pressed)
+	for field in _workshop_inputs():
+		field.validation_changed.connect(_refresh_workshop_errors)
 	bug_continue_button.pressed.connect(_on_bug_continue_pressed)
 	archive_button.pressed.connect(_on_archive_pressed)
 	code_editor.text_changed.connect(_on_code_changed)
@@ -496,6 +498,9 @@ func _begin_workshop_experiments() -> void:
 
 
 func _show_workshop_step() -> void:
+	for field in _workshop_inputs():
+		field.clear_validation()
+	_refresh_workshop_errors()
 	var experiment: Dictionary = WORKSHOP_EXPERIMENTS[_workshop_step]
 	workshop_badge.text = str(experiment.badge)
 	workshop_title.text = str(experiment.title)
@@ -525,23 +530,15 @@ func _show_workshop_step() -> void:
 
 func _on_workshop_action_pressed() -> void:
 	_bounce(workshop_action_button)
-	if _workshop_step == 0 and (
-		gap_target_input.text.strip_edges() != "target"
-		or gap_moisture_input.text.strip_edges() != "moisture"
-	):
-		workshop_body.text = str(WORKSHOP_EXPERIMENTS[0].body) + "\n⚠ 请在两个输入框中依次填入 target 和 moisture。"
+	var first_error: LineEdit = null
+	var fields: Array = _workshop_inputs().slice(0, 2) if _workshop_step == 0 else (_workshop_inputs().slice(2) if _workshop_step == 1 else [])
+	for field in fields:
+		if not field.validate() and first_error == null:
+			first_error = field
+	_refresh_workshop_errors()
+	if first_error != null:
 		_show_workshop_feedback(false)
-		gap_target_input.grab_focus()
-		return
-	if _workshop_step == 1 and not (
-		severe_boundary_input.text.strip_edges() == "30"
-		and severe_units_input.text.strip_edges() == "2"
-		and light_boundary_input.text.strip_edges() == "0"
-		and light_units_input.text.strip_edges() == "1"
-	):
-		workshop_body.text = str(WORKSHOP_EXPERIMENTS[1].body) + "\n⚠ 请检查四个输入框：30、2、0、1。"
-		_show_workshop_feedback(false)
-		severe_boundary_input.grab_focus()
+		first_error.grab_focus()
 		return
 	_show_workshop_feedback(true)
 	_workshop_step += 1
@@ -550,6 +547,20 @@ func _on_workshop_action_pressed() -> void:
 		_enter_code_phase()
 		return
 	_show_workshop_step()
+
+
+func _workshop_inputs() -> Array:
+	return [gap_target_input, gap_moisture_input, severe_boundary_input, severe_units_input, light_boundary_input, light_units_input]
+
+
+func _refresh_workshop_errors() -> void:
+	var messages: Array[String] = []
+	for field in _workshop_inputs():
+		if field.has_error:
+			messages.append(field.error_message)
+	var label := %WorkshopError as Label
+	label.text = "；".join(messages)
+	label.visible = not messages.is_empty()
 
 
 func _hide_lesson_overlays() -> void:
@@ -731,8 +742,7 @@ func _on_patch_requested() -> void:
 	_bounce(request_patch_button)
 	_patch_pending = true
 	_patch_stale = false
-	patch_dialog.dialog_text = "AI 建议修改（尚未应用）\n\n修改前：int gap = 60 - moisture[i];\n修改后：int gap = target[i] - moisture[i];\n\n依据：1号漏浇、5号不足、6号多浇，以及 Bug 先生的同为55公开测试。\n影响范围：只修改缺口计算这一行。\n接受后只生成新草稿，仍需由你点击“直接运行”验证。"
-	patch_dialog.popup_centered()
+	patch_dialog.popup_centered(Vector2i(980, 560))
 
 
 func _can_request_patch() -> bool:
