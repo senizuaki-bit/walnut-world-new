@@ -13,11 +13,12 @@ func _initialize() -> void:
 	story_overlay.skip_sequence()
 	story_overlay.play_agent_presentation("叮当师傅", null, "请先完成两步代码实验。", "两个数组为什么要使用同一个 i？", "教学实验")
 	story_overlay.advance()
-	await process_frame
+	await create_timer(0.45).timeout
 	var dialogue_card := story_overlay.get_node("DialogueCard") as Control
-	var dialogue_question := story_overlay.get_node("DialogueCard/ContentRoot/ContentMargin/Content/Question") as Label
-	if dialogue_card.get_global_rect().end.y - dialogue_question.get_global_rect().end.y < 70.0:
-		failures.append("叮当对话框的“想一想”文字必须上移，避开底部叶片装饰。")
+	var dialogue_question := story_overlay.get_node("DialogueCard/ContentRoot/ContentMargin/Scroll/Content/Question") as Label
+	var continue_hint := story_overlay.get_node("DialogueCard/ContentRoot/ContinueHint") as Label
+	if dialogue_question.get_global_rect().end.y > continue_hint.get_global_rect().position.y or not dialogue_card.get_global_rect().encloses(dialogue_question.get_global_rect()):
+		failures.append("底部对话中的问题必须完整位于木框内，并与继续提示分离。 card=%s question=%s continue=%s" % [dialogue_card.get_global_rect(), dialogue_question.get_global_rect(), continue_hint.get_global_rect()])
 	story_overlay.skip_sequence()
 	var grid := level.get_node_or_null("Hud/FarmLayout/PlotGrid") as GridContainer
 	if grid == null or grid.columns != 4 or grid.get_child_count() != 8:
@@ -238,7 +239,36 @@ func _initialize() -> void:
 	level.present_candidate_chain_error("RAW_CANDIDATE_ERROR_SHOULD_STAY_INTERNAL")
 	if "RAW_CANDIDATE_ERROR_SHOULD_STAY_INTERNAL" in evidence_body.text:
 		failures.append("候选演示失败不得把内部错误代码显示给学生。")
+	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.CODE)
+	level.call("_show_code_drawer")
+	await create_timer(0.10).timeout
+	var drawer_surface := level.get_node("CodeDrawer/Surface") as Control
+	for plot in grid.get_children():
+		if (plot as Control).get_global_rect().end.x > drawer_surface.get_global_rect().position.x:
+			failures.append("技能卷轴打开时，八块土地必须完整保留在左侧。")
+	level.call("_hide_code_drawer")
+	if (level.get_node("Hud/FarmLayout") as Control).scale != Vector2.ONE:
+		failures.append("关闭技能卷轴后必须恢复农田的正常尺寸。")
 	level.queue_free()
+	await process_frame
+	story_overlay = (load("res://scenes/ui/story_dialogue_overlay.tscn") as PackedScene).instantiate() as StoryDialogueOverlay
+	root.add_child(story_overlay)
+	await process_frame
+	story_overlay.play_agent_presentation("叮当师傅", null, "这是一段需要完整阅读的较长教学反馈。".repeat(80), "你观察到了什么？", "教学实验")
+	story_overlay.advance()
+	for _frame in range(4):
+		await process_frame
+	var scroll := story_overlay.get_node("DialogueCard/ContentRoot/ContentMargin/Scroll") as ScrollContainer
+	if scroll.get_v_scroll_bar().max_value <= scroll.get_v_scroll_bar().page:
+		failures.append("长教学反馈必须可以滚动阅读，不能超出底部木框。 scroll=%s range=%s page=%s body=%s" % [scroll.size, scroll.get_v_scroll_bar().max_value, scroll.get_v_scroll_bar().page, story_overlay.body_label.size])
+	var enter_event := InputEventKey.new()
+	enter_event.keycode = KEY_ENTER
+	enter_event.pressed = true
+	Input.parse_input_event(enter_event)
+	await create_timer(0.30).timeout
+	if story_overlay.visible:
+		failures.append("完整显示台词后，Enter 必须能继续并结束当前对话。")
+	story_overlay.queue_free()
 	await process_frame
 	if failures.is_empty():
 		print("CROP_ADAPTIVE_WATERING_DEMO_TEST_PASS: 2×4农田、分层错误与0/1/2份规则通过")

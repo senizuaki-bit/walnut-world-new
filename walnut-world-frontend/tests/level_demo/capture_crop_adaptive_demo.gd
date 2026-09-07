@@ -6,6 +6,7 @@ const START_SCREEN := preload("res://scenes/ui/game_start_screen.tscn")
 
 func _initialize() -> void:
 	root.size = Vector2i(1280, 720)
+	root.gui_embed_subwindows = true
 	var state_name := "start"
 	var output_path := "res://docs/design/verification/crop-adaptive-start.png"
 	for argument in OS.get_cmdline_user_args():
@@ -23,7 +24,8 @@ func _initialize() -> void:
 	if state_name != "start":
 		var level := capture_root as CropAdaptiveWateringDemo
 		level.timing_scale = 0.05
-		(level.get_node("StoryDialogueOverlay") as StoryDialogueOverlay).skip_sequence()
+		if state_name != "intro":
+			(level.get_node("StoryDialogueOverlay") as StoryDialogueOverlay).skip_sequence()
 		if state_name == "manual":
 			level.call("_begin_manual_compare")
 		elif state_name == "manual_choice":
@@ -61,6 +63,19 @@ func _initialize() -> void:
 			(level.get_node("StoryDialogueOverlay") as StoryDialogueOverlay).skip_sequence()
 		elif state_name == "growth":
 			level.call("_show_growth_summary")
+		elif state_name == "patch":
+			# Screenshot-only fixture; never applies the proposal or mutates a world.
+			level.code_editor.text = CropAdaptiveWateringDemo.STARTER_CODE
+			level.set("_same_failure_count", 4)
+			level.set("_same_failure_key", "FIXED_TARGET_VALUE")
+			level.set("_hint_level", 3)
+			level.call("_set_phase", CropAdaptiveWateringDemo.Phase.FAILED)
+			level.call("_on_patch_requested")
+		elif state_name == "hint":
+			level.call("_set_phase", CropAdaptiveWateringDemo.Phase.FAILED)
+			level.call("_on_hint_pressed")
+		elif state_name == "validating":
+			level.begin_agent_submission("正在检查这次行动的结果，请稍候。")
 		elif state_name == "unlocked":
 			level.call("_show_skill_tree", true)
 		elif state_name == "code":
