@@ -25,7 +25,7 @@ func _initialize() -> void:
 		not overlay.visible
 		or overlay.speaker_label.text != "Bug 先生"
 		or overlay.portrait.texture == null
-		or not overlay.portrait.texture.resource_path.ends_with("pest_bug.png")
+		or not overlay.portrait.texture.resource_path.ends_with("char-bug-idle.png")
 		or overlay.body_label.text != "边界问题出现了。"
 		or overlay.response_badge.text != "任务说明"
 	):
@@ -45,7 +45,7 @@ func _initialize() -> void:
 	await process_frame
 	if (
 		overlay.speaker_label.text != "叮当师傅"
-		or not overlay.portrait.texture.resource_path.ends_with("master_ding_dang.png")
+		or not overlay.portrait.texture.resource_path.ends_with("char-dingdang-idle.png")
 		or overlay.response_badge.text != "概念提示"
 		or not overlay.question_label.visible
 		or not overlay.question_label.text.contains("循环何时停止")

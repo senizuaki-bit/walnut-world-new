@@ -60,6 +60,7 @@ func _start_sequence(
 		sequence_finished.emit()
 		return
 	_stop_active_tweens()
+	_configure_v2_layout(response_label_text.begins_with("L") or response_label_text in ["方向提示", "概念提示", "修改建议", "世界反馈", "成长总结", "目标复述"])
 	_lines = lines.duplicate()
 	_line_index = -1
 	_typing = false
@@ -224,3 +225,13 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode in [KEY_SPACE, KEY_ENTER, KEY_KP_ENTER]:
 		advance()
 		get_viewport().set_input_as_handled()
+
+func _configure_v2_layout(expanded: bool) -> void:
+	const K := 720.0 / 941.0
+	dialogue_card.position = Vector2(300, 389) * K if expanded else Vector2(280, 608) * K
+	dialogue_card.size = Vector2(1160, 472) * K if expanded else Vector2(1125, 284) * K
+	$DialogueCard/ContentRoot.size = dialogue_card.size
+	avatar_stage.position = Vector2(338, 429) * K if expanded else Vector2(318, 648) * K
+	avatar_stage.size = Vector2(156, 392) * K if expanded else Vector2(156, 204) * K
+	_card_rest_position = dialogue_card.position
+	_avatar_rest_position = avatar_stage.position

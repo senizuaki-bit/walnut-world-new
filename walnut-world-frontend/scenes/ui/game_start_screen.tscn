@@ -1,17 +1,26 @@
-[gd_scene load_steps=16 format=3]
-[ext_resource type="Texture2D" path="res://assets/art/prototype/farm_backdrop.png" id="proto_farm"]
-[ext_resource type="Texture2D" path="res://assets/art/generated/characters/little_explorer.png" id="proto_explorer"]
+[gd_scene load_steps=25 format=3]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/B03-start-background.png" id="proto_farm"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/char-player-idle.png" id="proto_explorer"]
 [ext_resource type="StyleBox" path="res://resources/ui/parchment_panel.tres" id="proto_paper"]
-[ext_resource type="Theme" path="res://resources/ui/prototype_theme.tres" id="proto_theme"]
-
+[ext_resource type="Theme" path="res://resources/ui/v2/theme.tres" id="proto_theme"]
 [ext_resource type="Script" path="res://scenes/ui/game_start_screen.gd" id="1_script"]
 [ext_resource type="Texture2D" path="res://assets/art/generated/terrain/grass_plot.png" id="2_grass"]
 [ext_resource type="Texture2D" path="res://assets/art/generated/facilities/ancient_magic_tree.png" id="3_tree"]
 [ext_resource type="Texture2D" path="res://assets/art/generated/facilities/greenhouse.png" id="4_greenhouse"]
-[ext_resource type="Texture2D" path="res://assets/art/generated/characters/little_walnut.png" id="5_walnut"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/char-walnut-idle.png" id="5_walnut"]
 [ext_resource type="Texture2D" path="res://assets/art/generated/crops/tomato.png" id="6_tomato"]
 [ext_resource type="Texture2D" path="res://assets/art/generated/crops/carrot.png" id="7_carrot"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/ui-hero-frame.tres" id="ui-hero-frame"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/ui-nameplate.tres" id="ui-nameplate"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/ui-hero-crest.png" id="ui-hero-crest"]
 
+
+[ext_resource type="Script" path="res://scenes/ui/v2_surface.gd" id="v2_surface"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/empty.tres" id="v2_empty"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/edit-empty.tres" id="v2_edit_empty"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/input-empty.tres" id="v2_input_empty"]
+[ext_resource type="Font" path="res://resources/ui/v2/bold.tres" id="v2_bold"]
+[ext_resource type="Font" path="res://resources/ui/v2/mono.tres" id="v2_mono"]
 [sub_resource type="StyleBoxFlat" id="HeroPanel"]
 bg_color = Color(0.991, 0.957, 0.806, 0.98)
 border_width_left = 4
@@ -78,6 +87,8 @@ grow_vertical = 2
 script = ExtResource("1_script")
 theme = ExtResource("proto_theme")
 
+
+
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
@@ -87,6 +98,8 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(0.77, 0.93, 0.84, 1)
+
+
 
 [node name="FarmBackdrop" type="TextureRect" parent="."]
 layout_mode = 1
@@ -99,6 +112,8 @@ mouse_filter = 2
 texture = ExtResource("proto_farm")
 expand_mode = 1
 stretch_mode = 6
+
+
 
 [node name="Grass" type="TextureRect" parent="."]
 layout_mode = 1
@@ -120,6 +135,8 @@ expand_mode = 1
 stretch_mode = 5
 visible = false
 
+
+
 [node name="Tree" type="TextureRect" parent="."]
 layout_mode = 0
 offset_left = -76.0
@@ -132,6 +149,8 @@ texture = ExtResource("3_tree")
 expand_mode = 1
 stretch_mode = 5
 visible = false
+
+
 
 [node name="Greenhouse" type="TextureRect" parent="."]
 layout_mode = 1
@@ -150,6 +169,8 @@ expand_mode = 1
 stretch_mode = 5
 visible = false
 
+
+
 [node name="LeafLeft" type="Label" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
@@ -162,6 +183,9 @@ mouse_filter = 2
 theme_override_colors/font_color = Color(0.18, 0.49, 0.31, 1)
 theme_override_font_sizes/font_size = 54
 text = "❧"
+
+visible = false
+
 
 [node name="LeafRight" type="Label" parent="."]
 unique_name_in_owner = true
@@ -180,114 +204,216 @@ theme_override_colors/font_color = Color(0.18, 0.49, 0.31, 1)
 theme_override_font_sizes/font_size = 54
 text = "❧"
 
-[node name="HeroCard" type="PanelContainer" parent="."]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.0
-anchor_top = 0.5
-anchor_right = 0.0
-anchor_bottom = 0.5
-offset_left = 105.0
-offset_top = -236.0
-offset_right = 755.0
-offset_bottom = 230.0
-grow_horizontal = 2
-grow_vertical = 2
-pivot_offset = Vector2(325, 233)
-theme_override_styles/panel = ExtResource("proto_paper")
+visible = false
 
-[node name="Margin" type="MarginContainer" parent="HeroCard"]
-layout_mode = 2
+
+[node name="HeroCard" type="Panel" parent="."]
+unique_name_in_owner = true
+pivot_offset = Vector2(325, 233)
+
+layout_mode = 0
+offset_left = 109.41551540913922
+offset_top = 71.15834218916046
+offset_right = 853.134962805526
+offset_bottom = 591.4558979808714
+theme_override_styles/panel = ExtResource("v2_empty")
+
+
+[node name="OriginalSurface" type="NinePatchRect" parent="HeroCard"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-hero-frame"
+source_slice = 64.0
+border_width = 22.954303931987248
+patch_margin_left = 64
+patch_margin_top = 64
+patch_margin_right = 64
+patch_margin_bottom = 64
+
+[node name="Margin" type="Control" parent="HeroCard"]
 theme_override_constants/margin_left = 40
 theme_override_constants/margin_top = 40
 theme_override_constants/margin_right = 40
 theme_override_constants/margin_bottom = 32
 
-[node name="Content" type="HBoxContainer" parent="HeroCard/Margin"]
-layout_mode = 2
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 743.7194473963868
+offset_bottom = 520.2975557917109
+
+
+[node name="Content" type="Control" parent="HeroCard/Margin"]
 theme_override_constants/separation = 22
 
-[node name="Copy" type="VBoxContainer" parent="HeroCard/Margin/Content"]
-layout_mode = 2
-size_flags_horizontal = 3
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 743.7194473963868
+offset_bottom = 520.2975557917109
+
+
+[node name="Copy" type="Control" parent="HeroCard/Margin/Content"]
 theme_override_constants/separation = 12
 
-[node name="TitleGroup" type="VBoxContainer" parent="HeroCard/Margin/Content/Copy"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 743.7194473963868
+offset_bottom = 520.2975557917109
+
+
+[node name="TitleGroup" type="Control" parent="HeroCard/Margin/Content/Copy"]
 unique_name_in_owner = true
-layout_mode = 2
 theme_override_constants/separation = 2
 
+layout_mode = 0
+offset_left = 109.41551540913922
+offset_top = 106.35494155154092
+offset_right = 690.9245483528161
+offset_bottom = 241.7853347502657
+
+
 [node name="Eyebrow" type="Label" parent="HeroCard/Margin/Content/Copy/TitleGroup"]
-layout_mode = 2
 theme_override_colors/font_color = Color(0.76, 0.36, 0.08, 1)
-theme_override_font_sizes/font_size = 17
 text = "芽芽家园 · AI 编程农场"
 
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 550.9032943676939
+offset_bottom = 40.55260361317747
+theme_override_font_sizes/font_size = 23
+
+
 [node name="Title" type="Label" parent="HeroCard/Margin/Content/Copy/TitleGroup"]
-layout_mode = 2
 theme_override_colors/font_color = Color(0.10, 0.30, 0.21, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.82, 0.28, 0.38)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 3
-theme_override_font_sizes/font_size = 48
 text = "核桃代码世界"
 
+layout_mode = 0
+offset_left = 0.0
+offset_top = 49.73432518597237
+offset_right = 604.4633368756641
+offset_bottom = 135.43039319872474
+theme_override_font_sizes/font_size = 66
+
+theme_override_fonts/font = ExtResource("v2_bold")
+
 [node name="Subtitle" type="Label" parent="HeroCard/Margin/Content/Copy"]
-layout_mode = 2
 theme_override_colors/font_color = Color(0.28, 0.39, 0.26, 1)
-theme_override_font_sizes/font_size = 18
-text = "让每一行代码，都在世界里生根发芽。"
 autowrap_mode = 2
 
-[node name="Badge" type="PanelContainer" parent="HeroCard/Margin/Content/Copy"]
-layout_mode = 2
-size_flags_horizontal = 0
-theme_override_styles/panel = SubResource("Badge")
+text = "学会用循环，让小核桃一次照顾整排农田。"
+layout_mode = 0
+offset_left = 109.41551540913922
+offset_top = 250.201912858661
+offset_right = 690.9245483528161
+offset_bottom = 291.51965993623804
+theme_override_font_sizes/font_size = 24
+
+
+[node name="Badge" type="Panel" parent="HeroCard/Margin/Content/Copy"]
+
+layout_mode = 0
+offset_left = 109.41551540913922
+offset_top = 295.34537725823594
+offset_right = 531.7747077577045
+offset_bottom = 337.42826780021255
+theme_override_styles/panel = ExtResource("v2_empty")
+
+
+[node name="OriginalSurface" type="NinePatchRect" parent="HeroCard/Margin/Content/Copy/Badge"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-nameplate"
+source_slice = 64.0
+border_width = 22.954303931987248
+patch_margin_left = 64
+patch_margin_top = 64
+patch_margin_right = 64
+patch_margin_bottom = 64
 
 [node name="Label" type="Label" parent="HeroCard/Margin/Content/Copy/Badge"]
-layout_mode = 2
 theme_override_colors/font_color = Color(0.93, 0.98, 0.81, 1)
-theme_override_font_sizes/font_size = 14
-text = "清泉村  ·  作物适配浇水器"
+
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 422.35919234856533
+offset_bottom = 42.082890541976624
+theme_override_font_sizes/font_size = 21
+text = "演示关卡  作物适配浇水器"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 
 [node name="Spacer" type="Control" parent="HeroCard/Margin/Content/Copy"]
 custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
 size_flags_vertical = 3
 
+visible = false
+
+
 [node name="EnterButton" type="Button" parent="HeroCard/Margin/Content/Copy"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(380, 66)
-layout_mode = 2
-size_flags_horizontal = 0
 focus_mode = 2
 mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
-theme_override_font_sizes/font_size = 24
-theme_override_styles/normal = null
-theme_override_styles/hover = null
-theme_override_styles/pressed = null
 text = "进入农场  →"
 
+layout_mode = 0
+offset_left = 109.41551540913922
+offset_top = 355.02656748140276
+offset_right = 644.250797024442
+offset_bottom = 441.4877789585547
+theme_override_font_sizes/font_size = 38
+
+theme_override_styles/normal = ExtResource("v2_empty")
+theme_override_styles/pressed = ExtResource("v2_empty")
+theme_override_styles/hover = ExtResource("v2_empty")
+theme_override_styles/disabled = ExtResource("v2_empty")
+theme_override_styles/focus = ExtResource("v2_empty")
+theme_override_fonts/font = ExtResource("v2_bold")
+
+[node name="OriginalSurface" type="NinePatchRect" parent="HeroCard/Margin/Content/Copy/EnterButton"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "button-normal"
+source_slice = 56.0
+border_width = 16.83315621679065
+patch_margin_left = 56
+patch_margin_top = 56
+patch_margin_right = 56
+patch_margin_bottom = 56
+
 [node name="Tip" type="Label" parent="HeroCard/Margin/Content/Copy"]
-layout_mode = 2
 theme_override_colors/font_color = Color(0.40, 0.48, 0.32, 1)
-theme_override_font_sizes/font_size = 13
-text = "观察农田 · 编写规则 · 见证改变"
+
+layout_mode = 0
+offset_left = 140.0212539851222
+offset_top = 459.85122210414454
+offset_right = 690.9245483528161
+offset_bottom = 498.1083953241233
+theme_override_font_sizes/font_size = 18
+text = "主人公和小核桃一起进入农场"
+
 
 [node name="ArtStage" type="Control" parent="."]
-custom_minimum_size = Vector2(0, 0)
-layout_mode = 1
-anchor_left = 1.0
-anchor_right = 1.0
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = -590.0
-offset_top = -590.0
-offset_right = -30.0
-offset_bottom = -30.0
 mouse_filter = 2
+
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 1279.3198724760894
+offset_bottom = 720.0
+
 
 [node name="Tomato" type="TextureRect" parent="ArtStage"]
 layout_mode = 0
@@ -302,6 +428,8 @@ expand_mode = 1
 stretch_mode = 5
 visible = false
 
+
+
 [node name="Carrot" type="TextureRect" parent="ArtStage"]
 layout_mode = 0
 offset_left = 202.0
@@ -315,25 +443,41 @@ expand_mode = 1
 stretch_mode = 5
 visible = false
 
+
+
 [node name="Explorer" type="TextureRect" parent="ArtStage"]
-layout_mode = 0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 520.0
-offset_bottom = 550.0
 mouse_filter = 2
 texture = ExtResource("proto_explorer")
 expand_mode = 1
 stretch_mode = 5
 
+layout_mode = 0
+offset_left = 847.0138150903294
+offset_top = 198.93730074388947
+offset_right = 1132.412327311371
+offset_bottom = 674.8565356004251
+
+
 [node name="WalnutArt" type="TextureRect" parent="ArtStage"]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 355.0
-offset_top = 345.0
-offset_right = 560.0
-offset_bottom = 550.0
 mouse_filter = 2
 texture = ExtResource("5_walnut")
+expand_mode = 1
+stretch_mode = 5
+layout_mode = 0
+offset_left = 1087.268862911796
+offset_top = 483.5706695005314
+offset_right = 1257.1307120085016
+offset_bottom = 674.8565356004251
+
+
+[node name="HeroCrest" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 348.90541976620614
+offset_top = 35.19659936238045
+offset_right = 581.5090329436769
+offset_bottom = 180.5738575982997
+mouse_filter = 2
+texture = ExtResource("ui-hero-crest")
 expand_mode = 1
 stretch_mode = 5

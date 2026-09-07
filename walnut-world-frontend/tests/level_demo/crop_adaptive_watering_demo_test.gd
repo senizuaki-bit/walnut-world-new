@@ -73,9 +73,9 @@ func _initialize() -> void:
 	if initial_editor.text != CropAdaptiveWateringDemo.INITIAL_PRACTICE_CODE or "/*目标*/" not in initial_editor.text:
 		failures.append("首次代码草稿必须是含填空的初步代码，不得一上来给完整答案。")
 	var first_card := grid.get_child(0) as CropPlotCard
-	if not (first_card.get_node("Margin/Content/Values/CurrentLabel") as Label).text.begins_with("当前湿度"):
+	if not (first_card.get_node("%CurrentLabel") as Label).text.begins_with("当前湿度"):
 		failures.append("土地卡片必须明确标注“当前湿度”。")
-	if not (first_card.get_node("Margin/Content/Values/TargetLabel") as Label).text.begins_with("目标湿度"):
+	if not (first_card.get_node("%TargetLabel") as Label).text.begins_with("目标湿度"):
 		failures.append("土地卡片必须明确标注“目标湿度”。")
 	evidence_body.text = "[b]同下标读取当前值与目标值 → 计算 gap → 选择 0 / 1 / 2 份水[/b]\n叮当师傅已经在清泉工坊准备好代码卷轴。"
 	await process_frame
@@ -87,7 +87,7 @@ func _initialize() -> void:
 	var expected_manual_order := [1, 6, 5]
 	for expected_index in expected_manual_order:
 		for card_index in range(grid.get_child_count()):
-			var attention := grid.get_child(card_index).get_node("AttentionFrame") as Panel
+			var attention := grid.get_child(card_index).get_node("%AttentionFrame") as TextureRect
 			if attention.visible != (card_index == expected_index):
 				failures.append("手动验证阶段必须持续高亮当前土地%d。" % expected_index)
 		level.call("_on_plot_pressed", expected_index)
@@ -243,9 +243,12 @@ func _initialize() -> void:
 	level.call("_show_code_drawer")
 	await create_timer(0.10).timeout
 	var drawer_surface := level.get_node("CodeDrawer/Surface") as Control
-	for plot in grid.get_children():
-		if (plot as Control).get_global_rect().end.x > drawer_surface.get_global_rect().position.x:
-			failures.append("技能卷轴打开时，八块土地必须完整保留在左侧。")
+	if (grid.get_child(0) as Control).get_global_rect().position.x >= drawer_surface.get_global_rect().position.x:
+		failures.append("S07 must leave the left farm visible")
+	if (grid.get_child(3) as Control).get_global_rect().end.x <= drawer_surface.get_global_rect().position.x:
+		failures.append("S07 must deliberately overlay the right farm, as in guide-layout.json")
+	if (level.get_node("Hud/FarmLayout") as Control).scale != Vector2.ONE:
+		failures.append("Opening the scroll must not shrink the farm")
 	level.call("_hide_code_drawer")
 	if (level.get_node("Hud/FarmLayout") as Control).scale != Vector2.ONE:
 		failures.append("关闭技能卷轴后必须恢复农田的正常尺寸。")
