@@ -5,13 +5,18 @@ const START_SCREEN := preload("res://scenes/ui/game_start_screen.tscn")
 
 
 func _initialize() -> void:
-	root.size = Vector2i(1280, 720)
+	var capture_size := Vector2i(1280, 720)
+	root.size = capture_size
 	root.gui_embed_subwindows = true
 	var state_name := "start"
 	var output_path := "res://docs/design/verification/crop-adaptive-start.png"
 	for argument in OS.get_cmdline_user_args():
 		if argument.begins_with("--state="):
 			state_name = argument.trim_prefix("--state=")
+		elif argument.begins_with("--width="):
+			capture_size.x = int(argument.trim_prefix("--width="))
+		elif argument.begins_with("--height="):
+			capture_size.y = int(argument.trim_prefix("--height="))
 		elif argument.begins_with("--output="):
 			output_path = argument.trim_prefix("--output=")
 	var capture_root: CanvasItem
@@ -20,6 +25,9 @@ func _initialize() -> void:
 	else:
 		capture_root = CROP_DEMO.instantiate()
 	root.add_child(capture_root)
+	await process_frame
+	root.size = capture_size
+	await process_frame
 	await process_frame
 	if state_name != "start":
 		var level := capture_root as CropAdaptiveWateringDemo
@@ -71,9 +79,17 @@ func _initialize() -> void:
 			level.set("_hint_level", 3)
 			level.call("_set_phase", CropAdaptiveWateringDemo.Phase.FAILED)
 			level.call("_on_patch_requested")
+		elif state_name == "free" or state_name == "preview":
+			level.call("_enter_free_play")
+			if state_name == "preview":
+				level.show_next_level_preview()
+		elif state_name == "feedback":
+			level.call("_begin_growth_summary")
+			level.story_dialogue.advance()
 		elif state_name == "hint":
 			level.call("_set_phase", CropAdaptiveWateringDemo.Phase.FAILED)
 			level.call("_on_hint_pressed")
+			level.story_dialogue.advance()
 		elif state_name == "validating":
 			level.begin_agent_submission("正在检查这次行动的结果，请稍候。")
 		elif state_name == "unlocked":
@@ -81,6 +97,12 @@ func _initialize() -> void:
 		elif state_name == "code":
 			level.call("_set_phase", CropAdaptiveWateringDemo.Phase.CODE)
 			level.call("_show_code_drawer")
+		elif state_name == "failed":
+			level.set("_build_result", CropAdaptiveWateringDemo.evaluate_source(CropAdaptiveWateringDemo.STARTER_CODE))
+			for action in level.get("_build_result").actions:
+				var i := int(action.plot_index)
+				(level.plot_grid.get_child(i) as CropPlotCard).set_result(int(action.units), false, int(action.units) != CropAdaptiveWateringDemo.EXPECTED_UNITS[i])
+			level.call("_fail_run")
 		elif state_name == "results":
 			for index in range(8):
 				var units := 0 if CropAdaptiveWateringDemo.MOISTURE[index] >= 60 else (2 if 60 - CropAdaptiveWateringDemo.MOISTURE[index] >= 30 else 1)
