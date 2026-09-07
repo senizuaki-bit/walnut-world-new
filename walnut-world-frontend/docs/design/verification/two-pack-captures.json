@@ -1,0 +1,149 @@
+[
+  {
+    "view": "S01",
+    "state": "start",
+    "image": "two-pack-S01.png",
+    "ok": true,
+    "output": ""
+  },
+  {
+    "view": "S02",
+    "state": "intro",
+    "image": "two-pack-S02.png",
+    "ok": true,
+    "output": ""
+  },
+  {
+    "view": "E01",
+    "state": "old_tool",
+    "image": "two-pack-E01.png",
+    "ok": true,
+    "output": ""
+  },
+  {
+    "view": "E02",
+    "state": "manual",
+    "image": "two-pack-E02.png",
+    "ok": true,
+    "output": ""
+  },
+  {
+    "view": "E03",
+    "state": "skill_tree",
+    "image": "two-pack-E03.png",
+    "ok": true,
+    "output": ""
+  },
+  {
+    "view": "S03",
+    "state": "workshop_dialogue",
+    "image": "two-pack-S03.png",
+    "ok": true,
+    "output": ""
+  },
+  {
+    "view": "S04",
+    "state": "workshop",
+    "image": "two-pack-S04.png",
+    "ok": true,
+    "output": ""
+  },
+  {
+    "view": "S05",
+    "state": "workshop_branch",
+    "image": "two-pack-S05.png",
+    "ok": true,
+    "output": ""
+  },
+  {
+    "view": "S06",
+    "state": "workshop_summary",
+    "image": "two-pack-S06.png",
+    "ok": true,
+    "output": ""
+  },
+  {
+    "view": "S07",
+    "state": "code",
+    "image": "two-pack-S07.png",
+    "ok": true,
+    "output": ""
+  },
+  {
+    "view": "S08",
+    "state": "hint",
+    "image": "two-pack-S08.png",
+    "ok": true,
+    "output": ""
+  },
+  {
+    "view": "S09",
+    "state": "validating",
+    "image": "two-pack-S09.png",
+    "ok": true,
+    "output": ""
+  },
+  {
+    "view": "E08",
+    "state": "failed",
+    "image": "two-pack-E08.png",
+    "ok": true,
+    "output": ""
+  },
+  {
+    "view": "E04",
+    "state": "bug",
+    "image": "two-pack-E04.png",
+    "ok": true,
+    "output": ""
+  },
+  {
+    "view": "E05",
+    "state": "patch",
+    "image": "two-pack-E05.png",
+    "ok": true,
+    "output": ""
+  },
+  {
+    "view": "E09",
+    "state": "complete",
+    "image": "two-pack-E09.png",
+    "ok": true,
+    "output": ""
+  },
+  {
+    "view": "S10",
+    "state": "world_feedback",
+    "image": "two-pack-S10.png",
+    "ok": true,
+    "output": ""
+  },
+  {
+    "view": "E06",
+    "state": "growth",
+    "image": "two-pack-E06.png",
+    "ok": true,
+    "output": ""
+  },
+  {
+    "view": "E10",
+    "state": "unlocked",
+    "image": "two-pack-E10.png",
+    "ok": true,
+    "output": ""
+  },
+  {
+    "view": "E07",
+    "state": "free_play",
+    "image": "two-pack-E07.png",
+    "ok": true,
+    "output": ""
+  },
+  {
+    "view": "E11",
+    "state": "preview",
+    "image": "two-pack-E11.png",
+    "ok": true,
+    "output": ""
+  }
+]
