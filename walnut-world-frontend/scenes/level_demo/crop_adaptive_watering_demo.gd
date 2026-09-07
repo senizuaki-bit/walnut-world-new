@@ -178,6 +178,8 @@ var _last_candidate_result: Dictionary = {}
 
 
 func _ready() -> void:
+	code_drawer.visibility_changed.connect(_update_workspace_composition)
+	patch_dialog.visibility_changed.connect(func() -> void: $PatchBackdrop.visible = patch_dialog.visible)
 	primary_button.pressed.connect(_on_primary_pressed)
 	hint_button.pressed.connect(_on_hint_pressed)
 	request_patch_button.pressed.connect(_on_patch_requested)
@@ -722,8 +724,8 @@ func _on_patch_requested() -> void:
 	_bounce(request_patch_button)
 	_patch_pending = true
 	_patch_stale = false
-	patch_dialog.dialog_text = "AI 建议修改（尚未应用）\n\n修改前：int gap = 60 - moisture[i];\n修改后：int gap = target[i] - moisture[i];\n\n依据：1号漏浇、5号不足、6号多浇，以及 Bug 先生的同为55公开测试。\n影响范围：只修改缺口计算这一行。\n接受后只生成新草稿，仍需由你点击“直接运行”验证。"
-	patch_dialog.popup_centered()
+	%PatchExplanation.text = "依据：1号漏浇、5号不足、6号多浇，以及 Bug 先生的同为55公开测试。\n\n影响范围：只修改缺口计算这一行。\n接受后只生成新草稿，仍需由你点击“直接运行”验证。"
+	patch_dialog.popup_centered(Vector2i(840, 440))
 
 
 func _can_request_patch() -> bool:
@@ -835,7 +837,7 @@ func _show_growth_summary() -> void:
 	var assistance := "、".join(hint_names) if not hint_names.is_empty() else "未使用分层提示"
 	growth_summary_body.text = (
 		"[b]完成方式[/b]：%s\n\n" % route
-		+ "[b]代码变化[/b]：使用同一个 i 配对 moisture[i] 与 target[i]，计算目标减当前的缺口。\n\n"
+		+ "[b]代码变化[/b]：使用同一个 i 配对 moisture[lb]i[rb] 与 target[lb]i[rb]，计算目标减当前的缺口。\n\n"
 		+ "[b]提示记录[/b]：%s\n\n" % assistance
 		+ "[b]验证记录[/b]：8 次循环；3 次 250 ml；2 次 500 ml；3 次跳过。"
 	)
@@ -1358,3 +1360,20 @@ func _bounce(control: Control) -> void:
 
 func _duration(seconds: float) -> float:
 	return maxf(0.01, seconds * timing_scale)
+
+
+func _update_workspace_composition() -> void:
+	# Keep all eight plots visible alongside the S07 skill scroll.
+	var farm := $Hud/FarmLayout as Control
+	if code_drawer.visible:
+		farm.scale = Vector2(0.64, 0.64)
+		farm.offset_left = 155.0
+		farm.offset_top = 155.0
+		evidence_panel.offset_left = -480.0
+		evidence_panel.offset_right = 70.0
+	else:
+		farm.scale = Vector2.ONE
+		farm.offset_left = 230.0
+		farm.offset_top = 118.0
+		evidence_panel.offset_left = -385.0
+		evidence_panel.offset_right = 400.0

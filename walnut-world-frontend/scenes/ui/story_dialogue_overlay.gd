@@ -10,11 +10,12 @@ signal line_changed(line_index: int, line_text: String)
 @onready var avatar_stage: Control = $AvatarStage
 @onready var portrait: TextureRect = $AvatarStage/Portrait
 @onready var dialogue_card: Control = $DialogueCard
-@onready var speaker_label: Label = $DialogueCard/ContentRoot/ContentMargin/Content/Speaker
-@onready var response_badge: Label = $DialogueCard/ContentRoot/ContentMargin/Content/ResponseBadge
-@onready var body_label: Label = $DialogueCard/ContentRoot/ContentMargin/Content/Body
-@onready var question_label: Label = $DialogueCard/ContentRoot/ContentMargin/Content/Question
+@onready var speaker_label: Label = $DialogueCard/ContentRoot/ContentMargin/Scroll/Content/Speaker
+@onready var response_badge: Label = $DialogueCard/ContentRoot/ContentMargin/Scroll/Content/ResponseBadge
+@onready var body_label: Label = $DialogueCard/ContentRoot/ContentMargin/Scroll/Content/Body
+@onready var question_label: Label = $DialogueCard/ContentRoot/ContentMargin/Scroll/Content/Question
 @onready var continue_hint: Label = $DialogueCard/ContentRoot/ContinueHint
+@onready var dialogue_scroll: ScrollContainer = $DialogueCard/ContentRoot/ContentMargin/Scroll
 @onready var typewriter_timer: Timer = $TypewriterTimer
 
 var _lines: Array[String] = []
@@ -134,6 +135,7 @@ func _advance_to_next_line() -> void:
 		_hint_tween.kill()
 	continue_hint.visible = false
 	continue_hint.scale = Vector2.ONE
+	dialogue_scroll.scroll_vertical = 0
 	body_label.text = _lines[_line_index]
 	body_label.visible_characters = 0
 	_typing = true
@@ -214,3 +216,11 @@ func _stop_active_tweens() -> void:
 		_hint_tween.kill()
 	if _transition_tween != null and _transition_tween.is_valid():
 		_transition_tween.kill()
+
+
+func _input(event: InputEvent) -> void:
+	if not is_visible_in_tree() or _finishing:
+		return
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode in [KEY_SPACE, KEY_ENTER, KEY_KP_ENTER]:
+		advance()
+		get_viewport().set_input_as_handled()

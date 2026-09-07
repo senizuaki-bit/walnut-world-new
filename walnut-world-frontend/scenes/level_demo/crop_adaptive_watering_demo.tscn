@@ -1,4 +1,14 @@
-[gd_scene load_steps=21 format=3]
+[gd_scene load_steps=26 format=3]
+[ext_resource type="Texture2D" path="res://assets/art/prototype/farm_backdrop.png" id="proto_farm"]
+[ext_resource type="Texture2D" path="res://assets/art/prototype/workshop_backdrop.png" id="proto_workshop"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/characters/little_explorer.png" id="proto_explorer"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/characters/little_walnut.png" id="proto_walnut"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/characters/master_ding_dang.png" id="proto_master"]
+[ext_resource type="Texture2D" path="res://assets/art/generated/characters/shu_shu.png" id="proto_book"]
+[ext_resource type="StyleBox" path="res://resources/ui/parchment_panel.tres" id="proto_paper"]
+[ext_resource type="Theme" path="res://resources/ui/prototype_theme.tres" id="proto_theme"]
+[ext_resource type="Texture2D" path="res://resources/ui/skill_branches.svg" id="proto_tree"]
+[ext_resource type="StyleBox" path="res://resources/ui/parchment_compact.tres" id="proto_compact"]
 
 [ext_resource type="Script" path="res://scenes/level_demo/crop_adaptive_watering_demo.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://scenes/level_demo/crop_plot_card.tscn" id="2_card"]
@@ -11,84 +21,31 @@
 [ext_resource type="Resource" path="res://resources/agent/agent_character_catalog.tres" id="9_catalog"]
 [ext_resource type="PackedScene" path="res://scenes/characters/bug_legion/bug_legion_2d.tscn" id="10_legion"]
 
-[sub_resource type="StyleBoxFlat" id="TaskStyle"]
-bg_color = Color(0.99, 0.95, 0.80, 0.97)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.18, 0.40, 0.28, 1)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
-shadow_color = Color(0.04, 0.12, 0.08, 0.28)
-shadow_size = 7
-shadow_offset = Vector2(0, 4)
 
 [sub_resource type="StyleBoxFlat" id="DarkPill"]
-bg_color = Color(0.09, 0.26, 0.19, 0.96)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
+bg_color = Color(0.98, 0.92, 0.73, 0.98)
+corner_radius_top_left = 9
+corner_radius_top_right = 9
+corner_radius_bottom_right = 9
+corner_radius_bottom_left = 9
 shadow_color = Color(0.03, 0.09, 0.06, 0.26)
 shadow_size = 5
 shadow_offset = Vector2(0, 3)
 
-[sub_resource type="StyleBoxFlat" id="EvidenceStyle"]
-bg_color = Color(1, 0.976, 0.88, 0.98)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0.93, 0.58, 0.16, 1)
-corner_radius_top_left = 22
-corner_radius_top_right = 22
-corner_radius_bottom_right = 22
-corner_radius_bottom_left = 22
-shadow_color = Color(0.08, 0.15, 0.10, 0.26)
-shadow_size = 7
-shadow_offset = Vector2(0, 4)
 
-[sub_resource type="StyleBoxFlat" id="PrimaryStyle"]
-bg_color = Color(0.98, 0.68, 0.19, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.13, 0.35, 0.24, 1)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
-shadow_color = Color(0.24, 0.14, 0.04, 0.30)
-shadow_size = 5
-shadow_offset = Vector2(0, 3)
 
 [sub_resource type="StyleBoxFlat" id="SecondaryStyle"]
-bg_color = Color(0.98, 0.93, 0.75, 0.98)
+bg_color = Color(0.98, 0.92, 0.73, 0.98)
 border_width_left = 3
 border_width_top = 3
 border_width_right = 3
 border_width_bottom = 3
-border_color = Color(0.15, 0.38, 0.26, 1)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
+border_color = Color(0.50, 0.32, 0.15, 1)
+corner_radius_top_left = 9
+corner_radius_top_right = 9
+corner_radius_bottom_right = 9
+corner_radius_bottom_left = 9
 
-[sub_resource type="StyleBoxFlat" id="DrawerStyle"]
-bg_color = Color(0.985, 0.949, 0.84, 1)
-border_width_left = 7
-border_width_top = 4
-border_width_bottom = 4
-border_color = Color(0.21, 0.49, 0.33, 1)
-corner_radius_top_left = 28
-corner_radius_bottom_left = 28
-shadow_color = Color(0.03, 0.09, 0.06, 0.46)
-shadow_size = 14
-shadow_offset = Vector2(-7, 0)
 
 [sub_resource type="StyleBoxFlat" id="EditorStyle"]
 bg_color = Color(0.10, 0.17, 0.14, 1)
@@ -126,20 +83,6 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[sub_resource type="StyleBoxFlat" id="CompletionStyle"]
-bg_color = Color(0.92, 1, 0.82, 0.985)
-border_width_left = 5
-border_width_top = 5
-border_width_right = 5
-border_width_bottom = 5
-border_color = Color(0.18, 0.61, 0.37, 1)
-corner_radius_top_left = 30
-corner_radius_top_right = 30
-corner_radius_bottom_right = 30
-corner_radius_bottom_left = 30
-shadow_color = Color(0.04, 0.14, 0.08, 0.42)
-shadow_size = 14
-shadow_offset = Vector2(0, 8)
 
 [node name="CropAdaptiveWateringDemo" type="Control"]
 layout_mode = 3
@@ -149,6 +92,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
+theme = ExtResource("proto_theme")
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
@@ -168,8 +112,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-modulate = Color(1, 1, 1, 0.58)
-texture = ExtResource("4_grass")
+modulate = Color(1, 1, 1, 1)
+texture = ExtResource("proto_farm")
 expand_mode = 1
 stretch_mode = 6
 
@@ -184,6 +128,7 @@ modulate = Color(1, 1, 1, 0.82)
 texture = ExtResource("5_pump")
 expand_mode = 1
 stretch_mode = 5
+visible = false
 
 [node name="Workshop" type="TextureRect" parent="."]
 layout_mode = 1
@@ -200,6 +145,29 @@ modulate = Color(1, 1, 1, 0.78)
 texture = ExtResource("6_workshop")
 expand_mode = 1
 stretch_mode = 5
+visible = false
+
+[node name="Explorer" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = -18.0
+offset_top = 275.0
+offset_right = 238.0
+offset_bottom = 610.0
+mouse_filter = 2
+texture = ExtResource("proto_explorer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="FarmWalnut" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 510.0
+offset_right = 132.0
+offset_bottom = 655.0
+mouse_filter = 2
+texture = ExtResource("proto_walnut")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Hud" type="Control" parent="."]
 layout_mode = 1
@@ -211,11 +179,11 @@ grow_vertical = 2
 
 [node name="TaskCard" type="PanelContainer" parent="Hud"]
 layout_mode = 0
-offset_left = 18.0
-offset_top = 16.0
-offset_right = 330.0
-offset_bottom = 102.0
-theme_override_styles/panel = SubResource("TaskStyle")
+offset_left = 20.0
+offset_top = 15.0
+offset_right = 300.0
+offset_bottom = 92.0
+theme_override_styles/panel = ExtResource("proto_paper")
 
 [node name="Margin" type="MarginContainer" parent="Hud/TaskCard"]
 layout_mode = 2
@@ -232,7 +200,7 @@ theme_override_constants/separation = 2
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.11, 0.31, 0.21, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 20
 text = "作物适配浇水器"
 
 [node name="TaskProgress" type="Label" parent="Hud/TaskCard/Margin/Content"]
@@ -246,67 +214,65 @@ text = "进入试验田"
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_left = 355.0
-offset_top = 18.0
-offset_right = -355.0
-offset_bottom = 62.0
+offset_left = 322.0
+offset_top = 20.0
+offset_right = -275.0
+offset_bottom = 58.0
 grow_horizontal = 2
 theme_override_styles/panel = SubResource("DarkPill")
 
 [node name="PhaseStrip" type="Label" parent="Hud/PhasePill"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.91, 0.97, 0.78, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.24, 0.30, 0.17, 1)
+theme_override_font_sizes/font_size = 13
 text = "观察旧工具  →  理解数据  →  编写规则  →  世界验证"
 horizontal_alignment = 1
 vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
 
 [node name="ToolRail" type="HBoxContainer" parent="Hud"]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -405.0
-offset_top = 16.0
+offset_left = -250.0
+offset_top = 18.0
 offset_right = -18.0
-offset_bottom = 66.0
+offset_bottom = 58.0
 grow_horizontal = 0
 theme_override_constants/separation = 8
 
 [node name="CodeButton" type="Button" parent="Hud/ToolRail"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(112, 50)
+custom_minimum_size = Vector2(72, 38)
 layout_mode = 2
 focus_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("SecondaryStyle")
-theme_override_styles/hover = SubResource("PrimaryStyle")
 text = "</> 代码"
 
 [node name="HintButton" type="Button" parent="Hud/ToolRail"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(112, 50)
+custom_minimum_size = Vector2(72, 38)
 layout_mode = 2
 focus_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("SecondaryStyle")
-theme_override_styles/hover = SubResource("PrimaryStyle")
 text = "? 问叮当"
 
 [node name="RequestPatchButton" type="Button" parent="Hud/ToolRail"]
 unique_name_in_owner = true
 visible = false
-custom_minimum_size = Vector2(142, 50)
+custom_minimum_size = Vector2(72, 38)
 layout_mode = 2
 focus_mode = 2
 tooltip_text = "查看并决定是否采用 AI 修改提案"
 theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("PrimaryStyle")
-theme_override_styles/hover = SubResource("PrimaryStyle")
+theme_override_font_sizes/font_size = 14
 text = "AI 修改提案"
 
 [node name="PlaybackRail" type="HBoxContainer" parent="Hud"]
@@ -331,7 +297,6 @@ tooltip_text = "切换权威世界演出的播放速度（等待逻辑接入）"
 theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
 theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("SecondaryStyle")
-theme_override_styles/hover = SubResource("PrimaryStyle")
 text = "1x"
 
 [node name="SkipPlaybackButton" type="Button" parent="Hud/PlaybackRail"]
@@ -344,7 +309,6 @@ tooltip_text = "跳过当前权威世界演出（等待逻辑接入）"
 theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
 theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("SecondaryStyle")
-theme_override_styles/hover = SubResource("PrimaryStyle")
 text = "跳过"
 
 [node name="ReplayPlaybackButton" type="Button" parent="Hud/PlaybackRail"]
@@ -357,7 +321,6 @@ tooltip_text = "重播最近一次已验证结果（等待逻辑接入）"
 theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
 theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("SecondaryStyle")
-theme_override_styles/hover = SubResource("PrimaryStyle")
 text = "重播"
 
 [node name="FarmLayout" type="HBoxContainer" parent="Hud"]
@@ -365,10 +328,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 190.0
-offset_top = 112.0
+offset_left = 230.0
+offset_top = 118.0
 offset_right = -190.0
-offset_bottom = -185.0
+offset_bottom = -204.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 18
@@ -378,8 +341,8 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/h_separation = 12
-theme_override_constants/v_separation = 10
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 12
 columns = 4
 
 [node name="Plot0" parent="Hud/FarmLayout/PlotGrid" instance=ExtResource("2_card")]
@@ -422,20 +385,20 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -420.0
-offset_top = -175.0
-offset_right = 420.0
-offset_bottom = -95.0
+offset_left = -385.0
+offset_top = -193.0
+offset_right = 400.0
+offset_bottom = -83.0
 grow_horizontal = 2
 grow_vertical = 0
-theme_override_styles/panel = SubResource("EvidenceStyle")
+theme_override_styles/panel = ExtResource("proto_compact")
 
 [node name="Margin" type="MarginContainer" parent="Hud/EvidencePanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 8
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 2
 
 [node name="Content" type="VBoxContainer" parent="Hud/EvidencePanel/Margin"]
 layout_mode = 2
@@ -450,7 +413,7 @@ text = "清泉试验田"
 
 [node name="EvidenceBody" type="RichTextLabel" parent="Hud/EvidencePanel/Margin/Content"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 48)
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 mouse_filter = 2
 theme_override_colors/default_color = Color(0.25, 0.33, 0.22, 1)
@@ -467,18 +430,16 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -352.0
-offset_top = -82.0
-offset_right = -24.0
-offset_bottom = -22.0
+offset_left = -330.0
+offset_top = -70.0
+offset_right = -34.0
+offset_bottom = -20.0
 grow_horizontal = 0
 grow_vertical = 0
 focus_mode = 2
 mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
 theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("PrimaryStyle")
-theme_override_styles/hover = SubResource("PrimaryStyle")
 text = "查看旧工具演示  →"
 
 [node name="WaterChoices" type="HBoxContainer" parent="Hud"]
@@ -561,7 +522,10 @@ anchor_bottom = 1.0
 offset_left = -540.0
 grow_horizontal = 0
 grow_vertical = 2
-theme_override_styles/panel = SubResource("DrawerStyle")
+theme_override_styles/panel = ExtResource("proto_paper")
+offset_top = 14.0
+offset_right = -14.0
+offset_bottom = -14.0
 
 [node name="Margin" type="MarginContainer" parent="CodeDrawer/Surface"]
 layout_mode = 2
@@ -601,7 +565,6 @@ tooltip_text = "关闭代码界面"
 theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
 theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("SecondaryStyle")
-theme_override_styles/hover = SubResource("PrimaryStyle")
 text = "×"
 
 [node name="PrototypeNotice" type="Label" parent="CodeDrawer/Surface/Margin/Content"]
@@ -618,7 +581,7 @@ size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
 theme_override_colors/caret_color = Color(1, 0.72, 0.24, 1)
 theme_override_colors/selection_color = Color(0.28, 0.55, 0.38, 0.75)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 15
 theme_override_styles/normal = SubResource("EditorStyle")
 line_folding = true
 gutters_draw_line_numbers = true
@@ -646,7 +609,6 @@ focus_mode = 2
 tooltip_text = "保存当前代码并直接运行"
 theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
 theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("PrimaryStyle")
 text = "直接运行  ▶"
 
 [node name="CompletionCard" type="PanelContainer" parent="."]
@@ -663,7 +625,7 @@ offset_right = 370.0
 offset_bottom = 190.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("CompletionStyle")
+theme_override_styles/panel = ExtResource("proto_paper")
 
 [node name="Margin" type="MarginContainer" parent="CompletionCard"]
 layout_mode = 2
@@ -712,7 +674,6 @@ custom_minimum_size = Vector2(180, 58)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
 theme_override_font_sizes/font_size = 17
-theme_override_styles/normal = SubResource("PrimaryStyle")
 text = "下一关  →"
 
 [node name="ReturnButton" type="Button" parent="CompletionCard/Margin/Content/Actions"]
@@ -742,7 +703,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.035, 0.12, 0.08, 0.72)
+color = Color(0.12, 0.13, 0.05, 0.22)
 
 [node name="Card" type="PanelContainer" parent="SkillTreeOverlay"]
 layout_mode = 1
@@ -757,13 +718,49 @@ offset_right = 390.0
 offset_bottom = 255.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("CompletionStyle")
+theme_override_styles/panel = ExtResource("proto_paper")
+
+[node name="TreeArt" type="Control" parent="SkillTreeOverlay/Card"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Branches" type="TextureRect" parent="SkillTreeOverlay/Card/TreeArt"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 24.0
+offset_right = 228.0
+offset_bottom = 364.0
+mouse_filter = 2
+texture = ExtResource("proto_tree")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Crown" type="TextureRect" parent="SkillTreeOverlay/Card/TreeArt"]
+layout_mode = 0
+offset_left = 82.0
+offset_top = 52.0
+offset_right = 154.0
+offset_bottom = 110.0
+mouse_filter = 2
+texture = ExtResource("proto_walnut")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TreeCaption" type="Label" parent="SkillTreeOverlay/Card/TreeArt"]
+offset_left = 10.0
+offset_top = 386.0
+offset_right = 230.0
+offset_bottom = 430.0
+theme_override_font_sizes/font_size = 14
+text = "观察 · 理解 · 创造"
+horizontal_alignment = 1
+mouse_filter = 2
 
 [node name="Margin" type="MarginContainer" parent="SkillTreeOverlay/Card"]
 layout_mode = 2
-theme_override_constants/margin_left = 42
+theme_override_constants/margin_left = 250
 theme_override_constants/margin_top = 32
-theme_override_constants/margin_right = 42
+theme_override_constants/margin_right = 28
 theme_override_constants/margin_bottom = 30
 
 [node name="Content" type="VBoxContainer" parent="SkillTreeOverlay/Card/Margin"]
@@ -782,7 +779,7 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.10, 0.36, 0.22, 1)
-theme_override_font_sizes/font_size = 31
+theme_override_font_sizes/font_size = 27
 text = "作物适配浇水器"
 horizontal_alignment = 1
 
@@ -793,7 +790,7 @@ layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
 theme_override_colors/default_color = Color(0.22, 0.36, 0.22, 1)
-theme_override_font_sizes/normal_font_size = 18
+theme_override_font_sizes/normal_font_size = 16
 bbcode_enabled = true
 text = "技能节点"
 fit_content = false
@@ -804,7 +801,6 @@ custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
 theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("PrimaryStyle")
 text = "进入清泉工坊  →"
 
 [node name="WorkshopOverlay" type="Control" parent="."]
@@ -818,6 +814,18 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
 
+[node name="WorkshopBackdrop" type="TextureRect" parent="WorkshopOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("proto_workshop")
+expand_mode = 1
+stretch_mode = 6
+
 [node name="Dimmer" type="ColorRect" parent="WorkshopOverlay"]
 layout_mode = 1
 anchors_preset = 15
@@ -825,7 +833,40 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.035, 0.12, 0.08, 0.66)
+color = Color(0.10, 0.07, 0.03, 0.12)
+
+[node name="Apprentice" type="TextureRect" parent="WorkshopOverlay"]
+layout_mode = 0
+offset_left = -22.0
+offset_top = 328.0
+offset_right = 238.0
+offset_bottom = 690.0
+mouse_filter = 2
+texture = ExtResource("proto_explorer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Companion" type="TextureRect" parent="WorkshopOverlay"]
+layout_mode = 0
+offset_left = 15.0
+offset_top = 555.0
+offset_right = 135.0
+offset_bottom = 710.0
+mouse_filter = 2
+texture = ExtResource("proto_walnut")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Mentor" type="TextureRect" parent="WorkshopOverlay"]
+layout_mode = 0
+offset_left = 1018.0
+offset_top = 285.0
+offset_right = 1290.0
+offset_bottom = 685.0
+mouse_filter = 2
+texture = ExtResource("proto_master")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Card" type="PanelContainer" parent="WorkshopOverlay"]
 layout_mode = 1
@@ -834,24 +875,24 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -420.0
-offset_top = -300.0
-offset_right = 420.0
-offset_bottom = 300.0
+offset_left = -405.0
+offset_top = -307.0
+offset_right = 405.0
+offset_bottom = 303.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("TaskStyle")
+theme_override_styles/panel = ExtResource("proto_paper")
 
 [node name="Margin" type="MarginContainer" parent="WorkshopOverlay/Card"]
 layout_mode = 2
-theme_override_constants/margin_left = 46
-theme_override_constants/margin_top = 26
-theme_override_constants/margin_right = 46
-theme_override_constants/margin_bottom = 24
+theme_override_constants/margin_left = 26
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 26
+theme_override_constants/margin_bottom = 18
 
 [node name="Content" type="VBoxContainer" parent="WorkshopOverlay/Card/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 14
+theme_override_constants/separation = 10
 
 [node name="WorkshopBadge" type="Label" parent="WorkshopOverlay/Card/Margin/Content"]
 unique_name_in_owner = true
@@ -864,16 +905,16 @@ text = "实验 1 / 3"
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.10, 0.36, 0.22, 1)
-theme_override_font_sizes/font_size = 29
+theme_override_font_sizes/font_size = 26
 text = "同一个下标，找到同一块土地"
 
 [node name="WorkshopBody" type="RichTextLabel" parent="WorkshopOverlay/Card/Margin/Content"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 82)
+custom_minimum_size = Vector2(0, 75)
 layout_mode = 2
 mouse_filter = 2
 theme_override_colors/default_color = Color(0.23, 0.34, 0.22, 1)
-theme_override_font_sizes/normal_font_size = 17
+theme_override_font_sizes/normal_font_size = 16
 bbcode_enabled = true
 text = "实验内容"
 fit_content = false
@@ -930,8 +971,8 @@ vertical_alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(145, 42)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.31, 0.21, 1)
-theme_override_colors/caret_color = Color(0.10, 0.31, 0.21, 1)
+theme_override_colors/font_color = Color(0.15, 0.27, 0.17, 1)
+theme_override_colors/caret_color = Color(0.15, 0.27, 0.17, 1)
 theme_override_colors/placeholder_color = Color(0.41, 0.51, 0.39, 0.85)
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("WorkshopInputStyle")
@@ -939,6 +980,7 @@ theme_override_styles/focus = SubResource("WorkshopInputFocusStyle")
 placeholder_text = "目标数组"
 max_length = 16
 select_all_on_focus = true
+theme_override_colors/font_placeholder_color = Color(0.43, 0.43, 0.27, 0.85)
 
 [node name="Middle" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode/GapLine"]
 layout_mode = 2
@@ -951,8 +993,8 @@ vertical_alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(160, 42)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.31, 0.21, 1)
-theme_override_colors/caret_color = Color(0.10, 0.31, 0.21, 1)
+theme_override_colors/font_color = Color(0.15, 0.27, 0.17, 1)
+theme_override_colors/caret_color = Color(0.15, 0.27, 0.17, 1)
 theme_override_colors/placeholder_color = Color(0.41, 0.51, 0.39, 0.85)
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("WorkshopInputStyle")
@@ -960,6 +1002,7 @@ theme_override_styles/focus = SubResource("WorkshopInputFocusStyle")
 placeholder_text = "当前数组"
 max_length = 16
 select_all_on_focus = true
+theme_override_colors/font_placeholder_color = Color(0.43, 0.43, 0.27, 0.85)
 
 [node name="Suffix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode/GapLine"]
 layout_mode = 2
@@ -1006,14 +1049,15 @@ vertical_alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(78, 36)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.31, 0.21, 1)
-theme_override_colors/caret_color = Color(0.10, 0.31, 0.21, 1)
+theme_override_colors/font_color = Color(0.15, 0.27, 0.17, 1)
+theme_override_colors/caret_color = Color(0.15, 0.27, 0.17, 1)
 theme_override_font_sizes/font_size = 17
 theme_override_styles/normal = SubResource("WorkshopInputStyle")
 theme_override_styles/focus = SubResource("WorkshopInputFocusStyle")
 placeholder_text = "边界"
 max_length = 3
 select_all_on_focus = true
+theme_override_colors/font_placeholder_color = Color(0.43, 0.43, 0.27, 0.85)
 
 [node name="Suffix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/SevereCondition"]
 layout_mode = 2
@@ -1037,14 +1081,15 @@ vertical_alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(68, 36)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.31, 0.21, 1)
-theme_override_colors/caret_color = Color(0.10, 0.31, 0.21, 1)
+theme_override_colors/font_color = Color(0.15, 0.27, 0.17, 1)
+theme_override_colors/caret_color = Color(0.15, 0.27, 0.17, 1)
 theme_override_font_sizes/font_size = 17
 theme_override_styles/normal = SubResource("WorkshopInputStyle")
 theme_override_styles/focus = SubResource("WorkshopInputFocusStyle")
 placeholder_text = "份数"
 max_length = 1
 select_all_on_focus = true
+theme_override_colors/font_placeholder_color = Color(0.43, 0.43, 0.27, 0.85)
 
 [node name="Suffix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/SevereOutput"]
 layout_mode = 2
@@ -1068,14 +1113,15 @@ vertical_alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(78, 36)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.31, 0.21, 1)
-theme_override_colors/caret_color = Color(0.10, 0.31, 0.21, 1)
+theme_override_colors/font_color = Color(0.15, 0.27, 0.17, 1)
+theme_override_colors/caret_color = Color(0.15, 0.27, 0.17, 1)
 theme_override_font_sizes/font_size = 17
 theme_override_styles/normal = SubResource("WorkshopInputStyle")
 theme_override_styles/focus = SubResource("WorkshopInputFocusStyle")
 placeholder_text = "边界"
 max_length = 3
 select_all_on_focus = true
+theme_override_colors/font_placeholder_color = Color(0.43, 0.43, 0.27, 0.85)
 
 [node name="Suffix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/LightCondition"]
 layout_mode = 2
@@ -1099,14 +1145,15 @@ vertical_alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(68, 36)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.31, 0.21, 1)
-theme_override_colors/caret_color = Color(0.10, 0.31, 0.21, 1)
+theme_override_colors/font_color = Color(0.15, 0.27, 0.17, 1)
+theme_override_colors/caret_color = Color(0.15, 0.27, 0.17, 1)
 theme_override_font_sizes/font_size = 17
 theme_override_styles/normal = SubResource("WorkshopInputStyle")
 theme_override_styles/focus = SubResource("WorkshopInputFocusStyle")
 placeholder_text = "份数"
 max_length = 1
 select_all_on_focus = true
+theme_override_colors/font_placeholder_color = Color(0.43, 0.43, 0.27, 0.85)
 
 [node name="Suffix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/LightOutput"]
 layout_mode = 2
@@ -1168,7 +1215,6 @@ custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
 theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("PrimaryStyle")
 text = "继续  →"
 
 [node name="BugChallengeOverlay" type="Control" parent="."]
@@ -1189,7 +1235,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.12, 0.055, 0.035, 0.72)
+color = Color(0.12, 0.13, 0.05, 0.22)
 
 [node name="Card" type="PanelContainer" parent="BugChallengeOverlay"]
 layout_mode = 1
@@ -1204,7 +1250,7 @@ offset_right = 430.0
 offset_bottom = 245.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("EvidenceStyle")
+theme_override_styles/panel = ExtResource("proto_paper")
 
 [node name="Margin" type="MarginContainer" parent="BugChallengeOverlay/Card"]
 layout_mode = 2
@@ -1235,6 +1281,8 @@ theme_override_font_sizes/normal_font_size = 18
 bbcode_enabled = true
 text = "真实反例"
 fit_content = false
+theme_override_constants/table_h_separation = 42
+theme_override_constants/table_v_separation = 10
 
 [node name="BugContinueButton" type="Button" parent="BugChallengeOverlay/Card/Margin/Content"]
 unique_name_in_owner = true
@@ -1242,7 +1290,6 @@ custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
 theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("PrimaryStyle")
 text = "带着反例继续修改  →"
 
 [node name="GrowthSummaryOverlay" type="Control" parent="."]
@@ -1256,6 +1303,18 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
 
+[node name="WorkshopBackdrop" type="TextureRect" parent="GrowthSummaryOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("proto_workshop")
+expand_mode = 1
+stretch_mode = 6
+
 [node name="Dimmer" type="ColorRect" parent="GrowthSummaryOverlay"]
 layout_mode = 1
 anchors_preset = 15
@@ -1263,7 +1322,40 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.035, 0.12, 0.08, 0.72)
+color = Color(0.10, 0.07, 0.03, 0.12)
+
+[node name="Apprentice" type="TextureRect" parent="GrowthSummaryOverlay"]
+layout_mode = 0
+offset_left = -22.0
+offset_top = 328.0
+offset_right = 238.0
+offset_bottom = 690.0
+mouse_filter = 2
+texture = ExtResource("proto_explorer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Companion" type="TextureRect" parent="GrowthSummaryOverlay"]
+layout_mode = 0
+offset_left = 15.0
+offset_top = 555.0
+offset_right = 135.0
+offset_bottom = 710.0
+mouse_filter = 2
+texture = ExtResource("proto_walnut")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Archivist" type="TextureRect" parent="GrowthSummaryOverlay"]
+layout_mode = 0
+offset_left = 1018.0
+offset_top = 285.0
+offset_right = 1290.0
+offset_bottom = 685.0
+mouse_filter = 2
+texture = ExtResource("proto_book")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Card" type="PanelContainer" parent="GrowthSummaryOverlay"]
 layout_mode = 1
@@ -1278,7 +1370,7 @@ offset_right = 430.0
 offset_bottom = 260.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("CompletionStyle")
+theme_override_styles/panel = ExtResource("proto_paper")
 
 [node name="Margin" type="MarginContainer" parent="GrowthSummaryOverlay/Card"]
 layout_mode = 2
@@ -1316,8 +1408,49 @@ custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
 theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("PrimaryStyle")
 text = "完成归档并查看技能树  →"
+
+[node name="PatchBackdrop" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 0
+
+[node name="WorkshopBackdrop" type="TextureRect" parent="PatchBackdrop"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("proto_workshop")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Apprentice" type="TextureRect" parent="PatchBackdrop"]
+layout_mode = 0
+offset_left = -22.0
+offset_top = 328.0
+offset_right = 238.0
+offset_bottom = 690.0
+mouse_filter = 2
+texture = ExtResource("proto_explorer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Mentor" type="TextureRect" parent="PatchBackdrop"]
+layout_mode = 0
+offset_left = 1018.0
+offset_top = 285.0
+offset_right = 1290.0
+offset_bottom = 685.0
+mouse_filter = 2
+texture = ExtResource("proto_master")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="BugLegion2D" parent="." instance=ExtResource("10_legion")]
 unique_name_in_owner = true
@@ -1337,7 +1470,69 @@ unique_name_in_owner = true
 title = "AI 修改提案（尚未应用）"
 ok_button_text = "接受并生成新草稿"
 cancel_button_text = "关闭预览"
-dialog_text = "等待真实失败记录。"
+dialog_text = ""
+theme = ExtResource("proto_theme")
+min_size = Vector2i(820, 390)
+
+[node name="PatchContent" type="MarginContainer" parent="PatchDialog"]
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_bottom = 16
+
+[node name="Rows" type="VBoxContainer" parent="PatchDialog/PatchContent"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="Title" type="Label" parent="PatchDialog/PatchContent/Rows"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 27
+text = "AI 建议修改（尚未应用）"
+horizontal_alignment = 1
+
+[node name="Diff" type="HBoxContainer" parent="PatchDialog/PatchContent/Rows"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Before" type="PanelContainer" parent="PatchDialog/PatchContent/Rows/Diff"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("EditorStyle")
+
+[node name="Copy" type="Label" parent="PatchDialog/PatchContent/Rows/Diff/Before"]
+layout_mode = 2
+custom_minimum_size = Vector2(350, 92)
+theme_override_colors/font_color = Color(0.91, 0.93, 0.76, 1)
+theme_override_font_sizes/font_size = 16
+text = "修改前
+
+int gap = 60 - moisture[i];"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="After" type="PanelContainer" parent="PatchDialog/PatchContent/Rows/Diff"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("EditorStyle")
+
+[node name="Copy" type="Label" parent="PatchDialog/PatchContent/Rows/Diff/After"]
+layout_mode = 2
+custom_minimum_size = Vector2(350, 92)
+theme_override_colors/font_color = Color(0.91, 0.93, 0.76, 1)
+theme_override_font_sizes/font_size = 16
+text = "修改后
+
+int gap = target[i] - moisture[i];"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PatchExplanation" type="Label" parent="PatchDialog/PatchContent/Rows"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(740, 112)
+theme_override_font_sizes/font_size = 17
+text = "等待真实失败记录。"
+autowrap_mode = 2
 
 [node name="AutosaveTimer" type="Timer" parent="."]
 unique_name_in_owner = true
