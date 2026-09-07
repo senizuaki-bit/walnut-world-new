@@ -37,6 +37,7 @@ func clear_validation() -> void:
 
 
 func _refresh_skin() -> void:
+	set_meta("invalid", has_error)
 	var state := "error" if has_error else ("filled" if not text.is_empty() else ("hover" if _hovered else "normal"))
 	add_theme_stylebox_override("normal", load("res://resources/ui/art_v2/input_%s.tres" % state))
 	tooltip_text = error_message if has_error else ""

@@ -1,258 +1,242 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=17 format=3]
 
-[ext_resource type="Script" path="res://scenes/level_demo/crop_plot_card.gd" id="1_script"]
-
-[ext_resource type="Theme" path="res://resources/ui/art_v2/theme.tres" id="art_theme"]
-
-[ext_resource type="Script" path="res://scenes/ui/art_motion_texture.gd" id="art_motion"]
-
+[ext_resource type="Script" path="res://scenes/level_demo/crop_plot_card.gd" id="script"]
 [ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/soil-severe-dry.png" id="soil"]
-
-[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/crop-carrot-severe-dry.png" id="crop"]
-
-[ext_resource type="StyleBox" path="res://resources/ui/art_v2/ui-data-plaque.tres" id="plaque"]
-
-[ext_resource type="StyleBox" path="res://resources/ui/art_v2/ui-data-plaque.tres" id="header_plaque"]
-
-[sub_resource type="StyleBoxEmpty" id="CardStyle"]
-
-[sub_resource type="StyleBoxFlat" id="BarBackground"]
-bg_color = Color(0.80, 0.77, 0.57, 0.55)
-corner_radius_top_left = 7
-corner_radius_top_right = 7
-corner_radius_bottom_right = 7
-corner_radius_bottom_left = 7
-
-[sub_resource type="StyleBoxFlat" id="BarFill"]
-bg_color = Color(0.22, 0.66, 0.76, 1)
-corner_radius_top_left = 7
-corner_radius_top_right = 7
-corner_radius_bottom_right = 7
-corner_radius_bottom_left = 7
-
-[sub_resource type="StyleBoxFlat" id="AttentionStyle"]
-bg_color = Color(1, 0.78, 0.18, 0.12)
-border_width_left = 6
-border_width_top = 6
-border_width_right = 6
-border_width_bottom = 6
-border_color = Color(1, 0.68, 0.08, 1)
-corner_radius_top_left = 21
-corner_radius_top_right = 21
-corner_radius_bottom_right = 21
-corner_radius_bottom_left = 21
-shadow_color = Color(1, 0.61, 0.05, 0.72)
-shadow_size = 10
-
-[sub_resource type="StyleBoxFlat" id="ReadableData"]
-content_margin_left = 5.0
-content_margin_right = 5.0
-content_margin_top = 1.0
-content_margin_bottom = 1.0
-bg_color = Color(1, 0.96, 0.82, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_left = 4
-corner_radius_bottom_right = 4
+[ext_resource type="StyleBox" path="res://resources/ui/v2/ui-data-plaque.tres" id="plaque"]
+[ext_resource type="Shader" path="res://resources/ui/v2/soil_outline.gdshader" id="outline"]
+[ext_resource type="Script" path="res://scenes/ui/v2_surface.gd" id="v2_surface"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/empty.tres" id="v2_empty"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/edit-empty.tres" id="v2_edit_empty"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/input-empty.tres" id="v2_input_empty"]
+[ext_resource type="Font" path="res://resources/ui/v2/bold.tres" id="v2_bold"]
+[ext_resource type="Font" path="res://resources/ui/v2/mono.tres" id="v2_mono"]
+[ext_resource type="Script" path="res://scenes/ui/art_motion_texture.gd" id="merge_motion"]
+[sub_resource type="StyleBoxEmpty" id="empty"]
+[sub_resource type="StyleBoxFlat" id="barbg"]
+bg_color = Color(0.874, 0.831, 0.659, 1)
+[sub_resource type="StyleBoxFlat" id="barfill"]
+bg_color = Color(0.224, 0.643, 0.690, 1)
+[sub_resource type="ShaderMaterial" id="selection"]
+resource_local_to_scene = true
+shader = ExtResource("outline")
+[sub_resource type="ShaderMaterial" id="scan"]
+resource_local_to_scene = true
+shader = ExtResource("outline")
 
 [node name="CropPlotCard" type="PanelContainer"]
-offset_right = 190.0
-offset_bottom = 194.0
-theme_override_styles/panel = SubResource("CardStyle")
-script = ExtResource("1_script")
-theme = ExtResource("art_theme")
-mouse_filter = 2
-custom_minimum_size = Vector2(202, 180)
+custom_minimum_size = Vector2(177.51328374070138, 169.09670563230605)
+script = ExtResource("script")
+theme_override_styles/panel = SubResource("empty")
 
-[node name="ScanClip" type="Control" parent="."]
+[node name="Canvas" type="Control" parent="."]
 layout_mode = 2
 mouse_filter = 2
-clip_contents = true
 
-[node name="ScanGlow" type="ColorRect" parent="ScanClip"]
-unique_name_in_owner = true
-visible = false
+[node name="Soil" type="TextureRect" parent="Canvas"]
 layout_mode = 0
-offset_left = -46.0
-offset_top = -10.0
-offset_right = 14.0
-offset_bottom = 210.0
-rotation = -0.10
-mouse_filter = 2
-color = Color(0.42, 0.96, 0.86, 0.68)
-
-[node name="AttentionFrame" type="Panel" parent="."]
+offset_left = 0.0
+offset_top = 41.317747077577046
+offset_right = 175.21785334750265
+offset_bottom = 156.85441020191286
 unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
 mouse_filter = 2
-theme_override_styles/panel = SubResource("AttentionStyle")
-visible = false
-
-[node name="Margin" type="MarginContainer" parent="."]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/margin_left = 6
-theme_override_constants/margin_right = 6
-theme_override_constants/margin_top = 0
-theme_override_constants/margin_bottom = 0
-
-[node name="Content" type="VBoxContainer" parent="Margin"]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/separation = 3
-
-[node name="Header" type="HBoxContainer" parent="Margin/Content"]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/separation = 8
-
-[node name="NumberLabel" type="Label" parent="Margin/Content/Header"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
-theme_override_font_sizes/font_size = 17
-text = "00"
-theme_type_variation = &"TitleLabel"
-theme_override_styles/normal = SubResource("ReadableData")
-
-[node name="CropLabel" type="Label" parent="Margin/Content/Header"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
-text = "胡萝卜"
-theme_override_styles/normal = ExtResource("header_plaque")
-theme_override_font_sizes/font_size = 17
-horizontal_alignment = 1
-custom_minimum_size = Vector2(0, 24)
-theme_type_variation = &"TitleLabel"
-
-[node name="ArtRow" type="Control" parent="Margin/Content"]
-layout_mode = 2
-mouse_filter = 2
-custom_minimum_size = Vector2(0, 78)
-
-[node name="SoilArt" type="TextureRect" parent="Margin/Content/ArtRow"]
-unique_name_in_owner = true
-layout_mode = 1
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 15.0
-offset_bottom = 6.0
+expand_mode = 1
+stretch_mode = 5
 texture = ExtResource("soil")
+script = ExtResource("merge_motion")
+
+[node name="SoilGlow" type="TextureRect" parent="Canvas"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 41.317747077577046
+offset_right = 175.21785334750265
+offset_bottom = 156.85441020191286
+unique_name_in_owner = true
+mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
-mouse_filter = 2
-script = ExtResource("art_motion")
-
-[node name="SoilGlow" type="TextureRect" parent="Margin/Content/ArtRow"]
-unique_name_in_owner = true
+texture = ExtResource("soil")
+script = ExtResource("merge_motion")
 visible = false
-layout_mode = 1
-anchor_right = 1.0
-anchor_bottom = 1.0
-expand_mode = 1
-stretch_mode = 5
-mouse_filter = 2
-script = ExtResource("art_motion")
-offset_left = -10.0
-offset_right = 10.0
-offset_top = 7.0
-offset_bottom = 14.0
 
-[node name="CropArt" type="TextureRect" parent="Margin/Content/ArtRow"]
+[node name="AttentionFrame" type="TextureRect" parent="Canvas"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 41.317747077577046
+offset_right = 175.21785334750265
+offset_bottom = 156.85441020191286
 unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_right = 0.5
-grow_horizontal = 2
-grow_vertical = 2
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
-anchor_top = 0.0
-anchor_bottom = 1.0
-offset_left = -62.0
-offset_right = 62.0
-texture = ExtResource("crop")
-script = ExtResource("art_motion")
-offset_top = -28.0
-offset_bottom = 0.0
+texture = ExtResource("soil")
+visible = false
+material = SubResource("selection")
 
-[node name="MoistureBar" type="ProgressBar" parent="Margin/Content"]
+[node name="ScanGlow" type="TextureRect" parent="Canvas"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 41.317747077577046
+offset_right = 175.21785334750265
+offset_bottom = 156.85441020191286
 unique_name_in_owner = true
-layout_mode = 2
 mouse_filter = 2
-theme_override_styles/background = SubResource("BarBackground")
-theme_override_styles/fill = SubResource("BarFill")
-value = 20.0
-show_percentage = false
-custom_minimum_size = Vector2(0, 6)
+expand_mode = 1
+stretch_mode = 5
+texture = ExtResource("soil")
+visible = false
+material = SubResource("scan")
 
-[node name="Values" type="HBoxContainer" parent="Margin/Content"]
-layout_mode = 2
+[node name="CropArt" type="TextureRect" parent="Canvas"]
+layout_mode = 0
+offset_left = 35.961742826780025
+offset_top = 31.370882040382572
+offset_right = 143.8469713071201
+offset_bottom = 132.36981934112646
+unique_name_in_owner = true
 mouse_filter = 2
-theme_override_constants/separation = 4
+expand_mode = 1
+stretch_mode = 5
+texture = ExtResource("soil")
+script = ExtResource("merge_motion")
 
-[node name="CurrentLabel" type="Label" parent="Margin/Content/Values"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.06, 0.25, 0.32, 1)
-theme_override_font_sizes/font_size = 17
-text = "当前湿度 20"
-theme_override_styles/normal = SubResource("ReadableData")
+[node name="NamePlaque" type="Panel" parent="Canvas"]
+layout_mode = 0
+offset_left = 33.6663124335813
+offset_top = 0.0
+offset_right = 149.2029755579171
+offset_bottom = 32.901168969181725
+mouse_filter = 2
+theme_override_styles/panel = ExtResource("v2_empty")
 
-[node name="TargetLabel" type="Label" parent="Margin/Content/Values"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.45, 0.22, 0.04, 1)
-theme_override_font_sizes/font_size = 17
-text = "目标湿度 60"
-horizontal_alignment = 2
-theme_override_styles/normal = SubResource("ReadableData")
+[node name="OriginalSurface" type="NinePatchRect" parent="Canvas/NamePlaque"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-data-plaque"
+source_slice = 64.0
+border_width = 22.954303931987248
+patch_margin_left = 64
+patch_margin_top = 64
+patch_margin_right = 64
+patch_margin_bottom = 64
 
-[node name="WaterBadge" type="Label" parent="Margin/Content"]
+[node name="NumberLabel" type="Label" parent="Canvas"]
+layout_mode = 0
+offset_left = 41.317747077577046
+offset_top = 0.0
+offset_right = 65.03719447396386
+offset_bottom = 32.901168969181725
 unique_name_in_owner = true
-layout_mode = 2
-theme_override_font_sizes/font_size = 17
-text = "💧 × 2 · 500 ml"
-horizontal_alignment = 1
+mouse_filter = 2
+text = "00"
+theme_override_font_sizes/font_size = 16
 vertical_alignment = 1
-custom_minimum_size = Vector2(0, 20)
-theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
-theme_override_styles/normal = SubResource("ReadableData")
 
-[node name="GapLabel" type="Label" parent="Margin/Content"]
+[node name="CropLabel" type="Label" parent="Canvas"]
+layout_mode = 0
+offset_left = 65.80233793836345
+offset_top = 0.0
+offset_right = 144.61211477151966
+offset_bottom = 32.901168969181725
 unique_name_in_owner = true
-visible = false
-layout_mode = 2
-theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
-theme_override_font_sizes/font_size = 17
-text = "缺口 +40"
-horizontal_alignment = 1
-theme_override_styles/normal = SubResource("ReadableData")
+mouse_filter = 2
+text = "胡萝卜"
+theme_override_font_sizes/font_size = 16
+vertical_alignment = 1
 
-[node name="HitButton" type="Button" parent="."]
+[node name="DataPlaque" type="Panel" parent="Canvas"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 137.72582359192347
+offset_right = 177.51328374070138
+offset_bottom = 175.21785334750263
+mouse_filter = 2
+theme_override_styles/panel = ExtResource("v2_empty")
+
+[node name="OriginalSurface" type="NinePatchRect" parent="Canvas/DataPlaque"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-data-plaque"
+source_slice = 64.0
+border_width = 22.954303931987248
+patch_margin_left = 64
+patch_margin_top = 64
+patch_margin_right = 64
+patch_margin_bottom = 64
+
+[node name="MoistureBar" type="ProgressBar" parent="Canvas"]
+layout_mode = 0
+offset_left = 13.007438894792774
+offset_top = 140.7863974495218
+offset_right = 164.50584484590863
+offset_bottom = 146.90754516471839
 unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_default_cursor_shape = 2
+mouse_filter = 2
+show_percentage = false
+max_value = 100.0
+theme_override_styles/background = SubResource("barbg")
+theme_override_styles/fill = SubResource("barfill")
+
+[node name="CurrentLabel" type="Label" parent="Canvas"]
+layout_mode = 0
+offset_left = 13.007438894792774
+offset_top = 150.73326248671626
+offset_right = 98.70350690754516
+offset_bottom = 172.92242295430393
+unique_name_in_owner = true
+mouse_filter = 2
+text = "当前湿度 20"
+theme_override_font_sizes/font_size = 11
+vertical_alignment = 1
+
+[node name="TargetLabel" type="Label" parent="Canvas"]
+layout_mode = 0
+offset_left = 97.93836344314559
+offset_top = 150.73326248671626
+offset_right = 174.45270988310307
+offset_bottom = 172.92242295430393
+unique_name_in_owner = true
+mouse_filter = 2
+text = "目标湿度 60"
+theme_override_font_sizes/font_size = 11
+vertical_alignment = 1
+
+[node name="GapLabel" type="Label" parent="Canvas"]
+layout_mode = 0
+offset_left = 9.181721572794899
+offset_top = 177.51328374070138
+offset_right = 171.39213602550478
+offset_bottom = 201.99787460148778
+unique_name_in_owner = true
+mouse_filter = 2
+text = ""
+theme_override_font_sizes/font_size = 12
+vertical_alignment = 1
+
+[node name="WaterBadge" type="Label" parent="Canvas"]
+layout_mode = 0
+offset_left = 9.181721572794899
+offset_top = 202.76301806588737
+offset_right = 171.39213602550478
+offset_bottom = 227.24760892667376
+unique_name_in_owner = true
+mouse_filter = 2
+text = ""
+theme_override_font_sizes/font_size = 12
+vertical_alignment = 1
+
+[node name="HitButton" type="Button" parent="Canvas"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 177.51328374070138
+offset_bottom = 169.09670563230605
+unique_name_in_owner = true
 flat = true
-focus_mode = 2
-theme_override_styles/normal = SubResource("CardStyle")
-theme_override_styles/hover = SubResource("CardStyle")
-theme_override_styles/pressed = SubResource("CardStyle")
-theme_override_styles/focus = SubResource("CardStyle")
-theme_override_styles/disabled = SubResource("CardStyle")
-theme_override_colors/font_color = Color(0.075, 0.145, 0.11, 1)
+mouse_default_cursor_shape = 2
+theme_override_styles/normal = SubResource("empty")
+theme_override_styles/hover = SubResource("empty")
+theme_override_styles/pressed = SubResource("empty")
+theme_override_styles/focus = SubResource("empty")

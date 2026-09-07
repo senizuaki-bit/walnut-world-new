@@ -91,11 +91,5 @@ func _on_enter_unhovered() -> void:
 	_bounce_button(enter_button.scale, Vector2.ONE)
 
 
-func _bounce_button(from_scale: Vector2, to_scale: Vector2) -> void:
-	if _button_tween != null and _button_tween.is_valid():
-		_button_tween.kill()
-	enter_button.pivot_offset = enter_button.size * 0.5
-	enter_button.scale = from_scale
-	_button_tween = create_tween()
-	_button_tween.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	_button_tween.tween_property(enter_button, "scale", to_scale, 0.18)
+func _bounce_button(_from_scale: Vector2, _to_scale: Vector2) -> void:
+	enter_button.scale = Vector2.ONE

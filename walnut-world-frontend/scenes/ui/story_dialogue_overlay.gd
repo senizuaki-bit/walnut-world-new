@@ -10,11 +10,12 @@ signal line_changed(line_index: int, line_text: String)
 @onready var avatar_stage: Control = $AvatarStage
 @onready var portrait: TextureRect = $AvatarStage/Portrait
 @onready var dialogue_card: Control = $DialogueCard
-@onready var speaker_label: Label = $DialogueCard/ContentRoot/ContentMargin/Content/Speaker
-@onready var response_badge: Label = $DialogueCard/ContentRoot/ContentMargin/Content/ResponseBadge
-@onready var body_label: Label = $DialogueCard/ContentRoot/ContentMargin/Content/Body
-@onready var question_label: Label = $DialogueCard/ContentRoot/ContentMargin/Content/Question
+@onready var speaker_label: Label = $DialogueCard/ContentRoot/ContentMargin/Scroll/Content/Speaker
+@onready var response_badge: Label = $DialogueCard/ContentRoot/ContentMargin/Scroll/Content/ResponseBadge
+@onready var body_label: Label = $DialogueCard/ContentRoot/ContentMargin/Scroll/Content/Body
+@onready var question_label: Label = $DialogueCard/ContentRoot/ContentMargin/Scroll/Content/Question
 @onready var continue_hint: Label = $DialogueCard/ContentRoot/ContinueHint
+@onready var dialogue_scroll: ScrollContainer = $DialogueCard/ContentRoot/ContentMargin/Scroll
 @onready var typewriter_timer: Timer = $TypewriterTimer
 
 var _art_role := ""
@@ -34,7 +35,7 @@ func _ready() -> void:
 	_card_rest_position = dialogue_card.position
 	_avatar_rest_position = avatar_stage.position
 	typewriter_timer.timeout.connect(_on_typewriter_tick)
-	($DialogueCard/ContentRoot/ContentMargin as ScrollContainer).gui_input.connect(_gui_input)
+	dialogue_scroll.gui_input.connect(_gui_input)
 
 
 func play_sequence(speaker_name: String, portrait_texture: Texture2D, lines: Array[String]) -> void:
@@ -65,9 +66,10 @@ func _start_sequence(
 	if not visible:
 		var owner := get_viewport().gui_get_focus_owner()
 		_previous_focus = weakref(owner) if owner != null else null
+	_configure_v2_layout(response_label_text.begins_with("L") or response_label_text in ["方向提示", "概念提示", "修改建议", "世界反馈", "成长总结", "目标复述"])
 	_lines = lines.duplicate()
 	_line_index = -1
-	($DialogueCard/ContentRoot/ContentMargin as ScrollContainer).scroll_vertical = 0
+	dialogue_scroll.scroll_vertical = 0
 	_typing = false
 	_finishing = false
 	speaker_label.text = speaker_name
@@ -145,7 +147,7 @@ func _input(event: InputEvent) -> void:
 		if event.is_action_pressed("ui_accept") and not event.is_echo():
 			advance()
 		elif event.is_action_pressed("ui_up") or event.is_action_pressed("ui_down"):
-			var scroll := $DialogueCard/ContentRoot/ContentMargin as ScrollContainer
+			var scroll := dialogue_scroll
 			scroll.scroll_vertical += -48 if event.is_action_pressed("ui_up") else 48
 		if visible:
 			dialogue_card.grab_focus()
@@ -167,6 +169,7 @@ func _advance_to_next_line() -> void:
 		_hint_tween.kill()
 	continue_hint.visible = false
 	continue_hint.scale = Vector2.ONE
+	dialogue_scroll.scroll_vertical = 0
 	body_label.text = _lines[_line_index]
 	body_label.visible_characters = 0
 	_typing = true
@@ -256,3 +259,14 @@ func _stop_active_tweens() -> void:
 		_hint_tween.kill()
 	if _transition_tween != null and _transition_tween.is_valid():
 		_transition_tween.kill()
+
+
+func _configure_v2_layout(expanded: bool) -> void:
+	const K := 720.0 / 941.0
+	dialogue_card.position = Vector2(300, 389) * K if expanded else Vector2(280, 608) * K
+	dialogue_card.size = Vector2(1160, 472) * K if expanded else Vector2(1125, 284) * K
+	$DialogueCard/ContentRoot.size = dialogue_card.size
+	avatar_stage.position = Vector2(338, 429) * K if expanded else Vector2(318, 648) * K
+	avatar_stage.size = Vector2(156, 392) * K if expanded else Vector2(156, 204) * K
+	_card_rest_position = dialogue_card.position
+	_avatar_rest_position = avatar_stage.position

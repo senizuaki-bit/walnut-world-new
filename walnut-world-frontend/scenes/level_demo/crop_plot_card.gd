@@ -17,8 +17,8 @@ signal plot_pressed(plot_index: int)
 @onready var target_label: Label = %TargetLabel
 @onready var gap_label: Label = %GapLabel
 @onready var water_badge: Label = %WaterBadge
-@onready var scan_glow: ColorRect = %ScanGlow
-@onready var attention_frame: Panel = %AttentionFrame
+@onready var scan_glow: TextureRect = %ScanGlow
+@onready var attention_frame: TextureRect = %AttentionFrame
 @onready var hit_button: Button = %HitButton
 
 var _card_tween: Tween
@@ -28,7 +28,7 @@ var _soil_state := "severe-dry"
 var _attention_active := false
 var _error_active := false
 var _scanning := false
-@onready var soil_art: ArtMotionTexture = %SoilArt
+@onready var soil_art: ArtMotionTexture = %Soil
 @onready var soil_glow: ArtMotionTexture = %SoilGlow
 
 
@@ -129,6 +129,8 @@ func show_candidate_outcome(hydration: int, status: String) -> void:
 	# Presentation statuses come from the candidate evaluator; never write moisture.
 	if status == "CORRECT":
 		_update_art(0)
+	elif status == "UNDERWATERED":
+		_update_art(30)
 	elif status == "OVERWATERED":
 		_update_art(0, true)
 	_error_active = is_error

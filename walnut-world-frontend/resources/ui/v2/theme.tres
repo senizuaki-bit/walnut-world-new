@@ -1,0 +1,42 @@
+[gd_resource type="Theme" load_steps=24 format=3]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/ui-panel.tres" id="ui-panel"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/ui-hero-frame.tres" id="ui-hero-frame"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/ui-dialogue.tres" id="ui-dialogue"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/ui-hud.tres" id="ui-hud"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/ui-code.tres" id="ui-code"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/ui-data-plaque.tres" id="ui-data-plaque"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/ui-nameplate.tres" id="ui-nameplate"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/button-normal.tres" id="button-normal"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/button-hover.tres" id="button-hover"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/button-pressed.tres" id="button-pressed"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/button-disabled.tres" id="button-disabled"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/button-focus.tres" id="button-focus"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/button-loading.tres" id="button-loading"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/button-success.tres" id="button-success"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/button-error.tres" id="button-error"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/button-water-green.tres" id="button-water-green"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/button-water-blue.tres" id="button-water-blue"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/input-normal.tres" id="input-normal"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/input-hover.tres" id="input-hover"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/input-focus.tres" id="input-focus"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/input-filled.tres" id="input-filled"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/input-error.tres" id="input-error"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/input-disabled.tres" id="input-disabled"]
+[resource]
+default_font_size = 18
+Button/styles/normal = ExtResource("button-normal")
+Button/styles/hover = ExtResource("button-hover")
+Button/styles/pressed = ExtResource("button-pressed")
+Button/styles/disabled = ExtResource("button-disabled")
+Button/styles/focus = ExtResource("button-focus")
+LineEdit/styles/normal = ExtResource("input-normal")
+LineEdit/styles/focus = ExtResource("input-focus")
+LineEdit/styles/read_only = ExtResource("input-disabled")
+Label/colors/font_color = Color(0.129, 0.231, 0.173, 1)
+RichTextLabel/colors/default_color = Color(0.129, 0.231, 0.173, 1)
+Button/colors/font_color = Color(0.22, 0.157, 0.075, 1)
+Button/colors/font_hover_color = Color(0.22, 0.157, 0.075, 1)
+Button/colors/font_disabled_color = Color(0.93, 0.89, 0.82, 1)
+LineEdit/colors/font_color = Color(0.137, 0.271, 0.176, 1)
+AcceptDialog/styles/panel = ExtResource("ui-panel")
+Window/styles/embedded_border = ExtResource("ui-panel")

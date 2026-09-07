@@ -34,11 +34,11 @@ func _run() -> void:
 		failures.append("重播前必须恢复初始作物状态。")
 	level.call("_show_skill_tree", false)
 	for index in range(5):
-		var icon := level.get_node("SkillTreeOverlay/Card/TreeStage/Node%d" % index) as TextureRect
+		var icon := level.get_node("SkillTreeOverlay/Card/TreeArt/%s" % ["SkillRoot", "Array", "Drop", "Action", "Lock"][index]) as TextureRect
 		if icon.texture == null or icon.mouse_filter != Control.MOUSE_FILTER_IGNORE:
 			failures.append("五个技能节点必须有图标且不能新增学习热区。")
-	for concept: Node in level.get_node("SkillTreeOverlay/Card/Margin/Content/ConceptCards").get_children():
-		if (concept.get_node("Content/Completed") as Control).visible:
+	for index in range(3):
+		if level.get_node("SkillTreeOverlay/Card/Margin/Content/Slot%d/Completed" % index).visible:
 			failures.append("剧情可学习时不得显示完成标记。")
 	var dialogue := level.story_dialogue
 	dialogue.play_sequence("小核桃", null, ["正在读取这一块土地的湿度。"])
@@ -52,7 +52,7 @@ func _run() -> void:
 	dialogue.advance()
 	await process_frame
 	await process_frame
-	var scroll := dialogue.get_node("DialogueCard/ContentRoot/ContentMargin") as ScrollContainer
+	var scroll := dialogue.get_node("DialogueCard/ContentRoot/ContentMargin/Scroll") as ScrollContainer
 	if scroll.get_v_scroll_bar().max_value <= scroll.get_v_scroll_bar().page:
 		failures.append("长角色消息必须可以滚动阅读，不能裁掉正文。")
 	dialogue.skip_sequence()
@@ -68,7 +68,7 @@ func _run() -> void:
 	if dialogue.is_typing():
 		failures.append("滚动区域不能吞掉点击展开对话的操作。")
 	dialogue.skip_sequence()
-	var motion := level.get_node("PlayerCompanion") as ArtMotionTexture
+	var motion := level.get_node("Explorer") as ArtMotionTexture
 	motion.play_clip("char-player-talk", true)
 	await process_frame
 	motion.hide()
@@ -188,7 +188,7 @@ func _verify_review_regressions(level: CropAdaptiveWateringDemo, failures: Array
 	await process_frame
 	if level.patch_dialog.size.y > 680:
 		failures.append("提案弹窗必须完整放入720高的视口，实际大小 %s。" % level.patch_dialog.size)
-	if level.patch_dialog.get_node_or_null("Content/Rows/Columns/Before/Rows/Code") == null or level.patch_dialog.get_node_or_null("Content/Rows/Columns/After/Rows/Code") == null:
+	if level.patch_dialog.get_node_or_null("PatchContent/Rows/Diff/Before/Copy") == null or level.patch_dialog.get_node_or_null("PatchContent/Rows/Diff/After/Copy") == null:
 		failures.append("提案必须提供独立的前后对照栏。")
 	level.patch_dialog.hide()
 	var pump := level.get_node("Pump") as ArtMotionTexture
