@@ -1,0 +1,12 @@
+[gd_resource type="StyleBoxTexture" load_steps=2 format=3]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/ui-dialogue.png" id="1"]
+[resource]
+texture = ExtResource("1")
+texture_margin_left = 22.954
+content_margin_left = 0.0
+texture_margin_top = 22.954
+content_margin_top = 0.0
+texture_margin_right = 22.954
+content_margin_right = 0.0
+texture_margin_bottom = 22.954
+content_margin_bottom = 0.0
