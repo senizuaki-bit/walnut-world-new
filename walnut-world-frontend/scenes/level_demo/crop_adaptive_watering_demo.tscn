@@ -2434,9 +2434,9 @@ color = Color(0,0,0,0)
 layout_mode = 0
 
 offset_left = 87.99149840595112
-offset_top = 220.36131774707758
+offset_top = 387.28378
 offset_right = 283.10308182784274
-offset_bottom = 559.3198724760892
+offset_bottom = 726.24234
 mouse_filter = 2
 texture = ExtResource("char-player-idle")
 expand_mode = 1
@@ -2448,9 +2448,9 @@ motion_id = "char-player-idle"
 layout_mode = 0
 
 offset_left = 24.484590860786398
-offset_top = 397.1094580233794
+offset_top = 559.78934
 offset_right = 167.5664187035069
-offset_bottom = 561.6153028692879
+offset_bottom = 724.29518
 mouse_filter = 2
 texture = ExtResource("char-walnut-idle")
 expand_mode = 1
@@ -2462,9 +2462,9 @@ motion_id = "char-walnut-idle"
 layout_mode = 0
 
 offset_left = 1042.125398512221
-offset_top = 213.4750265674814
+offset_top = 369.81674
 offset_right = 1257.1307120085016
-offset_bottom = 605.2284803400637
+offset_bottom = 761.57020
 mouse_filter = 2
 texture = ExtResource("char-bug-idle")
 expand_mode = 1
