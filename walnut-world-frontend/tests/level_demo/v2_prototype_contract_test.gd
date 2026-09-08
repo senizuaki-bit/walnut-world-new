@@ -11,6 +11,8 @@ func _initialize() -> void:
 	_check_rect(home.get_node("HeroCard"), _rect(manifest, "S01", "ui-hero-frame"), "S01 hero")
 	_check_rect(home.get_node("%EnterButton"), _rect(manifest, "S01", "button-normal"), "S01 enter")
 	var home_surface := home.get_node("HeroCard/OriginalSurface") as NinePatchRect
+	if home_surface.texture.get_size() != Vector2(487, 388):
+		failures.append("Nine-slice source pixels must retain native dimensions after import")
 	if not home_surface.texture.resource_path.ends_with("ui-hero-frame.png"):
 		failures.append("Homepage must use the original, separately composited frame")
 	home.queue_free()
@@ -24,10 +26,16 @@ func _initialize() -> void:
 	_check_rect(level.get_node("CodeDrawer/Surface"), _rect(manifest, "S07", "ui-panel"), "S07 drawer")
 	var skills: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/art/redesign/crop_adaptive/v2/skill-tree-data.json"))
 	level.call("_show_skill_tree", true)
+	await process_frame
+	var caption := level.get_node("SkillTreeOverlay/Card/TreeArt/TreeCaption") as Control
+	var caption_rect: Array = skills.layout.treeCaption
+	_check_rect(caption, Rect2(Vector2(caption_rect[0], caption_rect[1]) * K, Vector2(caption_rect[2], caption_rect[3]) * K), "Skill tree caption")
 	for index in range(3):
 		var slot := level.get_node("SkillTreeOverlay/Card/Margin/Content/Slot%d" % index) as Control
 		var description := slot.get_node("Description") as Label
-		var marker := slot.get_node("Completed") as Label
+		var marker := slot.get_node("Completed") as Control
+		_check_rect(description, Rect2(slot.global_position + Vector2(12, 128) * K, Vector2(142, 43) * K), "Skill description")
+		_check_rect(marker, Rect2(slot.global_position + Vector2(130, 65) * K, Vector2(25, 25) * K), "Skill completion marker")
 		if description.text != skills.concepts[index].description or not marker.visible:
 			failures.append("Skill concept cards must preserve the delivered descriptions and unlocked markers")
 		if not Rect2(Vector2.ZERO, slot.size).encloses(marker.get_rect()):
@@ -46,11 +54,22 @@ func _initialize() -> void:
 	first.show_candidate_outcome(250, "UNDERWATERED")
 	if (first.crop_art as ArtMotionTexture).motion_id != "crop-carrot-severe-dry-sway":
 		failures.append("An underwatered replay must not retain a previous successful crop skin")
+	first.set_result(2, false)
+	if not first.find_child("ResultPlaque").visible:
+		failures.append("Result amounts need their own authored wood plaque")
+	var crop_texture := first.crop_art.texture as AtlasTexture
+	if crop_texture == null or crop_texture.region.size.y >= 320:
+		failures.append("Motion artwork must compensate the delivery canvas padding")
 	level.call("_enter_free_play")
 	var reward := level.get_node("CompletionCard/Margin/Content/RewardTool") as TextureRect
 	_check_rect(reward, _rect(manifest, "E07", "icon-skill-watering"), "E07 reward")
 	if not reward.visible or not reward.texture.resource_path.ends_with("icon-skill-watering.png"):
 		failures.append("E07 must show the same unlocked watering tool as the skill tree")
+	level.show_next_level_preview()
+	if reward.visible or not level.next_button.disabled:
+		failures.append("E11 uses the compact unavailable preview with no reward tool")
+	level.restart_level()
+	level.restart_level()
 	level.call("_begin_workshop_experiments")
 	level.story_dialogue.skip_sequence()
 	level.gap_target_input.text = "wrong"

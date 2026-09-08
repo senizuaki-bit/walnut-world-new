@@ -10,8 +10,8 @@ signal line_changed(line_index: int, line_text: String)
 @onready var avatar_stage: Control = $AvatarStage
 @onready var portrait: TextureRect = $AvatarStage/Portrait
 @onready var dialogue_card: Control = $DialogueCard
-@onready var speaker_label: Label = $DialogueCard/ContentRoot/ContentMargin/Scroll/Content/Speaker
-@onready var response_badge: Label = $DialogueCard/ContentRoot/ContentMargin/Scroll/Content/ResponseBadge
+@onready var speaker_label: Label = $DialogueCard/ContentRoot/Speaker
+@onready var response_badge: Label = $DialogueCard/ContentRoot/ResponseBadge
 @onready var body_label: Label = $DialogueCard/ContentRoot/ContentMargin/Scroll/Content/Body
 @onready var question_label: Label = $DialogueCard/ContentRoot/ContentMargin/Scroll/Content/Question
 @onready var continue_hint: Label = $DialogueCard/ContentRoot/ContinueHint
@@ -79,6 +79,7 @@ func _start_sequence(
 	response_badge.visible = not response_label_text.is_empty()
 	response_badge.text = response_label_text
 	question_label.visible = not question.is_empty()
+	$DialogueCard/ContentRoot/ContentMargin/Scroll/Content/Divider.visible = question_label.visible
 	question_label.text = "" if question.is_empty() else "想一想：%s" % question
 	continue_hint.visible = false
 	modulate.a = 0.0
@@ -268,5 +269,23 @@ func _configure_v2_layout(expanded: bool) -> void:
 	$DialogueCard/ContentRoot.size = dialogue_card.size
 	avatar_stage.position = Vector2(338, 429) * K if expanded else Vector2(318, 648) * K
 	avatar_stage.size = Vector2(156, 392) * K if expanded else Vector2(156, 204) * K
+	# Match the guide's nameplate and body offsets; long live messages still scroll.
+	var margin := $DialogueCard/ContentRoot/ContentMargin as MarginContainer
+	margin.add_theme_constant_override("margin_left", roundi(219 * K))
+	margin.add_theme_constant_override("margin_top", roundi(96 * K))
+	margin.add_theme_constant_override("margin_right", roundi(59 * K))
+	margin.add_theme_constant_override("margin_bottom", roundi(62 * K))
+	speaker_label.position = Vector2(203, 28) * K
+	speaker_label.size = Vector2(193, 48) * K
+	response_badge.position = Vector2(420, 40) * K
+	response_badge.size = Vector2(560, 34) * K
+	body_label.add_theme_font_size_override("font_size", roundi((25 if expanded else 27) * K))
+	body_label.custom_minimum_size.y = (216 if expanded else 91) * K
+	question_label.add_theme_font_size_override("font_size", roundi(21 * K))
+	continue_hint.text = "▼ 点击继续"
+	continue_hint.add_theme_font_size_override("font_size", roundi(23 * K))
+	continue_hint.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	continue_hint.position = Vector2(dialogue_card.size.x - 214 * K, dialogue_card.size.y - 47 * K)
+	continue_hint.size = Vector2(175, 38) * K
 	_card_rest_position = dialogue_card.position
 	_avatar_rest_position = avatar_stage.position

@@ -1,4 +1,5 @@
-[gd_resource type="Theme" load_steps=24 format=3]
+[gd_resource type="Theme" load_steps=25 format=3]
+[ext_resource type="Font" path="res://resources/ui/v2/body.tres" id="body"]
 [ext_resource type="StyleBox" path="res://resources/ui/v2/ui-panel.tres" id="ui-panel"]
 [ext_resource type="StyleBox" path="res://resources/ui/v2/ui-hero-frame.tres" id="ui-hero-frame"]
 [ext_resource type="StyleBox" path="res://resources/ui/v2/ui-dialogue.tres" id="ui-dialogue"]
@@ -23,6 +24,7 @@
 [ext_resource type="StyleBox" path="res://resources/ui/v2/input-error.tres" id="input-error"]
 [ext_resource type="StyleBox" path="res://resources/ui/v2/input-disabled.tres" id="input-disabled"]
 [resource]
+default_font = ExtResource("body")
 default_font_size = 18
 Button/styles/normal = ExtResource("button-normal")
 Button/styles/hover = ExtResource("button-hover")

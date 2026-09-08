@@ -40,6 +40,7 @@ func _ready() -> void:
 	hit_button.focus_exited.connect(_refresh_glow)
 	refresh_data()
 	set_result(-1, false)
+	water_badge.visibility_changed.connect(func(): $Canvas/ResultPlaque.visible = water_badge.visible)
 
 
 func configure(index: int, name_value: String, current_value: int, target_value: int, texture_value: Texture2D) -> void:
@@ -91,13 +92,16 @@ func set_result(water_units: int, animate: bool = true, is_error: bool = false) 
 	_error_active = is_error and water_units >= 0
 	_refresh_glow()
 	water_badge.visible = water_units >= 0
+	$Canvas/ResultPlaque.visible = water_units >= 0
 	if water_units < 0:
 		water_badge.text = ""
 		self_modulate = Color.WHITE
+		_update_art(target_moisture - current_moisture, current_moisture > target_moisture + 8)
 		return
-	water_badge.text = "跳过" if water_units == 0 else ("💧 × %d · %d ml" % [water_units, water_units * 250])
+	water_badge.text = "跳过" if water_units == 0 else ("%d份 · %d ml" % [water_units, water_units * 250])
 	water_badge.add_theme_color_override("font_color", Color(0.55, 0.13, 0.07, 1) if is_error else Color(0.06, 0.27, 0.20, 1))
-	self_modulate = Color(1.0, 0.88, 0.83, 1.0) if is_error else Color.WHITE
+	self_modulate = Color.WHITE
+	_update_art(30 if is_error else 0, is_error and current_moisture >= target_moisture)
 	if animate:
 		_bounce()
 

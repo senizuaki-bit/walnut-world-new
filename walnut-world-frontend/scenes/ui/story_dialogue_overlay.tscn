@@ -1,5 +1,6 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=16 format=3]
 
+[ext_resource type="Theme" path="res://resources/ui/v2/theme.tres" id="guide_theme"]
 [ext_resource type="StyleBox" path="res://resources/ui/v2/ui-dialogue.tres" id="proto_paper"]
 [ext_resource type="Script" path="res://scenes/ui/story_dialogue_overlay.gd" id="1_script"]
 [ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/ui-dialogue.png" id="2_frame"]
@@ -11,7 +12,6 @@
 [ext_resource type="Font" path="res://resources/ui/v2/mono.tres" id="v2_mono"]
 [ext_resource type="Script" path="res://scenes/ui/art_motion_texture.gd" id="merge_motion"]
 [ext_resource type="Script" path="res://scenes/ui/art_ambient.gd" id="merge_ambient"]
-
 
 [sub_resource type="StyleBoxFlat" id="PortraitGlowStyle"]
 bg_color = Color(0.945098, 1, 0.815686, 0.94)
@@ -49,10 +49,10 @@ corner_radius_top_right = 14
 corner_radius_bottom_right = 14
 corner_radius_bottom_left = 14
 
-
 [node name="StoryDialogueOverlay" type="Control"]
-visible = false
 layout_mode = 3
+visible = false
+
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -60,11 +60,11 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
 script = ExtResource("1_script")
-
-
+theme = ExtResource("guide_theme")
 
 [node name="Dimmer" type="ColorRect" parent="."]
 layout_mode = 1
+
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -72,23 +72,22 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-color = Color(0,0,0,0)
-
+color = Color(0.062745, 0.152941, 0.105882, 0.533333)
 
 [node name="AvatarStage" type="Control" parent="."]
+layout_mode = 0
 mouse_filter = 2
 pivot_offset = Vector2(90, 95)
 z_index = 1
 
-layout_mode = 0
 offset_left = 243.31562167906483
 offset_top = 495.8129649309245
 offset_right = 362.6780021253985
 offset_bottom = 651.9022316684378
 
-
 [node name="PortraitGlow" type="Panel" parent="AvatarStage"]
 layout_mode = 1
+
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -105,9 +104,9 @@ theme_override_styles/panel = SubResource("PortraitGlowStyle")
 
 visible = false
 
-
 [node name="Portrait" type="TextureRect" parent="AvatarStage"]
 layout_mode = 1
+
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -120,15 +119,14 @@ script = ExtResource("merge_motion")
 motion_id = ""
 
 [node name="DialogueCard" type="Panel" parent="."]
+layout_mode = 0
 mouse_filter = 2
 theme_override_styles/panel = ExtResource("v2_empty")
 
-layout_mode = 0
 offset_left = 214.24017003188098
 offset_top = 465.20722635494155
 offset_right = 1075.0265674814027
 offset_bottom = 682.5079702444209
-
 
 [node name="OriginalSurface" type="NinePatchRect" parent="DialogueCard"]
 show_behind_parent = true
@@ -143,17 +141,17 @@ patch_margin_right = 64
 patch_margin_bottom = 64
 
 [node name="ContentRoot" type="Control" parent="DialogueCard"]
+layout_mode = 0
 mouse_filter = 2
 
-layout_mode = 0
 offset_left = 0.0
 offset_top = 0.0
 offset_right = 860.7863974495218
 offset_bottom = 217.3007438894793
 
-
 [node name="LeafFrame" type="TextureRect" parent="DialogueCard/ContentRoot"]
 layout_mode = 1
+
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -165,10 +163,9 @@ expand_mode = 1
 stretch_mode = 0
 visible = false
 
-
-
 [node name="ContentMargin" type="MarginContainer" parent="DialogueCard/ContentRoot"]
 layout_mode = 1
+
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -181,54 +178,65 @@ theme_override_constants/margin_top = 21
 theme_override_constants/margin_right = 32
 theme_override_constants/margin_bottom = 40
 
-
 [node name="Scroll" type="ScrollContainer" parent="DialogueCard/ContentRoot/ContentMargin"]
 layout_mode = 2
+
 horizontal_scroll_mode = 0
 follow_focus = true
 mouse_filter = 1
 
-
-
 [node name="Content" type="VBoxContainer" parent="DialogueCard/ContentRoot/ContentMargin/Scroll"]
 layout_mode = 2
+
 mouse_filter = 2
 theme_override_constants/separation = 4
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-
-
-[node name="Speaker" type="Label" parent="DialogueCard/ContentRoot/ContentMargin/Scroll/Content"]
+[node name="Speaker" type="Label" parent="DialogueCard/ContentRoot"]
+layout_mode = 0
 custom_minimum_size = Vector2(115, 26)
-layout_mode = 2
+
 size_flags_horizontal = 0
 mouse_filter = 2
 theme_override_colors/font_color = Color(1, 0.980392, 0.839216, 1)
-theme_override_styles/normal = SubResource("SpeakerPillStyle")
+theme_override_styles/normal = ExtResource("v2_empty")
+theme_override_fonts/font = ExtResource("v2_bold")
 text = "芽芽"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 21
 
+[node name="OriginalSurface" type="NinePatchRect" parent="DialogueCard/ContentRoot/Speaker"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-nameplate"
+source_slice = 64.0
+border_width = 18.3634
+patch_margin_left = 64
+patch_margin_top = 64
+patch_margin_right = 64
+patch_margin_bottom = 64
 
-[node name="ResponseBadge" type="Label" parent="DialogueCard/ContentRoot/ContentMargin/Scroll/Content"]
+[node name="ResponseBadge" type="Label" parent="DialogueCard/ContentRoot"]
+layout_mode = 0
 visible = false
 custom_minimum_size = Vector2(0, 18)
-layout_mode = 2
+
 size_flags_horizontal = 0
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.713726, 0.376471, 0.141176, 1)
 text = "概念提示"
 
-theme_override_font_sizes/font_size = 14
-
+theme_override_font_sizes/font_size = 16
 
 [node name="Body" type="Label" parent="DialogueCard/ContentRoot/ContentMargin/Scroll/Content"]
-custom_minimum_size = Vector2(0, 55)
 layout_mode = 2
-size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 55)
+
+size_flags_vertical = 1
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.0823529, 0.254902, 0.164706, 1)
 theme_override_colors/font_outline_color = Color(1, 0.984314, 0.862745, 0.8)
@@ -239,11 +247,22 @@ vertical_alignment = 0
 
 theme_override_font_sizes/font_size = 19
 
+[node name="Divider" type="ColorRect" parent="DialogueCard/ContentRoot/ContentMargin/Scroll/Content"]
+layout_mode = 2
+
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.7651434643995749
+offset_bottom = 0.7651434643995749
+mouse_filter = 2
+custom_minimum_size = Vector2(0, 1)
+color = Color(0.741,0.678,0.463,0.4)
 
 [node name="Question" type="Label" parent="DialogueCard/ContentRoot/ContentMargin/Scroll/Content"]
+layout_mode = 2
 visible = false
 custom_minimum_size = Vector2(0, 26)
-layout_mode = 2
+
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.145098, 0.372549, 0.4, 1)
 text = "想一想：循环应该在什么时候停止？"
@@ -251,10 +270,10 @@ autowrap_mode = 2
 
 theme_override_font_sizes/font_size = 17
 
-
 [node name="ContinueHint" type="Label" parent="DialogueCard/ContentRoot"]
-visible = false
 layout_mode = 1
+visible = false
+
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
@@ -270,10 +289,8 @@ mouse_filter = 2
 theme_override_colors/font_color = Color(0.713726, 0.376471, 0.141176, 1)
 theme_override_font_sizes/font_size = 14
 text = "点击继续  ·  空格 / Enter  ▾"
-horizontal_alignment = 2
+horizontal_alignment = 0
 vertical_alignment = 1
-
-
 
 [node name="TypewriterTimer" type="Timer" parent="."]
 wait_time = 0.03

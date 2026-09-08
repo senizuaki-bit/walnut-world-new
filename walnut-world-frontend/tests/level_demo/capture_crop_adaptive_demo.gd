@@ -121,6 +121,14 @@ func _initialize() -> void:
 	var settle_frames := 72 if state_name == "start" else 12
 	for _frame in range(settle_frames):
 		await process_frame
+	# Capture settled full dialogue rather than a machine-dependent typing fragment.
+	await create_timer(0.45).timeout
+	if state_name != "start":
+		var dialogue := (capture_root as CropAdaptiveWateringDemo).story_dialogue
+		if dialogue.visible and dialogue.is_typing():
+			dialogue.advance()
+	await process_frame
+	await RenderingServer.frame_post_draw
 	var image := root.get_texture().get_image()
 	var absolute_path := ProjectSettings.globalize_path(output_path)
 	var result := image.save_png(absolute_path)

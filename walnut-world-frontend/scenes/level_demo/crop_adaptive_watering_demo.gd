@@ -64,7 +64,7 @@ const WORKSHOP_EXPERIMENTS: Array[Dictionary] = [
 	{
 		"badge": "理解汇总 · 准备完整练习",
 		"title": "把刚才学到的两条理解结合起来",
-		"body": "先用同一个 i 配对 target[i] 与 moisture[i]，再让计算出的 gap 进入 0 / 1 / 2 份分级。\n下一页将严格按关卡文档打开完整 C++ 练习，你要把这两条理解自己写进卷轴。",
+		"body": "先用同一个 i 配对 target 与 moisture，再让 gap 进入 0 / 1 / 2 份分级。\n下一页打开完整 C++ 练习，由你自己把两条理解写进卷轴。",
 		"action": "把两条规则结合起来，开始完整练习  →",
 	},
 ]
@@ -269,7 +269,6 @@ func restart_level() -> void:
 		_synchronizing_agent_draft = false
 	else:
 		code_editor.text = INITIAL_PRACTICE_CODE
-	completion_card.visibility_changed.connect(func(): $CompletionShade.visible = completion_card.visible)
 	completion_card.visible = false
 	code_drawer.visible = false
 	_hide_lesson_overlays()
@@ -457,12 +456,13 @@ func _show_skill_tree(unlocked: bool) -> void:
 	_set_phase(Phase.SKILL_UNLOCKED if unlocked else Phase.SKILL_TREE)
 	skill_tree_badge.text = "技能树 · 4★ 节点"
 	skill_tree_title.text = "作物适配浇水器"
-	skill_tree_body.text = "已解锁 · 读取数据，计算缺口，选择水量。" if unlocked else "剧情可学习 · 完成工坊实验，升级浇水技能。"
+	skill_tree_body.text = "已解锁 · 完成成长归档" if unlocked else "剧情可学习"
+	$SkillTreeOverlay/Card/TreeArt/TreeCaption.text = "理解已连接成完整规则\n现在可以回到农场" if unlocked else "三项理解，共同组成\n作物适配浇水器"
 	skill_tree_continue_button.text = "进入完成后的自由状态  →" if unlocked else "进入清泉工坊  →"
 	for index in range(3):
 		get_node("SkillTreeOverlay/Card/Margin/Content/Slot%d/Completed" % index).visible = unlocked
 	skill_tree_overlay.visible = true
-	$SkillTreeOverlay/UnlockSeal.visible = unlocked
+	$SkillTreeOverlay/UnlockSeal.visible = false
 	if unlocked:
 		($SkillTreeOverlay/UnlockSeal as ArtMotionTexture).play_clip("ui-four-star-seal-unlock", true)
 
@@ -505,6 +505,10 @@ func _show_workshop_step() -> void:
 	workshop_gap_code.visible = _workshop_step == 0
 	workshop_branch_code.visible = _workshop_step == 1
 	workshop_summary_code.visible = _workshop_step == 2
+	const K := 720.0 / 941.0
+	var board := $WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel as Control
+	board.position.y = ([330, 317, 347][_workshop_step] - 62) * K
+	board.size.y = [338, 352, 321][_workshop_step] * K
 	match _workshop_step:
 		0:
 			gap_target_input.text = ""
@@ -668,8 +672,9 @@ func _fail_run() -> void:
 	_same_failure_key = key
 	_hint_level = mini(_hint_level, 3)
 	_set_phase(Phase.FAILED)
-	evidence_title.text = "世界事实 · 本轮未通过"
-	evidence_body.text = "%s\n失败类型：[code]%s[/code]　同类失败：%d 次\n先看事实，再决定自己修改或询问叮当师傅。" % [_build_result.message, key, _same_failure_count]
+	evidence_title.text = "本轮未通过 · 先看事实，再修改"
+	evidence_body.text = "%s 同类失败 %d 次。" % [_build_result.message, _same_failure_count]
+	evidence_body.tooltip_text = "失败类型：%s" % key
 	_reveal_evidence()
 	if key == "FIXED_TARGET_VALUE" and _same_failure_count == 3 and not _bug_challenge_seen:
 		call_deferred("_show_bug_challenge")
@@ -805,15 +810,16 @@ func _complete_level() -> void:
 	tween.set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 	tween.tween_property(completion_card, "modulate:a", 1.0, _duration(0.24))
 	tween.tween_property(completion_card, "scale", Vector2.ONE, _duration(0.58))
-	completion_title.text = "世界目标已经客观完成！"
-	completion_summary.text = "8块土地全部检查 · 5块正确浇水 · 3块正确跳过\n最后一条本地教学动作已经结束，接下来由角色根据记录总结。"
+	completion_title.text = "世界目标已完成"
+	completion_summary.text = "检查土地 8/8 · 正确浇水 5块 · 正确跳过 3块。\n水量不足0，水量过多0。\n先查看成长归档，再进入自由复习。"
 	replay_button.visible = false
 	return_button.visible = false
 	next_button.visible = true
 	next_button.disabled = false
-	next_button.text = "听芽芽和书书总结  →"
+	next_button.text = "查看成长归档  →"
 	evidence_title.text = "世界目标已完成"
 	evidence_body.text = "检查土地 8/8　正确浇水 5块　正确跳过 3块\n250 ml 动作 3次　500 ml 动作 2次　水量不足 0　水量过多 0"
+	evidence_panel.hide()
 
 
 func _on_completion_next_pressed() -> void:
@@ -863,6 +869,8 @@ func _show_growth_summary() -> void:
 		+ "[img=34]res://assets/art/redesign/crop_adaptive/v2/components/icon-drops-two.png[/img]  [b]验证记录[/b]：8 次循环；3 次 250 ml；2 次 500 ml；3 次跳过。"
 	)
 	growth_summary_overlay.visible = true
+	$GrowthSummaryOverlay/Card/Margin/Content/RowValue0.text = route
+	$GrowthSummaryOverlay/Card/Margin/Content/RowValue2.text = assistance
 
 
 func _on_archive_pressed() -> void:
@@ -877,8 +885,8 @@ func _enter_free_play() -> void:
 	completion_card.visible = true
 	completion_card.modulate.a = 1.0
 	completion_card.scale = Vector2.ONE
-	completion_title.text = "4★ 作物适配浇水器已解锁"
-	completion_summary.text = "本次关卡记录已经完成前端归档。\n你可以重玩本关、查看下一关预告，或返回农场。"
+	completion_title.text = "作物适配浇水器已解锁"
+	completion_summary.text = "本关记录已完成归档。\n\n你可以重玩本关，\n查看下一关预告，\n或返回农场继续探索。"
 	replay_button.visible = true
 	return_button.visible = true
 	next_button.visible = true
@@ -887,11 +895,21 @@ func _enter_free_play() -> void:
 	evidence_title.text = "完成后的自由状态"
 	evidence_body.text = "已解锁：读取同下标数据、计算缺口、按 0 / 1 / 2 份执行。"
 	_reveal_evidence()
+	evidence_panel.hide()
 
 
 func show_next_level_preview() -> void:
+	_layout_completion(true)
+	const K := 720.0 / 941.0
+	$CompletionCard/RewardCompanion.visible = true
+	$CompletionCard/RewardCompanion.position = Vector2(1400 - 485, 603 - 211) * K
+	var actions := $CompletionCard/Margin/Content/Actions as Control
+	actions.position = Vector2(55, 386) * K
+	for item in [[replay_button, 0, 183], [next_button, 197, 225], [return_button, 436, 178]]:
+		(item[0] as Control).position = Vector2(item[1], 0) * K
+		(item[0] as Control).size = Vector2(item[2], 75) * K
 	completion_title.text = "下一关正在准备中"
-	completion_summary.text = "未来能力：让同一套规则管理更大范围的区域灌溉。\n当前可以返回农场或重玩本关。"
+	completion_summary.text = "未来能力：让同一套规则管理更大范围的区域灌溉。\n下一关尚未开放，当前可以返回农场或重玩本关。"
 	next_button.disabled = true
 
 
@@ -1332,7 +1350,7 @@ func _set_phase(value: Phase) -> void:
 		Phase.CERTIFIED: "准备交付",
 		Phase.ACTIVE: "准备验证",
 		Phase.RUNNING: "世界验证",
-		Phase.FAILED: "分层教学",
+		Phase.FAILED: "分层教学 · 失败复盘",
 		Phase.OBJECTIVE_COMPLETE: "世界目标完成",
 		Phase.GROWTH_SUMMARY: "书书成长总结",
 		Phase.SKILL_UNLOCKED: "4★技能解锁",
@@ -1352,7 +1370,7 @@ func _set_phase(value: Phase) -> void:
 	_apply_v2_layout(value)
 	primary_button.visible = value in [Phase.INTRO, Phase.OLD_TOOL, Phase.FAILED]
 	hint_button.visible = value in [Phase.CODE, Phase.CERTIFIED, Phase.ACTIVE, Phase.FAILED, Phase.LOCAL_FAILED, Phase.LOCAL_COMPLETED, Phase.CHAIN_ERROR]
-	code_button.visible = value in [Phase.CODE, Phase.CERTIFIED, Phase.ACTIVE, Phase.FAILED, Phase.LOCAL_FAILED, Phase.LOCAL_COMPLETED, Phase.CHAIN_ERROR]
+	code_button.visible = value in [Phase.CODE, Phase.CERTIFIED, Phase.ACTIVE, Phase.LOCAL_FAILED, Phase.LOCAL_COMPLETED, Phase.CHAIN_ERROR]
 	_refresh_patch_button()
 	run_button.disabled = value not in [Phase.CODE, Phase.CERTIFIED, Phase.ACTIVE, Phase.FAILED, Phase.LOCAL_FAILED, Phase.LOCAL_COMPLETED, Phase.CHAIN_ERROR]
 	match value:
@@ -1396,10 +1414,18 @@ func _apply_v2_layout(value: Phase) -> void:
 	plot_grid.add_theme_constant_override("v_separation", roundi((52 if outcomes else 13) * K))
 	evidence_panel.position = Vector2(288, 639 if tall else 711) * K
 	evidence_panel.size = Vector2(1119, 190 if tall else 126) * K
-	evidence_body.size.y = (112 if tall else 52) * K
+	evidence_body.size.y = (104 if tall else 40) * K
 	phase_strip.tooltip_text = _authoritative_snapshot_line() if _agent_mode else ""
 	if value == Phase.FAILED:
+		primary_button.position = Vector2(295, 853) * K
+		primary_button.size = Vector2(345, 74) * K
+		$Hud/ToolRail.position = Vector2(661, 857) * K
+		hint_button.custom_minimum_size = Vector2(312, 65) * K
+	else:
 		primary_button.position = Vector2(1005, 852) * K
+		primary_button.size = Vector2(409, 74) * K
+		$Hud/ToolRail.position = Vector2(291, 857) * K
+		hint_button.custom_minimum_size = Vector2(290, 65) * K
 
 func _layout_completion(compact: bool) -> void:
 	const K := 720.0 / 941.0
@@ -1415,11 +1441,29 @@ func _layout_completion(compact: bool) -> void:
 	completion_summary.size = Vector2(584, 149) * K if compact else Vector2(301, 215) * K
 	if not compact:
 		completion_summary.position = Vector2(389, 234) * K
+		completion_title.position = Vector2(51, 113) * K
+		completion_title.size = Vector2(662, 57) * K
+	completion_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT if compact else HORIZONTAL_ALIGNMENT_CENTER
+	if compact:
+		completion_title.position = Vector2(57, 125) * K
+		completion_title.size = Vector2(613, 67) * K
+		completion_summary.position = Vector2(58, 215) * K
+		completion_summary.size = Vector2(611, 130) * K
+	completion_title.add_theme_font_size_override("font_size", 27)
+	completion_summary.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	completion_summary.add_theme_font_size_override("font_size", 18)
+	$CompletionCard/RewardCompanion.visible = not compact
+	$CompletionCard/RewardCompanion.position = Vector2(1400 - 465, 603 - 145) * K
 	$CompletionCard/Margin/Content/RewardTool.visible = not compact
 	$CompletionCard/Margin/Content/RewardCaption.visible = not compact
 	(content.get_node("Actions") as Control).position = Vector2(70, 387) * K if compact else Vector2(59, 530) * K
 	next_button.position = Vector2.ZERO if compact else Vector2(201, 0) * K
 	next_button.size = Vector2(586, 76) * K if compact else Vector2(229, 75) * K
+	if not compact:
+		replay_button.position = Vector2.ZERO
+		replay_button.size = Vector2(183, 75) * K
+		return_button.position = Vector2(448, 0) * K
+		return_button.size = Vector2(188, 75) * K
 
 func _show_teaching_dialogue(badge: String) -> void:
 	var profile = PROFILE_CATALOG.profile_for(&"teaching_agent")

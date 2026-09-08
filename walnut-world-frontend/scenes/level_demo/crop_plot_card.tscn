@@ -30,10 +30,12 @@ theme_override_styles/panel = SubResource("empty")
 
 [node name="Canvas" type="Control" parent="."]
 layout_mode = 2
+
 mouse_filter = 2
 
 [node name="Soil" type="TextureRect" parent="Canvas"]
 layout_mode = 0
+
 offset_left = 0.0
 offset_top = 41.317747077577046
 offset_right = 175.21785334750265
@@ -47,6 +49,7 @@ script = ExtResource("merge_motion")
 
 [node name="SoilGlow" type="TextureRect" parent="Canvas"]
 layout_mode = 0
+
 offset_left = 0.0
 offset_top = 41.317747077577046
 offset_right = 175.21785334750265
@@ -61,6 +64,7 @@ visible = false
 
 [node name="AttentionFrame" type="TextureRect" parent="Canvas"]
 layout_mode = 0
+
 offset_left = 0.0
 offset_top = 41.317747077577046
 offset_right = 175.21785334750265
@@ -75,6 +79,7 @@ material = SubResource("selection")
 
 [node name="ScanGlow" type="TextureRect" parent="Canvas"]
 layout_mode = 0
+
 offset_left = 0.0
 offset_top = 41.317747077577046
 offset_right = 175.21785334750265
@@ -89,6 +94,7 @@ material = SubResource("scan")
 
 [node name="CropArt" type="TextureRect" parent="Canvas"]
 layout_mode = 0
+
 offset_left = 35.961742826780025
 offset_top = 31.370882040382572
 offset_right = 143.8469713071201
@@ -102,6 +108,7 @@ script = ExtResource("merge_motion")
 
 [node name="NamePlaque" type="Panel" parent="Canvas"]
 layout_mode = 0
+
 offset_left = 33.6663124335813
 offset_top = 0.0
 offset_right = 149.2029755579171
@@ -123,6 +130,7 @@ patch_margin_bottom = 64
 
 [node name="NumberLabel" type="Label" parent="Canvas"]
 layout_mode = 0
+
 offset_left = 41.317747077577046
 offset_top = 0.0
 offset_right = 65.03719447396386
@@ -135,6 +143,7 @@ vertical_alignment = 1
 
 [node name="CropLabel" type="Label" parent="Canvas"]
 layout_mode = 0
+
 offset_left = 65.80233793836345
 offset_top = 0.0
 offset_right = 144.61211477151966
@@ -147,6 +156,7 @@ vertical_alignment = 1
 
 [node name="DataPlaque" type="Panel" parent="Canvas"]
 layout_mode = 0
+
 offset_left = 0.0
 offset_top = 137.72582359192347
 offset_right = 177.51328374070138
@@ -168,6 +178,7 @@ patch_margin_bottom = 64
 
 [node name="MoistureBar" type="ProgressBar" parent="Canvas"]
 layout_mode = 0
+
 offset_left = 13.007438894792774
 offset_top = 140.7863974495218
 offset_right = 164.50584484590863
@@ -181,6 +192,7 @@ theme_override_styles/fill = SubResource("barfill")
 
 [node name="CurrentLabel" type="Label" parent="Canvas"]
 layout_mode = 0
+
 offset_left = 13.007438894792774
 offset_top = 150.73326248671626
 offset_right = 98.70350690754516
@@ -193,6 +205,7 @@ vertical_alignment = 1
 
 [node name="TargetLabel" type="Label" parent="Canvas"]
 layout_mode = 0
+
 offset_left = 97.93836344314559
 offset_top = 150.73326248671626
 offset_right = 174.45270988310307
@@ -205,6 +218,7 @@ vertical_alignment = 1
 
 [node name="GapLabel" type="Label" parent="Canvas"]
 layout_mode = 0
+
 offset_left = 9.181721572794899
 offset_top = 177.51328374070138
 offset_right = 171.39213602550478
@@ -215,20 +229,52 @@ text = ""
 theme_override_font_sizes/font_size = 12
 vertical_alignment = 1
 
+[node name="ResultPlaque" type="Panel" parent="Canvas"]
+layout_mode = 0
+
+offset_left = 7.651434643995749
+offset_top = 172.92242295430393
+offset_right = 169.86184909670564
+offset_bottom = 201.2327311370882
+mouse_filter = 2
+visible = false
+theme_override_styles/panel = ExtResource("v2_empty")
+
+[node name="OriginalSurface" type="NinePatchRect" parent="Canvas/ResultPlaque"]
+layout_mode = 0
+
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 162.21041445270987
+offset_bottom = 28.310308182784272
+mouse_filter = 2
+show_behind_parent = true
+script = ExtResource("v2_surface")
+asset_id = "ui-data-plaque"
+source_slice = 64.0
+border_width = 14.15
+patch_margin_left = 64
+patch_margin_top = 64
+patch_margin_right = 64
+patch_margin_bottom = 64
+
 [node name="WaterBadge" type="Label" parent="Canvas"]
 layout_mode = 0
-offset_left = 9.181721572794899
-offset_top = 202.76301806588737
-offset_right = 171.39213602550478
-offset_bottom = 227.24760892667376
+
+offset_left = 16.068012752391073
+offset_top = 177.51328374070138
+offset_right = 164.5058448459086
+offset_bottom = 196.64187035069077
 unique_name_in_owner = true
 mouse_filter = 2
 text = ""
 theme_override_font_sizes/font_size = 12
 vertical_alignment = 1
+horizontal_alignment = 1
 
 [node name="HitButton" type="Button" parent="Canvas"]
 layout_mode = 0
+
 offset_left = 0.0
 offset_top = 0.0
 offset_right = 177.51328374070138
