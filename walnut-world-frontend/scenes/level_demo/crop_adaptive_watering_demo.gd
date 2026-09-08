@@ -1411,6 +1411,10 @@ func _apply_v2_layout(value: Phase) -> void:
 	var outcomes := value in [Phase.OLD_TOOL, Phase.RUNNING, Phase.CANDIDATE_VALIDATING, Phase.CANDIDATE_PRESENTING, Phase.FAILED, Phase.LOCAL_FAILED, Phase.LOCAL_COMPLETED]
 	$Hud/FarmLayout.position = Vector2(383, 157 if outcomes else 168) * K
 	$Hud/FarmLayout.size = Vector2(940, 535 if outcomes else 455) * K
+	# Owner's annotated E02 revision: fit the complete grid into the lower green frame.
+	$Hud/FarmLayout.scale = Vector2(0.825, 0.778) if tall else Vector2.ONE
+	if tall:
+		$Hud/FarmLayout.position = Vector2(446, 266) * K
 	plot_grid.add_theme_constant_override("v_separation", roundi((52 if outcomes else 13) * K))
 	evidence_panel.position = Vector2(288, 639 if tall else 711) * K
 	evidence_panel.size = Vector2(1119, 190 if tall else 126) * K
