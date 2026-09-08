@@ -3,10 +3,12 @@ extends Button
 
 @onready var feedback: ArtMotionTexture = $Feedback
 var _skin: StyleBoxTexture
+var _rest_styles: Dictionary = {}
 
 
 func _ready() -> void:
-	add_theme_stylebox_override("focus", preload("res://resources/ui/art_v2/input_focus.tres"))
+	for state in ["normal", "hover"]:
+		_rest_styles[state] = get_theme_stylebox(state) if has_theme_stylebox_override(state) else null
 	visibility_changed.connect(func() -> void:
 		if not is_visible_in_tree():
 			clear_feedback()
@@ -30,8 +32,11 @@ func show_feedback(success: bool) -> void:
 
 func clear_feedback() -> void:
 	feedback.hide()
-	remove_theme_stylebox_override("normal")
-	remove_theme_stylebox_override("hover")
+	for state in ["normal", "hover"]:
+		if _rest_styles.get(state) != null:
+			add_theme_stylebox_override(state, _rest_styles[state])
+		else:
+			remove_theme_stylebox_override(state)
 	for color in ["font_color", "font_hover_color", "font_focus_color"]:
 		remove_theme_color_override(color)
 	_skin = null

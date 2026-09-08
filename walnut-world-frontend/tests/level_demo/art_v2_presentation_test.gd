@@ -79,7 +79,7 @@ func _run() -> void:
 	motion.show()
 	motion.reduced_motion = true
 	await process_frame
-	if motion.texture is AtlasTexture:
+	if motion.get("_atlas") != null or motion.texture == null:
 		failures.append("减少动态时必须显示静态回退图。")
 	var frames: SpriteFrames = level.watering_can.sprite_frames
 	var durations: Array[float] = []
@@ -276,11 +276,11 @@ func _verify_second_review(level: CropAdaptiveWateringDemo, failures: Array[Stri
 	while motion.visible and Time.get_ticks_msec() < deadline:
 		await process_frame
 	await process_frame
-	if button.has_theme_stylebox_override("normal"):
+	if not button.get_theme_stylebox("normal") is StyleBoxEmpty:
 		failures.append("反馈结束后必须恢复普通/悬停皮肤。")
 	if not button.get_global_rect().is_equal_approx(before):
 		failures.append("按钮反馈不能改变布局或点击范围：%s → %s。" % [before, button.get_global_rect()])
 	button.call("show_feedback", false)
 	level.call("_hide_lesson_overlays")
-	if motion.visible or button.has_theme_stylebox_override("normal"):
+	if motion.visible or not button.get_theme_stylebox("normal") is StyleBoxEmpty:
 		failures.append("离开工坊必须清除旧按钮反馈。")

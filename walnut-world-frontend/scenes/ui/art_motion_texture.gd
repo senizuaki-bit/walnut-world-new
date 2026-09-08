@@ -13,6 +13,8 @@ var _atlas: AtlasTexture
 var _frame_index := -1
 var _finished := false
 var _pending_atlases: Array[String] = []
+static var _registration: Dictionary = {}
+var _content_region := Rect2()
 
 
 func _ready() -> void:
@@ -41,7 +43,11 @@ func play_clip(id: String, restart := false) -> void:
 	if not parsed is Dictionary:
 		return
 	_metadata = parsed
-	texture = load(ROOT + str(_metadata.files.poster)) as Texture2D
+	if _registration.is_empty():
+		_registration = JSON.parse_string(FileAccess.get_file_as_string("res://resources/ui/v2/motion-registration.json"))
+	var fitted: Array = _registration.get(id, {}).get("rect", [])
+	_content_region = Rect2(fitted[0], fitted[1], fitted[2], fitted[3]) if fitted.size() == 4 else Rect2()
+	_show_poster()
 	# Hidden instances retain their poster and defer expensive atlas loading.
 	if not reduced_motion and not bool(Engine.get_meta("art_reduced_motion", false)) and is_visible_in_tree():
 		_load_atlas()
@@ -83,7 +89,7 @@ func _poll_atlases() -> void:
 func _visibility_changed() -> void:
 	set_process(is_visible_in_tree() or not _pending_atlases.is_empty())
 	if not is_visible_in_tree() and _atlas != null:
-		texture = load(ROOT + str(_metadata.files.poster)) as Texture2D
+		_show_poster()
 		_atlas = null
 		_frame_index = -1
 	if is_visible_in_tree() and _metadata.is_empty() and not motion_id.is_empty():
@@ -102,7 +108,7 @@ func _process(delta: float) -> void:
 			visible = false
 			return
 		if _atlas != null:
-			texture = load(ROOT + str(_metadata.files.poster)) as Texture2D
+			_show_poster()
 			_atlas = null
 		return
 	_load_atlas()
@@ -134,6 +140,20 @@ func _apply_frame(index: int) -> void:
 	_frame_index = index
 	var rect: Array = _metadata.atlas.frames[index].rect
 	_atlas.region = Rect2(float(rect[0]), float(rect[1]), float(rect[2]), float(rect[3]))
+	if _content_region.has_area():
+		_atlas.region = Rect2(_atlas.region.position + _content_region.position, _content_region.size)
+
+
+func _show_poster() -> void:
+	var poster := load(ROOT + str(_metadata.files.poster)) as Texture2D
+	if _content_region.has_area():
+		var fitted := AtlasTexture.new()
+		fitted.atlas = poster
+		fitted.region = _content_region
+		fitted.filter_clip = true
+		texture = fitted
+	else:
+		texture = poster
 
 
 func _exit_tree() -> void:

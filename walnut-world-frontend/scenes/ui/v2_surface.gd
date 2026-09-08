@@ -27,7 +27,8 @@ func _process(_delta: float) -> void:
 func _update_texture() -> void:
 	var feedback := _host.get_node_or_null("Feedback") as ArtMotionTexture
 	if feedback != null and feedback.visible and not (_host as Button).disabled:
-		texture = feedback.texture
+		# The native feedback StyleBox owns its registered atlas; do not draw it twice.
+		texture = null
 		_last_asset = ""
 		return
 	var next := asset_id
