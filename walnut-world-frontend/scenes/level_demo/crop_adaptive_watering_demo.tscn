@@ -1,4 +1,6 @@
-[gd_scene load_steps=66 format=3]
+[gd_scene load_steps=67 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/ui/mentor_question.tscn" id="mentor_question"]
 
 [ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/icon-check.png" id="guide_check"]
 [ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/B01-farm-background.png" id="proto_farm"]
@@ -388,6 +390,7 @@ patch_margin_right = 56
 patch_margin_bottom = 56
 
 [node name="HintButton" type="Button" parent="Hud/ToolRail"]
+visible = false
 layout_mode = 2
 unique_name_in_owner = true
 
@@ -418,6 +421,12 @@ patch_margin_left = 56
 patch_margin_top = 56
 patch_margin_right = 56
 patch_margin_bottom = 56
+
+[node name="HintSpace" type="Control" parent="Hud/ToolRail"]
+visible = false
+layout_mode = 2
+custom_minimum_size = Vector2(221.8916, 49.7343)
+mouse_filter = 2
 
 [node name="RequestPatchButton" type="Button" parent="Hud/ToolRail"]
 layout_mode = 2
@@ -2874,6 +2883,30 @@ layer = 40
 script = ExtResource("8_presenter")
 character_catalog = ExtResource("9_catalog")
 overlay_path = NodePath("../StoryDialogueOverlay")
+
+[node name="FarmMentor" type="TextureRect" parent="."]
+visible = false
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -224.0
+offset_top = -528.0
+offset_right = -18.0
+offset_bottom = -94.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+texture = ExtResource("proto_master")
+script = ExtResource("merge_motion")
+motion_id = "char-dingdang-idle"
+
+[node name="MentorQuestion" parent="." instance=ExtResource("mentor_question")]
+unique_name_in_owner = true
+visible = false
 
 [node name="StoryDialogueOverlay" parent="." instance=ExtResource("3_dialogue")]
 unique_name_in_owner = true

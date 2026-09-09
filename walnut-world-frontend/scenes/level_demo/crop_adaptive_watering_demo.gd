@@ -87,6 +87,8 @@ const CROP_TEXTURES := [
 @onready var evidence_body: RichTextLabel = %EvidenceBody
 @onready var primary_button: Button = %PrimaryButton
 @onready var hint_button: Button = %HintButton
+@onready var mentor_question: MentorQuestion = %MentorQuestion
+@onready var farm_mentor: ArtMotionTexture = $FarmMentor
 @onready var request_patch_button: Button = %RequestPatchButton
 @onready var code_button: Button = %CodeButton
 @onready var water_choices: HBoxContainer = %WaterChoices
@@ -178,6 +180,11 @@ var _last_candidate_result: Dictionary = {}
 
 
 func _ready() -> void:
+	for overlay: Control in [story_dialogue, code_drawer, skill_tree_overlay, bug_challenge_overlay, growth_summary_overlay, completion_card]:
+		overlay.visibility_changed.connect(_refresh_mentor_question)
+	patch_dialog.visibility_changed.connect(_refresh_mentor_question)
+	visibility_changed.connect(_refresh_mentor_question)
+	mentor_question.answering_changed.connect(_on_mentor_answering_changed)
 	code_drawer.visibility_changed.connect(_update_workspace_composition)
 	patch_dialog.visibility_changed.connect(func() -> void: $PatchBackdrop.visible = patch_dialog.visible)
 	primary_button.pressed.connect(_on_primary_pressed)
@@ -228,12 +235,14 @@ func _ready() -> void:
 	_hide_lesson_overlays()
 	water_choices.visible = false
 	watering_can.visible = false
+	_update_workspace_composition()
 	_set_phase(Phase.INTRO)
 	if is_visible_in_tree():
 		call_deferred("_play_intro")
 
 
 func restart_level() -> void:
+	mentor_question.reset()
 	agent_interaction_presenter.clear_queue()
 	story_dialogue.skip_sequence()
 	bug_legion_2d.hide_immediately()
@@ -494,6 +503,7 @@ func _begin_workshop_experiments() -> void:
 
 
 func _show_workshop_step() -> void:
+	_refresh_mentor_question()
 	workshop_action_button.remove_meta("art_feedback")
 	for field in [gap_target_input, gap_moisture_input, severe_boundary_input, severe_units_input, light_boundary_input, light_units_input]:
 		field.clear_validation()
@@ -1369,7 +1379,9 @@ func _set_phase(value: Phase) -> void:
 	_refresh_authority_strip()
 	_apply_v2_layout(value)
 	primary_button.visible = value in [Phase.INTRO, Phase.OLD_TOOL, Phase.FAILED]
-	hint_button.visible = value in [Phase.CODE, Phase.CERTIFIED, Phase.ACTIVE, Phase.FAILED, Phase.LOCAL_FAILED, Phase.LOCAL_COMPLETED, Phase.CHAIN_ERROR]
+	hint_button.visible = false
+	# Preserve the existing scroll button position without a second question entry.
+	$Hud/ToolRail/HintSpace.visible = value in [Phase.CODE, Phase.CERTIFIED, Phase.ACTIVE, Phase.FAILED, Phase.LOCAL_FAILED, Phase.LOCAL_COMPLETED, Phase.CHAIN_ERROR]
 	code_button.visible = value in [Phase.CODE, Phase.CERTIFIED, Phase.ACTIVE, Phase.LOCAL_FAILED, Phase.LOCAL_COMPLETED, Phase.CHAIN_ERROR]
 	_refresh_patch_button()
 	run_button.disabled = value not in [Phase.CODE, Phase.CERTIFIED, Phase.ACTIVE, Phase.FAILED, Phase.LOCAL_FAILED, Phase.LOCAL_COMPLETED, Phase.CHAIN_ERROR]
@@ -1378,6 +1390,34 @@ func _set_phase(value: Phase) -> void:
 			primary_button.text = "查看旧工具演示  →"
 		Phase.FAILED:
 			primary_button.text = "我自己修改  →"
+	_refresh_mentor_question()
+
+
+func _refresh_mentor_question() -> void:
+	if not is_node_ready():
+		return
+	var supported := _phase in [Phase.WORKSHOP, Phase.CODE, Phase.CERTIFIED, Phase.ACTIVE, Phase.FAILED, Phase.LOCAL_FAILED, Phase.LOCAL_COMPLETED, Phase.CHAIN_ERROR, Phase.FREE_PLAY]
+	var available := supported and is_visible_in_tree() and not (
+		story_dialogue.visible or code_drawer.visible or patch_dialog.visible
+		or skill_tree_overlay.visible or bug_challenge_overlay.visible
+		or growth_summary_overlay.visible or completion_card.visible
+	)
+	var reply := "两个数组使用同一个下标，才能找到同一块土地。先计算目标湿度减去当前湿度，再根据缺口决定浇几份水。想清楚后，再去补全代码。"
+	if _phase == Phase.WORKSHOP:
+		if _workshop_step == 0:
+			reply = "同一个下标，才能找到同一块土地。比如 1 号番茄，目标湿度是 70，当前湿度是 65。\n\n先从目标数组和当前数组里，各取出下标为 i 的数，再计算目标减去当前。这样得到的，就是这块土地的湿度缺口。想清楚后，再去补全代码。"
+		elif _workshop_step == 1:
+			reply = "先看看 gap 有多大。缺口达到 30，需要浇 2 份；大于 0 但不到 30，浇 1 份就够了。\n\n如果缺口是 0 或负数，土地已经不缺水，喷头保持关闭。可以分别用 35、5 和 0 试一试你的判断。"
+	elif _phase in [Phase.FAILED, Phase.LOCAL_FAILED]:
+		reply = "先别急着改所有条件。看看结果不同的几块土地：它们种的作物一样吗？目标湿度一样吗？\n\n回到 gap 这一行，检查目标值是否也会随着 i 一起变化。先确认取到的是同一块土地的两份数据，再试着运行。"
+	mentor_question.configure_context("%d:%d" % [_phase, _workshop_step], reply)
+	mentor_question.set_available(available)
+	farm_mentor.visible = available and _phase != Phase.WORKSHOP
+
+
+func _on_mentor_answering_changed(answering: bool) -> void:
+	var mentor := $WorkshopOverlay/Mentor as ArtMotionTexture if _phase == Phase.WORKSHOP else farm_mentor
+	mentor.play_clip("char-dingdang-talk" if answering else "char-dingdang-idle")
 
 
 func _reveal_evidence() -> void:
@@ -1401,6 +1441,7 @@ func _update_workspace_composition() -> void:
 	# S07 intentionally occludes the right farm; never shrink or move the plots.
 	code_button.disabled = code_drawer.visible
 	$Hud/ToolRail.move_child(hint_button, 0)
+	$Hud/ToolRail.move_child($Hud/ToolRail/HintSpace, 1)
 	evidence_body.size.x = (570.0 if code_drawer.visible else 1020.0) * (720.0 / 941.0)
 
 func _apply_v2_layout(value: Phase) -> void:
@@ -1425,11 +1466,13 @@ func _apply_v2_layout(value: Phase) -> void:
 		primary_button.size = Vector2(345, 74) * K
 		$Hud/ToolRail.position = Vector2(661, 857) * K
 		hint_button.custom_minimum_size = Vector2(312, 65) * K
+		$Hud/ToolRail/HintSpace.custom_minimum_size = Vector2(312, 65) * K
 	else:
 		primary_button.position = Vector2(1005, 852) * K
 		primary_button.size = Vector2(409, 74) * K
 		$Hud/ToolRail.position = Vector2(291, 857) * K
 		hint_button.custom_minimum_size = Vector2(290, 65) * K
+		$Hud/ToolRail/HintSpace.custom_minimum_size = Vector2(290, 65) * K
 
 func _layout_completion(compact: bool) -> void:
 	const K := 720.0 / 941.0

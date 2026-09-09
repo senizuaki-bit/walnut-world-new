@@ -1,0 +1,197 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/mentor_question.gd" id="script"]
+[ext_resource type="Theme" path="res://resources/ui/v2/theme.tres" id="theme"]
+[ext_resource type="Script" path="res://scenes/ui/v2_surface.gd" id="surface"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/empty.tres" id="empty"]
+[ext_resource type="Font" path="res://resources/ui/v2/bold.tres" id="bold"]
+[ext_resource type="Texture2D" path="res://assets/ui/microphone.svg" id="mic"]
+
+[sub_resource type="StyleBoxFlat" id="paper"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+bg_color = Color(0.985, 0.93, 0.77, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.58, 0.43, 0.23, 1)
+corner_radius_top_left = 9
+corner_radius_top_right = 9
+corner_radius_bottom_left = 9
+corner_radius_bottom_right = 9
+
+[sub_resource type="StyleBoxFlat" id="caption"]
+bg_color = Color(0.105, 0.25, 0.19, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+
+[sub_resource type="StyleBoxFlat" id="focus"]
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.18, 0.40, 0.29, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+
+[node name="MentorQuestion" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = ExtResource("theme")
+script = ExtResource("script")
+
+[node name="Stack" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -216.0
+offset_top = -305.0
+offset_right = -18.0
+offset_bottom = -14.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+theme_override_constants/separation = 8
+alignment = 2
+
+[node name="ReplyPanel" type="PanelContainer" parent="Stack"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 218)
+layout_mode = 2
+theme_override_styles/panel = SubResource("paper")
+
+[node name="Content" type="VBoxContainer" parent="Stack/ReplyPanel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ReplyScroll" type="ScrollContainer" parent="Stack/ReplyPanel/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 154)
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ReplyText" type="Label" parent="Stack/ReplyPanel/Content/ReplyScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 2
+
+[node name="UnderstoodButton" type="Button" parent="Stack/ReplyPanel/Content"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(80, 36)
+layout_mode = 2
+size_flags_horizontal = 8
+text = "我懂了"
+theme_override_colors/font_color = Color(0.13, 0.30, 0.23, 1)
+theme_override_styles/normal = ExtResource("empty")
+theme_override_styles/hover = SubResource("focus")
+theme_override_styles/pressed = SubResource("focus")
+theme_override_styles/focus = SubResource("focus")
+
+[node name="AskButton" type="Button" parent="Stack"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+tooltip_text = "按住说话，松开结束，移出取消"
+theme_override_constants/h_separation = 7
+theme_override_font_sizes/font_size = 19
+theme_override_fonts/font = ExtResource("bold")
+theme_override_colors/font_color = Color(0.13, 0.30, 0.23, 1)
+theme_override_styles/normal = ExtResource("empty")
+theme_override_styles/hover = ExtResource("empty")
+theme_override_styles/pressed = ExtResource("empty")
+theme_override_styles/disabled = ExtResource("empty")
+theme_override_styles/focus = ExtResource("empty")
+
+[node name="Surface" type="NinePatchRect" parent="Stack/AskButton"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("surface")
+asset_id = "button-normal"
+source_slice = 56.0
+border_width = 14.0
+patch_margin_left = 56
+patch_margin_top = 56
+patch_margin_right = 56
+patch_margin_bottom = 56
+
+[node name="CaptionMargin" type="MarginContainer" parent="Stack/AskButton"]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_right = 10
+
+[node name="Caption" type="HBoxContainer" parent="Stack/AskButton/CaptionMargin"]
+layout_mode = 2
+mouse_filter = 2
+alignment = 1
+theme_override_constants/separation = 7
+
+[node name="Microphone" type="TextureRect" parent="Stack/AskButton/CaptionMargin/Caption"]
+layout_mode = 2
+custom_minimum_size = Vector2(20, 24)
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("mic")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="AskLabel" type="Label" parent="Stack/AskButton/CaptionMargin/Caption"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 19
+theme_override_fonts/font = ExtResource("bold")
+theme_override_colors/font_color = Color(0.13, 0.30, 0.23, 1)
+text = "长按提问"
+
+[node name="QuestionStatus" type="Label" parent="Stack"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 23)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(1, 0.97, 0.85, 1)
+theme_override_styles/normal = SubResource("caption")
+text = "向叮当师傅请教"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HoldTimer" type="Timer" parent="."]
+wait_time = 0.35
+one_shot = true
+
+[node name="LimitTimer" type="Timer" parent="."]
+wait_time = 30.0
+one_shot = true
+
+[node name="ThinkingTimer" type="Timer" parent="."]
+wait_time = 0.65
+one_shot = true
+
+[node name="TypingTimer" type="Timer" parent="."]
+wait_time = 0.055
+
+[node name="FollowTimer" type="Timer" parent="."]
+wait_time = 0.01
+one_shot = true
