@@ -325,6 +325,23 @@ func _on_hint_requested(message: String) -> void:
 	_hint_running = false
 
 
+func configure_voice(base_url: String, token: String, session_id: String) -> void:
+	if is_instance_valid(_level):
+		_level.mentor_question.configure_voice(base_url, token, session_id, Callable(self, "_voice_context"))
+
+
+func _voice_context() -> Dictionary:
+	if not is_instance_valid(_level):
+		return {}
+	return {
+		"code": _level.code_editor.text,
+		"observation": "当前界面阶段：%s；%s" % [
+			CropAdaptiveWateringDemo.Phase.keys()[int(_level.get("_phase"))],
+			str(_store.get("objective_result").get("summary", "")) if is_instance_valid(_store) else "",
+		],
+	}
+
+
 func _on_interactions_recovered(interactions: Array[Dictionary]) -> void:
 	if not _projection_active:
 		_pending_interactions = interactions.duplicate(true)

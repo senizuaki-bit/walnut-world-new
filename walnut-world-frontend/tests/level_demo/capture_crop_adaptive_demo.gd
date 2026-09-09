@@ -47,16 +47,11 @@ func _initialize() -> void:
 				level.story_dialogue.skip_sequence()
 			var question := level.mentor_question
 			if state_name in ["question_listening", "question_answering", "question_complete"]:
-				question.begin_hold()
-				await create_timer(0.4).timeout
+				# Screenshot-only display state: no audio capture or model request.
+				question.call("_on_voice_state", "READY")
 				if state_name != "question_listening":
-					question.end_hold()
-					await create_timer(0.8).timeout
-					if state_name == "question_complete":
-						question.typing_timer.wait_time = 0.001
-						var deadline := Time.get_ticks_msec() + 20000
-						while question.state != MentorQuestion.State.COMPLETE and Time.get_ticks_msec() < deadline:
-							await process_frame
+					question.call("_on_response_started")
+					question.call("_on_text_received", "先比较同一下标的目标湿度与当前湿度，再计算它们的差。", state_name == "question_complete")
 		elif state_name == "manual":
 			level.call("_begin_manual_compare")
 		elif state_name == "manual_choice":

@@ -219,6 +219,8 @@ func _start() -> void:
 		)
 		return
 	store.set_authoritative_session(session)
+	if crop_agent_bridge != null and crop_agent_bridge.has_method("configure_voice"):
+		crop_agent_bridge.configure_voice(str(configuration.base_url), str(configuration.bearer_token), str(session.session_id))
 	if session_controller.has_method("configure_authority"):
 		session_controller.configure_authority(_bootstrap, session)
 	if store.has_method("complete_authority_revalidation"):

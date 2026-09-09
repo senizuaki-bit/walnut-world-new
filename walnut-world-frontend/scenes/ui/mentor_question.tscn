@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scenes/ui/mentor_question.gd" id="script"]
 [ext_resource type="Theme" path="res://resources/ui/v2/theme.tres" id="theme"]
@@ -6,6 +6,7 @@
 [ext_resource type="StyleBox" path="res://resources/ui/v2/empty.tres" id="empty"]
 [ext_resource type="Font" path="res://resources/ui/v2/bold.tres" id="bold"]
 [ext_resource type="Texture2D" path="res://assets/ui/microphone.svg" id="mic"]
+[ext_resource type="PackedScene" path="res://scenes/ui/dingdang_voice_client.tscn" id="voice"]
 
 [sub_resource type="StyleBoxFlat" id="paper"]
 content_margin_left = 12.0
@@ -111,7 +112,7 @@ theme_override_styles/focus = SubResource("focus")
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
-tooltip_text = "按住说话，松开结束，移出取消"
+tooltip_text = "点击开始连续语音对话，再次点击结束"
 theme_override_constants/h_separation = 7
 theme_override_font_sizes/font_size = 19
 theme_override_fonts/font = ExtResource("bold")
@@ -164,7 +165,7 @@ mouse_filter = 2
 theme_override_font_sizes/font_size = 19
 theme_override_fonts/font = ExtResource("bold")
 theme_override_colors/font_color = Color(0.13, 0.30, 0.23, 1)
-text = "长按提问"
+text = "问叮当"
 
 [node name="QuestionStatus" type="Label" parent="Stack"]
 unique_name_in_owner = true
@@ -177,21 +178,14 @@ text = "向叮当师傅请教"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="HoldTimer" type="Timer" parent="."]
-wait_time = 0.35
-one_shot = true
-
-[node name="LimitTimer" type="Timer" parent="."]
-wait_time = 30.0
-one_shot = true
-
-[node name="ThinkingTimer" type="Timer" parent="."]
-wait_time = 0.65
-one_shot = true
-
-[node name="TypingTimer" type="Timer" parent="."]
-wait_time = 0.055
+[node name="InterruptButton" type="Button" parent="Stack/ReplyPanel/Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = "打断，我来说"
 
 [node name="FollowTimer" type="Timer" parent="."]
 wait_time = 0.01
 one_shot = true
+
+[node name="VoiceClient" parent="." instance=ExtResource("voice")]
