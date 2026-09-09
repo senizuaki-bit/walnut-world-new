@@ -7,6 +7,7 @@ var failures: Array[String] = []
 func _initialize() -> void:
 	Engine.set_meta("art_reduced_motion", true)
 	root.size = Vector2i(1280, 720)
+	root.gui_embed_subwindows = true
 	var level := LEVEL.instantiate() as CropAdaptiveWateringDemo
 	root.add_child(level)
 	await process_frame
@@ -90,6 +91,31 @@ func _initialize() -> void:
 	level.code_drawer.hide()
 	await process_frame
 	check(question.visible and code_position.is_equal_approx(level.code_button.global_position), "关闭卷轴后恢复入口且不移动卷轴按钮")
+	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.FAILED)
+	level.set("_same_failure_count", 4)
+	level.set("_same_failure_key", "FIXED_TARGET_VALUE")
+	level.set("_hint_level", 3)
+	level.call("_on_patch_requested")
+	await process_frame
+	check(level.patch_dialog.visible and question.visible, "修改预览保留师傅下方提问入口")
+	check(not level.farm_mentor.visible, "修改预览不得叠加第二个师傅")
+	mouse = InputEventMouseButton.new()
+	mouse.button_index = MOUSE_BUTTON_LEFT
+	mouse.button_mask = MOUSE_BUTTON_MASK_LEFT
+	mouse.pressed = true
+	mouse.position = question.ask_button.get_global_rect().get_center()
+	root.push_input(mouse, true)
+	await create_timer(0.4).timeout
+	check(question.state == MentorQuestion.State.RECORDING, "修改预览弹窗外的按钮必须接收鼠标长按")
+	mouse = mouse.duplicate()
+	mouse.pressed = false
+	mouse.button_mask = 0
+	root.push_input(mouse, true)
+	await create_timer(0.8).timeout
+	check(question.state == MentorQuestion.State.ANSWERING and level.patch_dialog.visible, "修改预览提问不关闭修改比较")
+	level.patch_dialog.hide()
+	await process_frame
+	check(question.state == MentorQuestion.State.IDLE and not question.reply_panel.visible, "退出修改预览清理专属回复")
 	question.begin_hold()
 	await create_timer(0.4).timeout
 	question.end_hold()

@@ -2915,6 +2915,7 @@ unique_name_in_owner = true
 
 [node name="PatchDialog" type="ConfirmationDialog" parent="."]
 unique_name_in_owner = true
+exclusive = false
 ok_button_text = "接受并生成新草稿"
 cancel_button_text = "关闭预览"
 dialog_text = ""

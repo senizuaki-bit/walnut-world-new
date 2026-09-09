@@ -1448,7 +1448,7 @@ func _refresh_mentor_question() -> void:
 		return
 	var supported := _phase in [Phase.WORKSHOP, Phase.CODE, Phase.CERTIFIED, Phase.ACTIVE, Phase.FAILED, Phase.LOCAL_FAILED, Phase.LOCAL_COMPLETED, Phase.CHAIN_ERROR, Phase.FREE_PLAY]
 	var available := supported and is_visible_in_tree() and not (
-		story_dialogue.visible or code_drawer.visible or patch_dialog.visible
+		story_dialogue.visible or code_drawer.visible
 		or skill_tree_overlay.visible or bug_challenge_overlay.visible
 		or growth_summary_overlay.visible or completion_card.visible
 	)
@@ -1460,13 +1460,17 @@ func _refresh_mentor_question() -> void:
 			reply = "先看看 gap 有多大。缺口达到 30，需要浇 2 份；大于 0 但不到 30，浇 1 份就够了。\n\n如果缺口是 0 或负数，土地已经不缺水，喷头保持关闭。可以分别用 35、5 和 0 试一试你的判断。"
 	elif _phase in [Phase.FAILED, Phase.LOCAL_FAILED]:
 		reply = "先别急着改所有条件。看看结果不同的几块土地：它们种的作物一样吗？目标湿度一样吗？\n\n回到 gap 这一行，检查目标值是否也会随着 i 一起变化。先确认取到的是同一块土地的两份数据，再试着运行。"
-	mentor_question.configure_context("%d:%d" % [_phase, _workshop_step], reply)
+	if patch_dialog.visible:
+		reply = "先比较修改前后的 gap 这一行。固定的目标值，只适合部分作物；用 target[i]，才能取到当前这块土地自己的目标湿度。\n\n接受修改只会生成新草稿。你还可以检查代码，再点击直接运行，看看每块土地是否得到了合适的水量。"
+	mentor_question.configure_context("%d:%d:%s" % [_phase, _workshop_step, patch_dialog.visible], reply)
 	mentor_question.set_available(available)
-	farm_mentor.visible = available and _phase != Phase.WORKSHOP
+	farm_mentor.visible = available and _phase != Phase.WORKSHOP and not patch_dialog.visible
 
 
 func _on_mentor_answering_changed(answering: bool) -> void:
 	var mentor := $WorkshopOverlay/Mentor as ArtMotionTexture if _phase == Phase.WORKSHOP else farm_mentor
+	if patch_dialog.visible:
+		mentor = $PatchBackdrop/Mentor as ArtMotionTexture
 	mentor.play_clip("char-dingdang-talk" if answering else "char-dingdang-idle")
 
 
