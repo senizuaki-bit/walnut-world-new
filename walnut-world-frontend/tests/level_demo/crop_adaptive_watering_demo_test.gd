@@ -241,6 +241,16 @@ func _initialize() -> void:
 	if "RAW_CANDIDATE_ERROR_SHOULD_STAY_INTERNAL" in evidence_body.text:
 		failures.append("候选演示失败不得把内部错误代码显示给学生。")
 	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.CODE)
+	var farm := level.get_node("Hud/FarmLayout") as Control
+	var compact_scale := Vector2(0.825, 0.778)
+	for phase in [CropAdaptiveWateringDemo.Phase.MANUAL_COMPARE, CropAdaptiveWateringDemo.Phase.CODE, CropAdaptiveWateringDemo.Phase.CERTIFIED, CropAdaptiveWateringDemo.Phase.ACTIVE, CropAdaptiveWateringDemo.Phase.RUNNING, CropAdaptiveWateringDemo.Phase.FAILED, CropAdaptiveWateringDemo.Phase.LOCAL_FAILED, CropAdaptiveWateringDemo.Phase.LOCAL_COMPLETED, CropAdaptiveWateringDemo.Phase.CHAIN_ERROR, CropAdaptiveWateringDemo.Phase.FREE_PLAY]:
+		level.call("_set_phase", phase)
+		await process_frame
+		if not farm.scale.is_equal_approx(compact_scale) or not farm.position.is_equal_approx(Vector2(446, 266) * (720.0 / 941.0)):
+			failures.append("农田阶段 %d 必须沿用已确认的缩小尺寸与位置。" % phase)
+		if farm.get_global_rect().end.y > evidence_panel.get_global_rect().position.y:
+			failures.append("农田阶段 %d 不得遮挡下方说明。" % phase)
+	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.CODE)
 	level.call("_show_code_drawer")
 	await create_timer(0.10).timeout
 	var drawer_surface := level.get_node("CodeDrawer/Surface") as Control
@@ -248,10 +258,10 @@ func _initialize() -> void:
 		failures.append("S07 must leave the left farm visible")
 	if (grid.get_child(3) as Control).get_global_rect().end.x <= drawer_surface.get_global_rect().position.x:
 		failures.append("S07 must deliberately overlay the right farm, as in guide-layout.json")
-	if (level.get_node("Hud/FarmLayout") as Control).scale != Vector2.ONE:
+	if not farm.scale.is_equal_approx(compact_scale):
 		failures.append("Opening the scroll must not shrink the farm")
 	level.call("_hide_code_drawer")
-	if (level.get_node("Hud/FarmLayout") as Control).scale != Vector2.ONE:
+	if not farm.scale.is_equal_approx(compact_scale):
 		failures.append("关闭技能卷轴后必须恢复农田的正常尺寸。")
 	level.queue_free()
 	await process_frame

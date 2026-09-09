@@ -1514,7 +1514,7 @@ func _refresh_audio_ambience() -> void:
 	sfx.set_ambience_enabled(not quiet and is_visible_in_tree())
 
 func _update_workspace_composition() -> void:
-	# S07 intentionally occludes the right farm; never shrink or move the plots.
+	# Opening the scroll preserves the approved farm layout.
 	code_button.disabled = code_drawer.visible
 	$Hud/ToolRail.move_child(hint_button, 0)
 	$Hud/ToolRail.move_child($Hud/ToolRail/HintSpace, 1)
@@ -1526,12 +1526,10 @@ func _apply_v2_layout(value: Phase) -> void:
 	$Hud.visible = value != Phase.GROWTH_SUMMARY
 	var tall := value == Phase.MANUAL_COMPARE
 	var outcomes := value in [Phase.OLD_TOOL, Phase.RUNNING, Phase.CANDIDATE_VALIDATING, Phase.CANDIDATE_PRESENTING, Phase.FAILED, Phase.LOCAL_FAILED, Phase.LOCAL_COMPLETED]
-	$Hud/FarmLayout.position = Vector2(383, 157 if outcomes else 168) * K
+	$Hud/FarmLayout.position = Vector2(446, 266) * K
 	$Hud/FarmLayout.size = Vector2(940, 535 if outcomes else 455) * K
-	# Owner's annotated E02 revision: fit the complete grid into the lower green frame.
-	$Hud/FarmLayout.scale = Vector2(0.825, 0.778) if tall else Vector2.ONE
-	if tall:
-		$Hud/FarmLayout.position = Vector2(446, 266) * K
+	# Keep the owner's approved compact farm in every phase, including recovery.
+	$Hud/FarmLayout.scale = Vector2(0.825, 0.778)
 	plot_grid.add_theme_constant_override("v_separation", roundi((52 if outcomes else 13) * K))
 	evidence_panel.position = Vector2(288, 639 if tall else 711) * K
 	evidence_panel.size = Vector2(1119, 190 if tall else 126) * K

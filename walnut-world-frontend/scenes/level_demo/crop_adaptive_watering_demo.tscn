@@ -577,12 +577,13 @@ patch_margin_bottom = 56
 
 [node name="FarmLayout" type="HBoxContainer" parent="Hud"]
 layout_mode = 0
+scale = Vector2(0.825, 0.778)
 theme_override_constants/separation = 18
 
-offset_left = 293.0499468650372
-offset_top = 128.5441020191286
-offset_right = 1012.2848034006377
-offset_bottom = 476.68437832093514
+offset_left = 341.254
+offset_top = 203.528
+offset_right = 1060.489
+offset_bottom = 551.668
 
 [node name="PlotGrid" type="GridContainer" parent="Hud/FarmLayout"]
 layout_mode = 2
