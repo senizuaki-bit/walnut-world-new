@@ -1,0 +1,8 @@
+Author: isaiah658
+Source: https://opengameart.org/content/ambient-bird-sounds
+Retrieved: 2026-09-09
+License field on original publication: CC0
+License URL: https://creativecommons.org/publicdomain/zero/1.0/
+Download: https://opengameart.org/sites/default/files/birds-isaiah658_0.ogg
+Original download SHA-256: 359e4e3f9da9d75aac64cede511c7e3ef8b461f9d9f8c230f8f80e44c4b3e35f
+This is a source record, not a license file supplied in the download.

@@ -1,0 +1,8 @@
+Author: rubberduck
+Source: https://opengameart.org/content/40-cc0-water-splash-slime-sfx
+Retrieved: 2026-09-09
+License field on original publication: CC0
+License URL: https://creativecommons.org/publicdomain/zero/1.0/
+Download: https://opengameart.org/sites/default/files/water-splash-slime-sfx.zip
+Original download SHA-256: 7cd39abb49d4362a37ba18dc0e454c7dc1d08029d4e5b683149046bc237b2eba
+This is a source record, not a license file supplied in the download.

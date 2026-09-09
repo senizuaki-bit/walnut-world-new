@@ -1,0 +1,142 @@
+{
+  "date": "2026-09-09",
+  "packs": {
+    "interface": {
+      "pack": "interface",
+      "page": "https://kenney.nl/assets/interface-sounds",
+      "download": "https://kenney.nl/media/pages/assets/interface-sounds/fa43c1dd4d-1677589452/kenney_interface-sounds.zip",
+      "sha256": "f2193d072726d6758a5f7871b2dcc54dcce0d5c35c6f0a62f92549b327c81232",
+      "bytes": 834536,
+      "date": "2026-09-09",
+      "license": "CC0-1.0"
+    },
+    "jingles": {
+      "pack": "jingles",
+      "page": "https://kenney.nl/assets/music-jingles",
+      "download": "https://kenney.nl/media/pages/assets/music-jingles/f37e530b9e-1677590399/kenney_music-jingles.zip",
+      "sha256": "b729ba57959bd58793d2c5cafa348aaf2655d354f3da35ec4729e03ec77197b8",
+      "bytes": 1239525,
+      "date": "2026-09-09",
+      "license": "CC0-1.0"
+    },
+    "water": {
+      "pack": "water",
+      "page": "https://opengameart.org/content/40-cc0-water-splash-slime-sfx",
+      "download": "https://opengameart.org/sites/default/files/water-splash-slime-sfx.zip",
+      "sha256": "7cd39abb49d4362a37ba18dc0e454c7dc1d08029d4e5b683149046bc237b2eba",
+      "bytes": 2259262,
+      "date": "2026-09-09",
+      "license": "CC0-1.0"
+    },
+    "birds": {
+      "pack": "birds",
+      "page": "https://opengameart.org/content/ambient-bird-sounds",
+      "download": "https://opengameart.org/sites/default/files/birds-isaiah658_0.ogg",
+      "sha256": "359e4e3f9da9d75aac64cede511c7e3ef8b461f9d9f8c230f8f80e44c4b3e35f",
+      "bytes": 544669,
+      "date": "2026-09-09",
+      "license": "CC0-1.0"
+    }
+  },
+  "assets": [
+    {
+      "cue": "click",
+      "file": "click.wav",
+      "pack": "interface",
+      "source_file": "extracted/Audio/click_001.ogg",
+      "source_sha256": "ccfb7fa0cccdd9faec0eb16033c732b1e308d139d80f799161495d58f7adcdb9",
+      "sha256": "c6a6d857ac731881b3c0f8d366836e32a7324aae3973b8e18c9e11bbd2bdf899",
+      "duration_seconds": 0.0971,
+      "processing": "atrim=duration=0.09712018140589569,asetpts=PTS-STARTPTS,volume=0.8273863075193907,afade=t=in:d=0.005,afade=t=out:st=0.09212018140589569:d=0.005",
+      "format": "mono 44100Hz PCM 16-bit"
+    },
+    {
+      "cue": "panel_open",
+      "file": "panel_open.wav",
+      "pack": "interface",
+      "source_file": "extracted/Audio/open_001.ogg",
+      "source_sha256": "a27c6bb0df7da1e6af5dd5937593c98bc58b6e513f42fe6a3254cd6a6949c648",
+      "sha256": "cec70c0fb9727ed00a6b5d791862d0c486c8fe614d510919b16c0d5a84b717f4",
+      "duration_seconds": 0.1478,
+      "processing": "atrim=duration=0.14777777777777779,asetpts=PTS-STARTPTS,volume=0.781902772282194,afade=t=in:d=0.005,afade=t=out:st=0.14277777777777778:d=0.005",
+      "format": "mono 44100Hz PCM 16-bit"
+    },
+    {
+      "cue": "panel_close",
+      "file": "panel_close.wav",
+      "pack": "interface",
+      "source_file": "extracted/Audio/close_001.ogg",
+      "source_sha256": "44af8249b933e0fd35ec957a638bb1a0b01f85b53fbe9674bf77bd3ca3168ef4",
+      "sha256": "af4088abcfc9cbcdc391e8c7b947587bf8f80109a55464a0ca4cb3894be468d8",
+      "duration_seconds": 0.1478,
+      "processing": "atrim=duration=0.14777777777777779,asetpts=PTS-STARTPTS,volume=0.7870168957000949,afade=t=in:d=0.005,afade=t=out:st=0.14277777777777778:d=0.005",
+      "format": "mono 44100Hz PCM 16-bit"
+    },
+    {
+      "cue": "confirm",
+      "file": "confirm.wav",
+      "pack": "interface",
+      "source_file": "extracted/Audio/confirmation_001.ogg",
+      "source_sha256": "063564703b6094d70718a3e787a55cc9141611e4ecd6b6637f8828f79b4a8c3a",
+      "sha256": "ec17f4e72220b52ec0c79942e2e9978220ece278f6c90dd349c62713c2932115",
+      "duration_seconds": 0.2898,
+      "processing": "atrim=duration=0.28984126984126984,asetpts=PTS-STARTPTS,volume=0.7879934311043114,afade=t=in:d=0.005,afade=t=out:st=0.28484126984126984:d=0.005",
+      "format": "mono 44100Hz PCM 16-bit"
+    },
+    {
+      "cue": "retry",
+      "file": "retry.wav",
+      "pack": "interface",
+      "source_file": "extracted/Audio/error_004.ogg",
+      "source_sha256": "0b574cea597d96507e782ae9764f88482ce49f46e931e57054bf7150047f2d69",
+      "sha256": "86f38747b5b45193024ff61f74b2675c16cb10de3a3d6d557db9b76ee047df1f",
+      "duration_seconds": 0.1045,
+      "processing": "atrim=duration=0.10448979591836735,asetpts=PTS-STARTPTS,volume=0.5781881172619562,afade=t=in:d=0.005,afade=t=out:st=0.09948979591836735:d=0.005",
+      "format": "mono 44100Hz PCM 16-bit"
+    },
+    {
+      "cue": "activate",
+      "file": "activate.wav",
+      "pack": "interface",
+      "source_file": "extracted/Audio/confirmation_004.ogg",
+      "source_sha256": "568967a3d9f8a8f6af54ea01729c4882284308f2a27d78c07ffd7ee0d6951661",
+      "sha256": "d9ac9cfc484d3cadd62c7acc8870089203e137434428ed59268f371ad60abe6e",
+      "duration_seconds": 0.4904,
+      "processing": "atrim=duration=0.4904081632653061,asetpts=PTS-STARTPTS,volume=0.7863662438714241,afade=t=in:d=0.005,afade=t=out:st=0.4854081632653061:d=0.005",
+      "format": "mono 44100Hz PCM 16-bit"
+    },
+    {
+      "cue": "complete",
+      "file": "complete.wav",
+      "pack": "jingles",
+      "source_file": "extracted/Audio/Pizzicato jingles/jingles_PIZZI03.ogg",
+      "source_sha256": "88da900ec74a79fb845f2dcf2068383998833a9ee1b87a23f074924781af5700",
+      "sha256": "60f44981ba2a347b6ea8b7b18e055c2e6ddb4200ac2deda5243e452dac6ad270",
+      "duration_seconds": 1.1469,
+      "processing": "atrim=duration=1.1468707482993197,asetpts=PTS-STARTPTS,volume=0.8085487856727146,afade=t=in:d=0.005,afade=t=out:st=1.1418707482993198:d=0.005",
+      "format": "mono 44100Hz PCM 16-bit"
+    },
+    {
+      "cue": "watering",
+      "file": "watering.wav",
+      "pack": "water",
+      "source_file": "extracted/loop_water_02.ogg",
+      "source_sha256": "2a39d9c6d3069e94f15b092f15bcfac7de54ca1bdc7c0b9a02b151bda6f3a29d",
+      "sha256": "d085ae920829673c28bbb670d4ee4a1cac47f482045e860164fd83445402ac1d",
+      "duration_seconds": 3.0,
+      "processing": "atrim=duration=3.0,asetpts=PTS-STARTPTS,volume=1.0,afade=t=in:d=0.08,afade=t=out:st=2.92:d=0.08",
+      "format": "mono 44100Hz PCM 16-bit"
+    },
+    {
+      "cue": "birds",
+      "file": "birds.ogg",
+      "pack": "birds",
+      "source_file": "birds-isaiah658_0.ogg",
+      "source_sha256": "359e4e3f9da9d75aac64cede511c7e3ef8b461f9d9f8c230f8f80e44c4b3e35f",
+      "sha256": "26e4e61dc68fc874d7b0efeaf0b0e9fcbc9bb4adb5f5a542f022d383e942fbdd",
+      "duration_seconds": 24.0,
+      "processing": "atrim=duration=24.0,asetpts=PTS-STARTPTS,volume=1.0,afade=t=in:d=1.0,afade=t=out:st=23.0:d=1.0",
+      "format": "mono 44100Hz Vorbis q5"
+    }
+  ]
+}
