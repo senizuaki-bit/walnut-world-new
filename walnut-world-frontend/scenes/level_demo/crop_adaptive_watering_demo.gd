@@ -136,6 +136,8 @@ const CROP_TEXTURES := [
 @onready var light_boundary_input: LineEdit = %LightBoundaryInput
 @onready var light_units_input: LineEdit = %LightUnitsInput
 @onready var workshop_action_button: Button = %WorkshopActionButton
+@onready var _workshop_card_rest_height: float = $WorkshopOverlay/Card.size.y
+@onready var _workshop_action_rest_y: float = workshop_action_button.position.y
 @onready var bug_challenge_overlay: Control = %BugChallengeOverlay
 @onready var bug_challenge_body: RichTextLabel = %BugChallengeBody
 @onready var bug_continue_button: Button = %BugContinueButton
@@ -585,6 +587,23 @@ func _refresh_workshop_errors() -> void:
 	var label := %WorkshopError as Label
 	label.text = "；".join(messages)
 	label.visible = not messages.is_empty()
+	_layout_workshop_errors.call_deferred()
+
+
+func _layout_workshop_errors() -> void:
+	var label := %WorkshopError as Label
+	var board := $WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel as Control
+	var card := $WorkshopOverlay/Card as Control
+	if not label.visible:
+		workshop_action_button.position.y = _workshop_action_rest_y
+		card.size.y = _workshop_card_rest_height
+		return
+	# Reserve a separate paper area after the board; never write over its border.
+	label.position = Vector2(board.position.x, board.position.y + board.size.y + 10.0)
+	label.size.x = board.size.x
+	label.size.y = maxf(44.0, label.get_minimum_size().y)
+	workshop_action_button.position.y = label.position.y + label.size.y + 10.0
+	card.size.y = maxf(_workshop_card_rest_height, workshop_action_button.position.y + workshop_action_button.size.y + 24.0)
 
 
 func _hide_lesson_overlays() -> void:
