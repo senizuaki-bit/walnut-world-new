@@ -16,6 +16,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+voice = ["websockets==15.0.1"]
 test = [
     "jsonschema==4.23.0",
     "rfc3339-validator==0.1.4",

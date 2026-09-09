@@ -1,5 +1,7 @@
 # 核桃代码世界 Python 后端接口文档
 
+> 当前 Demo 联调入口：[前后端接口文档（2026-09-09）](frontend-api/README.md)。本文保留历史实现与交付记录；其中路由启用状态不代表当前应用配置。
+
 > 文档版本：v1.4（2026-08-15 INT2 current evidence）
 > 后端仓库：当前仓库根目录
 > Agent 合同与参考实现：sibling `../agent` workspace

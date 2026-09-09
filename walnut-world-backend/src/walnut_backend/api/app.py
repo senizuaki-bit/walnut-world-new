@@ -11,6 +11,7 @@ from walnut_backend.adapters.postgres.agent_sessions import PostgresAgentSession
 from walnut_backend.adapters.postgres.agent_turns import PostgresAgentTurnStore
 from walnut_backend.adapters.postgres.client_events import PostgresClientEventStore
 from walnut_backend.adapters.postgres.command_store import PostgresCommandStore
+from walnut_backend.adapters.postgres.dingdang_voice import PostgresDingdangVoiceContext
 from walnut_backend.adapters.postgres.event_store import PostgresEventStore
 from walnut_backend.adapters.postgres.feishu_learning import PostgresFeishuLearningStore
 from walnut_backend.adapters.postgres.product_content import PostgresProductContentStore
@@ -30,6 +31,8 @@ from walnut_backend.api.realtime import router as realtime_router
 from walnut_backend.api.routes.agent_sessions import router as agent_sessions_router
 from walnut_backend.api.routes.agent_turns import router as agent_turns_router
 from walnut_backend.api.routes.client_events import router as client_events_router
+from walnut_backend.api.routes.dingdang_voice import configured_voice
+from walnut_backend.api.routes.dingdang_voice import router as dingdang_voice_router
 from walnut_backend.api.routes.feishu_learning import router as feishu_learning_router
 from walnut_backend.api.routes.feishu_mcp import router as feishu_mcp_router
 from walnut_backend.api.routes.game_reads import router as game_reads_router
@@ -119,6 +122,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.state.product_content = ProductContent(PostgresProductContentStore(sessions))
         app.state.product_interactions = ProductInteractions(PostgresProductInteractionStore(sessions))
         app.state.product_workspaces = ProductWorkspaces(PostgresProductWorkspaceStore(sessions))
+        app.state.dingdang_voice_context = PostgresDingdangVoiceContext(sessions)
+        app.state.dingdang_voice_factory = configured_voice
         if resolved_settings.realtime_wss_enabled:
             app.state.realtime_subscriptions = RealtimeSubscriptions(
                 PostgresWorld(sessions), PostgresEventStore(sessions)
@@ -158,6 +163,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     if resolved_settings.skill_patch_enabled:
         app.include_router(product_patch_decision_router)
     app.include_router(product_workspaces_router)
+    app.include_router(dingdang_voice_router)
     if resolved_settings.realtime_wss_enabled:
         app.include_router(realtime_router)
     return app

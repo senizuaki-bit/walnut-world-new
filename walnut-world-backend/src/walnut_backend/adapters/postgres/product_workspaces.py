@@ -8,7 +8,7 @@ from copy import deepcopy
 from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from yaya_agent_contracts import Failure, OperationContext, Result, Success
 
@@ -26,7 +26,8 @@ class PostgresProductWorkspaceStore:
         self._sessions = session_factory
 
     async def get(self, session_id: str, context: OperationContext) -> Result[dict[str, Any]]:
-        async with self._sessions() as session:
+        async with self._sessions() as session, session.begin():
+            await session.execute(text("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY"))
             row = await session.scalar(select(ProductWorkspaceRow).where(ProductWorkspaceRow.tenant_id == context.actor.tenant_id, ProductWorkspaceRow.actor_id == context.actor.actor_id, ProductWorkspaceRow.session_id == session_id))
             owner = (
                 await session.scalar(

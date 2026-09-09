@@ -16,6 +16,7 @@ from yaya_agent_contracts import (
     CommandStatus,
     ContentRef,
     OperationContext,
+    SkillRef,
 )
 
 from walnut_backend.adapters.postgres import run_outcomes
@@ -61,22 +62,26 @@ def _authority(
     effective_turn_id = turn_id or f"turn_memo_{index:04d}"
     effective_command_id = command_id or f"cmd_memo_{index:04d}"
     context = _context(index, actor_id=actor_id)
-    context = SimpleNamespace(
-        **{
-            **context.__dict__,
-            "command_id": effective_command_id,
-        }
-    ) if hasattr(context, "__dict__") else OperationContext(
-        request_id=context.request_id,
-        correlation_id=context.correlation_id,
-        trace_id=context.trace_id,
-        requested_at=context.requested_at,
-        actor=context.actor,
-        content_ref=context.content_ref,
-        schema_version=context.schema_version,
-        command_id=effective_command_id,
-        causation_id=context.causation_id,
-        deadline_at=context.deadline_at,
+    context = (
+        SimpleNamespace(
+            **{
+                **context.__dict__,
+                "command_id": effective_command_id,
+            }
+        )
+        if hasattr(context, "__dict__")
+        else OperationContext(
+            request_id=context.request_id,
+            correlation_id=context.correlation_id,
+            trace_id=context.trace_id,
+            requested_at=context.requested_at,
+            actor=context.actor,
+            content_ref=context.content_ref,
+            schema_version=context.schema_version,
+            command_id=effective_command_id,
+            causation_id=context.causation_id,
+            deadline_at=context.deadline_at,
+        )
     )
     evidence_refs: tuple[Any, ...] = ()
     return SimpleNamespace(
@@ -86,6 +91,10 @@ def _authority(
             turn_sequence=index,
             turn_id=effective_turn_id,
             command_id=effective_command_id,
+            request_json={
+                "input": {"type": "UI_ACTION", "action_id": "submit"},
+                "skill_bindings": [{"skill_id": "skill_memo"}],
+            },
         ),
         command=SimpleNamespace(
             terminal=True,
@@ -100,14 +109,16 @@ def _authority(
             command_id=effective_command_id,
             task_success=False,
             failure_key="same_failure",
-            skill_ref="same_skill",
+            skill_ref=SkillRef("skill_memo_0001", "skillver_memo_0001", "a" * 64, "cert_memo_0001"),
             world_id="world_memo_0001",
             evidence_refs=evidence_refs,
         ),
     )
 
 
-def test_four_run_history_validates_each_projection_body_once(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_four_run_history_validates_each_projection_body_once(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     authorities = tuple(_authority(index) for index in range(1, 5))
     authorities_by_command = {item.run.command_id: item for item in authorities}
     projection_calls: list[str] = []
@@ -192,10 +203,32 @@ def test_four_run_history_validates_each_projection_body_once(monkeypatch: pytes
     assert len(load_calls) == len(authorities)
 
 
+@pytest.mark.parametrize("rebuilt,boundary,across_versions,expected", [
+    (False, None, True, 4), (True, None, True, 4),
+    (True, None, False, 1),
+    (True, "task_success", True, 2), (True, "failure_key", True, 2),
+    (True, "world_id", True, 2), (True, "skill_ref", True, 2),
+])
 def test_failure_suffix_prefetches_run_presence_in_one_query(
     monkeypatch: pytest.MonkeyPatch,
+    rebuilt: bool,
+    boundary: str | None,
+    across_versions: bool,
+    expected: int,
 ) -> None:
     authorities = tuple(_authority(index) for index in range(1, 5))
+    if rebuilt:
+        for index, item in enumerate(authorities, 1):
+            item.run.skill_ref = SkillRef(
+                "skill_memo_0001", f"skillver_memo_{index:04d}",
+                str(index) * 64, f"cert_memo_{index:04d}",
+            )
+    if boundary is not None:
+        setattr(authorities[1].run, boundary, (
+            True if boundary == "task_success" else
+            SkillRef("skill_other_0001", "skillver_other_0001", "f" * 64, "cert_other_0001")
+            if boundary == "skill_ref" else "different"
+        ))
     by_command = {item.run.command_id: item for item in authorities}
 
     class Result:
@@ -218,7 +251,7 @@ def test_failure_suffix_prefetches_run_presence_in_one_query(
         return by_command[command_id]
 
     async def validate_projection(_session: object, _authority: Any, **_kwargs: Any) -> None:
-        return None
+        raise AssertionError("counting failed Runs must not revalidate past Agent/learner projections")
 
     monkeypatch.setattr(run_outcomes, "load_validated_run", load_run)
     monkeypatch.setattr(run_outcomes, "validate_terminal_projection", validate_projection)
@@ -229,12 +262,265 @@ def test_failure_suffix_prefetches_run_presence_in_one_query(
             current=authorities[-1],
             context=authorities[-1].context,
             current_must_be_live=False,
+            across_versions=across_versions,
         )
     )
 
-    assert count == 4
+    assert count == expected
     assert session.execute_calls == 1
     assert session.scalar_calls == 0
+
+
+def test_failure_suffix_crosses_only_fully_validated_hint_turns(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runs = tuple(_authority(index) for index in (1, 3, 5))
+    by_command = {item.run.command_id: item for item in runs}
+    hint_two = SimpleNamespace(
+        tenant_id="tenant_yaya",
+        actor_id="student_0001",
+        session_id="session_memo_0001",
+        turn_sequence=2,
+        turn_id="turn_memo_0002",
+        command_id="cmd_memo_0002",
+        request_json={"input": {"type": "MESSAGE"}, "skill_bindings": []},
+    )
+    hint_four = SimpleNamespace(
+        tenant_id="tenant_yaya",
+        actor_id="student_0001",
+        session_id="session_memo_0001",
+        turn_sequence=4,
+        turn_id="turn_memo_0004",
+        command_id="cmd_memo_0004",
+        request_json={"input": {"type": "MESSAGE"}, "skill_bindings": []},
+    )
+    rows = [
+        (runs[2].turn, runs[2].run.command_id),
+        (hint_four, None),
+        (runs[1].turn, runs[1].run.command_id),
+        (hint_two, None),
+        (runs[0].turn, runs[0].run.command_id),
+    ]
+
+    class Result:
+        def all(self) -> list[tuple[Any, str | None]]:
+            return rows
+
+    class Session:
+        async def execute(self, _statement: Any) -> Result:
+            return Result()
+
+    validated_hints: list[str] = []
+
+    async def load_run(_session: object, *, command_id: str, **_kwargs: Any) -> Any:
+        return by_command[command_id]
+
+    async def validate_projection(_session: object, _authority: Any, **_kwargs: Any) -> None:
+        return None
+
+    async def validate_hint(_session: object, turn: Any, **_kwargs: Any) -> bool:
+        validated_hints.append(turn.turn_id)
+        return True
+
+    monkeypatch.setattr(run_outcomes, "load_validated_run", load_run)
+    monkeypatch.setattr(run_outcomes, "validate_terminal_projection", validate_projection)
+    monkeypatch.setattr(run_outcomes, "_terminal_hint_turn_has_authority", validate_hint)
+
+    count = asyncio.run(
+        run_outcomes.exact_failure_suffix_count(
+            Session(),  # type: ignore[arg-type]
+            current=runs[-1],
+            context=runs[-1].context,
+            current_must_be_live=False,
+        )
+    )
+
+    assert count == 3
+    assert validated_hints == ["turn_memo_0004", "turn_memo_0002"]
+
+
+def test_failure_suffix_rejects_a_hint_with_corrupt_terminal_authority(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    current = _authority(2)
+    hint = SimpleNamespace(
+        tenant_id="tenant_yaya",
+        actor_id="student_0001",
+        session_id="session_memo_0001",
+        turn_sequence=1,
+        turn_id="turn_memo_0001",
+        command_id="cmd_memo_0001",
+        request_json={"input": {"type": "MESSAGE"}, "skill_bindings": []},
+    )
+
+    class Result:
+        def all(self) -> list[tuple[Any, str | None]]:
+            return [(current.turn, current.run.command_id), (hint, None)]
+
+    class Session:
+        async def execute(self, _statement: Any) -> Result:
+            return Result()
+
+    async def reject_hint(_session: object, _turn: Any, **_kwargs: Any) -> bool:
+        return False
+
+    async def retained_hint(_session: object, _turn: Any) -> bool:
+        return False
+
+    monkeypatch.setattr(run_outcomes, "_terminal_hint_turn_has_authority", reject_hint)
+    monkeypatch.setattr(run_outcomes, "_abandoned_hint_attempt", retained_hint)
+
+    with pytest.raises(WorkflowInvariantError, match="hint without terminal authority"):
+        asyncio.run(
+            run_outcomes.exact_failure_suffix_count(
+                Session(),  # type: ignore[arg-type]
+                current=current,
+                context=current.context,
+                current_must_be_live=False,
+            )
+        )
+
+
+def test_failure_suffix_stops_at_an_abandoned_hint_attempt(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    current = _authority(2)
+    hint = SimpleNamespace(
+        tenant_id="tenant_yaya",
+        actor_id="student_0001",
+        session_id="session_memo_0001",
+        turn_sequence=1,
+        turn_id="turn_memo_0001",
+        command_id="cmd_memo_0001",
+        request_json={"input": {"type": "MESSAGE"}, "skill_bindings": []},
+    )
+
+    class Result:
+        def all(self) -> list[tuple[Any, str | None]]:
+            return [(current.turn, current.run.command_id), (hint, None)]
+
+    class Session:
+        async def execute(self, _statement: Any) -> Result:
+            return Result()
+
+    async def reject_hint(_session: object, _turn: Any, **_kwargs: Any) -> bool:
+        return False
+
+    async def abandoned_hint(_session: object, _turn: Any) -> bool:
+        return True
+
+    monkeypatch.setattr(run_outcomes, "_terminal_hint_turn_has_authority", reject_hint)
+    monkeypatch.setattr(run_outcomes, "_abandoned_hint_attempt", abandoned_hint)
+
+    count = asyncio.run(
+        run_outcomes.exact_failure_suffix_count(
+            Session(),  # type: ignore[arg-type]
+            current=current,
+            context=current.context,
+            current_must_be_live=False,
+        )
+    )
+
+    assert count == 1
+
+
+def test_failure_suffix_stops_at_an_unknown_no_run_turn(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    prior = _authority(1)
+    current = _authority(3)
+    unknown = SimpleNamespace(
+        tenant_id="tenant_yaya",
+        actor_id="student_0001",
+        session_id="session_memo_0001",
+        turn_sequence=2,
+        turn_id="turn_memo_0002",
+        command_id="cmd_memo_0002",
+        request_json={
+            "input": {"type": "UI_ACTION", "action_id": "unknown"},
+            "skill_bindings": [],
+        },
+    )
+
+    class Result:
+        def all(self) -> list[tuple[Any, str | None]]:
+            return [
+                (current.turn, current.run.command_id),
+                (unknown, None),
+                (prior.turn, prior.run.command_id),
+            ]
+
+    class Session:
+        async def execute(self, _statement: Any) -> Result:
+            return Result()
+
+    count = asyncio.run(
+        run_outcomes.exact_failure_suffix_count(
+            Session(),  # type: ignore[arg-type]
+            current=current,
+            context=current.context,
+            current_must_be_live=False,
+        )
+    )
+
+    assert count == 1
+
+
+def test_historical_hint_failure_lookup_does_not_require_current_world(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    authority = _authority(1)
+    current_turn = SimpleNamespace(
+        tenant_id="tenant_yaya",
+        actor_id="student_0001",
+        session_id="session_memo_0001",
+        turn_sequence=2,
+        turn_id="turn_memo_0002",
+        command_id="cmd_memo_0002",
+    )
+
+    class Result:
+        def all(self) -> list[tuple[Any, str]]:
+            return [(authority.turn, authority.run.command_id)]
+
+    class Session:
+        async def execute(self, _statement: Any) -> Result:
+            return Result()
+
+    current_world_requirements: list[bool] = []
+
+    async def load_run(
+        _session: object,
+        *,
+        require_current_world: bool,
+        **_kwargs: Any,
+    ) -> Any:
+        current_world_requirements.append(require_current_world)
+        return authority
+
+    async def validate_projection(_session: object, _authority: Any, **_kwargs: Any) -> None:
+        return None
+
+    async def count_suffix(_session: object, **_kwargs: Any) -> int:
+        return 1
+
+    monkeypatch.setattr(run_outcomes, "load_validated_run", load_run)
+    monkeypatch.setattr(run_outcomes, "validate_terminal_projection", validate_projection)
+    monkeypatch.setattr(run_outcomes, "exact_failure_suffix_count", count_suffix)
+
+    failure = asyncio.run(
+        run_outcomes.latest_failure_authority_for_hint(
+            Session(),  # type: ignore[arg-type]
+            current_turn=current_turn,  # type: ignore[arg-type]
+            context=authority.context,
+            expected_skill_ref=cast(Any, authority.run.skill_ref),
+            require_current_world=False,
+        )
+    )
+
+    assert failure is not None
+    assert failure.authority is authority
+    assert current_world_requirements == [False]
 
 
 def test_load_cache_is_exact_and_bound_to_one_database_session(
@@ -604,9 +890,7 @@ def test_failed_projection_is_not_memoized(monkeypatch: pytest.MonkeyPatch) -> N
 
     with pytest.raises(WorkflowInvariantError, match="corrupt projection"):
         asyncio.run(
-            run_outcomes.validate_terminal_projection(
-                session, authority, validation_state=state
-            )
+            run_outcomes.validate_terminal_projection(session, authority, validation_state=state)
         )
     asyncio.run(
         run_outcomes.validate_terminal_projection(session, authority, validation_state=state)

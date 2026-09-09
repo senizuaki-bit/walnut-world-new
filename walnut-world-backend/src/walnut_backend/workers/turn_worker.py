@@ -10,6 +10,7 @@ from typing import Any, cast
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from yaya_agent_backend.codec import decode_as, encode
 from yaya_agent_contracts import (
     ActorType,
     CommandRecord,
@@ -35,10 +36,12 @@ from yaya_agent_runtime import (
     RuntimeBoundaryError,
     SharedAgentRuntime,
     SkillInvocationResult,
+    TurnContext,
     build_default_tool_registry,
     side_effect_execution_id,
+    validate_context_for_role,
 )
-from yaya_agent_runtime import BUG_FAILURE_THRESHOLD
+from yaya_agent_runtime.domain import RoleId
 from yaya_agent_runtime.evidence import collect_decision_evidence
 from yaya_agent_runtime.tool_registry import ToolRegistry
 from yaya_agent_sandbox import RecoverableSandboxPort
@@ -51,6 +54,10 @@ from walnut_backend.adapters.postgres.agent_runtime import (
     PostgresAgentRuntimeReads,
     PostgresAgentTrace,
 )
+from walnut_backend.adapters.postgres.build_failures import (
+    compile_failure_key,
+    list_current_build_failure_streak,
+)
 from walnut_backend.adapters.postgres.command_store import PostgresCommandStore
 from walnut_backend.adapters.postgres.durable_llm import PostgresDurableLlm
 from walnut_backend.adapters.postgres.models import (
@@ -60,6 +67,7 @@ from walnut_backend.adapters.postgres.models import (
     CommandRow,
     CurrentSessionBindingRow,
     EvidenceRow,
+    JobStepReceiptRow,
     LaunchAuthorityRow,
     ProductContentUnitRow,
     ProductDraftRevisionRow,
@@ -80,6 +88,7 @@ from walnut_backend.adapters.postgres.product_interactions import (
 from walnut_backend.adapters.postgres.run_outcomes import (
     PostgresRunOutcomeAuthority,
     evidence_ref_wire,
+    latest_run_authority_for_hint,
 )
 from walnut_backend.adapters.postgres.session_binding_authority import (
     current_session_binding_matches,
@@ -94,6 +103,8 @@ from walnut_backend.adapters.postgres.workflow_jobs import (
     PostgresWorkflowJobStore,
     WorkflowBoundaryError,
     WorkflowInvariantError,
+    workflow_receipt_sha256,
+    workflow_step_receipt_id,
 )
 from walnut_backend.adapters.postgres.world import (
     PostgresWorld,
@@ -255,6 +266,7 @@ class TurnWorkflowHandler:
             lease_seconds=self._lease_seconds,
             receipt_namespace="ROOT",
             ordinal_base=0,
+            pending_wait_seconds=6,
         )
         root_runtime = self._runtime(
             claim,
@@ -320,10 +332,8 @@ class TurnWorkflowHandler:
         }:
             raise WorkflowInvariantError("Run outcome did not route to one final A8 role")
         try:
-            final_context = await self._contexts.build(
-                outcome,
-                final_route.role,
-                authority.context,
+            final_context = await self._saved_turn_context(
+                authority, final_route.role, outcome, "FINAL_CONTEXT_READY",
             )
         except ValueError as error:
             raise WorkflowBoundaryError("FINAL_CONTEXT_BUILD") from error
@@ -337,6 +347,7 @@ class TurnWorkflowHandler:
             lease_seconds=self._lease_seconds,
             receipt_namespace="FINAL",
             ordinal_base=100,
+            pending_wait_seconds=6,
         )
         final_runtime = self._runtime(
             claim,
@@ -379,14 +390,7 @@ class TurnWorkflowHandler:
         route = RoleRouter().route(authority.event)
         if not route.should_run or route.role not in {"teaching_agent", "bug_agent"}:
             raise WorkflowInvariantError("hint_requested did not route to one teaching role")
-        try:
-            turn_context = await self._contexts.build(
-                authority.event,
-                route.role,
-                authority.context,
-            )
-        except ValueError as error:
-            raise WorkflowBoundaryError("HINT_CONTEXT_BUILD") from error
+        turn_context = await self._hint_context(authority, route.role)
         llm = PostgresDurableLlm(
             session_factory=self._sessions,
             jobs=self._jobs,
@@ -417,8 +421,10 @@ class TurnWorkflowHandler:
         hint_mismatches: list[str] = []
         if decision.role != route.role:
             hint_mismatches.append("ROLE")
-        if decision.response_type not in {"question", "hint"}:
+        if decision.response_type not in {"question", "hint", "message"}:
             hint_mismatches.append("RESPONSE_TYPE")
+        if decision.response_type == "message" and decision.draft.learner_inference is not None:
+            hint_mismatches.append("CONVERSATION_INFERENCE")
         if decision.draft.skill_patch is not None:
             hint_mismatches.append("PATCH_BODY")
         if decision.source != "provider":
@@ -457,14 +463,64 @@ class TurnWorkflowHandler:
             lease_seconds=self._lease_seconds,
         )
 
+    async def _hint_context(self, authority: _TurnAuthority, role: RoleId) -> TurnContext:
+        return await self._saved_turn_context(authority, role, authority.event, "HINT_CONTEXT_READY")
+
+    async def _saved_turn_context(
+        self, authority: _TurnAuthority, role: RoleId, event: GameEvent, step_name: str,
+    ) -> TurnContext:
+        """Prepare input once; model continuation reuses this Turn's snapshot."""
+
+        claim = authority.claim
+        async with self._sessions() as session:
+            receipt = await session.scalar(
+                select(JobStepReceiptRow).where(
+                    JobStepReceiptRow.tenant_id == claim.tenant_id,
+                    JobStepReceiptRow.job_id == claim.job_id,
+                    JobStepReceiptRow.step_name == step_name,
+                )
+            )
+        if receipt is not None:
+            if (
+                receipt.receipt_id
+                != workflow_step_receipt_id(claim.tenant_id, claim.job_id, step_name)
+                or receipt.input_sha256 != claim.request_sha256
+                or receipt.output_sha256 != workflow_receipt_sha256(receipt.receipt_json)
+                or not 0 < receipt.fencing_token <= claim.fencing_token
+            ):
+                raise WorkflowInvariantError("Turn context receipt authority drifted")
+            try:
+                turn_context = decode_as(receipt.receipt_json, TurnContext)
+                validate_context_for_role(turn_context)
+            except (KeyError, TypeError, ValueError) as error:
+                raise WorkflowInvariantError("Turn context receipt is invalid") from error
+            if (
+                turn_context.role != role
+                or turn_context.event != event
+                or turn_context.task.request_context != authority.command.request_context
+            ):
+                raise WorkflowInvariantError("Saved context differs from accepted Turn authority")
+            return turn_context
+        try:
+            turn_context = await self._contexts.build(event, role, authority.context)
+        except ValueError as error:
+            raise WorkflowBoundaryError(step_name.replace("_READY", "_BUILD")) from error
+        async with self._sessions() as session, session.begin():
+            await self._jobs.record_step_in_session(
+                session,
+                claim,
+                step_name=step_name,
+                input_sha256=claim.request_sha256,
+                output=cast(Mapping[str, Any], encode(turn_context)),
+            )
+        return turn_context
+
     async def _execute_skill_patch(self, authority: _TurnAuthority) -> None:
         """Dispatch only teaching_agent for one pre-authorized UI request."""
 
         route = RoleRouter().route(authority.event)
         if not route.should_run or route.role != "teaching_agent":
-            raise WorkflowInvariantError(
-                "skill_patch_requested did not route to teaching_agent"
-            )
+            raise WorkflowInvariantError("skill_patch_requested did not route to teaching_agent")
         try:
             turn_context = await self._contexts.build(
                 authority.event,
@@ -515,15 +571,11 @@ class TurnWorkflowHandler:
             proposal_mismatches.append("TOOLS")
         if decision.evidence_refs != collect_decision_evidence(turn_context):
             proposal_mismatches.append("DECISION_EVIDENCE")
-        if (
-            proposal is not None
-            and proposal.failed.evidence_refs != authority.event.evidence_refs
-        ):
+        if proposal is not None and proposal.failed.evidence_refs != authority.event.evidence_refs:
             proposal_mismatches.append("FAILURE_EVIDENCE")
         if proposal_mismatches:
             raise WorkflowInvariantError(
-                "Skill Patch proposal closure mismatch: "
-                + ",".join(proposal_mismatches)
+                "Skill Patch proposal closure mismatch: " + ",".join(proposal_mismatches)
             )
         from walnut_backend.workers.turn_projection import finish_skill_patch_proposal
 
@@ -709,9 +761,7 @@ class TurnWorkflowHandler:
             raw_bindings = request.get("skill_bindings")
             if not isinstance(raw_bindings, list):
                 raise WorkflowInvariantError("Turn skill_bindings must be an array")
-            is_hint_request = (
-                not raw_bindings and requested_input.get("type") == "MESSAGE"
-            )
+            is_hint_request = not raw_bindings and requested_input.get("type") == "MESSAGE"
             requested_ref: SkillRef | None = None
             if not is_hint_request:
                 if len(raw_bindings) != 1 or not isinstance(raw_bindings[0], Mapping):
@@ -805,10 +855,8 @@ class TurnWorkflowHandler:
                         ProductInteractionRow.actor_id == context.actor.actor_id,
                         ProductInteractionRow.session_id == turn.session_id,
                         ProductInteractionRow.interaction_id == selected.interaction_id,
-                        ProductInteractionRow.interaction_revision
-                        == selected.interaction_revision,
-                        ProductInteractionRow.sequence
-                        == selected.interaction_sequence,
+                        ProductInteractionRow.interaction_revision == selected.interaction_revision,
+                        ProductInteractionRow.sequence == selected.interaction_sequence,
                     )
                     .with_for_update()
                 )
@@ -836,10 +884,8 @@ class TurnWorkflowHandler:
                         ProductDraftRevisionRow.session_id == turn.session_id,
                         ProductDraftRevisionRow.draft_id == draft_authority.draft_id,
                         ProductDraftRevisionRow.skill_id == draft_authority.skill_id,
-                        ProductDraftRevisionRow.revision
-                        == draft_authority.draft_revision,
-                        ProductDraftRevisionRow.draft_sha256
-                        == draft_authority.draft_sha256,
+                        ProductDraftRevisionRow.revision == draft_authority.draft_revision,
+                        ProductDraftRevisionRow.draft_sha256 == draft_authority.draft_sha256,
                     )
                 )
                 failed_build = await session.scalar(
@@ -902,15 +948,12 @@ class TurnWorkflowHandler:
                     if failed_run_provenance is not None
                     else None
                 )
-                selected_value = (
-                    selected_row.interaction_json if selected_row is not None else {}
-                )
+                selected_value = selected_row.interaction_json if selected_row is not None else {}
                 hint_policy = _object(task.get("hint_policy"), "Content hint policy")
                 if (
                     selected_row is None
                     or selected_hwm != selected.interaction_sequence
-                    or selected_row.sequence
-                    != selected.same_failure_suffix_end_sequence
+                    or selected_row.sequence != selected.same_failure_suffix_end_sequence
                     or current_draft_row is None
                     or immutable_draft is None
                     or failed_build is None
@@ -918,14 +961,11 @@ class TurnWorkflowHandler:
                     or failed_run is None
                     or failed_run_provenance is None
                     or validated_failed_build is None
-                    or validated_failed_build.build_id
-                    != failed_build_provenance.build_id
+                    or validated_failed_build.build_id != failed_build_provenance.build_id
                     or validated_failed_build.authority_sha256
                     != failed_build_provenance.authority_sha256
-                    or selected_value.get("role")
-                    not in {"teaching_agent", "bug_agent"}
-                    or selected_value.get("response_type")
-                    not in {"question", "hint", "message"}
+                    or selected_value.get("role") not in {"teaching_agent", "bug_agent"}
+                    or selected_value.get("response_type") not in {"question", "hint", "message"}
                     or (
                         selected_value.get("hint_level") is not None
                         and (
@@ -936,37 +976,30 @@ class TurnWorkflowHandler:
                     )
                     or current_draft_row.draft_json != immutable_draft.draft_json
                     or current_draft_row.revision != immutable_draft.revision
-                    or current_draft_row.draft_sha256
-                    != immutable_draft.draft_sha256
+                    or current_draft_row.draft_sha256 != immutable_draft.draft_sha256
                     or failed_build_provenance.draft_revision_row_id
                     != immutable_draft.draft_revision_row_id
-                    or failed_build_provenance.draft_sha256
-                    != immutable_draft.draft_sha256
+                    or failed_build_provenance.draft_sha256 != immutable_draft.draft_sha256
                     or failed_run_provenance.draft_revision_row_id
                     != immutable_draft.draft_revision_row_id
-                    or failed_run_provenance.draft_sha256
-                    != immutable_draft.draft_sha256
+                    or failed_run_provenance.draft_sha256 != immutable_draft.draft_sha256
                     or failed_run.command_id != selected.command_id
                     or len(evidence_rows) != len(selected.evidence_refs)
                     or any(
-                        evidence.evidence_json.get("evidence_ref")
-                        != evidence_ref_wire(reference)
+                        evidence.evidence_json.get("evidence_ref") != evidence_ref_wire(reference)
                         for evidence, reference in zip(
                             sorted(evidence_rows, key=lambda item: item.evidence_id),
                             sorted(selected.evidence_refs, key=lambda item: item.evidence_id),
                             strict=True,
                         )
                     )
-                    or not await _run_interactions_have_authority(
-                        session, [selected_row], owner
-                    )
+                    or not await _run_interactions_have_authority(session, [selected_row], owner)
                     or selected.failure_count < 4
                     or _integer(hint_policy, "max_level") != 4
                     or selected.session_id != turn.session_id
                     or selected.task_id != task_id
                     or selected.skill_ref != skill_ref
-                    or selected.interaction_sequence
-                    != selected.same_failure_suffix_end_sequence
+                    or selected.interaction_sequence != selected.same_failure_suffix_end_sequence
                     or compile_result.skill_ref != skill_ref
                     or not compile_result.succeeded
                     or compile_result.draft_authority != current_draft.authority
@@ -1022,11 +1055,13 @@ class TurnWorkflowHandler:
                         "Skill Patch request was superseded by a later Turn"
                     )
                 existing_request = await session.scalar(
-                    select(ProductSkillPatchRequestRow).where(
+                    select(ProductSkillPatchRequestRow)
+                    .where(
                         ProductSkillPatchRequestRow.tenant_id == owned.tenant_id,
                         ProductSkillPatchRequestRow.requested_interaction_id
                         == selected.interaction_id,
-                    ).with_for_update()
+                    )
+                    .with_for_update()
                 )
                 existing_proposal = await session.scalar(
                     select(ProductSkillPatchProposalRow.patch_id).where(
@@ -1038,9 +1073,7 @@ class TurnWorkflowHandler:
                 request_authority_sha256 = canonical_json_sha256(
                     cast(dict[str, Any], json_value(event))
                 )
-                request_id = _identifier(
-                    "patchrequest", f"{owned.tenant_id}:{command.command_id}"
-                )
+                request_id = _identifier("patchrequest", f"{owned.tenant_id}:{command.command_id}")
                 if existing_proposal is not None:
                     raise WorkflowInvariantError(
                         "selected failure already has a Skill Patch proposal"
@@ -1089,17 +1122,10 @@ class TurnWorkflowHandler:
                         context,
                     )
                     if isinstance(transitioned, Failure):
-                        raise WorkflowInvariantError(
-                            "Skill Patch Command validation CAS was lost"
-                        )
+                        raise WorkflowInvariantError("Skill Patch Command validation CAS was lost")
                     command = validating
-                elif (
-                    command.status is not CommandStatus.VALIDATING
-                    or command.stage != "POLICY"
-                ):
-                    raise WorkflowInvariantError(
-                        "Skill Patch Command is outside its policy stage"
-                    )
+                elif command.status is not CommandStatus.VALIDATING or command.stage != "POLICY":
+                    raise WorkflowInvariantError("Skill Patch Command is outside its policy stage")
                 return _TurnAuthority(
                     claim=owned,
                     command=command,
@@ -1108,8 +1134,13 @@ class TurnWorkflowHandler:
                     task=task,
                     learner_id=launch.learner_id,
                 )
-            compile_failure = (
-                await _unresolved_compile_failure(session, context)
+            failure_authority = (
+                await _current_failure_authority(
+                    session,
+                    context,
+                    turn=turn,
+                    active_skill_ref=skill_ref,
+                )
                 if is_hint_request
                 else None
             )
@@ -1125,11 +1156,17 @@ class TurnWorkflowHandler:
                 command_id=command.command_id,
                 occurred_at=turn.created_at,
                 expected_world_revision=expected_revision,
-                skill_ref=skill_ref,
-                failure_count=0 if compile_failure is None else compile_failure.failure_count,
-                failure_key=None if compile_failure is None else compile_failure.failure_key,
+                skill_ref=(
+                    None
+                    if failure_authority is not None and failure_authority.build_id is not None
+                    else skill_ref
+                ),
+                run_id=(None if failure_authority is None else failure_authority.run_id),
+                build_id=(None if failure_authority is None else failure_authority.build_id),
+                failure_count=(0 if failure_authority is None else failure_authority.failure_count),
+                failure_key=(None if failure_authority is None else failure_authority.failure_key),
                 evidence_refs=(
-                    () if compile_failure is None else compile_failure.evidence_refs
+                    () if failure_authority is None else failure_authority.evidence_refs
                 ),
                 payload={"input": turn_input},
             )
@@ -1155,10 +1192,7 @@ class TurnWorkflowHandler:
                     if isinstance(transitioned, Failure):
                         raise WorkflowInvariantError("hint Command validation CAS was lost")
                     command = validating
-                elif (
-                    command.status is not CommandStatus.VALIDATING
-                    or command.stage != "POLICY"
-                ):
+                elif command.status is not CommandStatus.VALIDATING or command.stage != "POLICY":
                     raise WorkflowInvariantError("hint Command is outside its policy stage")
             return _TurnAuthority(
                 claim=owned,
@@ -1197,20 +1231,63 @@ class _CompileFailureStreak:
     failure_count: int
     failure_key: str
     evidence_refs: tuple[EvidenceRef, ...]
+    build_id: str
 
 
-# A hint that names this many same-class failures must hand over to bug_agent,
-# and the contract requires such an event to name the exact failed Run. A compile
-# rejection has no Run, so the streak reported to the policy stops one short. The
-# learner still leaves REVIEW/HEURISTIC and gets a located, explained failure --
-# what stays out of reach is Bug 先生 and the Patch offer, both of which are
-# defined on Run failures today.
-_COMPILE_FAILURE_REPORT_CEILING = BUG_FAILURE_THRESHOLD - 1
+@dataclass(frozen=True, slots=True)
+class _CurrentFailureAuthority:
+    failure_count: int
+    failure_key: str | None
+    evidence_refs: tuple[EvidenceRef, ...]
+    run_id: str | None = None
+    build_id: str | None = None
+
+    def __post_init__(self) -> None:
+        if (self.run_id is None) == (self.build_id is None):
+            raise ValueError("current hint authority requires exactly one Build or Run")
+
+
+async def _current_failure_authority(
+    session: AsyncSession,
+    context: OperationContext,
+    *,
+    turn: AgentTurnRow,
+    active_skill_ref: SkillRef | None,
+) -> _CurrentFailureAuthority | None:
+    compile_failure = await _unresolved_compile_failure(
+        session,
+        context,
+        session_id=turn.session_id,
+    )
+    if compile_failure is not None:
+        return _CurrentFailureAuthority(
+            failure_count=compile_failure.failure_count,
+            failure_key=compile_failure.failure_key,
+            evidence_refs=compile_failure.evidence_refs,
+            build_id=compile_failure.build_id,
+        )
+    run_failure = await latest_run_authority_for_hint(
+        session,
+        current_turn=turn,
+        context=context,
+        expected_skill_ref=active_skill_ref,
+    )
+    if run_failure is None:
+        return None
+    run = run_failure.authority.run
+    return _CurrentFailureAuthority(
+        failure_count=run_failure.failure_count,
+        failure_key=run.failure_key,
+        evidence_refs=run.evidence_refs,
+        run_id=run.run_id,
+    )
 
 
 async def _unresolved_compile_failure(
     session: AsyncSession,
     context: OperationContext,
+    *,
+    session_id: str,
 ) -> _CompileFailureStreak | None:
     """Describe the compile rejections that the learner has not yet built past.
 
@@ -1222,62 +1299,26 @@ async def _unresolved_compile_failure(
     code that no longer exists.
     """
 
-    rows = (
-        await session.scalars(
-            select(EvidenceRow)
-            .where(
-                EvidenceRow.tenant_id == context.actor.tenant_id,
-                EvidenceRow.actor_id == context.actor.actor_id,
-                EvidenceRow.content_hash == context.content_ref.content_hash,
-            )
-            .order_by(EvidenceRow.recorded_at.desc(), EvidenceRow.evidence_id.desc())
-        )
-    ).all()
-
-    streak: list[tuple[EvidenceRow, Mapping[str, Any]]] = []
-    for row in rows:
-        payload = row.evidence_json.get("payload")
-        if not isinstance(payload, Mapping):
-            continue
-        kind = payload.get("evidence_kind")
-        if kind == "BUILD_CERTIFICATION":
-            break
-        if kind != "BUILD_REJECTION":
-            continue
-        streak.append((row, payload))
+    streak = await list_current_build_failure_streak(
+        session,
+        session_id=session_id,
+        context=context,
+    )
     if not streak:
         return None
-
-    newest_row, newest_payload = streak[0]
-    failure_key = _compile_failure_key(newest_payload)
-    same_class = 0
-    for _row, payload in streak:
-        if _compile_failure_key(payload) != failure_key:
-            break
-        same_class += 1
-
-    ref = _object(newest_row.evidence_json.get("evidence_ref"), "Evidence ref")
+    newest = streak[-1].snapshot
     return _CompileFailureStreak(
-        failure_count=min(same_class, _COMPILE_FAILURE_REPORT_CEILING),
-        failure_key=failure_key,
-        evidence_refs=(
-            EvidenceRef(
-                evidence_id=_text(ref, "evidence_id"),
-                evidence_type=_text(ref, "evidence_type"),
-                created_at=newest_row.recorded_at,
-                sha256=ref.get("sha256"),
-                uri=ref.get("uri"),
-            ),
-        ),
+        failure_count=len(streak),
+        failure_key=newest.failure_key,
+        evidence_refs=newest.evidence_refs,
+        build_id=newest.build_id,
     )
 
 
 def _compile_failure_key(payload: Mapping[str, Any]) -> str:
     """Identify one class of compile failure so repeats can be recognised."""
 
-    codes = payload.get("diagnostic_codes")
-    diagnostics = ",".join(sorted(str(code) for code in codes)) if isinstance(codes, list) else ""
-    return f"compile:{payload.get('failure_stage')}:{payload.get('failure_code')}:{diagnostics}"
+    return compile_failure_key(payload)
 
 
 async def _command(

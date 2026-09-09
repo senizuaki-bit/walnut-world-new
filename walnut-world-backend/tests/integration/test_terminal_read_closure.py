@@ -60,7 +60,9 @@ from walnut_backend.adapters.postgres.models import (
     LaunchAuthorityRow,
     LearnerProfileRow,
     ProductContentUnitRow,
+    ProductSkillPatchProposalRow,
     RegistryHeadRow,
+    RunRow,
     SkillArtifactRow,
     SkillBuildProvenanceRow,
     SkillBuildRow,
@@ -347,6 +349,14 @@ def test_rejected_build_closes_command_error_to_job_failure(
             monkeypatch=monkeypatch,
             succeed=False,
         )
+        command = client.get(f"/v1/commands/{terminal.command_id}", headers=terminal.headers)
+        build = client.get(f"/v1/skill-builds/{terminal.build_id}", headers=terminal.headers)
+        assert command.status_code == 200, command.text
+        assert build.status_code == 200, build.text
+        assert command.json()["evidence_refs"] == build.json()["evidence_refs"]
+        assert tuple(item["evidence_id"] for item in build.json()["evidence_refs"]) == (
+            terminal.evidence_id,
+        )
         _assert_command_read(client, terminal, 200)
         _assert_build_read(client, terminal, 200)
         _tamper_json_and_assert(
@@ -359,6 +369,40 @@ def test_rejected_build_closes_command_error_to_job_failure(
             ("error", "details", "pipeline_code"),
             "CORRUPT_PIPELINE_CODE",
         )
+
+
+def test_rejected_build_is_exact_agent_failure_authority_without_run_or_patch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    database_url = _database_url()
+    settings = replace(
+        Settings.for_test(
+            contract_path=DEFAULT_CONTRACT_PATH,
+            contract_release_path=BACKEND_ROOT / "contract-release.json",
+        ),
+        database_url=database_url,
+    )
+    with TestClient(create_app(settings)) as client:
+        terminal = _execute_build(
+            client,
+            database_url=database_url,
+            tmp_path=tmp_path,
+            monkeypatch=monkeypatch,
+            succeed=False,
+        )
+
+        result = _portal_call(client, _read_rejected_build_authority, terminal)
+
+        snapshot = result["snapshot"]
+        history = result["history"]
+        assert snapshot.build_id == terminal.build_id
+        assert snapshot.skill_id == terminal.skill_id
+        assert snapshot.failure_key.startswith("compile:COMPILE:CPP_COMPILE_FAILED:")
+        assert snapshot.diagnostics == ("synthetic compiler error",)
+        assert tuple(item.evidence_id for item in snapshot.evidence_refs) == (terminal.evidence_id,)
+        assert history == (snapshot,)
+        assert result["run_count"] == 0
+        assert result["patch_count"] == 0
         _tamper_json_and_assert(
             client,
             terminal,
@@ -630,6 +674,61 @@ def _execute_build(
         headers=headers,
         sessions=sessions,
     )
+
+
+async def _read_rejected_build_authority(terminal: _TerminalBuild) -> dict[str, object]:
+    async with terminal.sessions() as session:
+        build = await session.scalar(
+            select(SkillBuildRow).where(SkillBuildRow.build_id == terminal.build_id)
+        )
+        provenance = await session.scalar(
+            select(SkillBuildProvenanceRow).where(
+                SkillBuildProvenanceRow.build_id == terminal.build_id
+            )
+        )
+        assert build is not None and provenance is not None
+        assert provenance.session_id is not None
+        operation = request_context_from_data(build.build_json["request_context"])
+        session_id = provenance.session_id
+
+    reads = PostgresAgentRuntimeReads(terminal.sessions)
+    snapshot = await reads.get_build_failure(terminal.build_id, operation)
+    history = await reads.list_same_build_failures(
+        session_id,
+        snapshot.failure_key,
+        terminal.build_id,
+        10,
+        operation,
+    )
+    async with terminal.sessions() as session:
+        runs = list(
+            (
+                await session.scalars(
+                    select(RunRow).where(
+                        RunRow.tenant_id == terminal.tenant_id,
+                        RunRow.actor_id == terminal.actor_id,
+                        RunRow.session_id == session_id,
+                    )
+                )
+            ).all()
+        )
+        patches = list(
+            (
+                await session.scalars(
+                    select(ProductSkillPatchProposalRow).where(
+                        ProductSkillPatchProposalRow.tenant_id == terminal.tenant_id,
+                        ProductSkillPatchProposalRow.actor_id == terminal.actor_id,
+                        ProductSkillPatchProposalRow.session_id == session_id,
+                    )
+                )
+            ).all()
+        )
+    return {
+        "snapshot": snapshot,
+        "history": history,
+        "run_count": len(runs),
+        "patch_count": len(patches),
+    }
 
 
 async def _terminal_build_seal_state(terminal: _TerminalBuild) -> dict[str, object]:

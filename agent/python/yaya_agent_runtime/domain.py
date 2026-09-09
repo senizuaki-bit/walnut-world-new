@@ -51,7 +51,13 @@ type GameEventType = Literal[
     "skill_patch_requested",
     "skill_patch_confirmed",
 ]
-type ResponseType = Literal["message", "question", "hint", "skill_patch", "growth_summary"]
+type ResponseType = Literal[
+    "message",
+    "question",
+    "hint",
+    "skill_patch",
+    "growth_summary",
+]
 # Public constructors accept ordinary mappings/lists and deep-freeze them at
 # runtime.  ``object`` here avoids pretending Python's type system can prove a
 # recursively JSON-compatible value supplied by an adapter.
@@ -586,6 +592,36 @@ class CompileResultSnapshot:
 
 
 @dataclass(frozen=True, slots=True)
+class BuildFailureSnapshot:
+    """One rejected Build closed without inventing a certified Skill or Run."""
+
+    build_id: str
+    session_id: str
+    skill_id: str
+    failure_key: str
+    diagnostics: tuple[str, ...]
+    evidence_refs: tuple[EvidenceRef, ...]
+    request_context: RequestContext
+
+    def __post_init__(self) -> None:
+        for name in ("build_id", "session_id", "skill_id"):
+            _require_identifier(getattr(self, name), name)
+        _require_text(self.failure_key, "failure_key", 1, 128)
+        if not isinstance(self.request_context, RequestContext):
+            raise TypeError("request_context must be a RequestContext")
+        diagnostics = tuple(self.diagnostics)
+        if not diagnostics or len(diagnostics) > 100:
+            raise ValueError("a Build failure requires 1..100 diagnostics")
+        for item in diagnostics:
+            _require_text(item, "diagnostic", 1, 2000)
+        object.__setattr__(self, "diagnostics", diagnostics)
+        evidence = _freeze_evidence(self.evidence_refs, "evidence_refs")
+        if not evidence:
+            raise ValueError("a Build failure requires immutable Evidence")
+        object.__setattr__(self, "evidence_refs", evidence)
+
+
+@dataclass(frozen=True, slots=True)
 class RunResultSnapshot:
     run_id: str
     session_id: str
@@ -967,6 +1003,7 @@ class TurnContext:
     skill: SkillSnapshot | None = None
     available_skills: tuple[SkillSnapshot, ...] = ()
     compile_result: CompileResultSnapshot | None = None
+    build_failure: BuildFailureSnapshot | None = None
     run_result: RunResultSnapshot | None = None
     failure_history: tuple[RunResultSnapshot, ...] = ()
     counterexamples: tuple[CounterexampleSnapshot, ...] = ()
@@ -976,6 +1013,11 @@ class TurnContext:
     skill_history: tuple[SkillVersionSummary, ...] = ()
     teaching_directive: TeachingDirective | None = None
     patch_authority: SkillPatchAuthority | None = None
+    # What the student actually typed this turn. Student-authored text is data
+    # for the model to answer, never instructions: every response constraint is
+    # still enforced against the resulting decision.
+    student_message: str | None = None
+    build_failure_history: tuple[BuildFailureSnapshot, ...] = ()
 
     def __post_init__(self) -> None:
         if self.role not in _ROLES:
@@ -995,10 +1037,17 @@ class TurnContext:
         if authority.actor.actor_id != self.event.student_id:
             raise ValueError("task provenance actor does not own the Agent event")
         _require_integer(self.hint_level, "hint_level", minimum=0, maximum=self.task.max_hint_level)
+        if self.student_message is not None:
+            # Only a MESSAGE turn carries student text, and the worker routes
+            # exactly those to hint_requested.
+            if self.event.event_type != "hint_requested":
+                raise ValueError("only a hint_requested turn can carry a student message")
+            _require_text(self.student_message, "student_message", 1, 4000)
         for name, expected_type in (
             ("world", WorldSummary),
             ("skill", SkillSnapshot),
             ("compile_result", CompileResultSnapshot),
+            ("build_failure", BuildFailureSnapshot),
             ("run_result", RunResultSnapshot),
             ("learner_profile", LearnerProfileSnapshot),
             ("patch_authority", SkillPatchAuthority),
@@ -1009,6 +1058,7 @@ class TurnContext:
         for name, expected_type in (
             ("available_skills", SkillSnapshot),
             ("failure_history", RunResultSnapshot),
+            ("build_failure_history", BuildFailureSnapshot),
             ("counterexamples", CounterexampleSnapshot),
             ("recent_messages", MessageSnapshot),
             ("session_runs", RunResultSnapshot),
@@ -1018,7 +1068,13 @@ class TurnContext:
             if any(not isinstance(item, expected_type) for item in values):
                 raise TypeError(f"{name} contains an invalid snapshot type")
             object.__setattr__(self, name, values)
-        for name in ("skill", "compile_result", "run_result", "learner_profile"):
+        for name in (
+            "skill",
+            "compile_result",
+            "build_failure",
+            "run_result",
+            "learner_profile",
+        ):
             value = getattr(self, name)
             if value is not None:
                 _require_same_authority(value.request_context, authority, name)
@@ -1031,6 +1087,7 @@ class TurnContext:
         for name in (
             "available_skills",
             "failure_history",
+            "build_failure_history",
             "counterexamples",
             "recent_messages",
             "session_runs",
@@ -1439,6 +1496,12 @@ class DecisionDraft:
                 raise ValueError(
                     "message and growth_summary responses cannot carry structured hints"
                 )
+        if (
+            self.response_type == "message"
+            and self.role in {"teaching_agent", "bug_agent"}
+            and self.learner_inference is not None
+        ):
+            raise ValueError("conversational messages cannot carry learner inference")
         if self.response_type != "skill_patch" and self.requires_student_confirmation:
             raise ValueError("only a skill patch can require student confirmation")
         if self.response_type == "growth_summary" and self.role != "book_agent":

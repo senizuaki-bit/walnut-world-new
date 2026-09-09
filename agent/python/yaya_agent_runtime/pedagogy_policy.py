@@ -172,6 +172,7 @@ class PedagogyInput:
     skill_patch_feature_enabled: bool = False
     skill_patch_capability_enabled: bool = False
     draft_authority_validated: bool = False
+    student_message_present: bool = False
 
     def __post_init__(self) -> None:
         if self.role not in _ROLES:
@@ -190,9 +191,12 @@ class PedagogyInput:
             "skill_patch_feature_enabled",
             "skill_patch_capability_enabled",
             "draft_authority_validated",
+            "student_message_present",
         ):
             if not isinstance(getattr(self, name), bool):
                 raise TypeError(f"{name} must be boolean")
+        if self.student_message_present and self.event_type != "hint_requested":
+            raise ValueError("student messages require hint_requested")
         patch_gates = (
             self.explicit_skill_patch_request,
             self.skill_patch_feature_enabled,
@@ -263,9 +267,22 @@ _ALLOWED_BY_ROLE: dict[str, tuple[ResponseType, ...]] = {
     "xiaohutao": (),
 }
 _ALLOWED_OPTIONS_BY_PHASE: dict[TeachingPhase, frozenset[tuple[ResponseType, ...]]] = {
-    TeachingPhase.REVIEW: frozenset({("message",), ("question", "hint")}),
-    TeachingPhase.HEURISTIC: frozenset({("message",), ("question", "hint")}),
-    TeachingPhase.RECTIFICATION: frozenset({("question", "hint"), ("question",), ("skill_patch",)}),
+    # Retain legacy tuples so previously committed teaching turns remain readable.
+    TeachingPhase.REVIEW: frozenset(
+        {("message",), ("question", "hint"), ("question", "hint", "message")}
+    ),
+    TeachingPhase.HEURISTIC: frozenset(
+        {("message",), ("question", "hint"), ("question", "hint", "message")}
+    ),
+    TeachingPhase.RECTIFICATION: frozenset(
+        {
+            ("question", "hint"),
+            ("question",),
+            ("skill_patch",),
+            ("question", "hint", "message"),
+            ("question", "message"),
+        }
+    ),
     TeachingPhase.SUMMARIZATION: frozenset({("growth_summary",)}),
 }
 _HINT_CAP_BY_PHASE: dict[TeachingPhase, int] = {
@@ -440,14 +457,18 @@ class PedagogyPolicy:
         else:
             reasons.append("PATCH_DISABLED_RUNTIME_STAGE")
         reasons.append("FULL_SOLUTION_DISABLED")
+        allowed: tuple[ResponseType, ...] = (
+            ("skill_patch",) if patch_eligible else _ALLOWED_BY_ROLE[policy_input.role]
+        )
+        if policy_input.student_message_present:
+            allowed = (*allowed, "message")
+            reasons.append("STUDENT_MESSAGE_CONVERSATION_ALLOWED")
 
         return TeachingDirective(
             phase=phase,
             target_concept=target,
             hint_level=hint_level,
-            allowed_response_types=(
-                ("skill_patch",) if patch_eligible else _ALLOWED_BY_ROLE[policy_input.role]
-            ),
+            allowed_response_types=allowed,
             patch_eligible=patch_eligible,
             full_solution_eligible=False,
             required_evidence_ids=required_ids,

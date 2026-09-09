@@ -38,6 +38,7 @@ from yaya_agent_runtime.adapters import (
     OpenAICompatibleLlmAdapter,
     UrllibHttpTransport,
 )
+from yaya_agent_runtime.adapters.doubao_realtime import DoubaoRealtimeAdapter
 from yaya_agent_sandbox import DockerCppSandbox
 
 from .application import AgentTurnApplication, AgentTurnWorker
@@ -595,6 +596,7 @@ async def create_production_composition(
         runtime=runtime,
         turns=turns,
         invocations=invocations,
+        voice=DoubaoRealtimeAdapter(settings.voice_config) if settings.voice_config else None,
     )
     validator = ContractSchemaValidator(settings.contracts_root)
     outcomes = PostgresRunOutcomeAuthority(database, validator)

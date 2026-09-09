@@ -585,6 +585,18 @@ test("WORLD_COMMIT evidence declares the executable +1 revision invariant", () =
   ]);
 });
 
+test("additive BUILD_REJECTION evidence closes exact Build authority without a Run", () => {
+  const schema = json("contracts/schemas/game/build-rejection-evidence.schema.json");
+  const rejection = schema.$defs.buildRejectionPayload;
+  assert.equal(schema.properties.source.properties.source_type.const, "SKILL_BUILD");
+  assert.equal(schema.properties.source.properties.world_id.oneOf[1].type, "null");
+  assert.equal(rejection.properties.evidence_kind.const, "BUILD_REJECTION");
+  assert.equal(rejection.properties.outcome.const, "REJECTED");
+  assert.equal(rejection.additionalProperties, false);
+  assert.equal(rejection.properties.diagnostic_codes.uniqueItems, true);
+  assert.equal(Object.hasOwn(rejection.properties, "run_id"), false);
+});
+
 test("all successful revision events publish their executable +1 invariant", () => {
   const asyncapi = json("contracts/asyncapi/runtime-events.asyncapi.json");
   const schemas = asyncapi.components.schemas;

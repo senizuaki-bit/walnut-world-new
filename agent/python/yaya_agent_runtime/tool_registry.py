@@ -860,6 +860,7 @@ def build_default_tool_registry(
             _empty_schema,
             frozenset({"book_agent"}),
             FunctionToolHandler(get_session_runs),
+            is_available=lambda context: bool(context.session_runs),
         ),
     )
     for definition in definitions:

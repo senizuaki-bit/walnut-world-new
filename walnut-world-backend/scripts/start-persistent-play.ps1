@@ -42,7 +42,7 @@ else {
     $agentRoot = $null
 }
 if ([string]::IsNullOrWhiteSpace($GodotExe)) {
-    $GodotExe = Join-Path $workspaceRoot 'tools\godot-4.5.2\Godot_v4.5.2-stable_win64.exe'
+    $GodotExe = Join-Path $workspaceRoot 'tools\godot-4.7.1\Godot_v4.7.1-stable_win64.exe'
 }
 $backendPython = Join-Path $backendRoot '.venv\Scripts\python.exe'
 if (-not [string]::IsNullOrWhiteSpace($PythonExe)) {
@@ -278,6 +278,30 @@ function Stop-ProcessAndWait {
     }
 }
 
+function Clear-ProcessEnvironmentVariable {
+    param([Parameter(Mandatory)][string]$Name)
+
+    # PowerShell converts $null to '' when binding a [string] parameter, and
+    # .NET then keeps an empty process variable instead of deleting it. A child
+    # would inherit NAME='' rather than an absent variable, which config
+    # validators read as a present-but-invalid secret. [NullString]::Value is
+    # the only spelling that actually removes the variable.
+    [Environment]::SetEnvironmentVariable($Name, [NullString]::Value, 'Process')
+}
+
+function Restore-ProcessEnvironmentVariable {
+    param(
+        [Parameter(Mandatory)][string]$Name,
+        [AllowNull()][AllowEmptyString()][string]$Value
+    )
+
+    if ([string]::IsNullOrEmpty($Value)) {
+        Clear-ProcessEnvironmentVariable -Name $Name
+        return
+    }
+    [Environment]::SetEnvironmentVariable($Name, $Value, 'Process')
+}
+
 function Start-ProviderBlindBackendChild {
     param(
         [Parameter(Mandatory)][string[]]$ChildArguments,
@@ -292,22 +316,18 @@ function Start-ProviderBlindBackendChild {
         'WALNUT_LLM_UPSTREAM_API_KEY_FILE', 'Process'
     )
     try {
-        [Environment]::SetEnvironmentVariable('WALNUT_LLM_UPSTREAM_API_KEY', $null, 'Process')
-        [Environment]::SetEnvironmentVariable(
-            'WALNUT_LLM_UPSTREAM_API_KEY_FILE', $null, 'Process'
-        )
+        Clear-ProcessEnvironmentVariable -Name 'WALNUT_LLM_UPSTREAM_API_KEY'
+        Clear-ProcessEnvironmentVariable -Name 'WALNUT_LLM_UPSTREAM_API_KEY_FILE'
         return Start-Process -FilePath $backendPython -ArgumentList $ChildArguments `
             -WorkingDirectory $backendRoot -WindowStyle Hidden -PassThru `
             -RedirectStandardOutput $StandardOutputPath `
             -RedirectStandardError $StandardErrorPath
     }
     finally {
-        [Environment]::SetEnvironmentVariable(
-            'WALNUT_LLM_UPSTREAM_API_KEY', $previousDirectKey, 'Process'
-        )
-        [Environment]::SetEnvironmentVariable(
-            'WALNUT_LLM_UPSTREAM_API_KEY_FILE', $previousKeyFile, 'Process'
-        )
+        Restore-ProcessEnvironmentVariable `
+            -Name 'WALNUT_LLM_UPSTREAM_API_KEY' -Value $previousDirectKey
+        Restore-ProcessEnvironmentVariable `
+            -Name 'WALNUT_LLM_UPSTREAM_API_KEY_FILE' -Value $previousKeyFile
     }
 }
 
@@ -515,6 +535,18 @@ if ($anyCore -and -not $coreHealthy) {
 if ($null -ne $existingProcesses.game -and -not $coreHealthy) {
     throw 'A recorded Godot process exists without a healthy persistent-play runtime.'
 }
+if ($coreHealthy) {
+    foreach ($rootBinding in @(
+        @{ Name = 'backend_root'; Expected = $backendRoot },
+        @{ Name = 'agent_root'; Expected = $agentRoot },
+        @{ Name = 'frontend_root'; Expected = $frontendRoot }
+    )) {
+        $recordedRoot = $state.PSObject.Properties[$rootBinding.Name]
+        if ($null -eq $recordedRoot -or [string]$recordedRoot.Value -ine [IO.Path]::GetFullPath($rootBinding.Expected)) {
+            throw 'Persistent-play source directory changed or is unverified; use -Action Stop, then -Action Start from the current repository.'
+        }
+    }
+}
 if ($coreHealthy -and $null -ne $existingProcesses.game) {
     Write-Output 'PERSISTENT_PLAY_ALREADY_RUNNING'
     Show-PersistentStatus -State $state
@@ -564,6 +596,10 @@ Write-Output "PERSISTENT_PLAY_POSTGRES healthy"
 
 # ---- 2. Shared environment ----
 $env:PYTHONPATH = (Join-Path $backendRoot 'src') + ';' + (Join-Path $agentRoot 'python')
+# Import the deferred projection dependency before accepting any student work.
+# A live process alone does not prove that its source/dependencies still exist.
+& $backendPython -c 'import walnut_backend.worker_main; import walnut_backend.workers.turn_projection; import walnut_backend.learner_worker_main'
+if ($LASTEXITCODE -ne 0) { throw 'Backend runtime imports failed; repair the current repository Python environment before starting.' }
 $env:WALNUT_DATABASE_URL = "postgresql+asyncpg://walnut:$databasePassword@127.0.0.1:$postgresPort/walnut_int1"
 $env:WALNUT_CONTRACT_PATH = $agentRoot
 $env:WALNUT_CONTRACT_RELEASE_PATH = Join-Path $backendRoot 'contract-release.json'
@@ -597,6 +633,17 @@ $env:WALNUT_LLM_RELAY_MAX_RESPONSE_BYTES = '2097152'
 $env:WALNUT_LLM_RELAY_CAPABILITY_TIMEOUT_MS = '5000'
 $env:WALNUT_LLM_PROVIDER = $Provider
 $env:WALNUT_LLM_MODEL = $Model
+# Only the game voice endpoint uses Doubao. The durable workers retain DS.
+if ([string]::IsNullOrWhiteSpace($env:YAYA_VOICE_MODE)) {
+    $env:YAYA_VOICE_MODE = 'doubao'
+}
+if ([string]::IsNullOrWhiteSpace($env:YAYA_DOUBAO_VOICE_API_KEY) -and
+    [string]::IsNullOrWhiteSpace($env:YAYA_DOUBAO_VOICE_API_KEY_FILE)) {
+    $localVoiceKey = Join-Path $agentRoot 'doubao-voice-api.key'
+    if (Test-Path -LiteralPath $localVoiceKey -PathType Leaf) {
+        $env:YAYA_DOUBAO_VOICE_API_KEY_FILE = $localVoiceKey
+    }
+}
 $env:WALNUT_LLM_RESPONSE_FORMAT = 'json_object'
 $env:WALNUT_LLM_THINKING_MODE = 'disabled'
 $env:WALNUT_PROMPT_VERSION = 'int1-prompt-v1'
@@ -726,7 +773,7 @@ if ($null -eq $relayProcess) {
         'WALNUT_LLM_UPSTREAM_API_KEY_FILE', 'Process'
     )
     try {
-        [Environment]::SetEnvironmentVariable('WALNUT_LLM_UPSTREAM_API_KEY', $null, 'Process')
+        Clear-ProcessEnvironmentVariable -Name 'WALNUT_LLM_UPSTREAM_API_KEY'
         [Environment]::SetEnvironmentVariable(
             'WALNUT_LLM_UPSTREAM_API_KEY_FILE',
             [IO.Path]::GetFullPath($UpstreamKeyFile),
@@ -738,12 +785,10 @@ if ($null -eq $relayProcess) {
             -RedirectStandardOutput $relayLog -RedirectStandardError $relayErr
     }
     finally {
-        [Environment]::SetEnvironmentVariable(
-            'WALNUT_LLM_UPSTREAM_API_KEY', $previousDirectKey, 'Process'
-        )
-        [Environment]::SetEnvironmentVariable(
-            'WALNUT_LLM_UPSTREAM_API_KEY_FILE', $previousKeyFile, 'Process'
-        )
+        Restore-ProcessEnvironmentVariable `
+            -Name 'WALNUT_LLM_UPSTREAM_API_KEY' -Value $previousDirectKey
+        Restore-ProcessEnvironmentVariable `
+            -Name 'WALNUT_LLM_UPSTREAM_API_KEY_FILE' -Value $previousKeyFile
     }
     foreach ($i in 1..30) {
         if (Get-NetTCPConnection -State Listen -LocalAddress 127.0.0.1 -LocalPort $relayPort -ErrorAction SilentlyContinue) { break }
@@ -810,6 +855,8 @@ foreach ($component in @(
     -CommandMarker '*uvicorn*walnut_backend.main:app*')
 
 Set-StateValue -State $state -Name 'runtime_version' -Value '1.0.0'
+Set-StateValue -State $state -Name 'backend_root' -Value ([IO.Path]::GetFullPath($backendRoot))
+Set-StateValue -State $state -Name 'agent_root' -Value ([IO.Path]::GetFullPath($agentRoot))
 Set-StateValue -State $state -Name 'provider_started' -Value $true
 Set-StateValue -State $state -Name 'relay_pid' -Value $relayProcess.Id
 Set-StateValue -State $state -Name 'relay_started_at' `
@@ -840,7 +887,9 @@ foreach ($secretName in @(
     'WALNUT_LLM_RELAY_API_KEY',
     'WALNUT_LLM_RELAY_SERVER_API_KEY',
     'WALNUT_LLM_UPSTREAM_API_KEY',
-    'WALNUT_LLM_UPSTREAM_API_KEY_FILE'
+    'WALNUT_LLM_UPSTREAM_API_KEY_FILE',
+    'YAYA_DOUBAO_VOICE_API_KEY',
+    'YAYA_DOUBAO_VOICE_API_KEY_FILE'
 )) {
     $start.EnvironmentVariables.Remove($secretName) | Out-Null
 }

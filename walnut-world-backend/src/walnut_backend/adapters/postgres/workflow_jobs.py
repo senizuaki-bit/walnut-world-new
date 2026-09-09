@@ -230,6 +230,7 @@ class PostgresWorkflowJobStore:
         worker_id: str,
         lease_seconds: int,
         operation: str | None = None,
+        lane: Literal["interactive", "background"] | None = None,
     ) -> ClaimedWorkflowJob | None:
         """Claim one due job, including an expired claim, with a new fence."""
 
@@ -258,6 +259,13 @@ class PostgresWorkflowJobStore:
                 .with_for_update(skip_locked=True)
                 .limit(1)
             )
+            if lane is not None:
+                hint = func.coalesce(and_(
+                    WorkflowJobRow.operation == "EXECUTE_AGENT_TURN",
+                    WorkflowJobRow.job_json["request"]["input"]["type"].as_string() == "MESSAGE",
+                    WorkflowJobRow.job_json["request"]["skill_bindings"] == [],
+                ), False)
+                statement = statement.where(hint if lane == "interactive" else ~hint)
             if operation is not None:
                 statement = statement.where(WorkflowJobRow.operation == operation)
             row = await session.scalar(statement)

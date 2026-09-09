@@ -10,14 +10,16 @@ from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from typing import Any, cast
 
-from sqlalchemy import func, select, text
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from yaya_agent_backend.codec import decode_as
 from yaya_agent_contracts import (
     ActorType,
     CommandRecord,
     CommandStatus,
     ContentRef,
     EvidenceRef,
+    EvidenceType,
     Failure,
     FrozenJsonObject,
     OperationContext,
@@ -28,11 +30,18 @@ from yaya_agent_contracts import (
     Success,
     canonical_json_sha256,
 )
-from yaya_agent_runtime import side_effect_execution_id, skill_invocation_request_sha256
+from yaya_agent_runtime import (
+    TurnContext,
+    side_effect_execution_id,
+    skill_invocation_request_sha256,
+    validate_context_for_role,
+)
+from yaya_agent_runtime.evidence import collect_decision_evidence
 
 from walnut_backend.adapters.postgres.command_store import validated_command_record
 from walnut_backend.adapters.postgres.models import (
     domain_event_data,
+    json_value,
     public_domain_event_data,
     request_context_data,
 )
@@ -82,11 +91,14 @@ from .models import (
     WorldPresentationEventRow,
 )
 from .run_outcomes import (
+    TerminalProjectionValidationState,
+    latest_run_authority_for_hint,
     load_hint_provider_receipts,
     load_patch_provider_receipts,
     load_validated_run,
     validate_provider_decision_wire,
 )
+from .session import snapshot_read
 from .skill_provenance import validate_run_provenance
 
 
@@ -99,8 +111,7 @@ class PostgresProductInteractionStore:
     async def get(
         self, session_id: str, interaction_id: str, context: OperationContext
     ) -> Result[dict[str, Any]]:
-        async with self._sessions() as session, session.begin():
-            await session.execute(text("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY"))
+        async with snapshot_read(self._sessions) as session:
             row = await session.scalar(
                 select(ProductInteractionRow).where(
                     ProductInteractionRow.tenant_id == context.actor.tenant_id,
@@ -122,9 +133,7 @@ class PostgresProductInteractionStore:
             )
             if row is None:
                 return Failure(_error("NOT_FOUND", "READ", "agent interaction not found"))
-            if owner is None or not await _interactions_have_authority(
-                session, [row], owner
-            ):
+            if owner is None or not await _interactions_have_authority(session, [row], owner):
                 return Failure(
                     _error(
                         "INVARIANT_VIOLATION",
@@ -138,8 +147,7 @@ class PostgresProductInteractionStore:
         self, session_id: str, after_sequence: int, limit: int, context: OperationContext
     ) -> Result[dict[str, Any]]:
         """Read one page against one repeatable-read high watermark."""
-        async with self._sessions() as session, session.begin():
-            await session.execute(text("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY"))
+        async with snapshot_read(self._sessions) as session:
             agent_session = await session.scalar(
                 select(AgentSessionRow).where(
                     AgentSessionRow.tenant_id == context.actor.tenant_id,
@@ -186,7 +194,11 @@ class PostgresProductInteractionStore:
                     )
                 )
             if after_sequence > high:
-                return Failure(_error("INVALID_REQUEST", "VALIDATE", "after_sequence is above the high watermark"))
+                return Failure(
+                    _error(
+                        "INVALID_REQUEST", "VALIDATE", "after_sequence is above the high watermark"
+                    )
+                )
             rows = list(
                 (
                     await session.scalars(
@@ -205,9 +217,19 @@ class PostgresProductInteractionStore:
             )
             expected = after_sequence + 1
             if any(row.sequence != expected + index for index, row in enumerate(rows)):
-                return Failure(_error("EVENT_SEQUENCE_GAP", "READ", "interaction projection sequence is not gap-free"))
+                return Failure(
+                    _error(
+                        "EVENT_SEQUENCE_GAP",
+                        "READ",
+                        "interaction projection sequence is not gap-free",
+                    )
+                )
             if rows and rows[-1].sequence < high and len(rows) < limit:
-                return Failure(_error("EVENT_SEQUENCE_GAP", "READ", "interaction projection has a sequence gap"))
+                return Failure(
+                    _error(
+                        "EVENT_SEQUENCE_GAP", "READ", "interaction projection has a sequence gap"
+                    )
+                )
             if not await _interactions_have_authority(session, rows, agent_session):
                 return Failure(
                     _error(
@@ -236,7 +258,9 @@ class PostgresProductInteractionStore:
                 }
             )
 
-    async def record(self, interaction: Mapping[str, Any], context: OperationContext) -> Result[None]:
+    async def record(
+        self, interaction: Mapping[str, Any], context: OperationContext
+    ) -> Result[None]:
         """Internal Agent Turn projection writer; public transport never calls this method."""
         request_context = interaction.get("request_context")
         if not isinstance(request_context, Mapping) or request_context.get("actor") != {
@@ -245,7 +269,9 @@ class PostgresProductInteractionStore:
             "actor_type": context.actor.actor_type.value,
             "roles": list(context.actor.roles),
         }:
-            return Failure(_error("INVARIANT_VIOLATION", "PROJECT", "interaction actor differs from context"))
+            return Failure(
+                _error("INVARIANT_VIOLATION", "PROJECT", "interaction actor differs from context")
+            )
         try:
             session_id = _text_value(interaction, "session_id")
             interaction_id = _text_value(interaction, "interaction_id")
@@ -258,26 +284,40 @@ class PostgresProductInteractionStore:
             return Failure(_error("INVARIANT_VIOLATION", "PROJECT", str(error)))
         async with self._sessions() as session, session.begin():
             agent_session = await session.scalar(
-                select(AgentSessionRow).where(
+                select(AgentSessionRow)
+                .where(
                     AgentSessionRow.tenant_id == context.actor.tenant_id,
                     AgentSessionRow.actor_id == context.actor.actor_id,
                     AgentSessionRow.session_id == session_id,
-                ).with_for_update()
+                )
+                .with_for_update()
             )
             if agent_session is None:
                 return Failure(_error("NOT_FOUND", "PROJECT", "agent session not found"))
-            if agent_session.session_json["request_context"]["content_ref"] != request_context.get("content_ref"):
-                return Failure(_error("CONTENT_VERSION_MISMATCH", "PROJECT", "interaction content differs from session"))
+            if agent_session.session_json["request_context"]["content_ref"] != request_context.get(
+                "content_ref"
+            ):
+                return Failure(
+                    _error(
+                        "CONTENT_VERSION_MISMATCH",
+                        "PROJECT",
+                        "interaction content differs from session",
+                    )
+                )
             existing = await session.scalar(
-                select(ProductInteractionRow).where(
+                select(ProductInteractionRow)
+                .where(
                     ProductInteractionRow.tenant_id == context.actor.tenant_id,
                     ProductInteractionRow.session_id == session_id,
                     ProductInteractionRow.interaction_id == interaction_id,
-                ).with_for_update()
+                )
+                .with_for_update()
             )
             if existing is not None:
                 if existing.interaction_json != dict(interaction):
-                    return Failure(_error("INVARIANT_VIOLATION", "PROJECT", "immutable interaction changed"))
+                    return Failure(
+                        _error("INVARIANT_VIOLATION", "PROJECT", "immutable interaction changed")
+                    )
                 return Success(None)
             high = await session.scalar(
                 select(func.max(ProductInteractionRow.sequence)).where(
@@ -286,7 +326,9 @@ class PostgresProductInteractionStore:
                 )
             )
             if sequence != int(high or 0) + 1:
-                return Failure(_error("EVENT_SEQUENCE_GAP", "PROJECT", "interaction sequence is not next"))
+                return Failure(
+                    _error("EVENT_SEQUENCE_GAP", "PROJECT", "interaction sequence is not next")
+                )
             session.add(
                 ProductInteractionRow(
                     tenant_id=context.actor.tenant_id,
@@ -335,12 +377,14 @@ class PostgresProductInteractionStore:
             # point.  A waiter must re-read the receipt after acquiring this
             # lock so concurrent double-misses cannot apply a Patch twice.
             interaction_row = await session.scalar(
-                select(ProductInteractionRow).where(
+                select(ProductInteractionRow)
+                .where(
                     ProductInteractionRow.tenant_id == context.actor.tenant_id,
                     ProductInteractionRow.actor_id == context.actor.actor_id,
                     ProductInteractionRow.session_id == session_id,
                     ProductInteractionRow.interaction_id == interaction_id,
-                ).with_for_update()
+                )
+                .with_for_update()
             )
             if interaction_row is None:
                 return Failure(_error("NOT_FOUND", "PATCH_DECISION", "agent interaction not found"))
@@ -362,12 +406,14 @@ class PostgresProductInteractionStore:
                     )
                 )
             receipt = await session.scalar(
-                select(ProductPatchDecisionReceiptRow).where(
+                select(ProductPatchDecisionReceiptRow)
+                .where(
                     ProductPatchDecisionReceiptRow.tenant_id == context.actor.tenant_id,
                     ProductPatchDecisionReceiptRow.actor_id == context.actor.actor_id,
                     ProductPatchDecisionReceiptRow.canonical_path == canonical_path,
                     ProductPatchDecisionReceiptRow.idempotency_key == idempotency_key,
-                ).with_for_update()
+                )
+                .with_for_update()
             )
             if receipt is not None:
                 if receipt.request_sha256 != request_hash:
@@ -402,11 +448,32 @@ class PostgresProductInteractionStore:
             interaction = interaction_row.interaction_json
             patch = interaction.get("skill_patch")
             if not isinstance(patch, Mapping) or interaction.get("patch_decision") is not None:
-                return Failure(_error("CONTENT_VERSION_MISMATCH", "PATCH_DECISION", "interaction has no undecided patch"))
-            if not _decision_identities_match(request_body, session_id, interaction_id, patch_id, interaction, patch):
-                return Failure(_error("INVALID_REQUEST", "VALIDATE", "patch decision does not match interaction"))
-            if _integer_value(request_body, "expected_interaction_revision") != interaction_row.interaction_revision:
-                return Failure(_error("CONTENT_VERSION_MISMATCH", "PATCH_DECISION", "interaction revision is stale"))
+                return Failure(
+                    _error(
+                        "CONTENT_VERSION_MISMATCH",
+                        "PATCH_DECISION",
+                        "interaction has no undecided patch",
+                    )
+                )
+            if not _decision_identities_match(
+                request_body, session_id, interaction_id, patch_id, interaction, patch
+            ):
+                return Failure(
+                    _error(
+                        "INVALID_REQUEST", "VALIDATE", "patch decision does not match interaction"
+                    )
+                )
+            if (
+                _integer_value(request_body, "expected_interaction_revision")
+                != interaction_row.interaction_revision
+            ):
+                return Failure(
+                    _error(
+                        "CONTENT_VERSION_MISMATCH",
+                        "PATCH_DECISION",
+                        "interaction revision is stale",
+                    )
+                )
             authority = await _load_patch_decision_authority(
                 session,
                 tenant_id=context.actor.tenant_id,
@@ -448,7 +515,13 @@ class PostgresProductInteractionStore:
                 except InvalidSkillBuildRequest as error:
                     return Failure(_error("INVALID_REQUEST", "PATCH_DECISION", str(error)))
                 if updated_draft["draft_sha256"] != request_body["result_draft_sha256"]:
-                    return Failure(_error("CONTENT_VERSION_MISMATCH", "PATCH_DECISION", "patch result hash differs"))
+                    return Failure(
+                        _error(
+                            "CONTENT_VERSION_MISMATCH",
+                            "PATCH_DECISION",
+                            "patch result hash differs",
+                        )
+                    )
                 draft_row.revision = updated_draft["revision"]
                 draft_row.draft_sha256 = updated_draft["draft_sha256"]
                 draft_row.updated_at = decided_at
@@ -503,9 +576,7 @@ class PostgresProductInteractionStore:
                 session.add(
                     ProductDraftRevisionAssistanceRow(
                         draft_revision_row_id=accepted_revision.draft_revision_row_id,
-                        origin_accepted_revision_row_id=(
-                            accepted_revision.draft_revision_row_id
-                        ),
+                        origin_accepted_revision_row_id=(accepted_revision.draft_revision_row_id),
                         patch_id=patch_id,
                         patch_decision_id=decision_row.decision_id,
                         inherited=False,
@@ -576,33 +647,108 @@ async def _interactions_have_authority(
     session: AsyncSession,
     rows: list[ProductInteractionRow],
     owner: AgentSessionRow,
+    *,
+    validation_state: TerminalProjectionValidationState | None = None,
 ) -> bool:
     """Validate ordinary Run projections and no-Run Patch projections separately."""
 
+    validation_state = validation_state or TerminalProjectionValidationState()
+    validation_state.bind_session(session)
     ordinary: list[ProductInteractionRow] = []
+    run_bound: list[tuple[ProductInteractionRow, _InteractionAuthorityKeys]] = []
     proposals: list[ProductInteractionRow] = []
     hints: list[ProductInteractionRow] = []
     for row in rows:
         kind = _interaction_projection_kind(row.interaction_json)
-        if kind == "RUN":
-            ordinary.append(row)
+        if kind == "RUN_BOUND":
+            keys = _interaction_authority_keys(row.interaction_json)
+            if keys is None or keys.run_id is None:
+                return False
+            run_bound.append((row, keys))
         elif kind == "SKILL_PATCH_NO_RUN":
             proposals.append(row)
         elif kind == "HINT_NO_RUN":
             hints.append(row)
         else:
             return False
+    if run_bound:
+        # ``feedback.run_id`` can identify either the Run produced by this
+        # Turn or the prior failed Run a no-new-Run Hint is explaining.  Close
+        # that distinction from durable ownership instead of guessing from the
+        # response role: failed Run projections can also be teaching hints.
+        run_ids = {cast(str, keys.run_id) for _, keys in run_bound}
+        command_ids = {keys.command_id for _, keys in run_bound}
+        owned_runs = list(
+            (
+                await session.scalars(
+                    select(RunRow).where(
+                        RunRow.tenant_id == owner.tenant_id,
+                        RunRow.actor_id == owner.actor_id,
+                        RunRow.session_id == owner.session_id,
+                        RunRow.run_id.in_(run_ids),
+                        RunRow.command_id.in_(command_ids),
+                    )
+                )
+            ).all()
+        )
+        owned_pairs = {(run.command_id, run.run_id) for run in owned_runs}
+        for row, keys in run_bound:
+            if (keys.command_id, cast(str, keys.run_id)) in owned_pairs:
+                ordinary.append(row)
+            else:
+                hints.append(row)
     if ordinary and not await _run_interactions_have_authority(session, ordinary, owner):
         return False
-    return all(
-        [
-            *[
-                await _skill_patch_interaction_has_authority(session, row, owner)
-                for row in proposals
-            ],
-            *[await _hint_interaction_has_authority(session, row, owner) for row in hints],
-        ]
+    for row in proposals:
+        if not await _skill_patch_interaction_has_authority(session, row, owner):
+            return False
+    for row in hints:
+        if not await _validate_hint_once(session, row, owner, validation_state):
+            return False
+    return True
+
+
+async def _validate_hint_once(
+    session: AsyncSession,
+    row: ProductInteractionRow,
+    owner: AgentSessionRow,
+    validation_state: TerminalProjectionValidationState,
+) -> bool:
+    """Share complete Hint validation across one historical dependency walk."""
+
+    validation_state.bind_session(session)
+    key = (
+        owner.tenant_id,
+        owner.actor_id,
+        owner.session_id,
+        canonical_json_sha256(owner.session_json),
+        row.tenant_id,
+        row.actor_id,
+        row.session_id,
+        row.interaction_id,
+        row.turn_id,
+        str(row.sequence),
+        str(row.interaction_revision),
+        row.created_at.isoformat(),
+        row.updated_at.isoformat(),
+        canonical_json_sha256(row.interaction_json),
     )
+    if key in validation_state.hint_interactions_completed:
+        return True
+    if key in validation_state.hint_interactions_in_progress:
+        raise WorkflowInvariantError("Hint interaction validation cycle detected")
+    # Mark one row at a time: another row on this page may legitimately depend
+    # on it. Failed validation never becomes a successful memo entry.
+    validation_state.hint_interactions_in_progress.add(key)
+    try:
+        if not await _hint_interaction_has_authority(
+            session, row, owner, validation_state=validation_state
+        ):
+            return False
+        validation_state.hint_interactions_completed.add(key)
+        return True
+    finally:
+        validation_state.hint_interactions_in_progress.remove(key)
 
 
 async def _run_interactions_have_authority(
@@ -692,9 +838,7 @@ async def _run_interactions_have_authority(
     if len(run_provenance_by_id) != len(run_ids):
         return False
     for run_id in run_ids:
-        if await validate_run_provenance(
-            session, run_provenance_by_id[run_id]
-        ) is None:
+        if await validate_run_provenance(session, run_provenance_by_id[run_id]) is None:
             return False
 
     event_ids = {keys.event_id for _, keys in keyed}
@@ -828,9 +972,7 @@ async def _run_interactions_have_authority(
         command_row = commands_by_id.get(turn.command_id)
         job = jobs_by_id.get(receipt.job_id)
         command = validated_commands.get(turn.command_id)
-        invocation_receipt = (
-            invocation_receipts_by_job.get(job.job_id) if job is not None else None
-        )
+        invocation_receipt = invocation_receipts_by_job.get(job.job_id) if job is not None else None
         command_receipt = command_receipts_by_command.get(turn.command_id)
         if (
             command_row is None
@@ -882,9 +1024,7 @@ def _interaction_authority_keys(
     if any(item is not None and not isinstance(item, str) for item in fields.values()):
         return None
     if any(
-        not isinstance(fields[name], str)
-        for name in fields
-        if name not in {"draft_id", "run_id"}
+        not isinstance(fields[name], str) for name in fields if name not in {"draft_id", "run_id"}
     ):
         return None
     return _InteractionAuthorityKeys(
@@ -916,11 +1056,11 @@ def _interaction_projection_kind(value: Mapping[str, Any]) -> str | None:
             return "SKILL_PATCH_NO_RUN"
         return None
     if isinstance(feedback.get("run_id"), str):
-        return "RUN"
+        return "RUN_BOUND"
     if (
         feedback.get("run_id") is None
         and value.get("role") in {"teaching_agent", "bug_agent"}
-        and value.get("response_type") in {"question", "hint"}
+        and value.get("response_type") in {"question", "hint", "message"}
     ):
         return "HINT_NO_RUN"
     return None
@@ -995,9 +1135,7 @@ async def _skill_patch_interaction_has_authority(
         )
     )
     command = (
-        await validated_command_record(session, command_row)
-        if command_row is not None
-        else None
+        await validated_command_record(session, command_row) if command_row is not None else None
     )
     job = await session.scalar(
         select(WorkflowJobRow).where(
@@ -1134,8 +1272,7 @@ async def _skill_patch_interaction_has_authority(
         or command.stage != "COMPLETE"
         or not command.terminal
         or command.updated_at != created_at
-        or command.result
-        != {"result_type": "NO_EFFECT", "reason_code": "SKILL_PATCH_PROPOSED"}
+        or command.result != {"result_type": "NO_EFFECT", "reason_code": "SKILL_PATCH_PROPOSED"}
         or command.error is not None
         or command.links != {"self": f"/v1/commands/{command_id}"}
         or command_receipt.request_sha256 != job.request_sha256
@@ -1192,9 +1329,7 @@ async def _skill_patch_interaction_has_authority(
     if provider_draft is None:
         return False
     try:
-        provider_result_authority = _object_value(
-            provider_result.receipt_json, "dispatch"
-        )
+        provider_result_authority = _object_value(provider_result.receipt_json, "dispatch")
         validate_provider_decision_wire(
             provider_results,
             decision_draft=provider_draft,
@@ -1213,8 +1348,7 @@ async def _skill_patch_interaction_has_authority(
         or provider_dispatch.input_sha256 != provider_result.input_sha256
         or provider_dispatch.receipt_json.get("command_id") != command_id
         or provider_dispatch.receipt_json.get("turn_id") != row.turn_id
-        or provider_result_authority.get("request_sha256")
-        != provider_result.input_sha256
+        or provider_result_authority.get("request_sha256") != provider_result.input_sha256
         or provider_result_authority.get("generation_count") != 1
         or provider_result_authority.get("state") != "SUCCEEDED"
         or job.status != "SUCCEEDED"
@@ -1238,9 +1372,7 @@ async def _skill_patch_interaction_has_authority(
     feedback_sha256 = canonical_json_sha256(dict(feedback))
     source_projection = dict(source)
     retained_source_sha256 = source_projection.pop("source_sha256", None)
-    retained_event = (
-        public_domain_event_data(runtime_event) if runtime_event is not None else None
-    )
+    retained_event = public_domain_event_data(runtime_event) if runtime_event is not None else None
     event_payload = retained_event.pop("payload", None) if retained_event is not None else None
     if retained_event is not None:
         retained_event["feedback_sha256"] = feedback_sha256
@@ -1248,8 +1380,7 @@ async def _skill_patch_interaction_has_authority(
         runtime_event is None
         or len(request_events) != 1
         or request_events[0].event_id != event_id
-        or runtime_event.event_type
-        != RuntimeEventType.AGENT_TURN_FEEDBACK_READY.value
+        or runtime_event.event_type != RuntimeEventType.AGENT_TURN_FEEDBACK_READY.value
         or runtime_event.command_id != command_id
         or runtime_event.stream_id != f"agent-session:{row.session_id}"
         or runtime_event.occurred_at != completed_at
@@ -1282,8 +1413,7 @@ async def _skill_patch_interaction_has_authority(
             ProductInteractionRow.actor_id == row.actor_id,
             ProductInteractionRow.session_id == row.session_id,
             ProductInteractionRow.interaction_id == proposal.requested_interaction_id,
-            ProductInteractionRow.interaction_revision
-            == proposal.requested_interaction_revision,
+            ProductInteractionRow.interaction_revision == proposal.requested_interaction_revision,
             ProductInteractionRow.sequence == proposal.requested_interaction_sequence,
         )
     )
@@ -1304,8 +1434,7 @@ async def _skill_patch_interaction_has_authority(
         ),
         "session_workspace": f"/product-experience/v1/sessions/{row.session_id}/workspace",
         "skill_draft": (
-            f"/product-experience/v1/sessions/{row.session_id}/skill-drafts/"
-            f"{proposal.draft_id}"
+            f"/product-experience/v1/sessions/{row.session_id}/skill-drafts/{proposal.draft_id}"
         ),
     } or not _draft_authority_matches(draft, owner):
         return False
@@ -1383,8 +1512,10 @@ def _evidence_refs_from_wire(value: object) -> tuple[EvidenceRef, ...]:
             refs.append(
                 EvidenceRef(
                     evidence_id=str(item["evidence_id"]),
-                    evidence_type=str(item["evidence_type"]),
-                    created_at=datetime.fromisoformat(str(item["created_at"]).replace("Z", "+00:00")),
+                    evidence_type=EvidenceType(str(item["evidence_type"])),
+                    created_at=datetime.fromisoformat(
+                        str(item["created_at"]).replace("Z", "+00:00")
+                    ),
                     sha256=item.get("sha256"),
                     uri=item.get("uri"),
                 )
@@ -1398,8 +1529,10 @@ async def _hint_interaction_has_authority(
     session: AsyncSession,
     row: ProductInteractionRow,
     owner: AgentSessionRow,
+    *,
+    validation_state: TerminalProjectionValidationState | None = None,
 ) -> bool:
-    """Close a hint projection to its no-Run Turn and forbid every side effect."""
+    """Close a hint projection to its no-new-Run Turn and forbid every side effect."""
 
     value = row.interaction_json
     try:
@@ -1423,12 +1556,13 @@ async def _hint_interaction_has_authority(
     question = value.get("question")
     hint_level = value.get("hint_level")
     if (
-        feedback.get("run_id") is not None
+        (feedback.get("run_id") is not None and not isinstance(feedback.get("run_id"), str))
         or role not in {"teaching_agent", "bug_agent"}
-        or response_type not in {"question", "hint"}
+        or response_type not in {"question", "hint", "message"}
         or value.get("skill_patch") is not None
         or value.get("patch_decision") is not None
         or (response_type == "question" and (question is None or hint_level is not None))
+        or (response_type == "message" and hint_level is not None)
         or (
             response_type == "hint"
             and (
@@ -1593,6 +1727,59 @@ async def _hint_interaction_has_authority(
     ):
         return False
 
+    referenced_run_id = cast(str | None, feedback.get("run_id"))
+    if referenced_run_id is not None:
+        referenced_run = await session.scalar(
+            select(RunRow).where(
+                RunRow.tenant_id == row.tenant_id,
+                RunRow.actor_id == row.actor_id,
+                RunRow.session_id == row.session_id,
+                RunRow.run_id == referenced_run_id,
+            )
+        )
+        if referenced_run is None:
+            return False
+        # The public Run resource names this field ``skill``; the immutable
+        # invocation receipt's internal snapshot uses ``skill_ref``.  This read
+        # is intentionally against the public Run row we are authorizing.
+        raw_skill_ref = referenced_run.run_json.get("skill")
+        if not isinstance(raw_skill_ref, Mapping):
+            return False
+        origin_context = command.request_context
+        hint_context = OperationContext(
+            request_id=origin_context.request_id,
+            correlation_id=origin_context.correlation_id,
+            trace_id=origin_context.trace_id,
+            requested_at=origin_context.requested_at,
+            actor=origin_context.actor,
+            content_ref=origin_context.content_ref,
+            schema_version=origin_context.schema_version,
+            command_id=command.command_id,
+            causation_id=None,
+            deadline_at=None,
+        )
+        try:
+            expected_skill_ref = SkillRef(**dict(raw_skill_ref))
+            failure = await latest_run_authority_for_hint(
+                session,
+                current_turn=turn,
+                context=hint_context,
+                expected_skill_ref=expected_skill_ref,
+                require_current_world=False,
+                validation_state=validation_state,
+            )
+        except (TypeError, ValueError, WorkflowInvariantError):
+            return False
+        if (
+            failure is None
+            or failure.authority.run.run_id != referenced_run_id
+            or not _evidence_refs_match(
+                failure.authority.run.evidence_refs,
+                feedback.get("evidence_refs"),
+            )
+        ):
+            return False
+
     receipts = list(
         (
             await session.scalars(
@@ -1613,6 +1800,13 @@ async def _hint_interaction_has_authority(
         for name in (result.step_name, result.step_name.replace("_RESULT_", "_DISPATCH_"))
     }
     required_receipts = {*provider_names, "HINT_DECISION_DERIVED", "TURN_COMPLETED"}
+    # Older completed Hints predate the frozen-context receipt and retain their
+    # existing closure. New Hints bind their decision to the original input.
+    context_receipt = next(
+        (item for item in receipts if item.step_name == "HINT_CONTEXT_READY"), None,
+    )
+    if context_receipt is not None:
+        required_receipts.add("HINT_CONTEXT_READY")
     if not _patch_job_receipts_have_authority(receipts, job, required_receipts):
         return False
     receipts_by_name = {item.step_name: item for item in receipts}
@@ -1627,6 +1821,32 @@ async def _hint_interaction_has_authority(
         return False
     durable_draft = decision.get("draft")
     directive = decision.get("teaching_directive")
+    if context_receipt is not None:
+        try:
+            frozen_context = decode_as(context_receipt.receipt_json, TurnContext)
+            validate_context_for_role(frozen_context)
+        except (KeyError, TypeError, ValueError):
+            return False
+        if (
+            context_receipt.receipt_id
+            != workflow_step_receipt_id(row.tenant_id, job.job_id, "HINT_CONTEXT_READY")
+            or context_receipt.input_sha256 != job.request_sha256
+            or frozen_context.role != role
+            or frozen_context.event.command_id != command_id
+            or frozen_context.event.turn_id != row.turn_id
+            or frozen_context.event.session_id != row.session_id
+            or frozen_context.event.run_id != feedback.get("run_id")
+            or frozen_context.event.occurred_at != turn.created_at
+            or frozen_context.event.expected_world_revision
+            != turn.request_json.get("expected_world_revision")
+            or frozen_context.student_message != turn_input.get("text")
+            or frozen_context.task.request_context != command.request_context
+            or json_value(frozen_context.teaching_directive) != directive
+            or not _evidence_refs_match(
+                collect_decision_evidence(frozen_context), feedback.get("evidence_refs"),
+            )
+        ):
+            return False
     try:
         # The frozen decision renders its instant with an explicit UTC offset
         # while the public feedback renders the same instant with "Z"; compare
@@ -1645,7 +1865,9 @@ async def _hint_interaction_has_authority(
         # Evidence row was written under this Command -- but it may cite the
         # compile rejection it was answering. The citation has to be identical
         # everywhere it is repeated, or the record would disagree with itself.
-        or decision.get("evidence_refs") != feedback.get("evidence_refs")
+        or not _agent_evidence_refs_match_projection(
+            decision.get("evidence_refs"), feedback.get("evidence_refs")
+        )
         or decision.get("message_key") != feedback.get("message_key")
         or decision_completed_at != completed_at
         or directive.get("patch_eligible") is not False
@@ -1755,10 +1977,7 @@ def _patch_job_receipts_have_authority(
     """Allow only one no-Run projection's terminal receipts plus closed waits."""
 
     receipts_by_name = {item.step_name: item for item in receipts}
-    if (
-        len(receipts_by_name) != len(receipts)
-        or not required_receipts.issubset(receipts_by_name)
-    ):
+    if len(receipts_by_name) != len(receipts) or not required_receipts.issubset(receipts_by_name):
         return False
     for item in receipts:
         if (
@@ -1873,16 +2092,13 @@ def _proposal_agent_authority_matches(
         and request.get("task_id") == proposal.task_id
         and request.get("turn_id") == proposal.turn_id == turn.turn_id
         and request.get("command_id") == proposal.request_command_id == turn.command_id
-        and request.get("requested_interaction_id")
-        == proposal.requested_interaction_id
+        and request.get("requested_interaction_id") == proposal.requested_interaction_id
         and failed.get("tenant_id") == proposal.tenant_id
         and failed.get("actor_id") == proposal.actor_id
         and failed.get("session_id") == proposal.session_id
         and failed.get("interaction_id") == proposal.requested_interaction_id
-        and failed.get("interaction_revision")
-        == proposal.requested_interaction_revision
-        and failed.get("interaction_sequence")
-        == proposal.requested_interaction_sequence
+        and failed.get("interaction_revision") == proposal.requested_interaction_revision
+        and failed.get("interaction_sequence") == proposal.requested_interaction_sequence
         and failed.get("same_failure_suffix_end_sequence")
         == proposal.requested_failure_suffix_end_sequence
         and failed.get("turn_id") == proposal.failed_turn_id
@@ -1899,8 +2115,7 @@ def _proposal_agent_authority_matches(
         and failed.get("projection_receipt_id") == proposal.projection_receipt_id
         and operation.get("operation_type") == "UPSERT_FILE"
         and operation.get("path") == proposal.entrypoint
-        and operation.get("previous_content_sha256")
-        == proposal.previous_content_sha256
+        and operation.get("previous_content_sha256") == proposal.previous_content_sha256
         and operation.get("content_sha256") == proposal.content_sha256
         and isinstance(operation.get("content"), str)
         and hashlib.sha256(operation["content"].encode("utf-8")).hexdigest()
@@ -1934,9 +2149,7 @@ def _patch_provider_decision_draft(
             "replacement_content": operation.get("content"),
             "rationale": proposal.agent_proposal_json.get("rationale"),
         },
-        "requires_student_confirmation": patch.get(
-            "requires_student_confirmation"
-        ),
+        "requires_student_confirmation": patch.get("requires_student_confirmation"),
     }
 
 
@@ -2038,8 +2251,7 @@ async def _proposal_failure_authority_matches(
             SkillBuildProvenanceRow.tenant_id == proposal.tenant_id,
             SkillBuildProvenanceRow.actor_id == proposal.actor_id,
             SkillBuildProvenanceRow.session_id == proposal.session_id,
-            SkillBuildProvenanceRow.draft_revision_row_id
-            == proposal.base_draft_revision_row_id,
+            SkillBuildProvenanceRow.draft_revision_row_id == proposal.base_draft_revision_row_id,
         )
     )
     run = await session.scalar(
@@ -2058,14 +2270,11 @@ async def _proposal_failure_authority_matches(
             SkillRunProvenanceRow.tenant_id == proposal.tenant_id,
             SkillRunProvenanceRow.actor_id == proposal.actor_id,
             SkillRunProvenanceRow.session_id == proposal.session_id,
-            SkillRunProvenanceRow.draft_revision_row_id
-            == proposal.base_draft_revision_row_id,
+            SkillRunProvenanceRow.draft_revision_row_id == proposal.base_draft_revision_row_id,
         )
     )
     validated_failed_build = (
-        await validate_run_provenance(
-            session, run_provenance, require_immutable=True
-        )
+        await validate_run_provenance(session, run_provenance, require_immutable=True)
         if run_provenance is not None
         else None
     )
@@ -2077,21 +2286,17 @@ async def _proposal_failure_authority_matches(
         or run_provenance is None
         or validated_failed_build is None
         or validated_failed_build.build_id != build_provenance.build_id
-        or validated_failed_build.authority_sha256
-        != build_provenance.authority_sha256
+        or validated_failed_build.authority_sha256 != build_provenance.authority_sha256
         or build.status != "CERTIFIED"
         or not build.terminal
         or run.run_json.get("status") not in {"FAILED", "REJECTED"}
         or build_provenance.draft_sha256 != proposal.base_draft_sha256
         or build_provenance.source_bundle_sha256 != proposal.source_bundle_sha256
         or run_provenance.draft_sha256 != proposal.base_draft_sha256
-        or run_provenance.assistance_authority
-        != build_provenance.assistance_authority
+        or run_provenance.assistance_authority != build_provenance.assistance_authority
         or not isinstance(evidence_refs, list)
         or not evidence_refs
-        or not await _failed_run_has_full_authority(
-            session, proposal, evidence_refs
-        )
+        or not await _failed_run_has_full_authority(session, proposal, evidence_refs)
     ):
         return False
     links = list(
@@ -2103,9 +2308,7 @@ async def _proposal_failure_authority_matches(
             )
         ).all()
     )
-    evidence_ids = [
-        item.get("evidence_id") for item in evidence_refs if isinstance(item, Mapping)
-    ]
+    evidence_ids = [item.get("evidence_id") for item in evidence_refs if isinstance(item, Mapping)]
     evidence_rows = list(
         (
             await session.scalars(
@@ -2174,18 +2377,12 @@ def _interaction_authority_matches(
     except (KeyError, TypeError, ValueError):
         return False
 
-    expected_interaction_id = _scoped_identifier(
-        "interaction", row.tenant_id, authority.job.job_id
-    )
+    expected_interaction_id = _scoped_identifier("interaction", row.tenant_id, authority.job.job_id)
     run_status = authority.run.run_json.get("status")
     expected_command_status = (
         CommandStatus.APPLIED
         if run_status == "SUCCEEDED"
-        else (
-            CommandStatus.REJECTED
-            if run_status in {"REJECTED", "FAILED"}
-            else None
-        )
+        else (CommandStatus.REJECTED if run_status in {"REJECTED", "FAILED"} else None)
     )
     expected_command_stage = _expected_terminal_command_stage(authority.run.run_json)
     if (
@@ -2391,9 +2588,7 @@ def _runtime_event(row: EventRow) -> RuntimeEvent | None:
     return event
 
 
-def _evidence_refs_match(
-    authoritative: Sequence[EvidenceRef], projected: object
-) -> bool:
+def _evidence_refs_match(authoritative: Sequence[EvidenceRef], projected: object) -> bool:
     if not isinstance(projected, list) or len(projected) != len(authoritative):
         return False
     for reference, item in zip(authoritative, projected, strict=True):
@@ -2420,9 +2615,7 @@ def _evidence_refs_match(
     return True
 
 
-def _agent_evidence_refs_match_projection(
-    authoritative: object, projected: object
-) -> bool:
+def _agent_evidence_refs_match_projection(authoritative: object, projected: object) -> bool:
     """Compare Agent dataclass JSON with the frozen Product Evidence wire.
 
     Agent's internal JSON retains nullable ``uri`` and emits an ISO ``+00:00``
@@ -2496,16 +2689,11 @@ def _job_and_invocation_authority_matches(
     except (KeyError, TypeError):
         return False
     bindings = turn_request.get("skill_bindings")
-    if (
-        not isinstance(bindings, list)
-        or len(bindings) != 1
-        or not isinstance(bindings[0], Mapping)
-    ):
+    if not isinstance(bindings, list) or len(bindings) != 1 or not isinstance(bindings[0], Mapping):
         return False
     binding = dict(bindings[0])
     turn_projection = {
-        key: job_request.get(key)
-        for key in ("expected_world_revision", "input", "skill_bindings")
+        key: job_request.get(key) for key in ("expected_world_revision", "input", "skill_bindings")
     }
     invocation_id = invocation_value.get("invocation_id")
     expected_invocation_id = side_effect_execution_id(command.command_id, turn.turn_id)
@@ -2562,8 +2750,7 @@ def _job_and_invocation_authority_matches(
             "client_state",
         }
         or job_request.get("turn_id") != row.turn_id
-        or job_request.get("expected_world_revision")
-        != turn_request.get("expected_world_revision")
+        or job_request.get("expected_world_revision") != turn_request.get("expected_world_revision")
         or job_request.get("input") != turn_request.get("input")
         or job_request.get("skill_bindings") != bindings
         or turn_request not in (job_request, turn_projection)
@@ -2589,8 +2776,7 @@ def _job_and_invocation_authority_matches(
         or invocation_receipt.input_sha256 != invocation_value.get("request_sha256")
         or invocation_receipt.input_sha256 != terminal_receipt.input_sha256
         or invocation_receipt.input_sha256 != expected_invocation_request_sha256
-        or invocation_receipt.output_sha256
-        != workflow_receipt_sha256(dict(invocation_value))
+        or invocation_receipt.output_sha256 != workflow_receipt_sha256(dict(invocation_value))
         or set(invocation_value)
         != {
             "schema_version",
@@ -2639,8 +2825,7 @@ def _job_and_invocation_authority_matches(
         or invocation_run.get("evidence_refs") != run_value.get("evidence_refs")
         or invocation_run.get("request_context") != origin
         or world_commit != world_receipt
-        or command.links.get("world_snapshot")
-        != f"/v1/worlds/{owner.world_id}/snapshot"
+        or command.links.get("world_snapshot") != f"/v1/worlds/{owner.world_id}/snapshot"
         or not isinstance(task_success, bool)
         or (task_success and run_status != "SUCCEEDED")
         or (not task_success and run_status not in {"REJECTED", "FAILED"})
@@ -2653,10 +2838,8 @@ def _job_and_invocation_authority_matches(
     return (
         world_application.get("status") == "COMMITTED"
         and world_commit.get("world_id") == owner.world_id
-        and world_commit.get("previous_revision")
-        == invocation_run.get("world_revision_before")
-        and world_commit.get("world_revision")
-        == invocation_run.get("world_revision_after")
+        and world_commit.get("previous_revision") == invocation_run.get("world_revision_before")
+        and world_commit.get("world_revision") == invocation_run.get("world_revision_after")
     )
 
 
@@ -2723,9 +2906,7 @@ def _patch_authority_matches(
         draft_before = _integer_value(decision, "draft_revision_before")
         draft_after = _integer_value(decision, "draft_revision_after")
         receipt_actor = _object_value(_object_value(decision, "request_context"), "actor")
-        receipt_content = _object_value(
-            _object_value(decision, "request_context"), "content_ref"
-        )
+        receipt_content = _object_value(_object_value(decision, "request_context"), "content_ref")
     except (KeyError, TypeError, ValueError):
         return False
     expected_path = (
@@ -2836,8 +3017,7 @@ async def _patch_decision_receipt_has_authority(
             ProductSkillPatchProposalRow.tenant_id == interaction_row.tenant_id,
             ProductSkillPatchProposalRow.actor_id == interaction_row.actor_id,
             ProductSkillPatchProposalRow.session_id == interaction_row.session_id,
-            ProductSkillPatchProposalRow.interaction_id
-            == interaction_row.interaction_id,
+            ProductSkillPatchProposalRow.interaction_id == interaction_row.interaction_id,
             ProductSkillPatchProposalRow.patch_id == receipt.patch_id,
         )
     )
@@ -2866,14 +3046,12 @@ async def _patch_decision_receipt_has_authority(
         or decision.receipt_json != dict(decision_value)
         or decision.request_sha256 != request_hash
         or decision.patch_id != patch.get("patch_id")
-        or decision.base_draft_revision_row_id
-        != proposal.base_draft_revision_row_id
+        or decision.base_draft_revision_row_id != proposal.base_draft_revision_row_id
         or decision.draft_id != proposal.draft_id
         or decision.decided_at != receipt.created_at
         or decision_value.get("decision_id") != decision.decision_id
         or decision_value.get("patch_id") != proposal.patch_id
-        or decision_value.get("interaction_revision_after")
-        != interaction_row.interaction_revision
+        or decision_value.get("interaction_revision_after") != interaction_row.interaction_revision
         or interaction_row.updated_at != decision.decided_at
     ):
         return False
@@ -2900,22 +3078,19 @@ async def _patch_decision_receipt_has_authority(
         "revision": draft.revision,
         "draft_sha256": draft.draft_sha256,
         "url": (
-            f"/product-experience/v1/sessions/{draft.session_id}/"
-            f"skill-drafts/{draft.draft_id}"
+            f"/product-experience/v1/sessions/{draft.session_id}/skill-drafts/{draft.draft_id}"
         ),
     }
     if (
         not isinstance(refs, list)
         or expected_ref not in refs
-        or workspace.workspace_json.get("last_interaction_sequence")
-        != interaction_high_watermark
+        or workspace.workspace_json.get("last_interaction_sequence") != interaction_high_watermark
     ):
         return False
     if decision.decision == "REJECT":
         assistance = await session.scalar(
             select(ProductDraftRevisionAssistanceRow).where(
-                ProductDraftRevisionAssistanceRow.patch_decision_id
-                == decision.decision_id
+                ProductDraftRevisionAssistanceRow.patch_decision_id == decision.decision_id
             )
         )
         return (
@@ -2947,8 +3122,7 @@ async def _patch_decision_receipt_has_authority(
                 ProductDraftRevisionAssistanceRow.origin_accepted_revision_row_id
                 == accepted.draft_revision_row_id,
                 ProductDraftRevisionAssistanceRow.patch_id == proposal.patch_id,
-                ProductDraftRevisionAssistanceRow.patch_decision_id
-                == decision.decision_id,
+                ProductDraftRevisionAssistanceRow.patch_decision_id == decision.decision_id,
                 ProductDraftRevisionAssistanceRow.inherited.is_(False),
             )
         )
@@ -2959,8 +3133,7 @@ async def _patch_decision_receipt_has_authority(
         accepted is not None
         and assistance is not None
         and receipt.draft_revision_row_id == accepted.draft_revision_row_id
-        and accepted.parent_revision_row_id
-        == proposal.base_draft_revision_row_id
+        and accepted.parent_revision_row_id == proposal.base_draft_revision_row_id
         and accepted.revision == proposal.base_draft_revision + 1
         and accepted.draft_sha256 == proposal.result_draft_sha256
         and accepted.source_kind == "SKILL_PATCH"
@@ -3018,8 +3191,7 @@ async def _load_patch_decision_authority(
         or _patch_hash(patch) != patch.get("patch_sha256")
         or proposal.patch_sha256 != patch.get("patch_sha256")
         or proposal.patch_id != patch.get("patch_id")
-        or proposal.requested_interaction_id
-        == proposal.interaction_id
+        or proposal.requested_interaction_id == proposal.interaction_id
         or proposal.base_draft_revision != patch.get("base_draft_revision")
         or proposal.base_draft_sha256 != patch.get("base_draft_sha256")
         or proposal.result_draft_sha256 != patch.get("result_draft_sha256")
@@ -3028,17 +3200,13 @@ async def _load_patch_decision_authority(
         or proposal.turn_id != interaction.get("turn_id")
         or proposal.turn_id != agent_request.get("turn_id")
         or proposal.request_command_id != agent_request.get("command_id")
-        or proposal.requested_interaction_id
-        != agent_request.get("requested_interaction_id")
+        or proposal.requested_interaction_id != agent_request.get("requested_interaction_id")
         or proposal.requested_interaction_id != agent_failed.get("interaction_id")
-        or proposal.requested_interaction_revision
-        != agent_failed.get("interaction_revision")
-        or proposal.requested_interaction_sequence
-        != agent_failed.get("interaction_sequence")
+        or proposal.requested_interaction_revision != agent_failed.get("interaction_revision")
+        or proposal.requested_interaction_sequence != agent_failed.get("interaction_sequence")
         or proposal.requested_failure_suffix_end_sequence
         != agent_failed.get("same_failure_suffix_end_sequence")
-        or proposal.requested_interaction_sequence
-        != proposal.requested_failure_suffix_end_sequence
+        or proposal.requested_interaction_sequence != proposal.requested_failure_suffix_end_sequence
         or proposal.failed_turn_id != agent_failed.get("turn_id")
         or proposal.failed_command_id != agent_failed.get("command_id")
         or proposal.task_id != agent_failed.get("task_id")
@@ -3049,14 +3217,10 @@ async def _load_patch_decision_authority(
         or proposal.failed_build_id != agent_failed.get("build_id")
         or proposal.failed_run_id != agent_failed.get("run_id")
         or proposal.feedback_event_id != agent_failed.get("feedback_event_id")
-        or proposal.projection_receipt_id
-        != agent_failed.get("projection_receipt_id")
-        or proposal.agent_proposal_json.get("proposal_id")
-        != proposal.agent_proposal_id
-        or proposal.agent_proposal_json.get("proposal_sha256")
-        != proposal.agent_proposal_sha256
-        or _agent_proposal_sha256(proposal.agent_proposal_json)
-        != proposal.agent_proposal_sha256
+        or proposal.projection_receipt_id != agent_failed.get("projection_receipt_id")
+        or proposal.agent_proposal_json.get("proposal_id") != proposal.agent_proposal_id
+        or proposal.agent_proposal_json.get("proposal_sha256") != proposal.agent_proposal_sha256
+        or _agent_proposal_sha256(proposal.agent_proposal_json) != proposal.agent_proposal_sha256
     ):
         return Failure(
             _error(
@@ -3067,17 +3231,18 @@ async def _load_patch_decision_authority(
         )
 
     draft = await session.scalar(
-        select(ProductDraftRow).where(
+        select(ProductDraftRow)
+        .where(
             ProductDraftRow.tenant_id == tenant_id,
             ProductDraftRow.actor_id == actor_id,
             ProductDraftRow.session_id == session_id,
             ProductDraftRow.draft_id == proposal.draft_id,
-        ).with_for_update()
+        )
+        .with_for_update()
     )
     base_revision = await session.scalar(
         select(ProductDraftRevisionRow).where(
-            ProductDraftRevisionRow.draft_revision_row_id
-            == proposal.base_draft_revision_row_id,
+            ProductDraftRevisionRow.draft_revision_row_id == proposal.base_draft_revision_row_id,
             ProductDraftRevisionRow.tenant_id == tenant_id,
             ProductDraftRevisionRow.actor_id == actor_id,
             ProductDraftRevisionRow.session_id == session_id,
@@ -3118,8 +3283,7 @@ async def _load_patch_decision_authority(
         return Failure(_error("INVALID_REQUEST", "PATCH_DECISION", str(error)))
     if (
         operation.get("path") != proposal.entrypoint
-        or operation.get("previous_content_sha256")
-        != proposal.previous_content_sha256
+        or operation.get("previous_content_sha256") != proposal.previous_content_sha256
         or operation.get("content_sha256") != proposal.content_sha256
     ):
         return Failure(
@@ -3170,14 +3334,11 @@ async def _load_patch_decision_authority(
         or not build.terminal
         or run.run_json.get("status") not in {"FAILED", "REJECTED"}
         or run_provenance.build_id != build.build_id
-        or run_provenance.draft_revision_row_id
-        != build_provenance.draft_revision_row_id
+        or run_provenance.draft_revision_row_id != build_provenance.draft_revision_row_id
         or run_provenance.draft_sha256 != build_provenance.draft_sha256
-        or build_provenance.draft_revision_row_id
-        != base_revision.draft_revision_row_id
+        or build_provenance.draft_revision_row_id != base_revision.draft_revision_row_id
         or build_provenance.draft_sha256 != base_revision.draft_sha256
-        or build_provenance.source_bundle_sha256
-        != base_revision.source_bundle_sha256
+        or build_provenance.source_bundle_sha256 != base_revision.source_bundle_sha256
     ):
         return Failure(
             _error(
@@ -3189,9 +3350,7 @@ async def _load_patch_decision_authority(
 
     evidence_refs = patch.get("evidence_refs")
     if not isinstance(evidence_refs, list) or not evidence_refs:
-        return Failure(
-            _error("INVARIANT_VIOLATION", "PATCH_DECISION", "Patch Evidence is missing")
-        )
+        return Failure(_error("INVARIANT_VIOLATION", "PATCH_DECISION", "Patch Evidence is missing"))
     if not await _failed_run_has_full_authority(session, proposal, evidence_refs):
         return Failure(
             _error(
@@ -3395,9 +3554,7 @@ def _validated_entrypoint_operation(
         or not isinstance(operations[0], Mapping)
         or not isinstance(source, Mapping)
     ):
-        raise InvalidSkillBuildRequest(
-            "Skill Patch requires exactly one UPSERT_FILE operation"
-        )
+        raise InvalidSkillBuildRequest("Skill Patch requires exactly one UPSERT_FILE operation")
     operation = dict(operations[0])
     entrypoint = source.get("entrypoint")
     files = source.get("files")
@@ -3407,13 +3564,9 @@ def _validated_entrypoint_operation(
         or operation.get("path") != entrypoint
         or not isinstance(files, list)
     ):
-        raise InvalidSkillBuildRequest(
-            "Skill Patch must UPSERT the current canonical entrypoint"
-        )
+        raise InvalidSkillBuildRequest("Skill Patch must UPSERT the current canonical entrypoint")
     matches = [
-        item
-        for item in files
-        if isinstance(item, Mapping) and item.get("path") == entrypoint
+        item for item in files if isinstance(item, Mapping) and item.get("path") == entrypoint
     ]
     if len(matches) != 1:
         raise InvalidSkillBuildRequest("Draft entrypoint is not a unique source file")
@@ -3484,7 +3637,9 @@ def _apply_entrypoint_upsert(
     )
 
 
-def _apply_patch(draft: Mapping[str, Any], patch: Mapping[str, Any], decided_at: datetime) -> dict[str, Any]:
+def _apply_patch(
+    draft: Mapping[str, Any], patch: Mapping[str, Any], decided_at: datetime
+) -> dict[str, Any]:
     """Apply the released declarative operations without filesystem normalization."""
     source = copy.deepcopy(draft["source_bundle"])
     if not isinstance(source, dict) or not isinstance(source.get("files"), list):
@@ -3571,10 +3726,13 @@ def _apply_patch(draft: Mapping[str, Any], patch: Mapping[str, Any], decided_at:
 def _canonical_source_path(path: str) -> bool:
     import re
 
-    return re.fullmatch(
-        r"(?=.{1,240}$)[A-Za-z0-9_](?:[A-Za-z0-9_.-]*[A-Za-z0-9_-])?(?:/[A-Za-z0-9_](?:[A-Za-z0-9_.-]*[A-Za-z0-9_-])?)*",
-        path,
-    ) is not None
+    return (
+        re.fullmatch(
+            r"(?=.{1,240}$)[A-Za-z0-9_](?:[A-Za-z0-9_.-]*[A-Za-z0-9_-])?(?:/[A-Za-z0-9_](?:[A-Za-z0-9_.-]*[A-Za-z0-9_-])?)*",
+            path,
+        )
+        is not None
+    )
 
 
 def _expected_terminal_command_stage(run: Mapping[str, Any]) -> str | None:
@@ -3639,7 +3797,11 @@ def _error(code: str, stage: str, message: str) -> Any:
         "INVALID_REQUEST": (ErrorCategory.VALIDATION, False, "request.invalid"),
         "CONTENT_VERSION_MISMATCH": (ErrorCategory.VALIDATION, False, "content.version_mismatch"),
         "EVENT_SEQUENCE_GAP": (ErrorCategory.CONCURRENCY, True, "event.resync_required"),
-        "IDEMPOTENCY_KEY_REUSED": (ErrorCategory.CONCURRENCY, False, "request.idempotency_conflict"),
+        "IDEMPOTENCY_KEY_REUSED": (
+            ErrorCategory.CONCURRENCY,
+            False,
+            "request.idempotency_conflict",
+        ),
         "INVARIANT_VIOLATION": (ErrorCategory.INVARIANT, False, "system.invariant_violation"),
     }[code]
     return ContractError(

@@ -1,0 +1,919 @@
+{
+  "passed": true,
+  "runs": [
+    {
+      "run_id": "run_d1c61244dad060f0f560c384",
+      "run_status": "REJECTED",
+      "skill": {
+        "skill_id": "skill_crop_watering_0001",
+        "artifact_sha256": "58bfa4822d487ef285de929f63786cb00ec9cb92ed0ea66751c181aea691c7e0",
+        "certification_id": "cert_e6eda70a41cf06f462c09a06",
+        "skill_version_id": "skillver_f6b33ccc9e308d77112ccfc0"
+      },
+      "world": {
+        "status": "REJECTED",
+        "failure": {
+          "code": "WORLD_RULE_REJECTED",
+          "stage": "WORLD_VALIDATE",
+          "details": {
+            "reason": "TASK_INCOMPLETE"
+          },
+          "message": "The staged actions did not satisfy the activated World rules.",
+          "category": "WORLD_RULE",
+          "retryable": false,
+          "evidence_ids": [],
+          "user_message_key": "world.rule_rejected"
+        },
+        "receipt": null
+      },
+      "workflow_status": "SUCCEEDED",
+      "learner_status": "SUCCEEDED",
+      "learner_attempt": 1,
+      "failure_count": "1",
+      "interaction": {
+        "role": "teaching_agent",
+        "links": {
+          "self": "/product-experience/v1/sessions/session_65c7d5ee236fe73939e1ea23/agent-interactions/interaction_4e5de5d31ef05ae5a9b18541",
+          "skill_draft": null,
+          "session_workspace": "/product-experience/v1/sessions/session_65c7d5ee236fe73939e1ea23/workspace"
+        },
+        "turn_id": "turn_client_20260909110036_830806",
+        "feedback": {
+          "run_id": "run_d1c61244dad060f0f560c384",
+          "source": "provider",
+          "message": "规范运行记录确认任务尚未完成；失败类型为 task_incomplete。",
+          "turn_id": "turn_client_20260909110036_830806",
+          "degraded": false,
+          "command_id": "cmd_e5bde51510544ea7a0df240f277b1dcc",
+          "session_id": "session_65c7d5ee236fe73939e1ea23",
+          "message_key": "agent.teaching_agent.question",
+          "completed_at": "2026-09-09T11:00:47.234571Z",
+          "evidence_refs": [
+            {
+              "sha256": "e2e7e307d9b4da97e1db66f832e3d2fa400e4ec627c672ec9bb6ed867f15146c",
+              "created_at": "2026-09-09T11:00:47.234571Z",
+              "evidence_id": "evidence_run_d1c61244dad060f0f560c384",
+              "evidence_type": "SANDBOX_LOG"
+            }
+          ],
+          "fallback_reason": null
+        },
+        "question": "哪一步的可观察结果和你的预期不同？",
+        "sequence": 104,
+        "created_at": "2026-09-09T11:00:59.587830Z",
+        "hint_level": null,
+        "session_id": "session_65c7d5ee236fe73939e1ea23",
+        "updated_at": "2026-09-09T11:00:59.587830Z",
+        "skill_patch": null,
+        "response_type": "question",
+        "feedback_event": {
+          "event_id": "evt_eaade5c1dcca41549cf72a83490c1f36",
+          "producer": "walnut_agent_runtime",
+          "sequence": 104,
+          "trace_id": "trace_client_20260909110036_432341",
+          "stream_id": "agent-session:session_65c7d5ee236fe73939e1ea23",
+          "command_id": "cmd_e5bde51510544ea7a0df240f277b1dcc",
+          "event_type": "agent.turn.feedback_ready",
+          "content_ref": {
+            "unit_id": "YAYA_FARM_001",
+            "version": "1.0.0",
+            "content_hash": "8d740579513e5f2051fb27c1238b1016606425e16559b9a49a0deae3cef3bedd"
+          },
+          "occurred_at": "2026-09-09T11:00:47.234571Z",
+          "causation_id": "cmd_e5bde51510544ea7a0df240f277b1dcc",
+          "event_version": 1,
+          "correlation_id": "corr_client_20260909110036_432341",
+          "schema_version": "1.0.0",
+          "feedback_sha256": "70d88cfd6d87907c2a9471c3e3c3fea4dfc732060aa2a3cbecf3ff59d9a75a29"
+        },
+        "interaction_id": "interaction_4e5de5d31ef05ae5a9b18541",
+        "patch_decision": null,
+        "request_context": {
+          "actor": {
+            "roles": [
+              "game:player"
+            ],
+            "actor_id": "student_0001",
+            "tenant_id": "tenant_yaya",
+            "actor_type": "student"
+          },
+          "trace_id": "trace_client_20260909110036_432341",
+          "request_id": "req_client_20260909110036_432341",
+          "content_ref": {
+            "unit_id": "YAYA_FARM_001",
+            "version": "1.0.0",
+            "content_hash": "8d740579513e5f2051fb27c1238b1016606425e16559b9a49a0deae3cef3bedd"
+          },
+          "requested_at": "2026-09-09T11:00:36.868731+00:00",
+          "correlation_id": "corr_client_20260909110036_432341",
+          "schema_version": "1.0.0"
+        },
+        "projection_source": {
+          "role": "teaching_agent",
+          "actor": {
+            "roles": [
+              "game:player"
+            ],
+            "actor_id": "student_0001",
+            "tenant_id": "tenant_yaya",
+            "actor_type": "student"
+          },
+          "turn_id": "turn_client_20260909110036_830806",
+          "question": "哪一步的可观察结果和你的预期不同？",
+          "sequence": 104,
+          "command_id": "cmd_e5bde51510544ea7a0df240f277b1dcc",
+          "hint_level": null,
+          "receipt_id": "receipt_8aef61594d22829b56afc0dd",
+          "session_id": "session_65c7d5ee236fe73939e1ea23",
+          "content_ref": {
+            "unit_id": "YAYA_FARM_001",
+            "version": "1.0.0",
+            "content_hash": "8d740579513e5f2051fb27c1238b1016606425e16559b9a49a0deae3cef3bedd"
+          },
+          "source_type": "AGENT_TURN_PRODUCT_PROJECTION",
+          "committed_at": "2026-09-09T11:00:59.587830Z",
+          "response_type": "question",
+          "source_sha256": "51e60f1f05d90048612bb66c8a00c71bf1ad82fef1ef6d61755c4b61df62e5b1",
+          "interaction_id": "interaction_4e5de5d31ef05ae5a9b18541",
+          "feedback_sha256": "70d88cfd6d87907c2a9471c3e3c3fea4dfc732060aa2a3cbecf3ff59d9a75a29",
+          "source_revision": 1,
+          "feedback_event_id": "evt_eaade5c1dcca41549cf72a83490c1f36",
+          "skill_patch_sha256": null
+        },
+        "interaction_revision": 1
+      }
+    },
+    {
+      "run_id": "run_46cafe47f04f79c6d73b68b7",
+      "run_status": "REJECTED",
+      "skill": {
+        "skill_id": "skill_crop_watering_0001",
+        "artifact_sha256": "58bfa4822d487ef285de929f63786cb00ec9cb92ed0ea66751c181aea691c7e0",
+        "certification_id": "cert_2ca51fa1d4e37e82663fe9ef",
+        "skill_version_id": "skillver_d1225a158967274063574db2"
+      },
+      "world": {
+        "status": "REJECTED",
+        "failure": {
+          "code": "WORLD_RULE_REJECTED",
+          "stage": "WORLD_VALIDATE",
+          "details": {
+            "reason": "TASK_INCOMPLETE"
+          },
+          "message": "The staged actions did not satisfy the activated World rules.",
+          "category": "WORLD_RULE",
+          "retryable": false,
+          "evidence_ids": [],
+          "user_message_key": "world.rule_rejected"
+        },
+        "receipt": null
+      },
+      "workflow_status": "SUCCEEDED",
+      "learner_status": "SUCCEEDED",
+      "learner_attempt": 1,
+      "failure_count": "2",
+      "interaction": {
+        "role": "teaching_agent",
+        "links": {
+          "self": "/product-experience/v1/sessions/session_65c7d5ee236fe73939e1ea23/agent-interactions/interaction_c395197c373767b48f1d485c",
+          "skill_draft": null,
+          "session_workspace": "/product-experience/v1/sessions/session_65c7d5ee236fe73939e1ea23/workspace"
+        },
+        "turn_id": "turn_client_20260909110124_404050",
+        "feedback": {
+          "run_id": "run_46cafe47f04f79c6d73b68b7",
+          "source": "provider",
+          "message": "规范运行记录确认任务尚未完成；失败类型为 task_incomplete。",
+          "turn_id": "turn_client_20260909110124_404050",
+          "degraded": false,
+          "command_id": "cmd_b867b7900254422484ccf4716a58dfed",
+          "session_id": "session_65c7d5ee236fe73939e1ea23",
+          "message_key": "agent.teaching_agent.question",
+          "completed_at": "2026-09-09T11:01:31.799880Z",
+          "evidence_refs": [
+            {
+              "sha256": "5501037b7f03726e027944fbf65131a8bbc4bdd02644d456ffd56199139ce2aa",
+              "created_at": "2026-09-09T11:01:31.799880Z",
+              "evidence_id": "evidence_run_46cafe47f04f79c6d73b68b7",
+              "evidence_type": "SANDBOX_LOG"
+            }
+          ],
+          "fallback_reason": null
+        },
+        "question": "哪一步的可观察结果和你的预期不同？",
+        "sequence": 105,
+        "created_at": "2026-09-09T11:01:48.925791Z",
+        "hint_level": null,
+        "session_id": "session_65c7d5ee236fe73939e1ea23",
+        "updated_at": "2026-09-09T11:01:48.925791Z",
+        "skill_patch": null,
+        "response_type": "question",
+        "feedback_event": {
+          "event_id": "evt_843eeccafa0d43e3bea35841cf36773b",
+          "producer": "walnut_agent_runtime",
+          "sequence": 105,
+          "trace_id": "trace_client_20260909110124_534450",
+          "stream_id": "agent-session:session_65c7d5ee236fe73939e1ea23",
+          "command_id": "cmd_b867b7900254422484ccf4716a58dfed",
+          "event_type": "agent.turn.feedback_ready",
+          "content_ref": {
+            "unit_id": "YAYA_FARM_001",
+            "version": "1.0.0",
+            "content_hash": "8d740579513e5f2051fb27c1238b1016606425e16559b9a49a0deae3cef3bedd"
+          },
+          "occurred_at": "2026-09-09T11:01:31.799880Z",
+          "causation_id": "cmd_b867b7900254422484ccf4716a58dfed",
+          "event_version": 1,
+          "correlation_id": "corr_client_20260909110124_534450",
+          "schema_version": "1.0.0",
+          "feedback_sha256": "2ad77ade9908e26e00b1bd7658dd55953138c2dd21b460d1da22694b16dceb6f"
+        },
+        "interaction_id": "interaction_c395197c373767b48f1d485c",
+        "patch_decision": null,
+        "request_context": {
+          "actor": {
+            "roles": [
+              "game:player"
+            ],
+            "actor_id": "student_0001",
+            "tenant_id": "tenant_yaya",
+            "actor_type": "student"
+          },
+          "trace_id": "trace_client_20260909110124_534450",
+          "request_id": "req_client_20260909110124_534450",
+          "content_ref": {
+            "unit_id": "YAYA_FARM_001",
+            "version": "1.0.0",
+            "content_hash": "8d740579513e5f2051fb27c1238b1016606425e16559b9a49a0deae3cef3bedd"
+          },
+          "requested_at": "2026-09-09T11:01:24.664224+00:00",
+          "correlation_id": "corr_client_20260909110124_534450",
+          "schema_version": "1.0.0"
+        },
+        "projection_source": {
+          "role": "teaching_agent",
+          "actor": {
+            "roles": [
+              "game:player"
+            ],
+            "actor_id": "student_0001",
+            "tenant_id": "tenant_yaya",
+            "actor_type": "student"
+          },
+          "turn_id": "turn_client_20260909110124_404050",
+          "question": "哪一步的可观察结果和你的预期不同？",
+          "sequence": 105,
+          "command_id": "cmd_b867b7900254422484ccf4716a58dfed",
+          "hint_level": null,
+          "receipt_id": "receipt_f79d770c4738f56ad72051b5",
+          "session_id": "session_65c7d5ee236fe73939e1ea23",
+          "content_ref": {
+            "unit_id": "YAYA_FARM_001",
+            "version": "1.0.0",
+            "content_hash": "8d740579513e5f2051fb27c1238b1016606425e16559b9a49a0deae3cef3bedd"
+          },
+          "source_type": "AGENT_TURN_PRODUCT_PROJECTION",
+          "committed_at": "2026-09-09T11:01:48.925791Z",
+          "response_type": "question",
+          "source_sha256": "f0142da2219f3f6cc5d58632421b7252d169c39e66c7dbe1f511eb69d3cfc2a4",
+          "interaction_id": "interaction_c395197c373767b48f1d485c",
+          "feedback_sha256": "2ad77ade9908e26e00b1bd7658dd55953138c2dd21b460d1da22694b16dceb6f",
+          "source_revision": 1,
+          "feedback_event_id": "evt_843eeccafa0d43e3bea35841cf36773b",
+          "skill_patch_sha256": null
+        },
+        "interaction_revision": 1
+      }
+    },
+    {
+      "run_id": "run_9932ed3a5647c46eff75b20b",
+      "run_status": "REJECTED",
+      "skill": {
+        "skill_id": "skill_crop_watering_0001",
+        "artifact_sha256": "58bfa4822d487ef285de929f63786cb00ec9cb92ed0ea66751c181aea691c7e0",
+        "certification_id": "cert_da0f0aa5534e8c34da31c104",
+        "skill_version_id": "skillver_759e2f04ad4e63a8b5731418"
+      },
+      "world": {
+        "status": "REJECTED",
+        "failure": {
+          "code": "WORLD_RULE_REJECTED",
+          "stage": "WORLD_VALIDATE",
+          "details": {
+            "reason": "TASK_INCOMPLETE"
+          },
+          "message": "The staged actions did not satisfy the activated World rules.",
+          "category": "WORLD_RULE",
+          "retryable": false,
+          "evidence_ids": [],
+          "user_message_key": "world.rule_rejected"
+        },
+        "receipt": null
+      },
+      "workflow_status": "SUCCEEDED",
+      "learner_status": "SUCCEEDED",
+      "learner_attempt": 1,
+      "failure_count": "3",
+      "interaction": {
+        "role": "bug_agent",
+        "links": {
+          "self": "/product-experience/v1/sessions/session_65c7d5ee236fe73939e1ea23/agent-interactions/interaction_d4e98a4177f0cab89ab82829",
+          "skill_draft": null,
+          "session_workspace": "/product-experience/v1/sessions/session_65c7d5ee236fe73939e1ea23/workspace"
+        },
+        "turn_id": "turn_client_20260909110214_314963",
+        "feedback": {
+          "run_id": "run_9932ed3a5647c46eff75b20b",
+          "source": "provider",
+          "message": "同类失败已连续复现 3 次；失败类型为 task_incomplete。当前没有额外反例，只使用同类失败 Run。",
+          "turn_id": "turn_client_20260909110214_314963",
+          "degraded": false,
+          "command_id": "cmd_28933456e43b457db8e267845637e787",
+          "session_id": "session_65c7d5ee236fe73939e1ea23",
+          "message_key": "agent.bug_agent.question",
+          "completed_at": "2026-09-09T11:02:20.465132Z",
+          "evidence_refs": [
+            {
+              "sha256": "febdfb47daf8a2467c302a1b5a7ee1f034335bf8833a645a9f060753e5c1f620",
+              "created_at": "2026-09-09T11:02:20.465132Z",
+              "evidence_id": "evidence_run_9932ed3a5647c46eff75b20b",
+              "evidence_type": "SANDBOX_LOG"
+            }
+          ],
+          "fallback_reason": null
+        },
+        "question": "当边界输入到达关键条件时，循环或判断是否仍覆盖完整目标范围？",
+        "sequence": 106,
+        "created_at": "2026-09-09T11:02:34.456044Z",
+        "hint_level": null,
+        "session_id": "session_65c7d5ee236fe73939e1ea23",
+        "updated_at": "2026-09-09T11:02:34.456044Z",
+        "skill_patch": null,
+        "response_type": "question",
+        "feedback_event": {
+          "event_id": "evt_60ab187ec83d45188b94e14cd97a5b17",
+          "producer": "walnut_agent_runtime",
+          "sequence": 106,
+          "trace_id": "trace_client_20260909110214_857893",
+          "stream_id": "agent-session:session_65c7d5ee236fe73939e1ea23",
+          "command_id": "cmd_28933456e43b457db8e267845637e787",
+          "event_type": "agent.turn.feedback_ready",
+          "content_ref": {
+            "unit_id": "YAYA_FARM_001",
+            "version": "1.0.0",
+            "content_hash": "8d740579513e5f2051fb27c1238b1016606425e16559b9a49a0deae3cef3bedd"
+          },
+          "occurred_at": "2026-09-09T11:02:20.465132Z",
+          "causation_id": "cmd_28933456e43b457db8e267845637e787",
+          "event_version": 1,
+          "correlation_id": "corr_client_20260909110214_857893",
+          "schema_version": "1.0.0",
+          "feedback_sha256": "5dab1db56983c12615dca6ec2847e760aacea957cb55238e5f0dee7408b82979"
+        },
+        "interaction_id": "interaction_d4e98a4177f0cab89ab82829",
+        "patch_decision": null,
+        "request_context": {
+          "actor": {
+            "roles": [
+              "game:player"
+            ],
+            "actor_id": "student_0001",
+            "tenant_id": "tenant_yaya",
+            "actor_type": "student"
+          },
+          "trace_id": "trace_client_20260909110214_857893",
+          "request_id": "req_client_20260909110214_857893",
+          "content_ref": {
+            "unit_id": "YAYA_FARM_001",
+            "version": "1.0.0",
+            "content_hash": "8d740579513e5f2051fb27c1238b1016606425e16559b9a49a0deae3cef3bedd"
+          },
+          "requested_at": "2026-09-09T11:02:14.573388+00:00",
+          "correlation_id": "corr_client_20260909110214_857893",
+          "schema_version": "1.0.0"
+        },
+        "projection_source": {
+          "role": "bug_agent",
+          "actor": {
+            "roles": [
+              "game:player"
+            ],
+            "actor_id": "student_0001",
+            "tenant_id": "tenant_yaya",
+            "actor_type": "student"
+          },
+          "turn_id": "turn_client_20260909110214_314963",
+          "question": "当边界输入到达关键条件时，循环或判断是否仍覆盖完整目标范围？",
+          "sequence": 106,
+          "command_id": "cmd_28933456e43b457db8e267845637e787",
+          "hint_level": null,
+          "receipt_id": "receipt_d1564bede5c9c01f36a817af",
+          "session_id": "session_65c7d5ee236fe73939e1ea23",
+          "content_ref": {
+            "unit_id": "YAYA_FARM_001",
+            "version": "1.0.0",
+            "content_hash": "8d740579513e5f2051fb27c1238b1016606425e16559b9a49a0deae3cef3bedd"
+          },
+          "source_type": "AGENT_TURN_PRODUCT_PROJECTION",
+          "committed_at": "2026-09-09T11:02:34.456044Z",
+          "response_type": "question",
+          "source_sha256": "f263daaa8fc630eadb4359b70e3973e822c245aa96e2be47d9904b4138bd1724",
+          "interaction_id": "interaction_d4e98a4177f0cab89ab82829",
+          "feedback_sha256": "5dab1db56983c12615dca6ec2847e760aacea957cb55238e5f0dee7408b82979",
+          "source_revision": 1,
+          "feedback_event_id": "evt_60ab187ec83d45188b94e14cd97a5b17",
+          "skill_patch_sha256": null
+        },
+        "interaction_revision": 1
+      }
+    },
+    {
+      "run_id": "run_8917b0e104243f46b037a6ef",
+      "run_status": "SUCCEEDED",
+      "skill": {
+        "skill_id": "skill_crop_watering_0001",
+        "artifact_sha256": "e7b10b8e454e83820b949d2e5329fbf0b163786161a73936685946349319e94f",
+        "certification_id": "cert_5e3dac9b2cca889e2d61935a",
+        "skill_version_id": "skillver_c54f9c899614a8c18192ad0b"
+      },
+      "world": {
+        "status": "COMMITTED",
+        "failure": null,
+        "receipt": {
+          "world_id": "world_crop_watering_0001",
+          "state_hash": "e864317c824ad8475f1f11cd39b0b7463538a992e5e1a1dcc207361aba0d12f8",
+          "committed_at": "2026-09-09T11:03:26.628209Z",
+          "world_revision": 12,
+          "previous_revision": 11,
+          "last_event_sequence": 12,
+          "first_event_sequence": 12
+        }
+      },
+      "workflow_status": "SUCCEEDED",
+      "learner_status": "SUCCEEDED",
+      "learner_attempt": 1,
+      "failure_count": "0",
+      "interaction": {
+        "role": "book_agent",
+        "links": {
+          "self": "/product-experience/v1/sessions/session_65c7d5ee236fe73939e1ea23/agent-interactions/interaction_62e7f167ef592c156b9bd2f7",
+          "skill_draft": null,
+          "session_workspace": "/product-experience/v1/sessions/session_65c7d5ee236fe73939e1ea23/workspace"
+        },
+        "turn_id": "turn_client_20260909110316_988538",
+        "feedback": {
+          "run_id": "run_8917b0e104243f46b037a6ef",
+          "source": "provider",
+          "message": "本次运行已完成“Water every thirsty plot”。具体进步：你写的程序达成了当前任务目标。可迁移问题：下次输入规模改变时，你会怎样先验证循环或条件边界？",
+          "turn_id": "turn_client_20260909110316_988538",
+          "degraded": false,
+          "command_id": "cmd_135ddac43e624762b99f260355bc71cf",
+          "session_id": "session_65c7d5ee236fe73939e1ea23",
+          "message_key": "agent.book_agent.growth_summary",
+          "completed_at": "2026-09-09T11:03:26.628209Z",
+          "evidence_refs": [
+            {
+              "sha256": "f592fad66bcde193a0ee3ad17dfd75ab6deaa0aac82c6ece03c939e87edc0b09",
+              "created_at": "2026-09-09T11:03:23.538084Z",
+              "evidence_id": "evidence_run_8917b0e104243f46b037a6ef",
+              "evidence_type": "SANDBOX_LOG"
+            },
+            {
+              "sha256": "503a6b498e6511177d56991e83aa50455afffd8a65461801933891efdff83c6d",
+              "created_at": "2026-09-09T11:03:26.628209Z",
+              "evidence_id": "evidence_world_8917b0e104243f46b037a6ef",
+              "evidence_type": "WORLD_COMMIT"
+            }
+          ],
+          "fallback_reason": null
+        },
+        "question": null,
+        "sequence": 107,
+        "created_at": "2026-09-09T11:03:35.301474Z",
+        "hint_level": null,
+        "session_id": "session_65c7d5ee236fe73939e1ea23",
+        "updated_at": "2026-09-09T11:03:35.301474Z",
+        "skill_patch": null,
+        "response_type": "growth_summary",
+        "feedback_event": {
+          "event_id": "evt_211f24b913e84ddebe86493db6519f2a",
+          "producer": "walnut_agent_runtime",
+          "sequence": 107,
+          "trace_id": "trace_client_20260909110316_268040",
+          "stream_id": "agent-session:session_65c7d5ee236fe73939e1ea23",
+          "command_id": "cmd_135ddac43e624762b99f260355bc71cf",
+          "event_type": "agent.turn.feedback_ready",
+          "content_ref": {
+            "unit_id": "YAYA_FARM_001",
+            "version": "1.0.0",
+            "content_hash": "8d740579513e5f2051fb27c1238b1016606425e16559b9a49a0deae3cef3bedd"
+          },
+          "occurred_at": "2026-09-09T11:03:26.628209Z",
+          "causation_id": "evt_50b7ac2e5ba5492ea22a1e02a30e428a",
+          "event_version": 1,
+          "correlation_id": "corr_client_20260909110316_268040",
+          "schema_version": "1.0.0",
+          "feedback_sha256": "3332e2e988eb190400ceeec6bdc015306f9b9e6d4965db1c33764ac7af90800a"
+        },
+        "interaction_id": "interaction_62e7f167ef592c156b9bd2f7",
+        "patch_decision": null,
+        "request_context": {
+          "actor": {
+            "roles": [
+              "game:player"
+            ],
+            "actor_id": "student_0001",
+            "tenant_id": "tenant_yaya",
+            "actor_type": "student"
+          },
+          "trace_id": "trace_client_20260909110316_268040",
+          "request_id": "req_client_20260909110316_268040",
+          "content_ref": {
+            "unit_id": "YAYA_FARM_001",
+            "version": "1.0.0",
+            "content_hash": "8d740579513e5f2051fb27c1238b1016606425e16559b9a49a0deae3cef3bedd"
+          },
+          "requested_at": "2026-09-09T11:03:16.954836+00:00",
+          "correlation_id": "corr_client_20260909110316_268040",
+          "schema_version": "1.0.0"
+        },
+        "projection_source": {
+          "role": "book_agent",
+          "actor": {
+            "roles": [
+              "game:player"
+            ],
+            "actor_id": "student_0001",
+            "tenant_id": "tenant_yaya",
+            "actor_type": "student"
+          },
+          "turn_id": "turn_client_20260909110316_988538",
+          "question": null,
+          "sequence": 107,
+          "command_id": "cmd_135ddac43e624762b99f260355bc71cf",
+          "hint_level": null,
+          "receipt_id": "receipt_815d7c68fe535d6a60ada17e",
+          "session_id": "session_65c7d5ee236fe73939e1ea23",
+          "content_ref": {
+            "unit_id": "YAYA_FARM_001",
+            "version": "1.0.0",
+            "content_hash": "8d740579513e5f2051fb27c1238b1016606425e16559b9a49a0deae3cef3bedd"
+          },
+          "source_type": "AGENT_TURN_PRODUCT_PROJECTION",
+          "committed_at": "2026-09-09T11:03:35.301474Z",
+          "response_type": "growth_summary",
+          "source_sha256": "adf5ef73ee08415079087f520ed10a7e6e0057f2ad8a495a4416f386aa7e75cd",
+          "interaction_id": "interaction_62e7f167ef592c156b9bd2f7",
+          "feedback_sha256": "3332e2e988eb190400ceeec6bdc015306f9b9e6d4965db1c33764ac7af90800a",
+          "source_revision": 1,
+          "feedback_event_id": "evt_211f24b913e84ddebe86493db6519f2a",
+          "skill_patch_sha256": null
+        },
+        "interaction_revision": 1
+      }
+    }
+  ],
+  "summary_count": 1,
+  "learner_profile": {
+    "locale": "en-US",
+    "content": {
+      "unit_id": "YAYA_FARM_001",
+      "version": "1.0.0",
+      "content_hash": "8d740579513e5f2051fb27c1238b1016606425e16559b9a49a0deae3cef3bedd"
+    },
+    "actor_id": "student_0001",
+    "revision": 17,
+    "learner_id": "student_0001",
+    "updated_at": "2026-09-09T11:03:35.301474Z",
+    "competencies": {
+      "for_loop": {
+        "concept": "for_loop",
+        "evidence_ids": [
+          "evidence_run_c69393c250ad72b394ad4e16",
+          "evidence_world_c69393c250ad72b394ad4e16",
+          "evidence_run_5b3d330793602fb3139091ad",
+          "evidence_world_5b3d330793602fb3139091ad",
+          "evidence_run_84ae0690284a04c159d084bd",
+          "evidence_world_84ae0690284a04c159d084bd",
+          "evidence_run_a60175b263c4f8bdd8b92862",
+          "evidence_run_6a46594ef74408688f42d2a0",
+          "evidence_run_7b12401f6e9dd90128773374",
+          "evidence_run_19214b264929995e355e9296",
+          "evidence_world_19214b264929995e355e9296",
+          "evidence_run_61209c213b253b89936baf22",
+          "evidence_world_61209c213b253b89936baf22",
+          "evidence_run_a6fcf14b5b6541ae85d5c3ec",
+          "evidence_world_a6fcf14b5b6541ae85d5c3ec",
+          "evidence_run_58adff6e8dd1ee8a98adc7ba",
+          "evidence_world_58adff6e8dd1ee8a98adc7ba",
+          "evidence_run_bcabf534891ad63b3ea86104",
+          "evidence_run_8d52dfc57f174c1e0b40a37b",
+          "evidence_world_8d52dfc57f174c1e0b40a37b",
+          "evidence_run_39f3ae6f5cce26e2baf9e5a5",
+          "evidence_world_39f3ae6f5cce26e2baf9e5a5",
+          "evidence_run_d1c61244dad060f0f560c384",
+          "evidence_run_46cafe47f04f79c6d73b68b7",
+          "evidence_run_9932ed3a5647c46eff75b20b",
+          "evidence_run_8917b0e104243f46b037a6ef",
+          "evidence_world_8917b0e104243f46b037a6ef"
+        ],
+        "evidence_stage": "DEMONSTRATED",
+        "next_review_at": "2026-09-10T11:00:47.234571Z",
+        "assistance_level": 0,
+        "last_observed_at": "2026-09-09T11:03:26.628209Z"
+      }
+    },
+    "evidence_refs": [
+      {
+        "sha256": "eb224fb4a3a843ec36adc0c86a8947820addea1486e066c6a676ff24066d4d8f",
+        "created_at": "2026-08-18T15:21:03.839420Z",
+        "evidence_id": "evidence_run_c69393c250ad72b394ad4e16",
+        "evidence_type": "SANDBOX_LOG"
+      },
+      {
+        "sha256": "db95365f89d4f4f256a65989f4d190ed7f9a4f43dd5fa306cc37703e8bcc766c",
+        "created_at": "2026-08-18T15:21:06.483918Z",
+        "evidence_id": "evidence_world_c69393c250ad72b394ad4e16",
+        "evidence_type": "WORLD_COMMIT"
+      },
+      {
+        "sha256": "9165910f714c208ba8f9cf19447cbe10fc4d01702851b9d3c872c57a5c903563",
+        "created_at": "2026-08-19T06:04:18.296618Z",
+        "evidence_id": "evidence_run_5b3d330793602fb3139091ad",
+        "evidence_type": "SANDBOX_LOG"
+      },
+      {
+        "sha256": "8eb8cd58fdf8353e402dcdb065b7969b96160af8bf0219309c18591b385fbef3",
+        "created_at": "2026-08-19T06:04:23.789381Z",
+        "evidence_id": "evidence_world_5b3d330793602fb3139091ad",
+        "evidence_type": "WORLD_COMMIT"
+      },
+      {
+        "sha256": "eb0fe0a6e0edc4b80d212cda4fea92e49cc563e2b4296544f84d51ad1b4e0760",
+        "created_at": "2026-08-19T06:17:57.057129Z",
+        "evidence_id": "evidence_run_84ae0690284a04c159d084bd",
+        "evidence_type": "SANDBOX_LOG"
+      },
+      {
+        "sha256": "4d347b853bd835fc63d5fd0f11154bb59a302ad2411a9f7c298473ac6c1184bd",
+        "created_at": "2026-08-19T06:18:01.386662Z",
+        "evidence_id": "evidence_world_84ae0690284a04c159d084bd",
+        "evidence_type": "WORLD_COMMIT"
+      },
+      {
+        "sha256": "2c9d7620f61e52581dbbd1d18836d5cdb9208e04232cdf6de03e55829f2cb9d0",
+        "created_at": "2026-08-19T06:22:50.379776Z",
+        "evidence_id": "evidence_run_a60175b263c4f8bdd8b92862",
+        "evidence_type": "SANDBOX_LOG"
+      },
+      {
+        "sha256": "3fd6b2f69e115beb0895f26637040a33299ede66c70d9b7d2a1c429db9d146db",
+        "created_at": "2026-08-19T07:24:13.317419Z",
+        "evidence_id": "evidence_run_6a46594ef74408688f42d2a0",
+        "evidence_type": "SANDBOX_LOG"
+      },
+      {
+        "sha256": "94515fe4ac74db8c16d87b89ab2fad0f35960b1f82bc6e5edc9bf74fee5b6236",
+        "created_at": "2026-08-19T07:25:20.179756Z",
+        "evidence_id": "evidence_run_7b12401f6e9dd90128773374",
+        "evidence_type": "SANDBOX_LOG"
+      },
+      {
+        "sha256": "a3d46b57c5ac9ac231f7dc59d0baa287fcf2dd704f335e4b52245c4cbf78476f",
+        "created_at": "2026-08-19T07:42:38.449227Z",
+        "evidence_id": "evidence_run_19214b264929995e355e9296",
+        "evidence_type": "SANDBOX_LOG"
+      },
+      {
+        "sha256": "c601ed748105c7060e878c0bbb73c5f517940fc199e123e4c788696ddd73ebf7",
+        "created_at": "2026-08-19T07:42:41.990834Z",
+        "evidence_id": "evidence_world_19214b264929995e355e9296",
+        "evidence_type": "WORLD_COMMIT"
+      },
+      {
+        "sha256": "0c8984a217b9417d450f408f5623f53847fc5237a59db8d5b4ca0c12d5eb6aea",
+        "created_at": "2026-08-19T08:05:32.001874Z",
+        "evidence_id": "evidence_run_61209c213b253b89936baf22",
+        "evidence_type": "SANDBOX_LOG"
+      },
+      {
+        "sha256": "997ae5387513ccc4e0eee6ff20c627202ba092f3071b924694cf2acd9c414861",
+        "created_at": "2026-08-19T08:05:36.015501Z",
+        "evidence_id": "evidence_world_61209c213b253b89936baf22",
+        "evidence_type": "WORLD_COMMIT"
+      },
+      {
+        "sha256": "bc08722988067c67a4d38ca4ddff543d9c396eb7dd7f4e1921a04875853277b7",
+        "created_at": "2026-08-19T08:27:58.083944Z",
+        "evidence_id": "evidence_run_a6fcf14b5b6541ae85d5c3ec",
+        "evidence_type": "SANDBOX_LOG"
+      },
+      {
+        "sha256": "b1db09ba8d567fca81ec15fcea56554f9ee6e11c3983a8561b7c020b9e0e2877",
+        "created_at": "2026-08-19T08:28:01.684040Z",
+        "evidence_id": "evidence_world_a6fcf14b5b6541ae85d5c3ec",
+        "evidence_type": "WORLD_COMMIT"
+      },
+      {
+        "sha256": "5258f1d216119708e8f62508129b73cc1c53dc1219153a167a33df19611a211b",
+        "created_at": "2026-08-19T08:36:57.866694Z",
+        "evidence_id": "evidence_run_58adff6e8dd1ee8a98adc7ba",
+        "evidence_type": "SANDBOX_LOG"
+      },
+      {
+        "sha256": "3d627187682d34b3467cf05fd1da4bcd6c909b8d2975111eb26cec6d5e10408a",
+        "created_at": "2026-08-19T08:37:02.488736Z",
+        "evidence_id": "evidence_world_58adff6e8dd1ee8a98adc7ba",
+        "evidence_type": "WORLD_COMMIT"
+      },
+      {
+        "sha256": "b87dd8a60b2f9c9c887a1dda24e53cc158bc8b058eaa4501df288b194cae6907",
+        "created_at": "2026-08-19T09:02:49.902696Z",
+        "evidence_id": "evidence_run_bcabf534891ad63b3ea86104",
+        "evidence_type": "SANDBOX_LOG"
+      },
+      {
+        "sha256": "1affe1d4d90ca4fd55274518283bb94a7ebb19971548b58d1d034310148a3172",
+        "created_at": "2026-08-19T09:04:56.992739Z",
+        "evidence_id": "evidence_run_8d52dfc57f174c1e0b40a37b",
+        "evidence_type": "SANDBOX_LOG"
+      },
+      {
+        "sha256": "0ac1cf8fbcee459c4ff61d3ed25241c3ae10e7d71d00ed3a03453c1df526cb92",
+        "created_at": "2026-08-19T09:05:01.575683Z",
+        "evidence_id": "evidence_world_8d52dfc57f174c1e0b40a37b",
+        "evidence_type": "WORLD_COMMIT"
+      },
+      {
+        "sha256": "992c5bbae61660e779bf13596153dd3f80e5c279ecc58d740bc2cb4d9b912c7a",
+        "created_at": "2026-09-05T10:43:42.067708Z",
+        "evidence_id": "evidence_run_39f3ae6f5cce26e2baf9e5a5",
+        "evidence_type": "SANDBOX_LOG"
+      },
+      {
+        "sha256": "e69b322a3d02150cb78663c0357f19b00f665f148153290190beaccf898db1bb",
+        "created_at": "2026-09-05T10:43:44.257501Z",
+        "evidence_id": "evidence_world_39f3ae6f5cce26e2baf9e5a5",
+        "evidence_type": "WORLD_COMMIT"
+      },
+      {
+        "sha256": "e2e7e307d9b4da97e1db66f832e3d2fa400e4ec627c672ec9bb6ed867f15146c",
+        "created_at": "2026-09-09T11:00:47.234571Z",
+        "evidence_id": "evidence_run_d1c61244dad060f0f560c384",
+        "evidence_type": "SANDBOX_LOG"
+      },
+      {
+        "sha256": "5501037b7f03726e027944fbf65131a8bbc4bdd02644d456ffd56199139ce2aa",
+        "created_at": "2026-09-09T11:01:31.799880Z",
+        "evidence_id": "evidence_run_46cafe47f04f79c6d73b68b7",
+        "evidence_type": "SANDBOX_LOG"
+      },
+      {
+        "sha256": "febdfb47daf8a2467c302a1b5a7ee1f034335bf8833a645a9f060753e5c1f620",
+        "created_at": "2026-09-09T11:02:20.465132Z",
+        "evidence_id": "evidence_run_9932ed3a5647c46eff75b20b",
+        "evidence_type": "SANDBOX_LOG"
+      },
+      {
+        "sha256": "f592fad66bcde193a0ee3ad17dfd75ab6deaa0aac82c6ece03c939e87edc0b09",
+        "created_at": "2026-09-09T11:03:23.538084Z",
+        "evidence_id": "evidence_run_8917b0e104243f46b037a6ef",
+        "evidence_type": "SANDBOX_LOG"
+      },
+      {
+        "sha256": "503a6b498e6511177d56991e83aa50455afffd8a65461801933891efdff83c6d",
+        "created_at": "2026-09-09T11:03:26.628209Z",
+        "evidence_id": "evidence_world_8917b0e104243f46b037a6ef",
+        "evidence_type": "WORLD_COMMIT"
+      }
+    ],
+    "model_version": "learner_projection_v1",
+    "schema_version": "1.0.0",
+    "review_policy_version": "review_v1",
+    "projected_through_sequence": 17
+  },
+  "immediate_hints": [
+    {
+      "degraded": false,
+      "elapsed_seconds": 51.917,
+      "event": "immediate_hint_received",
+      "expected_run_id": "run_8917b0e104243f46b037a6ef",
+      "message": "是的，你刚才提交的代码运行成功了！最新一次正式运行中，任务被判定为成功，世界状态也从第 11 版更新到了第 12 版。你的浇水逻辑已经正确完成，干得漂亮！",
+      "response_type": "message",
+      "run_id": "run_8917b0e104243f46b037a6ef",
+      "seconds_since_hint": 11.62,
+      "since_submit_seconds": 43.127,
+      "source": "provider",
+      "utc": "2026-09-09 11:03:39Z",
+      "utc_unix_seconds": 1788951819.4
+    }
+  ],
+  "http_non_success": [
+    {
+      "elapsed_seconds": 41.158,
+      "event": "http_completed",
+      "method": "POST",
+      "observed_duration_seconds": 0.824,
+      "ok": false,
+      "operation": "submit_agent_turn",
+      "path": "/v1/agent-sessions/session_65c7d5ee236fe73939e1ea23/turns",
+      "sequence": 36,
+      "since_submit_seconds": 32.368,
+      "status": 400,
+      "utc": "2026-09-09 11:03:28Z",
+      "utc_unix_seconds": 1788951808.641
+    }
+  ],
+  "timing_events": [
+    {
+      "code": "",
+      "elapsed_seconds": 8.243,
+      "event": "startup_finished",
+      "ok": true,
+      "since_submit_seconds": null,
+      "utc": "2026-09-09 11:02:55Z",
+      "utc_unix_seconds": 1788951775.725
+    },
+    {
+      "elapsed_seconds": 8.79,
+      "event": "run_button_pressed",
+      "since_submit_seconds": 0.0,
+      "source_bytes": 497,
+      "source_sha256": "da15690335d9eb9ad48bfc2b40ac73b7c2493b13ea797b10df7c840b43fae672",
+      "submission_count": 1,
+      "utc": "2026-09-09 11:02:56Z",
+      "utc_unix_seconds": 1788951776.273
+    },
+    {
+      "code": "",
+      "elapsed_seconds": 26.501,
+      "event": "stage_finished",
+      "ok": true,
+      "since_submit_seconds": 17.711,
+      "stage": "BUILD",
+      "utc": "2026-09-09 11:03:13Z",
+      "utc_unix_seconds": 1788951793.983
+    },
+    {
+      "code": "",
+      "elapsed_seconds": 29.42,
+      "event": "stage_finished",
+      "ok": true,
+      "since_submit_seconds": 20.63,
+      "stage": "ACTIVATION",
+      "utc": "2026-09-09 11:03:16Z",
+      "utc_unix_seconds": 1788951796.903
+    },
+    {
+      "command_id": "cmd_135ddac43e624762b99f260355bc71cf",
+      "elapsed_seconds": 40.264,
+      "event": "run_resolved",
+      "run_id": "run_8917b0e104243f46b037a6ef",
+      "since_submit_seconds": 31.474,
+      "status": "SUCCEEDED",
+      "utc": "2026-09-09 11:03:27Z",
+      "utc_unix_seconds": 1788951807.747
+    },
+    {
+      "code": "",
+      "elapsed_seconds": 40.273,
+      "event": "stage_finished",
+      "ok": true,
+      "since_submit_seconds": 31.483,
+      "stage": "SUBMIT",
+      "utc": "2026-09-09 11:03:27Z",
+      "utc_unix_seconds": 1788951807.756
+    },
+    {
+      "build_id": "build_af1a5ab94a2b9ec520d75de1",
+      "code": "",
+      "elapsed_seconds": 40.275,
+      "event": "probe_finished",
+      "objective_succeeded": true,
+      "observed_stages": [
+        "BUILD",
+        "ACTIVATION",
+        "SUBMIT"
+      ],
+      "ok": true,
+      "run_id": "run_8917b0e104243f46b037a6ef",
+      "run_status": "SUCCEEDED",
+      "since_submit_seconds": 31.485,
+      "utc": "2026-09-09 11:03:27Z",
+      "utc_unix_seconds": 1788951807.757
+    },
+    {
+      "elapsed_seconds": 53.733,
+      "event": "probe_summary_complete",
+      "last_interaction_sequence": 108,
+      "ok": true,
+      "pending_count": 0,
+      "run_id": "run_8917b0e104243f46b037a6ef",
+      "since_submit_seconds": 44.943,
+      "utc": "2026-09-09 11:03:41Z",
+      "utc_unix_seconds": 1788951821.215,
+      "world_revision": 12
+    }
+  ],
+  "original_database_probe_runs": 0
+}

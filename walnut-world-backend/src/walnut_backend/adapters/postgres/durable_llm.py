@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import asyncio
+import time
 from collections.abc import Mapping
 from typing import Any, cast
 
@@ -95,6 +97,7 @@ class PostgresDurableLlm:
         max_calls: int = 3,
         receipt_namespace: str = "",
         ordinal_base: int = 0,
+        pending_wait_seconds: float = 0,
     ) -> None:
         if claim.operation != "EXECUTE_AGENT_TURN":
             raise ValueError("durable LLM requires one Agent Turn claim")
@@ -116,6 +119,8 @@ class PostgresDurableLlm:
             raise ValueError("durable LLM ordinal_base must be between 0 and 980")
         if ordinal_base + max_calls > 999:
             raise ValueError("durable LLM effective ordinal exceeds the protocol bound")
+        if not 0 <= pending_wait_seconds <= 10:
+            raise ValueError("short Provider wait must be between 0 and 10 seconds")
         self._sessions = session_factory
         self._jobs = jobs
         self._claim = claim
@@ -127,6 +132,7 @@ class PostgresDurableLlm:
         self._receipt_prefix = f"{receipt_namespace}_" if receipt_namespace else ""
         self._ordinal_base = ordinal_base
         self._ordinal = 0
+        self._pending_wait_seconds = pending_wait_seconds
 
     async def generate(self, request: LlmRequest, context: OperationContext) -> Result[LlmReply]:
         _validate_context(self._claim, context)
@@ -209,6 +215,25 @@ class PostgresDurableLlm:
                 raise DurableLlmDispatchAbsent(
                     f"provider dispatch {identity.dispatch_id} remained absent after PUT"
                 )
+        # A quick model response can finish in this call. Do not hold a database
+        # transaction while waiting, and keep the same immutable dispatch ID.
+        deadline = time.monotonic() + min(self._pending_wait_seconds, request.timeout_ms / 1000 / 2)
+        while resource.state == "PENDING" and self._pending_wait_seconds > 0:
+            delay = resource.retry_after_seconds
+            if delay is None:
+                raise WorkflowInvariantError("pending Provider resource has no retry delay")
+            if delay >= deadline - time.monotonic():
+                break
+            await asyncio.sleep(delay)
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                break
+            try:
+                resource = await asyncio.wait_for(
+                    self._provider_reconcile(identity, request, context), timeout=remaining,
+                )
+            except TimeoutError:
+                break
         if resource.state == "PENDING":
             retry_after = resource.retry_after_seconds
             if retry_after is None:

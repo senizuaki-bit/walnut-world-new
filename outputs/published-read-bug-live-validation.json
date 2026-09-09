@@ -1,0 +1,92 @@
+{
+  "passed": true,
+  "runs": [
+    {
+      "run_id": "run_d1c61244dad060f0f560c384",
+      "skill": {
+        "skill_id": "skill_crop_watering_0001",
+        "artifact_sha256": "58bfa4822d487ef285de929f63786cb00ec9cb92ed0ea66751c181aea691c7e0",
+        "certification_id": "cert_e6eda70a41cf06f462c09a06",
+        "skill_version_id": "skillver_f6b33ccc9e308d77112ccfc0"
+      },
+      "job_id": "job_0ab651ceb0ba3d2c7fdc71b9",
+      "status": "SUCCEEDED",
+      "failure_count": "1",
+      "role": "teaching_agent",
+      "learner_status": "SUCCEEDED",
+      "source": "provider",
+      "degraded": "false"
+    },
+    {
+      "run_id": "run_46cafe47f04f79c6d73b68b7",
+      "skill": {
+        "skill_id": "skill_crop_watering_0001",
+        "artifact_sha256": "58bfa4822d487ef285de929f63786cb00ec9cb92ed0ea66751c181aea691c7e0",
+        "certification_id": "cert_2ca51fa1d4e37e82663fe9ef",
+        "skill_version_id": "skillver_d1225a158967274063574db2"
+      },
+      "job_id": "job_c5020547edf877b8d1f7ce84",
+      "status": "SUCCEEDED",
+      "failure_count": "2",
+      "role": "teaching_agent",
+      "learner_status": "SUCCEEDED",
+      "source": "provider",
+      "degraded": "false"
+    },
+    {
+      "run_id": "run_9932ed3a5647c46eff75b20b",
+      "skill": {
+        "skill_id": "skill_crop_watering_0001",
+        "artifact_sha256": "58bfa4822d487ef285de929f63786cb00ec9cb92ed0ea66751c181aea691c7e0",
+        "certification_id": "cert_da0f0aa5534e8c34da31c104",
+        "skill_version_id": "skillver_759e2f04ad4e63a8b5731418"
+      },
+      "job_id": "job_b5eaae2a213f1db564ff762d",
+      "status": "SUCCEEDED",
+      "failure_count": "3",
+      "role": "bug_agent",
+      "learner_status": "SUCCEEDED",
+      "source": "provider",
+      "degraded": "false"
+    }
+  ],
+  "metrics": [
+    {
+      "run_id": "run_d1c61244dad060f0f560c384",
+      "submit_to_reply_seconds": 54.0,
+      "worker_attempts": 1,
+      "worker_seconds": 22.328,
+      "worker_sql": 4280,
+      "provider_calls": 4,
+      "provider_seconds": 5.391
+    },
+    {
+      "run_id": "run_46cafe47f04f79c6d73b68b7",
+      "submit_to_reply_seconds": 49.0,
+      "worker_attempts": 1,
+      "worker_seconds": 22.953,
+      "worker_sql": 4800,
+      "provider_calls": 4,
+      "provider_seconds": 5.968999999999999
+    },
+    {
+      "run_id": "run_9932ed3a5647c46eff75b20b",
+      "submit_to_reply_seconds": 48.0,
+      "worker_attempts": 1,
+      "worker_seconds": 19.906,
+      "worker_sql": 5585,
+      "provider_calls": 4,
+      "provider_seconds": 4.781
+    }
+  ],
+  "bug_context": {
+    "utc": "2026-09-09T11:02:28.782909+00:00",
+    "event": "end",
+    "stage": "ContextBuilder.build",
+    "role": "bug_agent",
+    "seconds": 1.531,
+    "sql": 499,
+    "outcome": "ok"
+  },
+  "original_database_probe_runs": 0
+}

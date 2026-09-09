@@ -39,8 +39,11 @@ from yaya_agent_runtime import (  # noqa: E402
     AgentToolAuthorizationError,
     AgentToolExecutionError,
     AgentToolInputError,
+    BuildFailureSnapshot,
     CompileResultSnapshot,
     ContextBuilder,
+    DecisionDraft,
+    LearnerInference,
     LearnerProfileSnapshot,
     PackagedRoleConfigProvider,
     PromptBuilder,
@@ -51,15 +54,28 @@ from yaya_agent_runtime import (  # noqa: E402
     ToolResult,
     TurnContext,
     build_default_tool_registry,
+    validate_decision,
     world_commit_receipt_sha256,
 )
+from yaya_agent_runtime.evidence import build_evidence_aliases  # noqa: E402
 from yaya_agent_runtime.model_output import build_model_output_schema  # noqa: E402
+from yaya_agent_runtime.schema_validation import validate_schema_definition  # noqa: E402
 
 
 class _TeachingReads(RecordingReads):
-    def __init__(self, *, compile_result=None, run_result=None, **kwargs) -> None:
+    def __init__(
+        self,
+        *,
+        compile_result=None,
+        build_failure=None,
+        build_history=(),
+        run_result=None,
+        **kwargs,
+    ) -> None:
         super().__init__(**kwargs)
         self.compile_result = compile_result
+        self.build_failure = build_failure
+        self.build_history = build_history
         self.run_result = run_result
 
     async def get_compile_result(self, build_id, context):
@@ -71,6 +87,23 @@ class _TeachingReads(RecordingReads):
         del run_id, context
         self.calls.append("get_run")
         return self.run_result
+
+    async def get_build_failure(self, build_id, context):
+        del build_id, context
+        self.calls.append("get_build_failure")
+        return self.build_failure
+
+    async def list_same_build_failures(
+        self, session_id, failure_key, through_build_id, limit, context
+    ):
+        del session_id, failure_key, through_build_id, limit, context
+        self.calls.append("list_same_build_failures")
+        return self.build_history
+
+    async def list_counterexamples(self, task_id, failure_key, context):
+        del task_id, failure_key, context
+        self.calls.append("list_counterexamples")
+        return ()
 
     async def get_profile(self, student_id, knowledge_points, context):
         del student_id, knowledge_points, context
@@ -123,6 +156,65 @@ def _context_builder(reads: RecordingReads, configs: StaticRoleConfigs) -> Conte
 
 
 class AgentRuntimeContextAndToolTests(unittest.IsolatedAsyncioTestCase):
+    async def test_student_conversation_uses_message_without_learning_inference(self) -> None:
+        operation = make_operation()
+        config = make_role_config("teaching_agent", allowed_events=("hint_requested",))
+        for input_type in ("MESSAGE", "UI_ACTION"):
+            with self.subTest(input_type=input_type):
+                reads = _TeachingReads(operation=operation)
+                event = replace(
+                    make_event("hint_requested"),
+                    payload={"input": {"type": input_type, "text": "你是谁？"}},
+                )
+                context = await _context_builder(reads, StaticRoleConfigs(config)).build(
+                    event, "teaching_agent", operation
+                )
+                directive = context.teaching_directive
+                assert directive is not None
+                self.assertEqual(
+                    "message" in directive.allowed_response_types, input_type == "MESSAGE"
+                )
+                if input_type != "MESSAGE":
+                    self.assertIsNone(context.student_message)
+                    continue
+                self.assertEqual(context.student_message, "你是谁？")
+                draft = DecisionDraft(
+                    role="teaching_agent",
+                    response_type="message",
+                    message="我是叮当师傅。",
+                    question=None,
+                    hint_level=None,
+                    learner_inference=None,
+                    skill_patch=None,
+                    requires_student_confirmation=False,
+                )
+                self.assertEqual(validate_decision(draft, config, context, ()), draft)
+                schema = build_model_output_schema(
+                    (),
+                    max_tool_calls=0,
+                    role="teaching_agent",
+                    directive=directive,
+                )
+                validate_schema_definition(schema)
+                wire = {
+                    "kind": "decision",
+                    "decision": {
+                        "role": draft.role,
+                        "response_type": draft.response_type,
+                        "message": draft.message,
+                        "question": None,
+                        "hint_level": None,
+                        "learner_inference": None,
+                        "skill_patch": None,
+                        "requires_student_confirmation": False,
+                    },
+                    "tool_calls": [],
+                }
+                validator = Draft202012Validator(schema)
+                validator.validate(wire)
+                wire["decision"]["hint_level"] = 1
+                self.assertFalse(validator.is_valid(wire))
+
     async def test_world_context_fetches_task_session_world_and_learner(self) -> None:
         operation = make_operation()
         reads = RecordingReads(operation=operation)
@@ -302,6 +394,181 @@ class AgentRuntimeContextAndToolTests(unittest.IsolatedAsyncioTestCase):
             )
 
         self.assertEqual(raised.exception.code, "CONTEXT_EVIDENCE_MISMATCH")
+
+    async def test_build_failure_hint_uses_exact_no_run_authority(self) -> None:
+        operation = make_operation()
+        first_evidence = make_evidence("evidence_build_failure_0001")
+        latest_evidence = make_evidence("evidence_build_failure_0002")
+        first = BuildFailureSnapshot(
+            build_id="build_failure_0001",
+            session_id="session_watering_0001",
+            skill_id="watering_skill",
+            failure_key="compile:COMPILE:SANDBOX_COMPILE_ERROR:error",
+            diagnostics=("error",),
+            evidence_refs=(first_evidence,),
+            request_context=operation,
+        )
+        latest = replace(
+            first,
+            build_id="build_failure_0002",
+            evidence_refs=(latest_evidence,),
+        )
+        event = replace(
+            make_event("hint_requested", failure_count=2),
+            skill_ref=None,
+            build_id=latest.build_id,
+            failure_key=latest.failure_key,
+            evidence_refs=latest.evidence_refs,
+        )
+        reads = _TeachingReads(
+            operation=operation,
+            build_failure=latest,
+            build_history=(first, latest),
+        )
+        configs = StaticRoleConfigs(
+            make_role_config("teaching_agent", allowed_events=("hint_requested",))
+        )
+
+        context = await _context_builder(reads, configs).build(
+            event,
+            "teaching_agent",
+            operation,
+        )
+
+        self.assertEqual(context.build_failure, latest)
+        self.assertEqual(context.build_failure_history, (first, latest))
+        self.assertIsNone(context.run_result)
+        self.assertIsNone(context.skill)
+        self.assertFalse(context.teaching_directive.patch_eligible)
+        self.assertIn("get_build_failure", reads.calls)
+        self.assertIn("list_same_build_failures", reads.calls)
+
+    async def test_bug_agent_accepts_third_exact_build_failure_without_patch_or_run(self) -> None:
+        operation = make_operation()
+        failures = tuple(
+            BuildFailureSnapshot(
+                build_id=f"build_failure_000{index}",
+                session_id="session_watering_0001",
+                skill_id="watering_skill",
+                failure_key="compile:COMPILE:SANDBOX_COMPILE_ERROR:error",
+                diagnostics=(f"main.cpp:{index}: error: mistake {index}",),
+                evidence_refs=(make_evidence(f"evidence_build_failure_000{index}"),),
+                request_context=operation,
+            )
+            for index in range(1, 4)
+        )
+        latest = failures[-1]
+        event = replace(
+            make_event("hint_requested", failure_count=3),
+            skill_ref=None,
+            run_id=None,
+            build_id=latest.build_id,
+            failure_key=latest.failure_key,
+            evidence_refs=latest.evidence_refs,
+        )
+        reads = _TeachingReads(
+            operation=operation,
+            build_failure=latest,
+            build_history=failures,
+        )
+        configs = StaticRoleConfigs(
+            make_role_config("bug_agent", allowed_events=("hint_requested",))
+        )
+
+        context = await _context_builder(reads, configs).build(
+            event,
+            "bug_agent",
+            operation,
+        )
+
+        self.assertEqual(context.build_failure, latest)
+        self.assertEqual(context.build_failure_history, failures)
+        prompt = PromptBuilder().initial_messages(configs.get("bug_agent"), context, ())
+        prompt_history = json.loads(prompt[-1].content)["turn_context"]["build_failure_history"]
+        self.assertEqual(
+            [item["diagnostics"] for item in prompt_history],
+            [list(item.diagnostics) for item in failures],
+        )
+        self.assertTrue(all(item["evidence_refs"] for item in prompt_history))
+        from yaya_agent_backend.codec import decode_as, encode
+        from yaya_agent_runtime.evidence import collect_decision_evidence
+
+        self.assertEqual(decode_as(encode(context), TurnContext), context)
+        legacy_context = encode(context)
+        legacy_context["$fields"].pop("build_failure_history")
+        self.assertEqual(decode_as(legacy_context, TurnContext).build_failure_history, ())
+        self.assertEqual(collect_decision_evidence(context), latest.evidence_refs)
+        self.assertIsNone(context.run_result)
+        self.assertEqual(context.failure_history, ())
+        self.assertIsNone(context.skill)
+        self.assertFalse(context.teaching_directive.patch_eligible)
+        self.assertIn("list_counterexamples", reads.calls)
+
+        validated = validate_decision(
+            DecisionDraft(
+                role="bug_agent",
+                response_type="question",
+                message="Earlier compiler errors and the current diagnostic need separate checks.",
+                question="Which boundary should be checked?",
+                hint_level=None,
+                learner_inference=LearnerInference(
+                    concept="for_loop",
+                    score_delta=-0.1,
+                    confidence=0.9,
+                    reason="The exact repeated Build rejection bounds this inference.",
+                    evidence_ids=(
+                        build_evidence_aliases(context)[0][latest.evidence_refs[0].evidence_id],
+                    ),
+                ),
+                skill_patch=None,
+                requires_student_confirmation=False,
+            ),
+            configs.get("bug_agent"),
+            context,
+            (),
+        )
+        self.assertEqual(
+            validated.message,
+            "Earlier compiler errors and the current diagnostic need separate checks.",
+        )
+        self.assertNotIn("Run", validated.message)
+
+    async def test_bug_history_accepts_edits_but_rejects_another_skill(self) -> None:
+        operation = make_operation()
+        event = make_event("run_failed", failure_count=3)
+        current = RunResultSnapshot(
+            run_id=event.run_id, session_id=event.session_id, turn_id=event.turn_id,
+            command_id=event.command_id, world_id="world_watering_0001",
+            skill_ref=event.skill_ref, task_success=False,
+            world_revision_before=5, world_revision_after=5,
+            world_difference={"watered_plots": 7}, failed_actions=({"reason": "short_loop"},),
+            failure_key=event.failure_key, evidence_refs=event.evidence_refs,
+            world_commit=None, request_context=operation,
+        )
+        previous = tuple(replace(
+            current, run_id=f"run_previous_{i:04d}", turn_id=f"turn_previous_{i:04d}",
+            command_id=f"cmd_previous_{i:04d}",
+            skill_ref=replace(current.skill_ref, skill_version_id=f"skillver_previous_{i:04d}",
+                              artifact_sha256=str(i) * 64, certification_id=f"cert_previous_{i:04d}"),
+        ) for i in (1, 2))
+
+        class Reads(_TeachingReads):
+            history = (*previous, current)
+
+            async def list_same_failure_runs(self, *args):
+                return self.history
+
+        reads = Reads(operation=operation, run_result=current)
+        configs = StaticRoleConfigs(make_role_config("bug_agent", allowed_events=("run_failed",)))
+        context = await _context_builder(reads, configs).build(event, "bug_agent", operation)
+        self.assertEqual(len(context.failure_history), 3)
+        self.assertEqual(len({item.skill_ref.skill_version_id for item in context.failure_history}), 3)
+        reads.history = (replace(previous[0], skill_ref=replace(
+            previous[0].skill_ref, skill_id="skill_other_0001",
+        )), previous[1], current)
+        with self.assertRaises(AgentContextError) as wrong_skill:
+            await _context_builder(reads, configs).build(event, "bug_agent", operation)
+        self.assertEqual(wrong_skill.exception.code, "CONTEXT_FAILURE_HISTORY_MISMATCH")
 
     async def test_run_failed_rejects_success_or_wrong_world_revision(self) -> None:
         operation = make_operation()

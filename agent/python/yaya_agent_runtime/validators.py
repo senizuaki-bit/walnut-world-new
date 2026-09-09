@@ -39,8 +39,8 @@ _PERMANENT_JUDGMENT_PATTERNS = (
 _ROLE_RESPONSES = {
     "world_agent": frozenset({"message"}),
     "xiaohutao": frozenset({"message"}),
-    "teaching_agent": frozenset({"question", "hint", "skill_patch"}),
-    "bug_agent": frozenset({"question"}),
+    "teaching_agent": frozenset({"question", "hint", "message", "skill_patch"}),
+    "bug_agent": frozenset({"question", "message"}),
     "book_agent": frozenset({"growth_summary"}),
 }
 
@@ -108,6 +108,17 @@ def validate_decision(
             "structured hint level does not match the deterministic policy",
             {"expected": context.hint_level, "actual": decision.hint_level},
         )
+    if decision.response_type == "message" and context.role in {"teaching_agent", "bug_agent"}:
+        if context.event.event_type != "hint_requested" or context.student_message is None:
+            raise InvalidAgentOutput(
+                "CONVERSATION_MESSAGE_REQUIRED",
+                "a conversational message can only answer an accepted student MESSAGE",
+            )
+        if decision.learner_inference is not None:
+            raise InvalidAgentOutput(
+                "CONVERSATION_INFERENCE_UNAUTHORIZED",
+                "a conversational message answers outside the current Evidence and cannot infer competence",
+            )
     if decision.response_type not in {"hint", "skill_patch"} and decision.hint_level is not None:
         raise InvalidAgentOutput(
             "HINT_LEVEL_UNAUTHORIZED",
@@ -186,7 +197,7 @@ def validate_decision(
         and directive is not None
         and bool(directive.required_evidence_ids)
         and set(directive.required_evidence_ids).issubset(current_learning_evidence)
-        and decision.response_type != "skill_patch"
+        and decision.response_type not in {"skill_patch", "message"}
     ):
         raise InvalidAgentOutput(
             "LEARNER_INFERENCE_REQUIRED",
@@ -292,14 +303,18 @@ def validate_decision(
             "only xiaohutao may execute invoke_skill",
         )
 
-    if context.event.event_type == "hint_requested" and any(
+    successful_hint = (
+        context.event.event_type == "hint_requested"
+        and context.run_result is not None
+        and context.run_result.task_success
+    )
+    if context.event.event_type == "hint_requested" and not successful_hint and any(
         phrase in decision.message
         or (decision.question is not None and phrase in decision.question)
         for phrase in _FALSE_SUCCESS_PHRASES
     ):
-        # A hint carries no Run, so it has no authority to settle the outcome
-        # either way.  This replaces what the deterministic copy used to say
-        # for it ("I will not infer success or failure").
+        # Only a Hint that carries an already successful Run may confirm that
+        # earlier result. The question itself never executes or settles a Run.
         raise InvalidAgentOutput(
             "HINT_CLAIMS_OUTCOME",
             "a hint has no bound Run and cannot claim the task succeeded",
@@ -311,18 +326,22 @@ def validate_decision(
                 "FALSE_SUCCESS_CLAIM",
                 "message claims success while the bound run says the task failed",
             )
-        if context.role in {"teaching_agent", "bug_agent"}:
+        if context.role in {"teaching_agent", "bug_agent"} and decision.response_type != "message":
             decision = _replace_message(
                 decision,
                 f"规范运行记录确认任务尚未完成；失败类型为 {run.failure_key}。",
             )
-    if context.compile_result is not None and not context.compile_result.succeeded:
+    if (
+        context.compile_result is not None
+        and not context.compile_result.succeeded
+        and decision.response_type != "message"
+    ):
         first_diagnostic = context.compile_result.diagnostics[0][:160]
         decision = _replace_message(
             decision,
             f"规范编译记录确认代码未通过；第一条诊断是：{first_diagnostic}",
         )
-    if context.role == "bug_agent" and len(context.failure_history) < 3:
+    if context.role == "bug_agent" and _reproducible_failure_count(context) < 3:
         raise InvalidAgentOutput(
             "BUG_WITHOUT_REPRODUCIBLE_EVIDENCE",
             "bug role requires three same-class failures",
@@ -332,7 +351,9 @@ def validate_decision(
             "GROWTH_SUMMARY_WITHOUT_COMPLETION",
             "book role requires an objectively successful completion run",
         )
-    if decision.response_type == "skill_patch":
+    if decision.response_type == "skill_patch" or (
+        decision.response_type == "message" and context.role in {"teaching_agent", "bug_agent"}
+    ):
         return decision
     if context.role == "world_agent":
         decision = _canonical_world_copy(decision, context, config.limits.max_message_chars)
@@ -395,16 +416,15 @@ def _canonical_teaching_copy(
     maximum: int,
 ) -> DecisionDraft:
     if context.event.event_type == "hint_requested":
-        # A hint is the one teaching turn with no compile or run result to
-        # restate, so the deterministic copy below would collapse every hint to
-        # the same content-free sentence and discard the only thing the student
-        # pressed the button for: the model's reading of their current source.
+        # A hint answers the student's question about their current source or
+        # latest result.  Keep that answer rather than replacing it with the
+        # fixed failure copy used by automatic teaching turns below.
         #
         # Keeping the prose is not trusting it blindly.  By this point it has
         # already passed the role/response_type/hint_level checks, the length
         # limit, the permanent-judgment ban and the output schema, and
-        # `validate_decision` additionally forbids a hint from claiming the task
-        # succeeded, because a hint has no authoritative Run behind it.
+        # `validate_decision` permits success claims only when this hint carries
+        # an authoritative successful Run.
         del maximum
         return decision
     if context.compile_result is not None:
@@ -450,17 +470,39 @@ def _canonical_bug_copy(
     context: TurnContext,
     maximum: int,
 ) -> DecisionDraft:
+    if context.build_failure is not None and context.event.event_type == "hint_requested":
+        # Preserve the validated explanation of current and earlier compiler
+        # errors instead of replacing it with a fixed loop-boundary question.
+        return decision
     failure_key = context.event.failure_key or "当前边界条件"
+    failure_count = _reproducible_failure_count(context)
+    if context.build_failure is not None:
+        failure_label = "同类构建失败"
+        fallback_evidence = "当前没有额外反例，只使用已验证的构建拒绝证据。"
+    else:
+        failure_label = "同类失败"
+        fallback_evidence = "当前没有额外反例，只使用同类失败 Run。"
     if context.counterexamples:
         evidence = f"已验证反例：{context.counterexamples[0].title}。"
     else:
-        evidence = "当前没有额外反例，只使用同类失败 Run。"
+        evidence = fallback_evidence
     message = _bounded(
-        f"同类失败已连续复现 {len(context.failure_history)} 次；失败类型为 {failure_key}。{evidence}",
+        f"{failure_label}已连续复现 {failure_count} 次；失败类型为 {failure_key}。{evidence}",
         maximum,
     )
     question = "当边界输入到达关键条件时，循环或判断是否仍覆盖完整目标范围？"
     return _replace_public_copy(decision, message=message, question=question)
+
+
+def _reproducible_failure_count(context: TurnContext) -> int:
+    """Return the exact repeated-failure authority retained by the context builder."""
+
+    if context.build_failure is not None and context.run_result is None:
+        # ContextBuilder has already matched this count against the immutable
+        # same-class Build rejection suffix. Historical Build details are prompt
+        # context; only the current Build owns this feedback's Evidence.
+        return context.event.failure_count
+    return len(context.failure_history)
 
 
 def _canonical_book_copy(
@@ -468,6 +510,18 @@ def _canonical_book_copy(
     context: TurnContext,
     maximum: int,
 ) -> DecisionDraft:
+    if not context.session_runs:
+        message = _bounded(
+            (
+                f"本次运行已完成“{context.task.title}”。"
+                "具体进步：你写的程序达成了当前任务目标。"
+                "可迁移问题：下次输入规模改变时，你会怎样先验证循环或条件边界？"
+            ),
+            maximum,
+        )
+        return _replace_public_copy(decision, message=message, question=None)
+
+    # Retained historical contexts still describe their complete Session.
     attempts = len(context.session_runs)
     failures = sum(not item.task_success for item in context.session_runs)
     versions = len(context.skill_history)

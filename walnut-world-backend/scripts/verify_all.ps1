@@ -21,7 +21,7 @@ if (-not (Test-Path -LiteralPath $PythonExe -PathType Leaf)) {
 }
 
 if ([string]::IsNullOrWhiteSpace($UvxExe)) {
-    $UvxCommand = Get-Command "uvx" -CommandType Application -ErrorAction SilentlyContinue
+    $UvxCommand = Get-Command "uvx" -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($null -eq $UvxCommand) {
         throw "uvx was not found; pinned offline Ruff and Pyright are required."
     }
@@ -33,7 +33,7 @@ if (-not (Test-Path -LiteralPath $UvxExe -PathType Leaf)) {
 }
 
 if ([string]::IsNullOrWhiteSpace($NodeExe)) {
-    $NodeCommand = Get-Command "node" -CommandType Application -ErrorAction SilentlyContinue
+    $NodeCommand = Get-Command "node" -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($null -eq $NodeCommand) {
         throw "Node.js was not found; pinned Pyright must not install nodeenv."
     }
@@ -192,7 +192,7 @@ try {
         $env:PYRIGHT_PYTHON_PYLANCE_VERSION = $null
         $env:PYLANCE_VERSION = $null
 
-        Confirm-NativeVersionChecked "Node.js version" $NodeExe "v24.16.0" @("--version")
+        Confirm-NativeVersionChecked "Node.js version" $NodeExe "v24.18.1" @("--version")
         Confirm-NativeVersionChecked "Pyright version" $UvxExe "pyright 1.1.411" @(
             "--offline", "--from", $PyrightPackage, "pyright", "--version"
         )

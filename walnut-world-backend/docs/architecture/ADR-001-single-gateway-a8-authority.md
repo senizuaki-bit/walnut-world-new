@@ -10,7 +10,7 @@
 
 Agent 仓只提供不可变 Wire 合同、公共 Ports、provider-neutral Runtime、Digest-pinned Docker Build/Sandbox 和教学策略等库能力。后端在自身表和 Unit of Work 上实现这些 Ports。生产进程不启动 `yaya_agent_backend` HTTP 服务，不运行 Agent 的 `yaya_schema_migrations`，也不直接或间接把 `yaya_*` 私表作为产品数据源。
 
-现有 `agent-contracts-v0.3.0` 边界由 release lock 保持逐字节不变。INT1 所需但 v0.3 未表达的学生运行权威，发布为追加式 `0.4.0` 合同资源和新 GET 操作；其锁定manifest为26,127 bytes、138 files、SHA-256 `b62a6152f1f2fd87d1941beecd3a1d47089811e91b067a8b225ff0d7a5ce72b9`。当前INT2 additive v0.6 candidate为147 entries、27,848 bytes、SHA-256 `11dde4ef0fd71de5f78afa8aaeef527ef72775a953b6399929245eb1c4d7ab05`，但v0.6 Git tag尚未创建，严格为`NOT_PROVEN`。INT1新资源公开：
+现有 `agent-contracts-v0.3.0` 边界由 release lock 保持逐字节不变。INT1 所需但 v0.3 未表达的学生运行权威，发布为追加式 `0.4.0` 合同资源和新 GET 操作；其锁定manifest为26,127 bytes、138 files、SHA-256 `b62a6152f1f2fd87d1941beecd3a1d47089811e91b067a8b225ff0d7a5ce72b9`。当前INT2 additive v0.6 candidate为148 entries、28,042 bytes、SHA-256 `bb4f1c12f34125bcc4b79b6a1330a20848a7f43764d87fa7c8d7668e7994fe14`，但v0.6 Git tag尚未创建，严格为`NOT_PROVEN`。INT1新资源公开：
 
 - 服务端可恢复的精确 Session 身份及创建所需 authority；
 - Build policy、compiler/test suite 与允许 capability；

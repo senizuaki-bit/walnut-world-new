@@ -1,0 +1,10 @@
+{
+  "http_operations": 28,
+  "websocket_interfaces": 2,
+  "schema_validated_files": 30,
+  "verified_source_hashes": 6,
+  "json_blocks_parsed": 22,
+  "local_links_checked": 190,
+  "errors": [],
+  "scope": "Offline documentation checks only; no services started and no live API/provider call."
+}

@@ -4,12 +4,15 @@ from __future__ import annotations
 
 import json
 
+import pytest
+from sqlalchemy.exc import OperationalError
 from yaya_agent_runtime import (
     AgentContextError,
     RuntimeBoundaryError,
     RuntimeBoundaryStage,
 )
 
+from walnut_backend.adapters.postgres.agent_runtime import AgentRuntimeAuthorityError
 from walnut_backend.adapters.postgres.workflow_jobs import (
     WorkflowBoundaryError,
     WorkflowInvariantError,
@@ -68,6 +71,64 @@ def test_durable_invariant_fails_once_without_changing_boundary_budget() -> None
         previous_failures=4,
         maximum_attempts=5,
     )
+
+
+def test_wrapped_run_history_invariant_stops_after_the_first_failure() -> None:
+    source = WorkflowInvariantError("Run outcome event differs from its canonical suffix")
+    failure = AgentRuntimeAuthorityError(str(source))
+    failure.__cause__ = source
+
+    assert _failure_budget_exhausted(
+        failure,
+        previous_failures=0,
+        maximum_attempts=5,
+    )
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        RuntimeError("read could not complete"),
+        TimeoutError("read timed out"),
+        OperationalError("SELECT history", None, ConnectionError("database unavailable")),
+        WorkflowRetryableError("dependency unavailable", retry_after_seconds=3),
+        WorkflowBoundaryError("OUTCOME_AUTHORITY"),
+    ],
+    ids=["unknown-runtime", "timeout", "database", "retryable", "workflow-boundary"],
+)
+def test_wrapped_non_invariant_read_failure_keeps_normal_recovery_budget(
+    source: Exception,
+) -> None:
+    failure = AgentRuntimeAuthorityError("Agent history read failed")
+    failure.__cause__ = source
+
+    assert not _failure_budget_exhausted(
+        failure,
+        previous_failures=0,
+        maximum_attempts=5,
+    )
+    assert _failure_budget_exhausted(
+        failure,
+        previous_failures=4,
+        maximum_attempts=5,
+    )
+
+
+def test_direct_authority_error_and_unrelated_wrapper_keep_their_existing_budget() -> None:
+    authority_error = AgentRuntimeAuthorityError("resource is not available")
+    unrelated_wrapper = RuntimeError("another workflow boundary")
+    unrelated_wrapper.__cause__ = WorkflowInvariantError("nested diagnostic")
+    boundary_wrapper = AgentRuntimeAuthorityError("read boundary failed")
+    boundary = WorkflowBoundaryError("OUTCOME_AUTHORITY")
+    boundary.__cause__ = WorkflowInvariantError("nested diagnostic")
+    boundary_wrapper.__cause__ = boundary
+
+    for failure in (authority_error, unrelated_wrapper, boundary_wrapper):
+        assert not _failure_budget_exhausted(
+            failure,
+            previous_failures=0,
+            maximum_attempts=5,
+        )
 
 
 def test_agent_runtime_failure_persists_only_stable_bounded_diagnostics() -> None:

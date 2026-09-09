@@ -12,25 +12,25 @@ These tests pin the two halves of the fix that do not need a database:
 
 * one class of compile failure is identified stably, so repeats of the *same*
   mistake can be recognised and different mistakes are not merged;
-* the streak reported to the policy stops below the bug-agent threshold, because
-  a hint at that threshold must name an exact failed Run and a compile rejection
-  has none.
+* a rejected Build can carry the exact failed-attempt identity required at the
+  bug-agent threshold without inventing a Run.
 """
 
 from __future__ import annotations
 
 import sys
 import unittest
+from datetime import UTC, datetime
 from pathlib import Path
 
 BACKEND_ROOT = Path(__file__).resolve().parents[2]
 if str(BACKEND_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(BACKEND_ROOT / "src"))
 
-from yaya_agent_runtime import BUG_FAILURE_THRESHOLD  # noqa: E402
+from yaya_agent_contracts import EvidenceRef  # noqa: E402
+from yaya_agent_runtime import BUG_FAILURE_THRESHOLD, GameEvent  # noqa: E402
 
 from walnut_backend.workers.turn_worker import (  # noqa: E402
-    _COMPILE_FAILURE_REPORT_CEILING,
     _compile_failure_key,
 )
 
@@ -86,19 +86,33 @@ class CompileFailureIdentityTests(unittest.TestCase):
         self.assertEqual(_compile_failure_key(bare), _compile_failure_key(dict(bare)))
 
 
-class ReportedStreakStaysBelowTheBugThresholdTests(unittest.TestCase):
-    """The cap is a contract requirement, not a tuning choice."""
+class BuildOnlyBugThresholdTests(unittest.TestCase):
+    def test_exact_rejected_build_reaches_the_bug_threshold_without_a_run(self) -> None:
+        evidence = EvidenceRef(
+            evidence_id="evidence_build_rejection_0001",
+            evidence_type="TEST_REPORT",
+            created_at=datetime(2026, 9, 2, tzinfo=UTC),
+            sha256="a" * 64,
+        )
+        event = GameEvent(
+            event_id="gameevent_build_rejection_0001",
+            event_type="hint_requested",
+            student_id="student_build_rejection_0001",
+            task_id="task_build_rejection_0001",
+            session_id="session_build_rejection_0001",
+            turn_id="turn_build_rejection_0001",
+            command_id="cmd_build_rejection_0001",
+            occurred_at=datetime(2026, 9, 2, tzinfo=UTC),
+            expected_world_revision=0,
+            build_id="build_rejection_0001",
+            failure_count=BUG_FAILURE_THRESHOLD,
+            failure_key="compile:COMPILE:SANDBOX_COMPILE_ERROR:error",
+            evidence_refs=(evidence,),
+        )
 
-    def test_the_ceiling_is_below_the_bug_threshold(self) -> None:
-        # GameEvent rejects a hint_requested at or above the threshold unless it
-        # names an exact failed Run. Compile rejections have no Run, so reporting
-        # the true streak there would make the event unconstructible.
-        self.assertLess(_COMPILE_FAILURE_REPORT_CEILING, BUG_FAILURE_THRESHOLD)
-
-    def test_the_ceiling_still_leaves_the_review_phase(self) -> None:
-        # It has to be at least 1, or the policy would keep seeing "never failed"
-        # and this whole change would buy the learner nothing.
-        self.assertGreaterEqual(_COMPILE_FAILURE_REPORT_CEILING, 1)
+        self.assertIsNone(event.run_id)
+        self.assertEqual(event.build_id, "build_rejection_0001")
+        self.assertEqual(event.failure_count, BUG_FAILURE_THRESHOLD)
 
 
 if __name__ == "__main__":

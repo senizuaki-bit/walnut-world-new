@@ -8,15 +8,19 @@ $godotExe = $env:YAYA_GODOT_EXE
 $projectRoot = Join-Path $workspaceRoot "clients\godot"
 
 if ([string]::IsNullOrWhiteSpace($godotExe)) {
-    $godotExe = Join-Path $repositoryRoot "tools\godot-4.5.2\Godot_v4.5.2-stable_win64_console.exe"
+    $godotExe = Join-Path $repositoryRoot "tools\godot-4.7.1\Godot_v4.7.1-stable_win64_console.exe"
 }
 
 if (-not (Test-Path -LiteralPath $godotExe -PathType Leaf)) {
     $candidate = Get-Command godot4_console.exe,godot4.exe,godot.exe,godot4,godot -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
     if (-not $candidate) {
-        throw "Godot 4.5 executable is missing. Set YAYA_GODOT_EXE or add Godot to PATH."
+        throw "Godot 4.7.1 executable is missing. Set YAYA_GODOT_EXE or add Godot to PATH."
     }
     $godotExe = $candidate.Source
+}
+$godotVersion = (& $godotExe --version 2>&1 | Out-String).Trim()
+if ($LASTEXITCODE -ne 0 -or $godotVersion -notmatch '^4\.7\.1\.stable') {
+    throw "Godot 4.7.1 stable is required; observed '$godotVersion'."
 }
 
 function Invoke-GodotTestRunner {

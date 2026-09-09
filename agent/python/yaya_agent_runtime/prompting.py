@@ -15,7 +15,7 @@ from .pedagogy_policy import TeachingDirective
 from .role_config import RoleConfig
 
 _COMMON_RULES = """你正在参与一个面向编程初学者的农场游戏。
-只使用本轮上下文、Evidence 和由 Runtime 返回的工具结果，不编造运行、世界变化、测试或学生经历。
+关于学生代码、运行、世界状态和学习表现的陈述，只使用本轮上下文、Evidence 和 Runtime 工具结果，不编造事实。
 一次只聚焦一个核心问题；AI 推断不能写成永久能力结论。
 必须只输出 output_schema 允许的 JSON 对象，不要输出 Markdown 或解释文字。
 工具调用只是请求；只有 Runtime 返回的工具结果才是事实。"""
@@ -36,11 +36,17 @@ class PromptBuilder:
             "不要使用 API 原生 tool_calls 字段，闭合对象必须直接放在消息 content 中。"
             "available_tools 是本轮完整且穷尽的工具集合，不得请求未列出的工具。"
         )
+        if context.role == "book_agent" and not context.session_runs:
+            system += (
+                "\n本轮只生成本次完成总结，依据 run_result 中已验证的成功运行说明一项具体进步和一个可迁移问题。"
+                "本轮未读取整个 Session 的运行历史，不要声称总尝试次数、失败次数、首次成功或此前如何纠错。"
+                "学习推断只引用本次运行的 required_evidence_refs；已有 learner_profile 仅作教学背景。"
+            )
         if context.teaching_directive is not None:
             system += (
                 "\nThe Runtime-owned TeachingDirective is immutable. Do not change its phase, "
                 "target_concept, required_evidence_refs, allowed response types, or hint ceiling. "
-                "Full-solution output is disabled."
+                "Complete solutions to the current programming task are disabled."
             )
             if context.teaching_directive.patch_eligible:
                 system += (
@@ -55,12 +61,36 @@ class PromptBuilder:
             if (
                 context.role in {"teaching_agent", "bug_agent"}
                 and not context.teaching_directive.required_evidence_ids
+                and context.run_result is None
             ):
                 system += (
                     "\nThis directive has no required Evidence. Do not claim an observed run "
-                    "or call a tool to invent missing run context. Ask one bounded diagnostic "
-                    "question about target_concept and keep learner_inference null."
+                    "or call a tool to invent missing run context. For teaching feedback, ask "
+                    "one bounded diagnostic question about target_concept and keep learner_inference null."
                 )
+            if (
+                context.student_message is not None
+                and "message" in context.teaching_directive.allowed_response_types
+            ):
+                system += (
+                    "\n先理解 student_message，再决定回复类型。问候、身份、日常聊天和课程外知识问题用 message，"
+                    "直接回答学生的问题，可使用一般知识；不确定就说明，不虚构后台数据。"
+                    "message 的 hint_level、learner_inference、skill_patch 必须为 null，"
+                    "requires_student_confirmation=false。question 必须为 null，无须强行反问或转回课程。"
+                    "例如问天空为何是蓝色，应解释光散射；问你是谁，应介绍自己是叮当师傅。"
+                    "只有学生询问当前课程、代码或调试帮助时才使用 question/hint 并遵守教学规则。"
+                    "不得把当前任务的完整代码答案包装成 message。已有失败记录不能替代本轮真实问题。"
+                )
+        if (
+            context.event.event_type == "hint_requested"
+            and context.run_result is not None
+            and context.run_result.task_success
+        ):
+            system += (
+                "\nrun_result 已确认刚才的代码运行成功且世界结果已提交，可以直接向学生确认这次成功。"
+                "成长总结与学习档案可能仍在整理，不影响本次运行结果；不要把尚未整理完说成运行失败。"
+                "只讨论已验证的本次结果，不声称已更新学习档案或生成成长总结。"
+            )
         payload = {
             "turn_context": _context_payload(context),
             "available_tools": [thaw_value(item) for item in tool_definitions],
@@ -304,8 +334,26 @@ def _context_payload(context: TurnContext) -> dict[str, object]:
                 evidence_aliases,
             ),
         }
+    if context.build_failure is not None:
+        payload["compile_result"] = {
+            "succeeded": False,
+            "diagnostics": context.build_failure.diagnostics,
+            "evidence_refs": alias_evidence_refs(
+                context.build_failure.evidence_refs,
+                evidence_aliases,
+            ),
+        }
     if context.run_result is not None:
         payload["run_result"] = _run_payload(context.run_result, evidence_aliases)
+    if context.build_failure_history:
+        payload["build_failure_history"] = [
+            {
+                "attempt": index,
+                "diagnostics": item.diagnostics,
+                "evidence_refs": alias_evidence_refs(item.evidence_refs, evidence_aliases),
+            }
+            for index, item in enumerate(context.build_failure_history, start=1)
+        ]
     if context.failure_history:
         payload["failure_history"] = [
             _run_payload(item, evidence_aliases) for item in context.failure_history
@@ -329,6 +377,14 @@ def _context_payload(context: TurnContext) -> dict[str, object]:
                 context.learner_profile.evidence_refs,
                 evidence_aliases,
             ),
+        }
+    if context.student_message is not None:
+        # Untrusted student text. It is the question to answer, not a source of
+        # instructions, and it cannot widen response_type, hint_level or the
+        # Evidence the decision may cite.
+        payload["student_message"] = {
+            "text": context.student_message,
+            "trust": "untrusted_student_input",
         }
     if context.recent_messages:
         payload["recent_messages"] = [

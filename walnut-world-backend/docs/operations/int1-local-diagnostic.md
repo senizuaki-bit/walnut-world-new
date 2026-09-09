@@ -8,7 +8,7 @@ the separate real-Provider acceptance gate.
 The harness starts only private localhost processes, creates a fresh disposable PostgreSQL 16.9
 container from an exact digest-pinned image and a run-unique Docker volume, migrates and seeds the
 fixed INT1 authority, starts the one Gateway,
-combined workflow worker, and dedicated learner worker, and runs the official Godot 4.5.2
+combined workflow worker, and dedicated learner worker, and runs the official Godot 4.7.1
 real-Gateway runner. It uses
 `scripts/int1_recoverable_relay.py` as an in-memory fixture for
 `YAYA_RECOVERABLE_LLM_V1`.
@@ -75,7 +75,7 @@ The script requires these local inputs and never downloads them implicitly:
 
 - the sibling `agent` and `walnut-world-frontend` workspaces;
 - the Backend `.venv`;
-- the pinned Godot 4.5.2 console executable under the shared `tools` directory (or `-GodotExe`);
+- the pinned Godot 4.7.1 stable executable under the shared `tools` directory (or `-GodotExe`);
 - the exact local images
   `postgres:16.9-alpine@sha256:7c688148e5e156d0e86df7ba8ae5a05a2386aaec1e2ad8e6d11bdf10504b1fb7`
   and

@@ -24,8 +24,8 @@ LIVE_TEST_IDS = frozenset(
         "test_real_three_failures_bug_then_success_book_replay_restart",
     }
 )
-EXPECTED_DISCOVERED_TESTS = 601
-EXPECTED_NON_LIVE_TESTS = 599
+EXPECTED_DISCOVERED_TESTS = 637
+EXPECTED_NON_LIVE_TESTS = 635
 
 
 def _flatten(suite: unittest.TestSuite) -> Iterable[unittest.case.TestCase]:

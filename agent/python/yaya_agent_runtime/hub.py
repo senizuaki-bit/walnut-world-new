@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import AsyncGenerator, Sequence
+from contextlib import asynccontextmanager
 from dataclasses import dataclass
 
 from yaya_agent_contracts import OperationContext
@@ -23,6 +25,13 @@ from .ports import AgentTurnCommitPort, SkillInvocationPort
 from .router import RoleRouter
 from .runtime import SharedAgentRuntime
 from .tool_registry import side_effect_execution_id
+from .voice import (
+    RealtimeVoicePort,
+    VoiceError,
+    VoiceSession,
+    VoiceTool,
+    voice_instructions,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -42,6 +51,51 @@ class AgentHubResult:
             raise ValueError("only a persisted Agent turn can be replayed")
 
 
+class RealtimeVoiceAuthority:
+    """Authorize ephemeral voice sessions with the routing and context authority of a turn.
+
+    A realtime session produces audio and transcripts, never a durable Agent
+    turn: nothing here claims, commits or replays one.  Deployments that only
+    serve voice construct this directly instead of an AgentHub, so a voice
+    surface can never reach turn execution by accident.
+    """
+
+    def __init__(
+        self,
+        *,
+        router: RoleRouter,
+        contexts: ContextBuilder,
+        voice: RealtimeVoicePort,
+    ) -> None:
+        self._router = router
+        self._contexts = contexts
+        self._voice = voice
+
+    @asynccontextmanager
+    async def open_session(
+        self,
+        event: GameEvent,
+        operation_context: OperationContext,
+        tools: Sequence[VoiceTool] = (),
+    ) -> AsyncGenerator[VoiceSession]:
+        """Callers build the GameEvent from trusted session state, just as for handle().
+
+        Microphone transcripts must never be cast directly to a GameEvent.  Stop
+        and await the receive task before leaving this context manager.
+        """
+
+        if event.command_id != operation_context.command_id:
+            raise AgentContextError("HUB_COMMAND_MISMATCH", "voice command identity mismatch")
+        if event.student_id != operation_context.actor.actor_id:
+            raise AgentContextError("HUB_ACTOR_MISMATCH", "voice actor identity mismatch")
+        route = self._router.route(event)
+        if not route.should_run or route.role is None:
+            raise VoiceError("VOICE_ROUTE_REQUIRED")
+        context = await self._contexts.build(event, route.role, operation_context)
+        async with self._voice.open_session(voice_instructions(context), tools) as session:
+            yield session
+
+
 class AgentHub:
     def __init__(
         self,
@@ -51,12 +105,33 @@ class AgentHub:
         runtime: SharedAgentRuntime,
         turns: AgentTurnCommitPort,
         invocations: SkillInvocationPort | None = None,
+        voice: RealtimeVoicePort | None = None,
     ) -> None:
         self._router = router
         self._contexts = contexts
         self._runtime = runtime
         self._turns = turns
         self._invocations = invocations
+        self._voice_authority = (
+            None
+            if voice is None
+            else RealtimeVoiceAuthority(router=router, contexts=contexts, voice=voice)
+        )
+
+    @asynccontextmanager
+    async def open_voice(
+        self,
+        event: GameEvent,
+        operation_context: OperationContext,
+        tools: Sequence[VoiceTool] = (),
+    ) -> AsyncGenerator[VoiceSession]:
+        """Authorize a fresh voice session without claiming/committing a game turn."""
+
+        authority = self._voice_authority
+        if authority is None:
+            raise VoiceError("VOICE_DISABLED")
+        async with authority.open_session(event, operation_context, tools) as session:
+            yield session
 
     async def handle(
         self,
@@ -400,4 +475,4 @@ def _validate_committed_turn(
     return value
 
 
-__all__ = ["AgentHub", "AgentHubResult"]
+__all__ = ["AgentHub", "AgentHubResult", "RealtimeVoiceAuthority"]

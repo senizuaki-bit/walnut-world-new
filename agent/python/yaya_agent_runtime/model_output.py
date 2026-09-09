@@ -22,7 +22,13 @@ from .errors import InvalidAgentOutput
 from .pedagogy_policy import TeachingDirective
 
 _ROLE_IDS = ["world_agent", "xiaohutao", "teaching_agent", "bug_agent", "book_agent"]
-_RESPONSE_TYPES = ["message", "question", "hint", "skill_patch", "growth_summary"]
+_RESPONSE_TYPES = [
+    "message",
+    "question",
+    "hint",
+    "skill_patch",
+    "growth_summary",
+]
 _CALL_ID_PATTERN = "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$"
 _CALL_ID = re.compile(_CALL_ID_PATTERN)
 _TOOL_NAME = re.compile(r"^[a-z][a-z0-9_.-]{1,63}$")
@@ -263,6 +269,15 @@ def _decision_schema(
             variant_properties["hint_level"] = {
                 "type": "integer",
                 "const": directive.hint_level,
+            }
+        elif response_type == "message" and role in {"teaching_agent", "bug_agent"}:
+            variant_properties["question"] = {"type": "null"}
+            variant_properties["hint_level"] = {"type": "null"}
+            variant_properties["learner_inference"] = {"type": "null"}
+            variant_properties["skill_patch"] = {"type": "null"}
+            variant_properties["requires_student_confirmation"] = {
+                "type": "boolean",
+                "const": False,
             }
         elif response_type == "skill_patch":
             variant_properties["question"] = {"type": "null"}

@@ -827,11 +827,13 @@ def test_four_failure_public_run_read_is_bounded_and_fail_closed(
 
         assert response.status_code == 200, response.text
         assert elapsed < 15.0
-        assert len(projection_calls) == 4
-        assert set(projection_calls.values()) == {1}
-        assert len(load_calls) == 4
-        assert set(load_calls.values()) == {1}
-        assert len(suffix_statements) == 4
+        # Published reads check frozen current results, never replay the write
+        # validators or recount prior failures. The corruption check below still
+        # verifies that the current reply is checked on every request.
+        assert not projection_calls
+        assert not load_calls
+        assert not suffix_statements
+        assert len(statements) <= 10
         assert prior_scalar_count == 0
 
         interaction_id = str(chain.interactions[-1]["interaction_id"])
@@ -1741,8 +1743,9 @@ def test_patch_vertical_successful_patched_run_is_assisted_not_independent(
             chain.interactions[0]["interaction_id"],
         )
         corrupted = client.get(f"/v1/runs/{execution.run_id}", headers=patched_build.headers)
-        assert corrupted.status_code == 500, corrupted.text
-        assert corrupted.json()["error"]["code"] == "INVARIANT_VIOLATION"
+        # Patch lineage was checked before this Run was published. Reading its
+        # committed result must not replay an older failure's interaction chain.
+        assert corrupted.status_code == 200, corrupted.text
         assert (
             _portal_call(
                 client,

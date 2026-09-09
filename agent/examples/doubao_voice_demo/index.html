@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>问叮当 · 实时语音测试</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div>
+        <p class="eyebrow">WALNUT WORLD · ASK DINGDANG</p>
+        <h1>问叮当 · 实时语音</h1>
+        <p class="description">语音提问由豆包实时模型直接回答；文字提问走现有问叮当链路。</p>
+      </div>
+      <div id="status" class="status" data-state="offline"><span></span>未连接</div>
+    </header>
+
+    <section class="conversation" aria-live="polite">
+      <article class="message user">
+        <div class="avatar">我</div>
+        <div><p class="label">你说</p><p id="userText" class="text placeholder">等待麦克风输入…</p></div>
+      </article>
+      <article class="message assistant">
+        <div class="avatar">芽</div>
+        <div>
+          <p class="label">叮当回复<span id="answerSource" class="source"></span></p>
+          <p id="assistantText" class="text placeholder">连接后点“开始说话”提问</p>
+          <pre id="hintReport" class="report" hidden></pre>
+        </div>
+      </article>
+    </section>
+
+    <section class="controls">
+      <button id="connectButton" class="secondary">连接服务</button>
+      <button id="micButton" class="primary" disabled><span class="mic-dot"></span><span>开始说话</span></button>
+      <button id="interruptButton" class="secondary" disabled>打断播放</button>
+    </section>
+
+    <form id="textForm" class="text-test">
+      <input id="textInput" maxlength="200" placeholder="文字提问（走现有问叮当链路，非豆包回答）" disabled>
+      <button id="sendButton" type="submit" disabled>发送</button>
+    </form>
+
+    <p id="hint" class="hint">建议戴耳机测试，避免扬声器声音再次被麦克风收录。</p>
+    <p id="scope" class="hint">实时语音会话不可恢复，因此不写入持久化教学记录；它不能执行任何游戏操作。</p>
+  </main>
+  <script src="./app.js" defer></script>
+</body>
+</html>

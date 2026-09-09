@@ -56,6 +56,7 @@ from .run_outcomes import (
     validate_canonical_outcome_event,
     validate_terminal_projection,
 )
+from .session import snapshot_read
 from .skill_builds import PostgresSkillBuildStore
 from .skill_invocation import (
     invocation_result_from_receipt,
@@ -63,6 +64,7 @@ from .skill_invocation import (
 )
 from .workflow_jobs import (
     WorkflowInvariantError,
+    workflow_json_sha256,
     workflow_receipt_sha256,
     workflow_step_receipt_id,
 )
@@ -83,7 +85,13 @@ class _NonterminalRunAuthority:
         return self.result.run
 
 
-_PublicRunAuthority = ValidatedRunAuthority | _NonterminalRunAuthority
+@dataclass(frozen=True, slots=True)
+class _PublishedRunAuthority:
+    run: RunResultSnapshot
+    learner_job: LearnerProjectionJobRow
+
+
+_PublicRunAuthority = ValidatedRunAuthority | _NonterminalRunAuthority | _PublishedRunAuthority
 
 
 class PostgresRunEvidenceStore:
@@ -96,7 +104,7 @@ class PostgresRunEvidenceStore:
 
     async def get_run(self, run_id: str, context: OperationContext) -> Result[dict[str, Any]]:
         try:
-            async with self._sessions() as session:
+            async with snapshot_read(self._sessions) as session:
                 row = await session.scalar(
                     select(RunRow).where(
                         RunRow.run_id == run_id,
@@ -125,7 +133,7 @@ class PostgresRunEvidenceStore:
     ) -> Result[dict[str, Any]]:
         build_id: str | None = None
         try:
-            async with self._sessions() as session:
+            async with snapshot_read(self._sessions) as session:
                 row = await session.scalar(
                     select(EvidenceRow).where(
                         EvidenceRow.evidence_id == evidence_id,
@@ -162,15 +170,16 @@ class PostgresRunEvidenceStore:
                             validation_state=validation_state,
                         )
                         if source_type == "LEARNER_PROJECTOR":
-                            if not isinstance(authority, ValidatedRunAuthority):
+                            if not isinstance(authority, (ValidatedRunAuthority, _PublishedRunAuthority)):
                                 raise WorkflowInvariantError(
                                     "Learner Evidence has no terminal Run authority"
                                 )
-                            await validate_terminal_projection(
-                                session,
-                                authority,
-                                validation_state=validation_state,
-                            )
+                            if isinstance(authority, ValidatedRunAuthority):
+                                await validate_terminal_projection(
+                                    session,
+                                    authority,
+                                    validation_state=validation_state,
+                                )
                             learner_job = await session.scalar(
                                 select(LearnerProjectionJobRow).where(
                                     LearnerProjectionJobRow.tenant_id == row.tenant_id,
@@ -345,6 +354,9 @@ async def _validated_run_for_public_read(
     ):
         raise WorkflowInvariantError("Run Command row authority drifted")
     if command.terminal:
+        published = await _read_published_run(session, row, context)
+        if published is not None:
+            return published
         validated = await validated_command_record(session, command_row)
         if validated is None or validated != command:
             raise WorkflowInvariantError("terminal Run Command authority drifted")
@@ -437,6 +449,128 @@ async def _validated_run_for_public_read(
             validation_state=validation_state,
         )
     return authority
+
+
+async def _read_published_run(
+    session: AsyncSession, row: RunRow, context: OperationContext
+) -> _PublishedRunAuthority | None:
+    """Read the committed publication without replaying its write-time validation.
+
+    The learner handoff freezes the full Run and feedback in the same transaction.
+    Check those bytes and the current evidence; draft/build provenance, provider
+    traces and prior failure counts were already checked before publication.
+    Every request uses a fresh database snapshot, never a cross-request cache.
+    """
+    learner_job = await session.scalar(
+        select(LearnerProjectionJobRow).where(
+            LearnerProjectionJobRow.tenant_id == row.tenant_id,
+            LearnerProjectionJobRow.actor_id == row.actor_id,
+            LearnerProjectionJobRow.command_id == row.command_id,
+            LearnerProjectionJobRow.run_id == row.run_id,
+        )
+    )
+    if learner_job is None:
+        return None
+    objective = learner_job.projection_json
+    identity = _object(objective.get("identity"), "published Run identity")
+    saved_run = _object(objective.get("run"), "published Run digest")
+    if (
+        learner_job.status != "SUCCEEDED"
+        or learner_job.request_sha256 != workflow_json_sha256(objective)
+        or learner_job.content_hash != row.content_hash
+        or learner_job.session_id != row.session_id
+        or learner_job.turn_id != row.turn_id
+        or any(
+            identity.get(key) != getattr(learner_job, key)
+            for key in (
+                "tenant_id",
+                "actor_id",
+                "command_id",
+                "run_id",
+                "session_id",
+                "turn_id",
+                "content_hash",
+                "learner_id",
+                "job_id",
+            )
+        )
+        or saved_run.get("run_feedback_sha256") != canonical_json_sha256(row.run_json)
+        or objective.get("feedback") != row.run_json.get("agent_feedback")
+        or context.actor.tenant_id != row.tenant_id
+        or context.actor.actor_id != row.actor_id
+    ):
+        raise WorkflowInvariantError("published Run differs from committed learner handoff")
+    receipts = (
+        await session.execute(
+            select(JobStepReceiptRow, WorkflowJobRow)
+            .join(WorkflowJobRow, WorkflowJobRow.job_id == JobStepReceiptRow.job_id)
+            .where(
+                WorkflowJobRow.tenant_id == row.tenant_id,
+                WorkflowJobRow.command_id == row.command_id,
+                JobStepReceiptRow.step_name.in_(
+                    ("SKILL_INVOKED", "LEARNER_PROJECTION_COMMITTED")
+                ),
+            )
+        )
+    ).all()
+    by_step = {receipt.step_name: (receipt, job) for receipt, job in receipts}
+    if len(by_step) != 2:
+        raise WorkflowInvariantError("published Run invocation or publication is missing")
+    receipt, job = by_step["SKILL_INVOKED"]
+    publication, _ = by_step["LEARNER_PROJECTION_COMMITTED"]
+    if (
+        publication.receipt_id != workflow_step_receipt_id(
+            row.tenant_id, job.job_id, "LEARNER_PROJECTION_COMMITTED"
+        )
+        or publication.input_sha256 != learner_job.request_sha256
+        or publication.output_sha256 != workflow_receipt_sha256(publication.receipt_json)
+    ):
+        raise WorkflowInvariantError("published Run completion receipt drifted")
+    try:
+        result = invocation_result_from_receipt(receipt.receipt_json)
+    except (KeyError, TypeError, ValueError) as error:
+        raise WorkflowInvariantError("published Run invocation is invalid") from error
+    if (
+        receipt.receipt_id != workflow_step_receipt_id(row.tenant_id, job.job_id, "SKILL_INVOKED")
+        or receipt.output_sha256 != workflow_receipt_sha256(receipt.receipt_json)
+        or receipt.input_sha256 != result.request_sha256
+        or saved_run.get("invocation_request_sha256") != result.request_sha256
+        or result.tenant_id != row.tenant_id
+    ):
+        raise WorkflowInvariantError("published Run invocation drifted")
+    # Preserve current-result integrity without loading any historical Run.
+    origin = result.run.request_context
+    run_context = OperationContext(
+        request_id=origin.request_id,
+        correlation_id=origin.correlation_id,
+        trace_id=origin.trace_id,
+        requested_at=origin.requested_at,
+        actor=origin.actor,
+        content_ref=origin.content_ref,
+        command_id=row.command_id,
+        causation_id=None,
+    )
+    run_outcome_validators._validate_run_row(row, result.run, run_context)
+    await run_outcome_validators._validate_evidence(session, result.run, run_context)
+    projection = _object(objective.get("projection"), "published interaction")
+    interaction = await session.scalar(
+        select(ProductInteractionRow).where(
+            ProductInteractionRow.tenant_id == row.tenant_id,
+            ProductInteractionRow.actor_id == row.actor_id,
+            ProductInteractionRow.interaction_id == projection.get("interaction_id"),
+        )
+    )
+    committed_interaction = _object(
+        publication.receipt_json.get("interaction"), "committed interaction"
+    )
+    if (
+        interaction is None
+        or interaction.interaction_json.get("feedback") != objective.get("feedback")
+        or canonical_json_sha256(interaction.interaction_json)
+        != committed_interaction.get("interaction_sha256")
+    ):
+        raise WorkflowInvariantError("published Run feedback differs from current interaction")
+    return _PublishedRunAuthority(result.run, learner_job)
 
 
 async def _validate_nonterminal_run_without_turn(

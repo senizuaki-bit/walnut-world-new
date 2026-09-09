@@ -1,0 +1,142 @@
+{
+  "measurements": [
+    {
+      "stage": "latest_run_revision",
+      "sample": 1,
+      "seconds": 0.0146,
+      "sql": 1
+    },
+    {
+      "stage": "latest_run_revision",
+      "sample": 2,
+      "seconds": 0.0064,
+      "sql": 1
+    },
+    {
+      "stage": "latest_run_revision",
+      "sample": 3,
+      "seconds": 0.006,
+      "sql": 1
+    },
+    {
+      "stage": "latest_run_revision",
+      "sample": 4,
+      "seconds": 0.0072,
+      "sql": 1
+    },
+    {
+      "stage": "latest_run_revision",
+      "sample": 5,
+      "seconds": 0.006,
+      "sql": 1
+    },
+    {
+      "stage": "latest_run_revision",
+      "sample": 6,
+      "seconds": 0.0095,
+      "sql": 1
+    },
+    {
+      "stage": "latest_run_revision",
+      "sample": 7,
+      "seconds": 0.0071,
+      "sql": 1
+    },
+    {
+      "stage": "latest_run_revision",
+      "sample": 8,
+      "seconds": 0.0118,
+      "sql": 1
+    },
+    {
+      "stage": "latest_run_revision",
+      "sample": 9,
+      "seconds": 0.0089,
+      "sql": 1
+    },
+    {
+      "stage": "latest_run_revision",
+      "sample": 10,
+      "seconds": 0.0079,
+      "sql": 1
+    },
+    {
+      "stage": "latest_run_revision",
+      "sample": 11,
+      "seconds": 0.0277,
+      "sql": 1
+    },
+    {
+      "stage": "latest_run_revision",
+      "sample": 12,
+      "seconds": 0.0156,
+      "sql": 1
+    },
+    {
+      "stage": "latest_run_revision",
+      "sample": 13,
+      "seconds": 0.0232,
+      "sql": 1
+    },
+    {
+      "stage": "latest_run_revision",
+      "sample": 14,
+      "seconds": 0.0106,
+      "sql": 1
+    },
+    {
+      "stage": "latest_run_revision",
+      "sample": 15,
+      "seconds": 0.0089,
+      "sql": 1
+    },
+    {
+      "stage": "latest_run_revision",
+      "sample": 16,
+      "seconds": 0.0056,
+      "sql": 1
+    },
+    {
+      "stage": "latest_run_revision",
+      "sample": 17,
+      "seconds": 0.0154,
+      "sql": 1
+    },
+    {
+      "stage": "latest_run_revision",
+      "sample": 18,
+      "seconds": 0.0065,
+      "sql": 1
+    },
+    {
+      "stage": "latest_run_revision",
+      "sample": 19,
+      "seconds": 0.0058,
+      "sql": 1
+    },
+    {
+      "stage": "latest_run_revision",
+      "sample": 20,
+      "seconds": 0.0074,
+      "sql": 1
+    },
+    {
+      "stage": "load",
+      "sample": 1,
+      "seconds": 0.0579,
+      "sql": 12
+    },
+    {
+      "stage": "load",
+      "sample": 2,
+      "seconds": 0.0349,
+      "sql": 12
+    },
+    {
+      "stage": "load",
+      "sample": 3,
+      "seconds": 0.0335,
+      "sql": 12
+    }
+  ]
+}

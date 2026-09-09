@@ -45,7 +45,7 @@ def test_persistent_play_supports_current_and_legacy_workspace_layouts() -> None
         "Join-Path $nestedFrontendRoot 'project.godot'",
         "$bundledAgentRoot = Join-Path $backendRoot 'agent'",
         "$legacyAgentRoot = Join-Path $workspaceRoot 'agent'",
-        "tools\\godot-4.5.2\\Godot_v4.5.2-stable_win64.exe",
+        "tools\\godot-4.7.1\\Godot_v4.7.1-stable_win64.exe",
         "Godot project missing: $frontendRoot",
     ):
         assert required in script
@@ -60,7 +60,7 @@ def test_provider_credential_is_injected_by_validated_file_only() -> None:
     assert "Get-Content -LiteralPath $UpstreamKeyFile" not in script
     assert "$upstreamKey" not in script
     assert "$env:WALNUT_LLM_UPSTREAM_API_KEY =" not in script
-    assert "'WALNUT_LLM_UPSTREAM_API_KEY', $null, 'Process'" in relay_start
+    assert "Clear-ProcessEnvironmentVariable -Name 'WALNUT_LLM_UPSTREAM_API_KEY'" in relay_start
     assert "'WALNUT_LLM_UPSTREAM_API_KEY_FILE'," in relay_start
     assert "[IO.Path]::GetFullPath($UpstreamKeyFile)" in relay_start
     assert "Start-ProviderBlindBackendChild" in script

@@ -173,6 +173,11 @@ class WebSocketTransportMiddleware:
         if scope["type"] != "websocket":
             await self.app(scope, receive, send)
             return
+        if re.fullmatch(r"/product-experience/v1/sessions/[^/]+/dingdang-voice", scope["path"]):
+            # This route authenticates its first frame; World WSS keeps its
+            # existing headers, schema and yaya.runtime.v1 subprotocol.
+            await self.app(scope, receive, send)
+            return
         headers = Headers(scope=scope)
         identity, invalid_header = attempt_identity(headers)
         if invalid_header is not None:

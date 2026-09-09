@@ -10,6 +10,8 @@ from pathlib import Path
 from typing import Literal
 from urllib.parse import urlsplit
 
+from yaya_agent_runtime.adapters.doubao_realtime import DoubaoRealtimeConfig
+
 
 def _required(source: Mapping[str, str], name: str) -> str:
     value = source.get(name, "").strip()
@@ -131,6 +133,7 @@ class ProductionSettings:
     learner_worker_lease_seconds: int = 30
     learner_worker_poll_ms: int = 100
     llm_thinking_mode: Literal["enabled", "disabled"] | None = None
+    voice_config: DoubaoRealtimeConfig | None = field(default=None, repr=False)
 
     def __post_init__(self) -> None:
         database = urlsplit(self.database_dsn)
@@ -235,6 +238,7 @@ class ProductionSettings:
             auth_issuer=_required(source, "YAYA_AUTH_ISSUER"),
             auth_audience=_required(source, "YAYA_AUTH_AUDIENCE"),
             llm_mode=llm_mode,
+            voice_config=DoubaoRealtimeConfig.from_env(source),
             llm_endpoint=endpoint,
             llm_api_key=key,
             llm_model=llm_model,

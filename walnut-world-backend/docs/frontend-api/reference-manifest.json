@@ -1,0 +1,180 @@
+{
+  "http_operations": [
+    {
+      "method": "GET",
+      "path": "/v1/bootstrap",
+      "operation_id": "getGameBootstrap"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/commands/{command_id}",
+      "operation_id": "getCommand"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/runs/{run_id}",
+      "operation_id": "getRun"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/evidence/{evidence_id}",
+      "operation_id": "getEvidence"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/worlds/{world_id}/snapshot",
+      "operation_id": "getWorldSnapshot"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/worlds/{world_id}/events",
+      "operation_id": "listWorldEvents"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/worlds/{world_id}/presentation-events",
+      "operation_id": "listWorldPresentationEvents"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/student-bootstrap",
+      "operation_id": "getStudentBootstrap"
+    },
+    {
+      "method": "POST",
+      "path": "/integrations/feishu/v1/learner-queries",
+      "operation_id": "queryLearnerProjectionFromFeishu"
+    },
+    {
+      "method": "POST",
+      "path": "/integrations/feishu/v1/class-insights",
+      "operation_id": "queryClassInsightsFromFeishu"
+    },
+    {
+      "method": "GET",
+      "path": "/integrations/feishu/v1/evidence/{evidence_id}",
+      "operation_id": "getRedactedEvidenceForFeishu"
+    },
+    {
+      "method": "POST",
+      "path": "/integrations/feishu/v1/mcp",
+      "operation_id": "feishuTeacherMcp"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/skill-builds",
+      "operation_id": "createSkillBuild"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/skill-builds/{build_id}",
+      "operation_id": "getSkillBuild"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/skill-versions/{skill_version_id}/activations",
+      "operation_id": "activateSkillVersion"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/skill-activations/{activation_id}",
+      "operation_id": "getSkillActivation"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/agent-sessions",
+      "operation_id": "createAgentSession"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/agent-sessions/{session_id}",
+      "operation_id": "getAgentSession"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/agent-sessions/{session_id}/turns",
+      "operation_id": "createAgentTurn"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/client-events:batch",
+      "operation_id": "ingestClientEventBatch"
+    },
+    {
+      "method": "GET",
+      "path": "/product-experience/v1/sessions/{session_id}/skill-drafts/{draft_id}",
+      "operation_id": "getProductSkillDraft"
+    },
+    {
+      "method": "PUT",
+      "path": "/product-experience/v1/sessions/{session_id}/skill-drafts/{draft_id}",
+      "operation_id": "upsertProductSkillDraft"
+    },
+    {
+      "method": "GET",
+      "path": "/product-experience/v1/content-units/{unit_id}/versions/{content_version}",
+      "operation_id": "getProductContentUnit"
+    },
+    {
+      "method": "GET",
+      "path": "/product-experience/v1/capabilities",
+      "operation_id": "getInt2Capabilities"
+    },
+    {
+      "method": "GET",
+      "path": "/product-experience/v1/sessions/{session_id}/agent-interactions",
+      "operation_id": "listProductAgentInteractions"
+    },
+    {
+      "method": "GET",
+      "path": "/product-experience/v1/sessions/{session_id}/agent-interactions/{interaction_id}",
+      "operation_id": "getProductAgentInteraction"
+    },
+    {
+      "method": "POST",
+      "path": "/product-experience/v1/sessions/{session_id}/agent-interactions/{interaction_id}/patches/{patch_id}/decision",
+      "operation_id": "recordProductPatchDecision"
+    },
+    {
+      "method": "GET",
+      "path": "/product-experience/v1/sessions/{session_id}/workspace",
+      "operation_id": "getProductSessionWorkspace"
+    }
+  ],
+  "examples": {
+    "game-bootstrap-response.json": "contracts/schemas/game/bootstrap-response.schema.json",
+    "game-command.json": "contracts/schemas/game/command.schema.json",
+    "game-run.json": "contracts/schemas/game/run.schema.json",
+    "game-evidence.json": "contracts/schemas/game/evidence.schema.json",
+    "game-world-snapshot.json": "contracts/schemas/game/world-snapshot.schema.json",
+    "game-world-event-page.json": "contracts/schemas/game/world-event-page.schema.json",
+    "game-world-presentation-event-page.json": "contracts/schemas/game/world-presentation-event-page.schema.json",
+    "game-student-bootstrap-v2.json": "contracts/schemas/game/student-bootstrap-v2.schema.json",
+    "feishu-learner-query.json": "contracts/schemas/feishu/learner-query.schema.json",
+    "feishu-learner-query-result.json": "contracts/schemas/feishu/learner-query-result.schema.json",
+    "feishu-class-insights-query.json": "contracts/schemas/feishu/class-insights-query.schema.json",
+    "feishu-class-insights-result.json": "contracts/schemas/feishu/class-insights-result.schema.json",
+    "feishu-evidence-view.json": "contracts/schemas/feishu/evidence-view.schema.json",
+    "game-skill-build-create-request.json": "contracts/schemas/game/skill-build-create-request.schema.json",
+    "game-skill-build.json": "contracts/schemas/game/skill-build.schema.json",
+    "game-skill-activation-request.json": "contracts/schemas/game/skill-activation-request.schema.json",
+    "game-skill-activation.json": "contracts/schemas/game/skill-activation.schema.json",
+    "game-agent-session-create-request.json": "contracts/schemas/game/agent-session-create-request.schema.json",
+    "game-agent-session.json": "contracts/schemas/game/agent-session.schema.json",
+    "game-agent-turn-create-request.json": "contracts/schemas/game/agent-turn-create-request.schema.json",
+    "game-client-event-batch-request.json": "contracts/schemas/game/client-event-batch-request.schema.json",
+    "product-experience-skill-draft.json": "contracts/schemas/product-experience/skill-draft.schema.json",
+    "product-experience-skill-draft-upsert-request.json": "contracts/schemas/product-experience/skill-draft-upsert-request.schema.json",
+    "product-experience-content-unit.json": "contracts/schemas/product-experience/content-unit.schema.json",
+    "product-experience-int2-capabilities.json": "contracts/schemas/product-experience/int2-capabilities.schema.json",
+    "product-experience-agent-interaction-page.json": "contracts/schemas/product-experience/agent-interaction-page.schema.json",
+    "product-experience-agent-interaction.json": "contracts/schemas/product-experience/agent-interaction.schema.json",
+    "product-experience-patch-decision-request.json": "contracts/schemas/product-experience/patch-decision-request.schema.json",
+    "product-experience-patch-decision-receipt.json": "contracts/schemas/product-experience/patch-decision-receipt.schema.json",
+    "product-experience-session-workspace.json": "contracts/schemas/product-experience/session-workspace.schema.json"
+  },
+  "websockets": [
+    "/product-experience/v1/sessions/{session_id}/dingdang-voice",
+    "/v1/realtime"
+  ]
+}

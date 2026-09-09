@@ -21,12 +21,13 @@ from yaya_agent_contracts import (
     VersionSet,
 )
 
-from walnut_backend.adapters.postgres import skill_invocation
+from walnut_backend.adapters.postgres import product_interactions, skill_invocation
 from walnut_backend.adapters.postgres.models import (
     command_record_data,
     command_record_from_data,
 )
 from walnut_backend.application.game.queries import public_command_record_data
+from walnut_backend.workers import turn_projection
 
 
 def test_command_and_run_evidence_refs_share_canonical_utc_wire() -> None:
@@ -53,11 +54,27 @@ def test_command_and_run_evidence_refs_share_canonical_utc_wire() -> None:
     run_reference_wire = skill_invocation._evidence_ref_wire(  # pyright: ignore[reportPrivateUsage]
         reference
     )
+    feedback_reference_wire = turn_projection._evidence_ref_wire(  # pyright: ignore[reportPrivateUsage]
+        reference
+    )
 
     assert durable_command_wire["evidence_refs"][0]["created_at"] == (
         "2026-08-12T14:29:43.123456+08:00"
     )
     assert public_command_wire["evidence_refs"] == [run_reference_wire]
+    assert feedback_reference_wire == run_reference_wire
+    assert product_interactions._agent_evidence_refs_match_projection(  # pyright: ignore[reportPrivateUsage]
+        [
+            {
+                "evidence_id": reference.evidence_id,
+                "evidence_type": reference.evidence_type.value,
+                "created_at": reference.created_at.isoformat(),
+                "sha256": reference.sha256,
+                "uri": reference.uri,
+            }
+        ],
+        [feedback_reference_wire],
+    )
     assert run_reference_wire["created_at"] == "2026-08-12T06:29:43.123456Z"
     assert "uri" not in run_reference_wire
 

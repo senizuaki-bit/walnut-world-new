@@ -22,6 +22,7 @@ from yaya_agent_contracts import (
 )
 from yaya_agent_runtime import (
     AgentTraceEvent,
+    BuildFailureSnapshot,
     CompileResultSnapshot,
     CounterexampleSnapshot,
     DraftAuthority,
@@ -51,6 +52,10 @@ from .agent_trace_identity import (
 from .agent_trace_identity import (
     AgentTraceIdentityError,
     agent_trace_audit_id,
+)
+from .build_failures import (
+    list_current_build_failure_streak,
+    load_validated_build_failure,
 )
 from .models import (
     AgentSessionRow,
@@ -82,7 +87,9 @@ from .run_outcomes import (
     list_validated_session_runs,
     load_validated_run,
     validate_terminal_projection,
+    validated_failure_suffix,
 )
+from .session import snapshot_read
 from .session_binding_authority import (
     current_session_binding_matches,
     current_session_binding_observed_at,
@@ -102,7 +109,7 @@ class PostgresAgentRuntimeReads:
         self._sessions = session_factory
 
     async def get_task(self, task_id: str, context: OperationContext) -> TaskSnapshot:
-        async with self._sessions() as session:
+        async with snapshot_read(self._sessions) as session:
             content = await _content(session, context)
         task = _object(content.content_json.get("task"), "Content task")
         if task.get("task_id") != task_id:
@@ -120,7 +127,7 @@ class PostgresAgentRuntimeReads:
         )
 
     async def get_session(self, session_id: str, context: OperationContext) -> SessionSnapshot:
-        async with self._sessions() as session:
+        async with snapshot_read(self._sessions) as session:
             _, row, _ = await _current_session_binding_authority(
                 session,
                 context,
@@ -148,7 +155,7 @@ class PostgresAgentRuntimeReads:
     async def get_bound_skill(
         self, skill_ref: SkillRef, context: OperationContext
     ) -> SkillSnapshot:
-        async with self._sessions() as session:
+        async with snapshot_read(self._sessions) as session:
             return await self._skill(session, skill_ref, context, require_active=True)
 
     async def list_active_skills(
@@ -156,7 +163,7 @@ class PostgresAgentRuntimeReads:
     ) -> tuple[SkillSnapshot, ...]:
         if student_id != context.actor.actor_id:
             raise AgentRuntimeAuthorityError("student differs from authenticated actor")
-        async with self._sessions() as session:
+        async with snapshot_read(self._sessions) as session:
             binding, _, _ = await _current_session_binding_authority(session, context)
             head = await session.scalar(
                 select(RegistryHeadRow).where(
@@ -211,7 +218,7 @@ class PostgresAgentRuntimeReads:
         session_id: str,
         context: OperationContext,
     ) -> tuple[SkillVersionSummary, ...]:
-        async with self._sessions() as session:
+        async with snapshot_read(self._sessions) as session:
             binding, _, _ = await _current_session_binding_authority(
                 session,
                 context,
@@ -289,7 +296,7 @@ class PostgresAgentRuntimeReads:
     async def get_compile_result(
         self, build_id: str, context: OperationContext
     ) -> CompileResultSnapshot:
-        async with self._sessions() as session:
+        async with snapshot_read(self._sessions) as session:
             build = await session.scalar(
                 select(SkillBuildRow).where(
                     SkillBuildRow.tenant_id == context.actor.tenant_id,
@@ -386,8 +393,64 @@ class PostgresAgentRuntimeReads:
             draft_authority=draft_authority,
         )
 
+    async def get_build_failure(
+        self,
+        build_id: str,
+        context: OperationContext,
+    ) -> BuildFailureSnapshot:
+        async with snapshot_read(self._sessions) as session:
+            provenance = await session.scalar(
+                select(SkillBuildProvenanceRow).where(
+                    SkillBuildProvenanceRow.build_id == build_id,
+                    SkillBuildProvenanceRow.tenant_id == context.actor.tenant_id,
+                    SkillBuildProvenanceRow.actor_id == context.actor.actor_id,
+                )
+            )
+            if provenance is None or provenance.session_id is None:
+                raise AgentRuntimeAuthorityError("rejected Build provenance was not found")
+            try:
+                authority = await load_validated_build_failure(
+                    session,
+                    build_id=build_id,
+                    session_id=provenance.session_id,
+                    context=context,
+                )
+            except WorkflowInvariantError as error:
+                raise AgentRuntimeAuthorityError(str(error)) from error
+        return authority.snapshot
+
+    async def list_same_build_failures(
+        self,
+        session_id: str,
+        failure_key: str,
+        through_build_id: str,
+        limit: int,
+        context: OperationContext,
+    ) -> tuple[BuildFailureSnapshot, ...]:
+        if not 1 <= limit <= 100:
+            raise AgentRuntimeAuthorityError("Build failure history limit is invalid")
+        async with snapshot_read(self._sessions) as session:
+            try:
+                authorities = await list_current_build_failure_streak(
+                    session,
+                    session_id=session_id,
+                    context=context,
+                )
+            except WorkflowInvariantError as error:
+                raise AgentRuntimeAuthorityError(str(error)) from error
+        snapshots = tuple(item.snapshot for item in authorities)
+        if (
+            not snapshots
+            or snapshots[-1].build_id != through_build_id
+            or snapshots[-1].failure_key != failure_key
+        ):
+            raise AgentRuntimeAuthorityError(
+                "through_build_id is outside the current Build failure suffix"
+            )
+        return snapshots[-limit:]
+
     async def get_run(self, run_id: str, context: OperationContext) -> RunResultSnapshot:
-        async with self._sessions() as session:
+        async with snapshot_read(self._sessions) as session:
             row = await session.scalar(
                 select(RunRow).where(
                     RunRow.tenant_id == context.actor.tenant_id,
@@ -425,7 +488,7 @@ class PostgresAgentRuntimeReads:
         draft_id: str,
         context: OperationContext,
     ) -> DraftSnapshot:
-        async with self._sessions() as session:
+        async with snapshot_read(self._sessions) as session:
             current = await session.scalar(
                 select(ProductDraftRow).where(
                     ProductDraftRow.tenant_id == context.actor.tenant_id,
@@ -495,7 +558,7 @@ class PostgresAgentRuntimeReads:
         same-failure suffix, Run, Build and Evidence before any Provider call.
         """
 
-        async with self._sessions() as session, session.begin():
+        async with snapshot_read(self._sessions) as session:
             row = await session.scalar(
                 select(ProductInteractionRow).where(
                     ProductInteractionRow.tenant_id == context.actor.tenant_id,
@@ -643,27 +706,34 @@ class PostgresAgentRuntimeReads:
     ) -> tuple[RunResultSnapshot, ...]:
         if limit < 1:
             return ()
-        async with self._sessions() as session:
+        async with snapshot_read(self._sessions) as session:
             try:
-                history = await list_validated_session_runs(
+                row = await session.scalar(select(RunRow).where(
+                    RunRow.tenant_id == context.actor.tenant_id,
+                    RunRow.actor_id == context.actor.actor_id,
+                    RunRow.content_hash == context.content_ref.content_hash,
+                    RunRow.session_id == session_id,
+                    RunRow.run_id == through_run_id,
+                ))
+                if row is None:
+                    raise AgentRuntimeAuthorityError("failure Run was not found")
+                current = await load_validated_run(
+                    session, tenant_id=context.actor.tenant_id,
+                    actor_id=context.actor.actor_id,
+                    content_hash=context.content_ref.content_hash,
+                    command_id=row.command_id,
+                    expected_context=replace(context, command_id=row.command_id, causation_id=None),
+                    require_current_world=False,
+                )
+                history = await validated_failure_suffix(
                     session,
-                    session_id=session_id,
-                    through_run_id=through_run_id,
-                    context=context,
+                    current=current, context=context,
+                    current_must_be_live=not current.command.terminal,
                 )
             except RuntimeError as error:
                 raise AgentRuntimeAuthorityError(str(error)) from error
-        suffix: list[RunResultSnapshot] = []
-        for run in reversed(history):
-            if run.task_success or run.failure_key != failure_key:
-                break
-            if suffix and (
-                run.skill_ref != suffix[-1].skill_ref or run.world_id != suffix[-1].world_id
-            ):
-                break
-            suffix.append(run)
-        result = tuple(reversed(suffix))
-        if not result or result[-1].run_id != through_run_id or len(result) > limit:
+        result = tuple(item.run for item in history)
+        if not result or result[-1].run_id != through_run_id or result[-1].failure_key != failure_key or len(result) > limit:
             raise AgentRuntimeAuthorityError("same-failure Run suffix is not canonical")
         return result
 
@@ -673,7 +743,7 @@ class PostgresAgentRuntimeReads:
         through_run_id: str,
         context: OperationContext,
     ) -> tuple[RunResultSnapshot, ...]:
-        async with self._sessions() as session:
+        async with snapshot_read(self._sessions) as session:
             try:
                 return await list_validated_session_runs(
                     session,
@@ -701,7 +771,7 @@ class PostgresAgentRuntimeReads:
             raise AgentRuntimeAuthorityError("Learner differs from authenticated actor")
         from .models import LearnerProfileRow
 
-        async with self._sessions() as session:
+        async with snapshot_read(self._sessions) as session:
             row = await session.scalar(
                 select(LearnerProfileRow).where(
                     LearnerProfileRow.tenant_id == context.actor.tenant_id,
@@ -728,8 +798,66 @@ class PostgresAgentRuntimeReads:
     async def list_recent(
         self, session_id: str, limit: int, context: OperationContext
     ) -> tuple[MessageSnapshot, ...]:
-        del session_id, limit, context
-        return ()
+        # Each item is a labelled student/Agent exchange. MessageSnapshot.role
+        # names the responding Agent; it does not support a synthetic user role.
+        if not 1 <= limit <= 8:
+            raise ValueError("recent message limit must be between 1 and 8")
+        async with snapshot_read(self._sessions) as session:
+            current = await session.scalar(
+                select(AgentTurnRow).join(AgentSessionRow, (
+                    (AgentSessionRow.tenant_id == AgentTurnRow.tenant_id)
+                    & (AgentSessionRow.actor_id == AgentTurnRow.actor_id)
+                    & (AgentSessionRow.session_id == AgentTurnRow.session_id)
+                )).where(
+                    AgentTurnRow.tenant_id == context.actor.tenant_id,
+                    AgentTurnRow.actor_id == context.actor.actor_id,
+                    AgentTurnRow.session_id == session_id,
+                    AgentTurnRow.command_id == context.command_id,
+                    AgentSessionRow.session_json["content"]["content_hash"].as_string()
+                    == context.content_ref.content_hash,
+                )
+            )
+            if current is None:
+                return ()
+            rows = (await session.execute(
+                select(AgentTurnRow, ProductInteractionRow)
+                .join(ProductInteractionRow, (
+                    (ProductInteractionRow.tenant_id == AgentTurnRow.tenant_id)
+                    & (ProductInteractionRow.actor_id == AgentTurnRow.actor_id)
+                    & (ProductInteractionRow.session_id == AgentTurnRow.session_id)
+                    & (ProductInteractionRow.turn_id == AgentTurnRow.turn_id)
+                ))
+                .where(
+                    AgentTurnRow.tenant_id == context.actor.tenant_id,
+                    AgentTurnRow.actor_id == context.actor.actor_id,
+                    AgentTurnRow.session_id == session_id,
+                    AgentTurnRow.turn_sequence < current.turn_sequence,
+                    AgentTurnRow.request_json["input"]["type"].as_string() == "MESSAGE",
+                    ProductInteractionRow.interaction_json["role"].as_string().in_(
+                        ("teaching_agent", "bug_agent", "book_agent")
+                    ),
+                    ProductInteractionRow.interaction_json["feedback"]["source"].as_string()
+                    == "provider",
+                    ProductInteractionRow.interaction_json["feedback"]["degraded"].as_boolean().is_(False),
+                )
+                .order_by(AgentTurnRow.turn_sequence.desc(), ProductInteractionRow.sequence.desc())
+                .limit(limit)
+            )).all()
+        messages = []
+        for turn, interaction in reversed(rows):
+            feedback = _object(interaction.interaction_json.get("feedback"), "message feedback")
+            if feedback.get("command_id") != turn.command_id:
+                raise AgentRuntimeAuthorityError("history message differs from its Turn")
+            student = _text(_object(turn.request_json.get("input"), "message input"), "text")
+            answer = _text(feedback, "message")
+            messages.append(MessageSnapshot(
+                message_id=interaction.interaction_id,
+                session_id=session_id,
+                role=interaction.interaction_json["role"],
+                message=f"学生：{student[:1900]}\n叮当：{answer[:1900]}",
+                request_context=_request_context(context),
+            ))
+        return tuple(messages)
 
     async def _skill(
         self,

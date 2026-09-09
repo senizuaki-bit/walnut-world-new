@@ -79,7 +79,7 @@ async def get_evidence(evidence_id: str, request: Request) -> Any:
     return contract_response(
         request=request,
         payload=result.value,
-        schema_path="contracts/schemas/game/evidence.schema.json",
+        schema_path=_evidence_schema_path(result.value),
         headers={"ETag": _evidence_etag(result.value)},
     )
 
@@ -164,3 +164,10 @@ def _evidence_etag(value: Mapping[str, Any]) -> str:
     integrity = value.get("integrity")
     digest = integrity.get("payload_sha256") if isinstance(integrity, Mapping) else None
     return f'"{digest}"' if isinstance(digest, str) else '""'
+
+
+def _evidence_schema_path(value: Mapping[str, Any]) -> str:
+    payload = value.get("payload")
+    if isinstance(payload, Mapping) and payload.get("evidence_kind") == "BUILD_REJECTION":
+        return "contracts/schemas/game/build-rejection-evidence.schema.json"
+    return "contracts/schemas/game/evidence.schema.json"

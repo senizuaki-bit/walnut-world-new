@@ -8,7 +8,7 @@ import logging
 from collections.abc import Mapping
 from dataclasses import replace
 from datetime import UTC, datetime
-from typing import Any, Protocol
+from typing import Any, Literal, Protocol
 
 from asyncpg.exceptions import (
     CannotConnectNowError,
@@ -34,6 +34,7 @@ from yaya_agent_contracts import (
 )
 from yaya_agent_runtime import AgentRuntimeError
 
+from walnut_backend.adapters.postgres.agent_runtime import AgentRuntimeAuthorityError
 from walnut_backend.adapters.postgres.command_store import PostgresCommandStore
 from walnut_backend.adapters.postgres.models import (
     CommandRow,
@@ -120,6 +121,7 @@ class WorkflowWorker:
         retry_max_seconds: int = 60,
         database_retry_base_seconds: float = 0.25,
         database_retry_max_seconds: float = 5.0,
+        lane: Literal["interactive", "background"] | None = None,
     ) -> None:
         if not worker_id or len(worker_id) > 128:
             raise ValueError("worker_id must be a bounded non-empty string")
@@ -148,12 +150,14 @@ class WorkflowWorker:
         self._retry_max_seconds = retry_max_seconds
         self._database_retry_base_seconds = database_retry_base_seconds
         self._database_retry_max_seconds = database_retry_max_seconds
+        self._lane = lane
 
     async def run_once(self, tenant_id: str) -> bool:
         claim = await self._jobs.claim_next(
             tenant_id=tenant_id,
             worker_id=self._worker_id,
             lease_seconds=self._lease_seconds,
+            **({"lane": self._lane} if self._lane is not None else {}),
         )
         if claim is None:
             return False
@@ -358,8 +362,14 @@ def _failure_budget_exhausted(
 ) -> bool:
     if previous_failures < 0 or maximum_attempts < 1:
         raise ValueError("workflow failure budget inputs are invalid")
-    if isinstance(error, WorkflowInvariantError) and not isinstance(
-        error, WorkflowBoundaryError
+    source = error
+    while isinstance(source, AgentRuntimeAuthorityError) and isinstance(source.__cause__, Exception):
+        # Agent read Ports retain the original failure as their explicit cause.
+        # Preserve a durable invariant's classification without treating every
+        # authority wrapper (including transient read failures) as permanent.
+        source = source.__cause__
+    if isinstance(source, WorkflowInvariantError) and not isinstance(
+        source, WorkflowBoundaryError
     ):
         # Retrying corrupt durable authority cannot repair it and only repeats
         # downstream work. Boundary failures retain their existing bounded

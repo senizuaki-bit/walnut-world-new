@@ -6,7 +6,7 @@
 
 历史 INT1 正式链为 `Student Bootstrap → server-created Session + starter Draft/Workspace → Draft CAS → pinned-Docker Build/Certification → full-scope Activation CAS → original Session exact-version Turn → Run/World/Event/Snapshot/Evidence → Learner/Interaction/Workspace → Godot recovery/display`。2026-08-13 的 194.12 秒 DeepSeek V4 Flash 运行是 **historical INT1 real-Provider / host-Docker evidence**，不是 INT2 当前树或 production private DinD 的通过证据；公开 Gateway pending write response-loss 也仍为 `NOT_PROVEN`。见 [INT1 三仓验证报告](docs/INT1_CROSS_REPOSITORY_VALIDATION_REPORT.md)。
 
-INT2 当前事实：v0.4 继续按已发布基线逐字节锁定；当前三仓工作树消费 additive v0.6 candidate（147 entries、27,848-byte manifest、SHA-256 `11dde4ef0fd71de5f78afa8aaeef527ef72775a953b6399929245eb1c4d7ab05`），但 `refs/tags/agent-contracts-v0.6.0` 尚不存在，发布身份为 `NOT_PROVEN`。当前 Agent full discovery 为 601：2 条真实 Provider opt-in 精确 `EXCLUDED_NOT_RUN`，其余 599/599 non-live 全部通过且 0 skip；Backend current-tree full 为 468/468、0 failure/error/skip；Frontend offline 为 60/60、另有 2 条真实 E2E opt-in 精确排除。正式 deterministic Gateway/Godot M2 actual10 已 PASS。受控真实 Provider M2 也已由 2026-08-15 run `868a` 在 301.012 秒取得 PASS：`source=provider`、`degraded=false`，18 unique dispatch / 18 generation、单 dispatch 最大 generation 1，Provider relay response-loss 复用同一 dispatch 且 generation 仍为 1；学生可见、可确认 Patch 为 `PUBLIC_UI_CHAIN_CLOSED`，World commit 1、8 条 presentation event 与第二 Godot 进程 17 GET / 0 mutation 均闭合。该 live 不改变默认 flag，也不证明 production private DinD 或公开 Gateway pending write response-loss；两者仍为 `NOT_PROVEN`。Patch capability 继续默认关闭并由 Backend capability 与 Frontend 本地 flag 双重收紧；WSS、Client Event Batch、Feishu、自动接受/应用/Build/Activate/Run、多文件 Patch 与通用动画平台仍明确排除。
+INT2 当前事实：v0.4 继续按已发布基线逐字节锁定；当前三仓工作树消费 additive v0.6 candidate（148 entries、28,042-byte manifest、SHA-256 `bb4f1c12f34125bcc4b79b6a1330a20848a7f43764d87fa7c8d7668e7994fe14`），但 `refs/tags/agent-contracts-v0.6.0` 尚不存在，发布身份为 `NOT_PROVEN`。当前 Agent full discovery 为 601：2 条真实 Provider opt-in 精确 `EXCLUDED_NOT_RUN`，其余 599/599 non-live 全部通过且 0 skip；Backend current-tree full 为 468/468、0 failure/error/skip；Frontend offline 为 60/60、另有 2 条真实 E2E opt-in 精确排除。正式 deterministic Gateway/Godot M2 actual10 已 PASS。受控真实 Provider M2 也已由 2026-08-15 run `868a` 在 301.012 秒取得 PASS：`source=provider`、`degraded=false`，18 unique dispatch / 18 generation、单 dispatch 最大 generation 1，Provider relay response-loss 复用同一 dispatch 且 generation 仍为 1；学生可见、可确认 Patch 为 `PUBLIC_UI_CHAIN_CLOSED`，World commit 1、8 条 presentation event 与第二 Godot 进程 17 GET / 0 mutation 均闭合。该 live 不改变默认 flag，也不证明 production private DinD 或公开 Gateway pending write response-loss；两者仍为 `NOT_PROVEN`。Patch capability 继续默认关闭并由 Backend capability 与 Frontend 本地 flag 双重收紧；WSS、Client Event Batch、Feishu、自动接受/应用/Build/Activate/Run、多文件 Patch 与通用动画平台仍明确排除。
 
 运行链路为：
 
@@ -79,7 +79,7 @@ Game Build 使用请求中的完整 source bundle，服务端自行计算 hash �
 4. `05_核桃代码世界_接口对齐与联调规范.md`
 5. `01`—`04` 的历史示例
 
-当前工作树的追加式合同 descriptor 为 `@yaya/agent-contracts` v0.6.0 candidate：manifest 27,848 bytes、147 files、SHA-256 `11dde4ef0fd71de5f78afa8aaeef527ef72775a953b6399929245eb1c4d7ab05`。v0.3/v0.4/v0.5 release locks 分别校验已冻结历史字节；v0.5 只追加 World presentation，v0.6 只追加 INT2 capability。已发布的 v0.4 annotated tag 保留为历史兼容证据；v0.6 tag 尚不存在，不能把 candidate 写成正式 release PASS。
+当前工作树的追加式合同 descriptor 为 `@yaya/agent-contracts` v0.6.0 candidate：manifest 28,042 bytes、148 files、SHA-256 `bb4f1c12f34125bcc4b79b6a1330a20848a7f43764d87fa7c8d7668e7994fe14`。v0.3/v0.4/v0.5 release locks 分别校验已冻结历史字节；v0.5 只追加 World presentation，v0.6 只追加 INT2 capability。已发布的 v0.4 annotated tag 保留为历史兼容证据；v0.6 tag 尚不存在，不能把 candidate 写成正式 release PASS。
 
 ## 目录
 
@@ -101,7 +101,7 @@ docs/                         合同、部署和故障恢复规则
 - Python 3.12
 - PostgreSQL 15+
 - Docker；生产 Sandbox 镜像必须使用 `name@sha256:<64 hex>`
-- Godot 4.5.2（统一合同门禁）
+- Godot 4.7.1 stable（统一合同门禁）
 - Windows 开发门禁还需要 Visual Studio 2022 C++ Build Tools；原生 Sandbox 只用于证明其不具备生产隔离能力，composition 永远只装配 Docker Sandbox
 
 安装锁定依赖：

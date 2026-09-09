@@ -6,9 +6,9 @@ import asyncio
 import json
 import sys
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
-from sqlalchemy import func, select, text
+from sqlalchemy import Table, func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 from yaya_agent_build import CPP20_SAFE_V1_FLAGS, canonical_source_bundle_sha256
@@ -127,7 +127,7 @@ async def _exactly_one[ModelBase: DeclarativeBase](
     session: AsyncSession,
     model: type[ModelBase],
 ) -> ModelBase:
-    table_name = model.__table__.name
+    table_name = cast(Table, model.__table__).name
     count = await session.scalar(select(func.count()).select_from(model))
     if count != 1:
         code_name = table_name.upper().replace("-", "_")

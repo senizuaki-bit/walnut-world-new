@@ -233,6 +233,16 @@ async def run_worker(settings: WorkerSettings) -> None:
         handlers=handlers,
         worker_id=settings.worker_id,
         lease_seconds=settings.lease_seconds,
+        lane="background",
+    )
+    hint_worker = WorkflowWorker(
+        session_factory=sessions,
+        jobs=jobs,
+        commands=commands,
+        handlers=handlers,
+        worker_id=f"{settings.worker_id[:120]}-hint",
+        lease_seconds=settings.lease_seconds,
+        lane="interactive",
     )
     stop = asyncio.Event()
     loop = asyncio.get_running_loop()
@@ -242,11 +252,15 @@ async def run_worker(settings: WorkerSettings) -> None:
         except (NotImplementedError, RuntimeError):
             pass
     try:
-        await worker.run_forever(
-            settings.tenant_id,
-            stop=stop,
-            idle_poll_seconds=settings.idle_poll_seconds,
-        )
+        # One reserved Hint slot keeps a slow Build/Book from delaying speech-
+        # independent text questions. Both lanes retain the same durable leases.
+        async with asyncio.TaskGroup() as tasks:
+            for lane_worker in (worker, hint_worker):
+                tasks.create_task(lane_worker.run_forever(
+                    settings.tenant_id,
+                    stop=stop,
+                    idle_poll_seconds=settings.idle_poll_seconds,
+                ))
     finally:
         await sessions.kw["bind"].dispose()
 
