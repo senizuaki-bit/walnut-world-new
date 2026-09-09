@@ -1,0 +1,128 @@
+[
+  {
+    "page": "S01",
+    "state": "start",
+    "passed": true,
+    "output": "Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org\nOpenGL API 3.3.0 - Build 31.0.101.4146 - Compatibility - Using Device: Intel - Intel(R) Iris(R) Xe Graphics\n\nCROP_ADAPTIVE_CAPTURE_PASS: D:/FeishuAIreview/walnut-world-new/walnut-world-frontend/docs/design/verification/guide-alignment/S01.png\n"
+  },
+  {
+    "page": "S02",
+    "state": "intro",
+    "passed": true,
+    "output": "Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org\nOpenGL API 3.3.0 - Build 31.0.101.4146 - Compatibility - Using Device: Intel - Intel(R) Iris(R) Xe Graphics\n\nCROP_ADAPTIVE_CAPTURE_PASS: D:/FeishuAIreview/walnut-world-new/walnut-world-frontend/docs/design/verification/guide-alignment/S02.png\n"
+  },
+  {
+    "page": "E01",
+    "state": "old_tool",
+    "passed": true,
+    "output": "Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org\nOpenGL API 3.3.0 - Build 31.0.101.4146 - Compatibility - Using Device: Intel - Intel(R) Iris(R) Xe Graphics\n\nCROP_ADAPTIVE_CAPTURE_PASS: D:/FeishuAIreview/walnut-world-new/walnut-world-frontend/docs/design/verification/guide-alignment/E01.png\n"
+  },
+  {
+    "page": "E02",
+    "state": "manual_choice",
+    "passed": true,
+    "output": "Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org\nOpenGL API 3.3.0 - Build 31.0.101.4146 - Compatibility - Using Device: Intel - Intel(R) Iris(R) Xe Graphics\n\nCROP_ADAPTIVE_CAPTURE_PASS: D:/FeishuAIreview/walnut-world-new/walnut-world-frontend/docs/design/verification/guide-alignment/E02.png\n"
+  },
+  {
+    "page": "E03",
+    "state": "skill_tree",
+    "passed": true,
+    "output": "Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org\nOpenGL API 3.3.0 - Build 31.0.101.4146 - Compatibility - Using Device: Intel - Intel(R) Iris(R) Xe Graphics\n\nCROP_ADAPTIVE_CAPTURE_PASS: D:/FeishuAIreview/walnut-world-new/walnut-world-frontend/docs/design/verification/guide-alignment/E03.png\n"
+  },
+  {
+    "page": "S03",
+    "state": "workshop_dialogue",
+    "passed": true,
+    "output": "Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org\nOpenGL API 3.3.0 - Build 31.0.101.4146 - Compatibility - Using Device: Intel - Intel(R) Iris(R) Xe Graphics\n\nCROP_ADAPTIVE_CAPTURE_PASS: D:/FeishuAIreview/walnut-world-new/walnut-world-frontend/docs/design/verification/guide-alignment/S03.png\n"
+  },
+  {
+    "page": "S04",
+    "state": "workshop",
+    "passed": true,
+    "output": "Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org\nOpenGL API 3.3.0 - Build 31.0.101.4146 - Compatibility - Using Device: Intel - Intel(R) Iris(R) Xe Graphics\n\nCROP_ADAPTIVE_CAPTURE_PASS: D:/FeishuAIreview/walnut-world-new/walnut-world-frontend/docs/design/verification/guide-alignment/S04.png\n"
+  },
+  {
+    "page": "S05",
+    "state": "workshop_branch",
+    "passed": true,
+    "output": "Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org\nOpenGL API 3.3.0 - Build 31.0.101.4146 - Compatibility - Using Device: Intel - Intel(R) Iris(R) Xe Graphics\n\nCROP_ADAPTIVE_CAPTURE_PASS: D:/FeishuAIreview/walnut-world-new/walnut-world-frontend/docs/design/verification/guide-alignment/S05.png\n"
+  },
+  {
+    "page": "S06",
+    "state": "workshop_summary",
+    "passed": true,
+    "output": "Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org\nOpenGL API 3.3.0 - Build 31.0.101.4146 - Compatibility - Using Device: Intel - Intel(R) Iris(R) Xe Graphics\n\nCROP_ADAPTIVE_CAPTURE_PASS: D:/FeishuAIreview/walnut-world-new/walnut-world-frontend/docs/design/verification/guide-alignment/S06.png\n"
+  },
+  {
+    "page": "S07",
+    "state": "code",
+    "passed": true,
+    "output": "Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org\nOpenGL API 3.3.0 - Build 31.0.101.4146 - Compatibility - Using Device: Intel - Intel(R) Iris(R) Xe Graphics\n\nCROP_ADAPTIVE_CAPTURE_PASS: D:/FeishuAIreview/walnut-world-new/walnut-world-frontend/docs/design/verification/guide-alignment/S07.png\n"
+  },
+  {
+    "page": "S08",
+    "state": "hint",
+    "passed": true,
+    "output": "Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org\nOpenGL API 3.3.0 - Build 31.0.101.4146 - Compatibility - Using Device: Intel - Intel(R) Iris(R) Xe Graphics\n\nCROP_ADAPTIVE_CAPTURE_PASS: D:/FeishuAIreview/walnut-world-new/walnut-world-frontend/docs/design/verification/guide-alignment/S08.png\n"
+  },
+  {
+    "page": "S09",
+    "state": "validating",
+    "passed": true,
+    "output": "Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org\nOpenGL API 3.3.0 - Build 31.0.101.4146 - Compatibility - Using Device: Intel - Intel(R) Iris(R) Xe Graphics\n\nCROP_ADAPTIVE_CAPTURE_PASS: D:/FeishuAIreview/walnut-world-new/walnut-world-frontend/docs/design/verification/guide-alignment/S09.png\n"
+  },
+  {
+    "page": "E08",
+    "state": "failed",
+    "passed": true,
+    "output": "Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org\nOpenGL API 3.3.0 - Build 31.0.101.4146 - Compatibility - Using Device: Intel - Intel(R) Iris(R) Xe Graphics\n\nCROP_ADAPTIVE_CAPTURE_PASS: D:/FeishuAIreview/walnut-world-new/walnut-world-frontend/docs/design/verification/guide-alignment/E08.png\n"
+  },
+  {
+    "page": "E04",
+    "state": "bug",
+    "passed": true,
+    "output": "Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org\nOpenGL API 3.3.0 - Build 31.0.101.4146 - Compatibility - Using Device: Intel - Intel(R) Iris(R) Xe Graphics\n\nCROP_ADAPTIVE_CAPTURE_PASS: D:/FeishuAIreview/walnut-world-new/walnut-world-frontend/docs/design/verification/guide-alignment/E04.png\n"
+  },
+  {
+    "page": "E05",
+    "state": "patch",
+    "passed": true,
+    "output": "Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org\nOpenGL API 3.3.0 - Build 31.0.101.4146 - Compatibility - Using Device: Intel - Intel(R) Iris(R) Xe Graphics\n\nCROP_ADAPTIVE_CAPTURE_PASS: D:/FeishuAIreview/walnut-world-new/walnut-world-frontend/docs/design/verification/guide-alignment/E05.png\n"
+  },
+  {
+    "page": "E09",
+    "state": "complete",
+    "passed": true,
+    "output": "Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org\nOpenGL API 3.3.0 - Build 31.0.101.4146 - Compatibility - Using Device: Intel - Intel(R) Iris(R) Xe Graphics\n\nCROP_ADAPTIVE_CAPTURE_PASS: D:/FeishuAIreview/walnut-world-new/walnut-world-frontend/docs/design/verification/guide-alignment/E09.png\n"
+  },
+  {
+    "page": "S10",
+    "state": "feedback",
+    "passed": true,
+    "output": "Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org\nOpenGL API 3.3.0 - Build 31.0.101.4146 - Compatibility - Using Device: Intel - Intel(R) Iris(R) Xe Graphics\n\nCROP_ADAPTIVE_CAPTURE_PASS: D:/FeishuAIreview/walnut-world-new/walnut-world-frontend/docs/design/verification/guide-alignment/S10.png\n"
+  },
+  {
+    "page": "E06",
+    "state": "growth",
+    "passed": true,
+    "output": "Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org\nOpenGL API 3.3.0 - Build 31.0.101.4146 - Compatibility - Using Device: Intel - Intel(R) Iris(R) Xe Graphics\n\nCROP_ADAPTIVE_CAPTURE_PASS: D:/FeishuAIreview/walnut-world-new/walnut-world-frontend/docs/design/verification/guide-alignment/E06.png\n"
+  },
+  {
+    "page": "E10",
+    "state": "unlocked",
+    "passed": true,
+    "output": "Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org\nOpenGL API 3.3.0 - Build 31.0.101.4146 - Compatibility - Using Device: Intel - Intel(R) Iris(R) Xe Graphics\n\nCROP_ADAPTIVE_CAPTURE_PASS: D:/FeishuAIreview/walnut-world-new/walnut-world-frontend/docs/design/verification/guide-alignment/E10.png\n"
+  },
+  {
+    "page": "E07",
+    "state": "free",
+    "passed": true,
+    "output": "Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org\nOpenGL API 3.3.0 - Build 31.0.101.4146 - Compatibility - Using Device: Intel - Intel(R) Iris(R) Xe Graphics\n\nCROP_ADAPTIVE_CAPTURE_PASS: D:/FeishuAIreview/walnut-world-new/walnut-world-frontend/docs/design/verification/guide-alignment/E07.png\n"
+  },
+  {
+    "page": "E11",
+    "state": "preview",
+    "passed": true,
+    "output": "Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org\nOpenGL API 3.3.0 - Build 31.0.101.4146 - Compatibility - Using Device: Intel - Intel(R) Iris(R) Xe Graphics\n\nCROP_ADAPTIVE_CAPTURE_PASS: D:/FeishuAIreview/walnut-world-new/walnut-world-frontend/docs/design/verification/guide-alignment/E11.png\n"
+  }
+]

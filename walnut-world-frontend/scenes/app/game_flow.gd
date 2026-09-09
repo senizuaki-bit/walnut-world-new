@@ -5,15 +5,34 @@ extends Control
 @onready var transition: ColorRect = %Transition
 
 var _transitioning: bool = false
+var _closing := false
+var _previous_auto_accept_quit := true
 
 
 func _ready() -> void:
+	_previous_auto_accept_quit = get_tree().auto_accept_quit
+	get_tree().auto_accept_quit = false
+	get_tree().root.close_requested.connect(_on_close_requested)
 	start_screen.enter_farm_requested.connect(_enter_farm)
 	crop_adaptive_watering_demo.replay_requested.connect(_replay_level)
 	crop_adaptive_watering_demo.return_home_requested.connect(_return_home)
 	crop_adaptive_watering_demo.next_level_requested.connect(_show_next_level_preview)
 	crop_adaptive_watering_demo.visible = false
 	transition.visible = false
+
+
+func _on_close_requested() -> void:
+	if _closing:
+		return
+	_closing = true
+	await $BackgroundMusic.fade_out()
+	get_tree().quit()
+
+
+func _exit_tree() -> void:
+	get_tree().auto_accept_quit = _previous_auto_accept_quit
+	if get_tree().root.close_requested.is_connected(_on_close_requested):
+		get_tree().root.close_requested.disconnect(_on_close_requested)
 
 
 func _enter_farm() -> void:

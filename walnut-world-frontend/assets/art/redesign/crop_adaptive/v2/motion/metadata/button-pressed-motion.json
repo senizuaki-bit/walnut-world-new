@@ -1,0 +1,114 @@
+{
+  "group": "ui",
+  "id": "button-pressed-motion",
+  "source": [
+    "components/button-pressed.png"
+  ],
+  "state": "按钮按下",
+  "effect": "只对皮肤轻微位移／缩放或边缘亮度变化；文字必须继续由前端独立绘制",
+  "width": 640,
+  "height": 224,
+  "frames": 6,
+  "fps": 40,
+  "loop": false,
+  "trigger": "按钮按下；disabled 状态不播放，动作不延迟点击处理",
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "durationMs": 150,
+  "delayMs": 25,
+  "files": {
+    "webp": "ui/button-pressed-motion.webp",
+    "poster": "ui/button-pressed-motion-poster.png",
+    "atlas": "ui/button-pressed-motion-atlas.png",
+    "metadata": "metadata/button-pressed-motion.json"
+  },
+  "atlas": {
+    "columns": 6,
+    "rows": 1,
+    "frameWidth": 640,
+    "frameHeight": 224,
+    "frames": [
+      {
+        "index": 0,
+        "rect": [
+          0,
+          0,
+          640,
+          224
+        ],
+        "durationMs": 25
+      },
+      {
+        "index": 1,
+        "rect": [
+          640,
+          0,
+          640,
+          224
+        ],
+        "durationMs": 25
+      },
+      {
+        "index": 2,
+        "rect": [
+          1280,
+          0,
+          640,
+          224
+        ],
+        "durationMs": 25
+      },
+      {
+        "index": 3,
+        "rect": [
+          1920,
+          0,
+          640,
+          224
+        ],
+        "durationMs": 25
+      },
+      {
+        "index": 4,
+        "rect": [
+          2560,
+          0,
+          640,
+          224
+        ],
+        "durationMs": 25
+      },
+      {
+        "index": 5,
+        "rect": [
+          3200,
+          0,
+          640,
+          224
+        ],
+        "durationMs": 25
+      }
+    ]
+  },
+  "encoded": {
+    "frames": 5,
+    "durationMs": 150,
+    "bytes": 89662
+  },
+  "playback": {
+    "frameDurationMs": 25,
+    "loop": false,
+    "endBehavior": "hold-last-frame-until-state-controller-switches",
+    "reducedMotion": "ui/button-pressed-motion-poster.png",
+    "alpha": "straight-alpha",
+    "sizing": "preserve aspect; use contentBounds and pivot, do not stretch the whole padded canvas into old art bounds"
+  },
+  "contentBounds": [
+    38,
+    28,
+    564,
+    168
+  ]
+}

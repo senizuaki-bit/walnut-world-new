@@ -1,0 +1,234 @@
+{
+  "group": "equipment",
+  "id": "prop-pump-stop",
+  "source": [
+    "components/prop-pump.png"
+  ],
+  "state": "停机",
+  "effect": "上部杠杆与机身局部轻动，底座固定；停机与故障无持续水流",
+  "width": 448,
+  "height": 576,
+  "frames": 18,
+  "fps": 12,
+  "loop": false,
+  "trigger": "设备状态变化",
+  "pivot": [
+    0.5,
+    0.95
+  ],
+  "durationMs": 1494,
+  "delayMs": 83,
+  "files": {
+    "webp": "equipment/prop-pump-stop.webp",
+    "poster": "equipment/prop-pump-stop-poster.png",
+    "atlas": "equipment/prop-pump-stop-atlas.png",
+    "metadata": "metadata/prop-pump-stop.json"
+  },
+  "atlas": {
+    "columns": 6,
+    "rows": 3,
+    "frameWidth": 448,
+    "frameHeight": 576,
+    "frames": [
+      {
+        "index": 0,
+        "rect": [
+          0,
+          0,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 1,
+        "rect": [
+          448,
+          0,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 2,
+        "rect": [
+          896,
+          0,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 3,
+        "rect": [
+          1344,
+          0,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 4,
+        "rect": [
+          1792,
+          0,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 5,
+        "rect": [
+          2240,
+          0,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 6,
+        "rect": [
+          0,
+          576,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 7,
+        "rect": [
+          448,
+          576,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 8,
+        "rect": [
+          896,
+          576,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 9,
+        "rect": [
+          1344,
+          576,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 10,
+        "rect": [
+          1792,
+          576,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 11,
+        "rect": [
+          2240,
+          576,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 12,
+        "rect": [
+          0,
+          1152,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 13,
+        "rect": [
+          448,
+          1152,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 14,
+        "rect": [
+          896,
+          1152,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 15,
+        "rect": [
+          1344,
+          1152,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 16,
+        "rect": [
+          1792,
+          1152,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 17,
+        "rect": [
+          2240,
+          1152,
+          448,
+          576
+        ],
+        "durationMs": 83
+      }
+    ]
+  },
+  "encoded": {
+    "frames": 18,
+    "durationMs": 1494,
+    "bytes": 859758
+  },
+  "playback": {
+    "frameDurationMs": 83,
+    "loop": false,
+    "endBehavior": "hold-last-frame-until-state-controller-switches",
+    "reducedMotion": "equipment/prop-pump-stop-poster.png",
+    "alpha": "straight-alpha",
+    "sizing": "preserve aspect; use contentBounds and pivot, do not stretch the whole padded canvas into old art bounds"
+  },
+  "contentBounds": [
+    40,
+    59,
+    368,
+    477
+  ]
+}

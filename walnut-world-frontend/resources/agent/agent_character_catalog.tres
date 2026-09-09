@@ -2,11 +2,11 @@
 
 [ext_resource type="Script" path="res://resources/agent/agent_character_catalog.gd" id="1_catalog"]
 [ext_resource type="Script" path="res://resources/agent/agent_character_profile.gd" id="2_profile"]
-[ext_resource type="Texture2D" path="res://assets/art/generated/characters/yaya_sprout.png" id="3_yaya"]
-[ext_resource type="Texture2D" path="res://assets/art/generated/characters/little_walnut.png" id="4_walnut"]
-[ext_resource type="Texture2D" path="res://assets/art/generated/characters/master_ding_dang.png" id="5_dingdang"]
-[ext_resource type="Texture2D" path="res://assets/art/generated/characters/pest_bug.png" id="6_bug"]
-[ext_resource type="Texture2D" path="res://assets/art/generated/characters/shu_shu.png" id="7_shushu"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/char-yaya-idle.png" id="3_yaya"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/char-walnut-idle.png" id="4_walnut"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/char-dingdang-idle.png" id="5_dingdang"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/char-bug-idle.png" id="6_bug"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/char-shushu-idle.png" id="7_shushu"]
 
 [sub_resource type="Resource" id="AgentCharacterProfile_world"]
 script = ExtResource("2_profile")

@@ -1,0 +1,58 @@
+[gd_resource type="Theme" load_steps=12 format=3]
+
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/button_normal.tres" id="button_normal"]
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/button_hover.tres" id="button_hover"]
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/button_pressed.tres" id="button_pressed"]
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/button_disabled.tres" id="button_disabled"]
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/button_focus.tres" id="button_focus"]
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/input_normal.tres" id="input_normal"]
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/input_focus.tres" id="input_focus"]
+[ext_resource type="StyleBox" path="res://resources/ui/art_v2/input_disabled.tres" id="input_disabled"]
+[ext_resource type="FontFile" path="res://assets/fonts/noto-sans-sc/NotoSansSC-Medium.otf" id="body"]
+[ext_resource type="FontFile" path="res://assets/fonts/noto-sans-sc/NotoSansSC-Bold.otf" id="bold"]
+[ext_resource type="FontFile" path="res://assets/fonts/noto-sans-sc/NotoSansMonoCJKsc-Regular.otf" id="mono"]
+
+[resource]
+default_font = ExtResource("body")
+default_font_size = 20
+Button/styles/normal = ExtResource("button_normal")
+Button/styles/hover = ExtResource("button_hover")
+Button/styles/pressed = ExtResource("button_pressed")
+Button/styles/disabled = ExtResource("button_disabled")
+Button/styles/focus = ExtResource("button_focus")
+LineEdit/styles/normal = ExtResource("input_normal")
+LineEdit/styles/focus = ExtResource("input_focus")
+LineEdit/styles/read_only = ExtResource("input_disabled")
+Button/colors/font_color = Color(0.075, 0.145, 0.11, 1)
+CheckButton/colors/font_color = Color(0.075, 0.145, 0.11, 1)
+Label/colors/font_color = Color(0.075, 0.145, 0.11, 1)
+LineEdit/colors/font_color = Color(0.075, 0.145, 0.11, 1)
+RichTextLabel/colors/default_color = Color(0.075, 0.145, 0.11, 1)
+Button/colors/font_hover_color = Color(0.08, 0.22, 0.16, 1)
+Button/colors/font_pressed_color = Color(0.08, 0.22, 0.16, 1)
+Button/colors/font_focus_color = Color(0.08, 0.22, 0.16, 1)
+Button/colors/font_disabled_color = Color(0.34, 0.31, 0.26, 1)
+Button/fonts/font = ExtResource("bold")
+Button/font_sizes/font_size = 20
+CheckButton/fonts/font = ExtResource("bold")
+CheckButton/font_sizes/font_size = 18
+LineEdit/colors/font_placeholder_color = Color(0.29, 0.32, 0.27, 1)
+LineEdit/colors/font_uneditable_color = Color(0.29, 0.32, 0.27, 1)
+LineEdit/colors/font_selected_color = Color(1, 1, 0.96, 1)
+LineEdit/colors/selection_color = Color(0.12, 0.32, 0.22, 1)
+LineEdit/colors/caret_color = Color(0.075, 0.145, 0.11, 1)
+LineEdit/constants/caret_width = 2
+LineEdit/font_sizes/font_size = 20
+CodeEdit/fonts/font = ExtResource("mono")
+CodeEdit/font_sizes/font_size = 20
+CodeEdit/colors/line_number_color = Color(0.73, 0.82, 0.76, 1)
+CodeEdit/constants/line_spacing = 4
+Label/constants/line_spacing = 3
+RichTextLabel/fonts/normal_font = ExtResource("body")
+RichTextLabel/fonts/bold_font = ExtResource("bold")
+RichTextLabel/fonts/mono_font = ExtResource("mono")
+RichTextLabel/font_sizes/normal_font_size = 20
+RichTextLabel/font_sizes/bold_font_size = 20
+RichTextLabel/constants/line_separation = 4
+TitleLabel/base_type = &"Label"
+TitleLabel/fonts/font = ExtResource("bold")

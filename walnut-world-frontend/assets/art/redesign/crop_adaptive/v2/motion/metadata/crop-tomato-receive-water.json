@@ -1,0 +1,234 @@
+{
+  "group": "crops",
+  "id": "crop-tomato-receive-water",
+  "source": [
+    "components/crop-tomato-light-thirst.png"
+  ],
+  "state": "受到水滴",
+  "effect": "叶片受水时小幅压下并弹回，根部不移动；结束后由数据选择干／湿状态",
+  "width": 256,
+  "height": 320,
+  "frames": 18,
+  "fps": 12,
+  "loop": false,
+  "trigger": "该地块实际应用浇水动作；不能自行变成达标",
+  "pivot": [
+    0.5,
+    0.95
+  ],
+  "durationMs": 1494,
+  "delayMs": 83,
+  "files": {
+    "webp": "crops/crop-tomato-receive-water.webp",
+    "poster": "crops/crop-tomato-receive-water-poster.png",
+    "atlas": "crops/crop-tomato-receive-water-atlas.png",
+    "metadata": "metadata/crop-tomato-receive-water.json"
+  },
+  "atlas": {
+    "columns": 6,
+    "rows": 3,
+    "frameWidth": 256,
+    "frameHeight": 320,
+    "frames": [
+      {
+        "index": 0,
+        "rect": [
+          0,
+          0,
+          256,
+          320
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 1,
+        "rect": [
+          256,
+          0,
+          256,
+          320
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 2,
+        "rect": [
+          512,
+          0,
+          256,
+          320
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 3,
+        "rect": [
+          768,
+          0,
+          256,
+          320
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 4,
+        "rect": [
+          1024,
+          0,
+          256,
+          320
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 5,
+        "rect": [
+          1280,
+          0,
+          256,
+          320
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 6,
+        "rect": [
+          0,
+          320,
+          256,
+          320
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 7,
+        "rect": [
+          256,
+          320,
+          256,
+          320
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 8,
+        "rect": [
+          512,
+          320,
+          256,
+          320
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 9,
+        "rect": [
+          768,
+          320,
+          256,
+          320
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 10,
+        "rect": [
+          1024,
+          320,
+          256,
+          320
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 11,
+        "rect": [
+          1280,
+          320,
+          256,
+          320
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 12,
+        "rect": [
+          0,
+          640,
+          256,
+          320
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 13,
+        "rect": [
+          256,
+          640,
+          256,
+          320
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 14,
+        "rect": [
+          512,
+          640,
+          256,
+          320
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 15,
+        "rect": [
+          768,
+          640,
+          256,
+          320
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 16,
+        "rect": [
+          1024,
+          640,
+          256,
+          320
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 17,
+        "rect": [
+          1280,
+          640,
+          256,
+          320
+        ],
+        "durationMs": 83
+      }
+    ]
+  },
+  "encoded": {
+    "frames": 18,
+    "durationMs": 1494,
+    "bytes": 344468
+  },
+  "playback": {
+    "frameDurationMs": 83,
+    "loop": false,
+    "endBehavior": "hold-last-frame-until-state-controller-switches",
+    "reducedMotion": "crops/crop-tomato-receive-water-poster.png",
+    "alpha": "straight-alpha",
+    "sizing": "preserve aspect; use contentBounds and pivot, do not stretch the whole padded canvas into old art bounds"
+  },
+  "contentBounds": [
+    26,
+    73,
+    204,
+    221
+  ]
+}

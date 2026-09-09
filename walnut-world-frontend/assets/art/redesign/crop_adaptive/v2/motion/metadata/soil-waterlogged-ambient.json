@@ -1,0 +1,414 @@
+{
+  "group": "soil",
+  "id": "soil-waterlogged-ambient",
+  "source": [
+    "components/soil-waterlogged.png"
+  ],
+  "state": "过湿积水",
+  "effect": "仅积水中的反光和水纹改变，石边和泥块不动",
+  "width": 640,
+  "height": 400,
+  "frames": 36,
+  "fps": 12,
+  "loop": true,
+  "trigger": "过湿积水",
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "durationMs": 2988,
+  "delayMs": 83,
+  "files": {
+    "webp": "soil/soil-waterlogged-ambient.webp",
+    "poster": "soil/soil-waterlogged-ambient-poster.png",
+    "atlas": "soil/soil-waterlogged-ambient-atlas.png",
+    "metadata": "metadata/soil-waterlogged-ambient.json"
+  },
+  "atlas": {
+    "columns": 6,
+    "rows": 6,
+    "frameWidth": 640,
+    "frameHeight": 400,
+    "frames": [
+      {
+        "index": 0,
+        "rect": [
+          0,
+          0,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 1,
+        "rect": [
+          640,
+          0,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 2,
+        "rect": [
+          1280,
+          0,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 3,
+        "rect": [
+          1920,
+          0,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 4,
+        "rect": [
+          2560,
+          0,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 5,
+        "rect": [
+          3200,
+          0,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 6,
+        "rect": [
+          0,
+          400,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 7,
+        "rect": [
+          640,
+          400,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 8,
+        "rect": [
+          1280,
+          400,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 9,
+        "rect": [
+          1920,
+          400,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 10,
+        "rect": [
+          2560,
+          400,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 11,
+        "rect": [
+          3200,
+          400,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 12,
+        "rect": [
+          0,
+          800,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 13,
+        "rect": [
+          640,
+          800,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 14,
+        "rect": [
+          1280,
+          800,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 15,
+        "rect": [
+          1920,
+          800,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 16,
+        "rect": [
+          2560,
+          800,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 17,
+        "rect": [
+          3200,
+          800,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 18,
+        "rect": [
+          0,
+          1200,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 19,
+        "rect": [
+          640,
+          1200,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 20,
+        "rect": [
+          1280,
+          1200,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 21,
+        "rect": [
+          1920,
+          1200,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 22,
+        "rect": [
+          2560,
+          1200,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 23,
+        "rect": [
+          3200,
+          1200,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 24,
+        "rect": [
+          0,
+          1600,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 25,
+        "rect": [
+          640,
+          1600,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 26,
+        "rect": [
+          1280,
+          1600,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 27,
+        "rect": [
+          1920,
+          1600,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 28,
+        "rect": [
+          2560,
+          1600,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 29,
+        "rect": [
+          3200,
+          1600,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 30,
+        "rect": [
+          0,
+          2000,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 31,
+        "rect": [
+          640,
+          2000,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 32,
+        "rect": [
+          1280,
+          2000,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 33,
+        "rect": [
+          1920,
+          2000,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 34,
+        "rect": [
+          2560,
+          2000,
+          640,
+          400
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 35,
+        "rect": [
+          3200,
+          2000,
+          640,
+          400
+        ],
+        "durationMs": 83
+      }
+    ]
+  },
+  "encoded": {
+    "frames": 36,
+    "durationMs": 2988,
+    "bytes": 1231722
+  },
+  "playback": {
+    "frameDurationMs": 83,
+    "loop": true,
+    "endBehavior": "continue-until-state-change",
+    "reducedMotion": "soil/soil-waterlogged-ambient-poster.png",
+    "alpha": "straight-alpha",
+    "sizing": "preserve aspect; use contentBounds and pivot, do not stretch the whole padded canvas into old art bounds"
+  },
+  "contentBounds": [
+    41,
+    35,
+    558,
+    330
+  ]
+}

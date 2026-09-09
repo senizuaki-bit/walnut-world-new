@@ -233,9 +233,9 @@ func _initialize() -> void:
 		if recovered_skill_patch != expected_skill_patch:
 			_abort("PHASE1_SKILL_PATCH_FINGERPRINT_DRIFT", "GET-only recovery reconstructed a different public Patch/Decision/Draft/Build/Activation/Run fingerprint.")
 			return
-	await process_frame
-	await process_frame
-	var ui_guard := _verify_formal_ui_projection(app, store, interaction)
+	var ui_guard: Dictionary = await _wait_for_formal_ui_projection(
+		app, store, interaction, absolute_deadline,
+	)
 	if not ui_guard.ok:
 		_abort(str(ui_guard.code), str(ui_guard.message))
 		return
@@ -589,6 +589,40 @@ func _bind_presentation_authority_fingerprint(
 	return bound
 
 
+func _wait_for_formal_ui_projection(
+	app: Node,
+	store: WalnutClientStore,
+	interaction: Dictionary,
+	absolute_deadline: int,
+) -> Dictionary:
+	while Time.get_ticks_msec() < absolute_deadline:
+		var guard := _verify_formal_ui_projection(app, store, interaction)
+		if bool(guard.get("ok", false)) or str(guard.get("code", "")) == "FORMAL_CROP_UI_MISSING":
+			return guard
+		var crop_level := app.get_node_or_null("GameFlow/CropAdaptiveWateringDemo") as CropAdaptiveWateringDemo
+		var presenter := crop_level.get_node_or_null("AgentInteractionPresenter") as AgentInteractionPresenter if crop_level != null else null
+		var legion := crop_level.get_node_or_null("BugLegion2D") as BugLegion2D if crop_level != null else null
+		if (
+			presenter != null
+			and (
+				presenter.is_presenting()
+				or presenter.pending_count() > 0
+				or (legion != null and legion.is_legion_visible())
+			)
+		):
+			return _failure(
+				"CROP_UI_RECOVERY_REPLAYED",
+				"Startup recovery replayed a persisted AgentInteraction instead of restoring its static projection.",
+			)
+		await process_frame
+	var final_guard := _verify_formal_ui_projection(app, store, interaction)
+	return _failure(
+		"CROP_UI_PROJECTION_TIMEOUT",
+		"CropAdaptiveWateringDemo did not reach the terminal recovered interaction before the total deadline. Last observation: %s"
+		% str(final_guard.get("message", final_guard)),
+	)
+
+
 func _verify_formal_ui_projection(app: Node, store: WalnutClientStore, interaction: Dictionary) -> Dictionary:
 	var crop_level := app.get_node_or_null("GameFlow/CropAdaptiveWateringDemo") as CropAdaptiveWateringDemo
 	var crop_agent_bridge := app.get_node_or_null("CropAgentBridge")
@@ -605,35 +639,65 @@ func _verify_formal_ui_projection(app: Node, store: WalnutClientStore, interacti
 	var task_title := crop_level.get_node_or_null("Hud/TaskCard/Margin/Content/TaskTitle") as Label
 	var phase_strip := crop_level.get_node_or_null("Hud/PhasePill/PhaseStrip") as Label
 	var evidence_body := crop_level.get_node_or_null("Hud/EvidencePanel/Margin/Content/EvidenceBody") as RichTextLabel
+	var run_button := crop_level.get_node_or_null("CodeDrawer/Surface/Margin/Content/Actions/RunButton") as Button
+	var presenter := crop_level.get_node_or_null("AgentInteractionPresenter") as AgentInteractionPresenter
+	var legion := crop_level.get_node_or_null("BugLegion2D") as BugLegion2D
 	var content_task: Variant = store.content.get("task")
 	var feedback: Variant = interaction.get("feedback")
 	var projection: Variant = crop_level.formal_projection_state()
-	if (
-		editor == null
-		or str(editor.text) != store.local_source
-		or task_title == null
-		or not content_task is Dictionary
-		or str(task_title.text) != str(content_task.get("name", ""))
-		or phase_strip == null
-		or not str(phase_strip.text).contains(str(store.world_snapshot.get("world_id", "")))
-		or not str(phase_strip.text).contains("revision %d" % int(store.world_snapshot.get("revision", -1)))
-		or not str(phase_strip.text).contains(str(store.world_snapshot.get("state_hash", "")))
-		or evidence_body == null
-		or not feedback is Dictionary
-		or not str(evidence_body.text).contains(str(feedback.get("message", "")))
-		or not projection is Dictionary
-		or projection.get("content") != store.content
-		or projection.get("snapshot") != store.world_snapshot
-		or projection.get("interaction") != interaction
-		or str(projection.get("source", "")) != store.local_source
-	):
-		return _failure("CROP_UI_PROJECTION_MISMATCH", "CropAdaptiveWateringDemo does not display the recovered Content, Draft, AgentInteraction and Snapshot.")
+	var mismatches: Array[String] = []
+	if editor == null:
+		mismatches.append("draft_editor_missing")
+	elif str(editor.text) != store.local_source:
+		mismatches.append("draft_source")
+	if task_title == null:
+		mismatches.append("task_title_missing")
+	elif not content_task is Dictionary or str(task_title.text) != str(content_task.get("name", "")):
+		mismatches.append("content_task")
+	if phase_strip == null:
+		mismatches.append("phase_strip_missing")
+	else:
+		if not str(phase_strip.text).contains(str(store.world_snapshot.get("world_id", ""))):
+			mismatches.append("snapshot_world_id")
+		if not str(phase_strip.text).contains("revision %d" % int(store.world_snapshot.get("revision", -1))):
+			mismatches.append("snapshot_revision")
+		if not str(phase_strip.text).contains(str(store.world_snapshot.get("state_hash", ""))):
+			mismatches.append("snapshot_state_hash")
+	if evidence_body == null:
+		mismatches.append("evidence_body_missing")
+	elif not feedback is Dictionary or not str(evidence_body.text).contains(str(feedback.get("message", ""))):
+		mismatches.append("interaction_feedback")
+	if not projection is Dictionary:
+		mismatches.append("formal_projection_missing")
+	else:
+		if projection.get("content") != store.content:
+			mismatches.append("formal_content")
+		if projection.get("snapshot") != store.world_snapshot:
+			mismatches.append("formal_snapshot")
+		if projection.get("interaction") != interaction:
+			mismatches.append("formal_interaction")
+		if str(projection.get("source", "")) != store.local_source:
+			mismatches.append("formal_source")
+	if run_button == null:
+		mismatches.append("run_button_missing")
+	if presenter == null or presenter.is_presenting() or presenter.pending_count() != 0:
+		mismatches.append("historical_interaction_replayed")
+	if legion == null or legion.is_legion_visible():
+		mismatches.append("historical_bug_legion_replayed")
+	if not mismatches.is_empty():
+		return _failure(
+			"CROP_UI_PROJECTION_MISMATCH",
+			"CropAdaptiveWateringDemo recovery projection mismatches: %s."
+			% ", ".join(mismatches),
+		)
 	return {
 		"ok": true,
 		"value": {
 			"crop_adaptive_watering_demo": true,
 			"crop_agent_bridge": true,
+			"run_button": true,
 			"content_draft_interaction_snapshot": true,
+			"recovered_interaction_replayed": false,
 		},
 	}
 
@@ -744,7 +808,7 @@ func _verify_read_only_transport_audit(transport: Variant) -> Dictionary:
 func _production_clients_are_wired(app: Node) -> bool:
 	var expected := {
 		"_transport": "res://scripts/client/audited_http_agent_api_transport.gd",
-		"_game_gateway": "res://addons/yaya_contract_client/agent_api_gateway.gd",
+		"_game_gateway": "res://scripts/client/extended_agent_api_gateway.gd",
 		"_product_gateway": "res://scripts/client/product_interaction_gateway.gd",
 	}
 	for property in expected:

@@ -1,7 +1,7 @@
 # 核桃代码世界：Godot 前端接口文档
 
 > 文档版本：1.3（2026-08-17 WATER frontend candidate draft）
-> 适用目录：`walnut-world-frontend`（Godot 4.5.2）
+> 适用目录：`walnut-world-frontend`（Godot 4.7.1 stable）
 > Wire Contract：已发布 v0.4 字节保持不变；当前三仓工作树消费 additive v0.6 candidate（v0.6 tag `NOT_PROVEN`）
 
 ## 1. 权威顺序与交付状态

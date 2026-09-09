@@ -1,0 +1,414 @@
+{
+  "group": "equipment",
+  "id": "prop-pump-standby",
+  "source": [
+    "components/prop-pump.png"
+  ],
+  "state": "待机",
+  "effect": "上部杠杆与机身局部轻动，底座固定；停机与故障无持续水流",
+  "width": 448,
+  "height": 576,
+  "frames": 36,
+  "fps": 12,
+  "loop": true,
+  "trigger": "设备状态变化",
+  "pivot": [
+    0.5,
+    0.95
+  ],
+  "durationMs": 2988,
+  "delayMs": 83,
+  "files": {
+    "webp": "equipment/prop-pump-standby.webp",
+    "poster": "equipment/prop-pump-standby-poster.png",
+    "atlas": "equipment/prop-pump-standby-atlas.png",
+    "metadata": "metadata/prop-pump-standby.json"
+  },
+  "atlas": {
+    "columns": 6,
+    "rows": 6,
+    "frameWidth": 448,
+    "frameHeight": 576,
+    "frames": [
+      {
+        "index": 0,
+        "rect": [
+          0,
+          0,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 1,
+        "rect": [
+          448,
+          0,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 2,
+        "rect": [
+          896,
+          0,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 3,
+        "rect": [
+          1344,
+          0,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 4,
+        "rect": [
+          1792,
+          0,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 5,
+        "rect": [
+          2240,
+          0,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 6,
+        "rect": [
+          0,
+          576,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 7,
+        "rect": [
+          448,
+          576,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 8,
+        "rect": [
+          896,
+          576,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 9,
+        "rect": [
+          1344,
+          576,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 10,
+        "rect": [
+          1792,
+          576,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 11,
+        "rect": [
+          2240,
+          576,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 12,
+        "rect": [
+          0,
+          1152,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 13,
+        "rect": [
+          448,
+          1152,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 14,
+        "rect": [
+          896,
+          1152,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 15,
+        "rect": [
+          1344,
+          1152,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 16,
+        "rect": [
+          1792,
+          1152,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 17,
+        "rect": [
+          2240,
+          1152,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 18,
+        "rect": [
+          0,
+          1728,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 19,
+        "rect": [
+          448,
+          1728,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 20,
+        "rect": [
+          896,
+          1728,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 21,
+        "rect": [
+          1344,
+          1728,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 22,
+        "rect": [
+          1792,
+          1728,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 23,
+        "rect": [
+          2240,
+          1728,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 24,
+        "rect": [
+          0,
+          2304,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 25,
+        "rect": [
+          448,
+          2304,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 26,
+        "rect": [
+          896,
+          2304,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 27,
+        "rect": [
+          1344,
+          2304,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 28,
+        "rect": [
+          1792,
+          2304,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 29,
+        "rect": [
+          2240,
+          2304,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 30,
+        "rect": [
+          0,
+          2880,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 31,
+        "rect": [
+          448,
+          2880,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 32,
+        "rect": [
+          896,
+          2880,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 33,
+        "rect": [
+          1344,
+          2880,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 34,
+        "rect": [
+          1792,
+          2880,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 35,
+        "rect": [
+          2240,
+          2880,
+          448,
+          576
+        ],
+        "durationMs": 83
+      }
+    ]
+  },
+  "encoded": {
+    "frames": 7,
+    "durationMs": 2988,
+    "bytes": 55696
+  },
+  "playback": {
+    "frameDurationMs": 83,
+    "loop": true,
+    "endBehavior": "continue-until-state-change",
+    "reducedMotion": "equipment/prop-pump-standby-poster.png",
+    "alpha": "straight-alpha",
+    "sizing": "preserve aspect; use contentBounds and pivot, do not stretch the whole padded canvas into old art bounds"
+  },
+  "contentBounds": [
+    40,
+    59,
+    368,
+    477
+  ]
+}

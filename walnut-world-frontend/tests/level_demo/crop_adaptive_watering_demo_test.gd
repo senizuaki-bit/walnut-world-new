@@ -4,6 +4,7 @@ const LEVEL_PATH := "res://scenes/level_demo/crop_adaptive_watering_demo.tscn"
 
 
 func _initialize() -> void:
+	root.size = Vector2i(1280, 720)
 	var failures: Array[String] = []
 	var level := (load(LEVEL_PATH) as PackedScene).instantiate() as CropAdaptiveWateringDemo
 	level.timing_scale = 0.05
@@ -13,11 +14,12 @@ func _initialize() -> void:
 	story_overlay.skip_sequence()
 	story_overlay.play_agent_presentation("叮当师傅", null, "请先完成两步代码实验。", "两个数组为什么要使用同一个 i？", "教学实验")
 	story_overlay.advance()
-	await process_frame
+	await create_timer(0.45).timeout
 	var dialogue_card := story_overlay.get_node("DialogueCard") as Control
-	var dialogue_question := story_overlay.get_node("DialogueCard/ContentRoot/ContentMargin/Content/Question") as Label
-	if dialogue_card.get_global_rect().end.y - dialogue_question.get_global_rect().end.y < 70.0:
-		failures.append("叮当对话框的“想一想”文字必须上移，避开底部叶片装饰。")
+	var dialogue_question := story_overlay.get_node("DialogueCard/ContentRoot/ContentMargin/Scroll/Content/Question") as Label
+	var continue_hint := story_overlay.get_node("DialogueCard/ContentRoot/ContinueHint") as Label
+	if dialogue_question.get_global_rect().end.y > continue_hint.get_global_rect().position.y or not dialogue_card.get_global_rect().encloses(dialogue_question.get_global_rect()):
+		failures.append("底部对话中的问题必须完整位于木框内，并与继续提示分离。 card=%s question=%s continue=%s" % [dialogue_card.get_global_rect(), dialogue_question.get_global_rect(), continue_hint.get_global_rect()])
 	story_overlay.skip_sequence()
 	var grid := level.get_node_or_null("Hud/FarmLayout/PlotGrid") as GridContainer
 	if grid == null or grid.columns != 4 or grid.get_child_count() != 8:
@@ -34,7 +36,7 @@ func _initialize() -> void:
 		"Hud/PlaybackRail/PlaybackSpeedButton",
 		"Hud/PlaybackRail/SkipPlaybackButton",
 		"Hud/PlaybackRail/ReplayPlaybackButton",
-		"StoryDialogueOverlay", "PatchDialog",
+		"BugLegion2D", "AgentInteractionPresenter", "StoryDialogueOverlay", "PatchDialog",
 		"SkillTreeOverlay", "WorkshopOverlay", "WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel",
 		"WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode/GapLine/GapTargetInput",
 		"WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/SevereCondition/SevereBoundaryInput",
@@ -72,9 +74,9 @@ func _initialize() -> void:
 	if initial_editor.text != CropAdaptiveWateringDemo.INITIAL_PRACTICE_CODE or "/*目标*/" not in initial_editor.text:
 		failures.append("首次代码草稿必须是含填空的初步代码，不得一上来给完整答案。")
 	var first_card := grid.get_child(0) as CropPlotCard
-	if not (first_card.get_node("Margin/Content/Values/CurrentLabel") as Label).text.begins_with("当前湿度"):
+	if not (first_card.get_node("%CurrentLabel") as Label).text.begins_with("当前湿度"):
 		failures.append("土地卡片必须明确标注“当前湿度”。")
-	if not (first_card.get_node("Margin/Content/Values/TargetLabel") as Label).text.begins_with("目标湿度"):
+	if not (first_card.get_node("%TargetLabel") as Label).text.begins_with("目标湿度"):
 		failures.append("土地卡片必须明确标注“目标湿度”。")
 	evidence_body.text = "[b]同下标读取当前值与目标值 → 计算 gap → 选择 0 / 1 / 2 份水[/b]\n叮当师傅已经在清泉工坊准备好代码卷轴。"
 	await process_frame
@@ -86,7 +88,7 @@ func _initialize() -> void:
 	var expected_manual_order := [1, 6, 5]
 	for expected_index in expected_manual_order:
 		for card_index in range(grid.get_child_count()):
-			var attention := grid.get_child(card_index).get_node("AttentionFrame") as Panel
+			var attention := grid.get_child(card_index).get_node("%SoilGlow") as TextureRect
 			if attention.visible != (card_index == expected_index):
 				failures.append("手动验证阶段必须持续高亮当前土地%d。" % expected_index)
 		level.call("_on_plot_pressed", expected_index)
@@ -230,7 +232,80 @@ func _initialize() -> void:
 	level.fail_agent_submission("验证", "AGENT_RAW_ERROR_SHOULD_NOT_BE_VISIBLE")
 	if "AGENT_RAW_ERROR_SHOULD_NOT_BE_VISIBLE" in evidence_body.text or "Agent" in (level.get_node("Hud/EvidencePanel/Margin/Content/EvidenceTitle") as Label).text:
 		failures.append("Agent 提交失败时不得显示原始报错或 Agent 字样。")
+	for stage in ["构建", "激活", "验证"]:
+		var raw := "RAW_%s_FAILURE_SHOULD_STAY_INTERNAL" % stage
+		level.fail_agent_submission(stage, raw)
+		if raw in evidence_body.text:
+			failures.append("%s失败不得把原始服务错误显示给学生。" % stage)
+	level.present_candidate_chain_error("RAW_CANDIDATE_ERROR_SHOULD_STAY_INTERNAL")
+	if "RAW_CANDIDATE_ERROR_SHOULD_STAY_INTERNAL" in evidence_body.text:
+		failures.append("候选演示失败不得把内部错误代码显示给学生。")
+	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.CODE)
+	var farm := level.get_node("Hud/FarmLayout") as Control
+	var compact_scale := Vector2(0.825, 0.778)
+	var plot_rects: Array[Rect2] = []
+	for phase in [CropAdaptiveWateringDemo.Phase.MANUAL_COMPARE, CropAdaptiveWateringDemo.Phase.OLD_TOOL, CropAdaptiveWateringDemo.Phase.CODE, CropAdaptiveWateringDemo.Phase.CERTIFIED, CropAdaptiveWateringDemo.Phase.ACTIVE, CropAdaptiveWateringDemo.Phase.RUNNING, CropAdaptiveWateringDemo.Phase.CANDIDATE_VALIDATING, CropAdaptiveWateringDemo.Phase.CANDIDATE_PRESENTING, CropAdaptiveWateringDemo.Phase.FAILED, CropAdaptiveWateringDemo.Phase.LOCAL_FAILED, CropAdaptiveWateringDemo.Phase.LOCAL_COMPLETED, CropAdaptiveWateringDemo.Phase.CHAIN_ERROR, CropAdaptiveWateringDemo.Phase.FREE_PLAY]:
+		level.call("_set_phase", phase)
+		for frame in range(3):
+			await process_frame
+		for index in range(8):
+			var plot := grid.get_child(index) as CropPlotCard
+			var rect := plot.crop_art.get_global_rect()
+			if plot_rects.size() < 8:
+				plot_rects.append(rect)
+			elif not rect.is_equal_approx(plot_rects[index]):
+				failures.append("阶段 %d 的第 %d 块作物发生位移。" % [phase, index])
+			var plaque := plot.get_node("Canvas/ResultPlaque") as Control
+			var lower_bound := (grid.get_child(index + 4) as Control).get_global_rect().position.y if index < 4 else evidence_panel.get_global_rect().position.y
+			if plaque.get_global_rect().end.y + 4.0 > lower_bound:
+				failures.append("结果标签必须与下一排作物或说明区保持间距。")
+		if not farm.scale.is_equal_approx(compact_scale) or not farm.position.is_equal_approx(Vector2(446, 266) * (720.0 / 941.0)):
+			failures.append("农田阶段 %d 必须沿用已确认的缩小尺寸与位置。" % phase)
+		if farm.get_global_rect().end.y > evidence_panel.get_global_rect().position.y:
+			failures.append("农田阶段 %d 不得遮挡下方说明。" % phase)
+	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.CODE)
+	level.call("_show_code_drawer")
+	await create_timer(0.10).timeout
+	var drawer_surface := level.get_node("CodeDrawer/Surface") as Control
+	if (grid.get_child(0) as Control).get_global_rect().position.x >= drawer_surface.get_global_rect().position.x:
+		failures.append("S07 must leave the left farm visible")
+	if (grid.get_child(3) as Control).get_global_rect().end.x <= drawer_surface.get_global_rect().position.x:
+		failures.append("S07 must deliberately overlay the right farm, as in guide-layout.json")
+	if not farm.scale.is_equal_approx(compact_scale):
+		failures.append("Opening the scroll must not shrink the farm")
+	level.call("_hide_code_drawer")
+	if not farm.scale.is_equal_approx(compact_scale):
+		failures.append("关闭技能卷轴后必须恢复农田的正常尺寸。")
+	level.call("_begin_manual_compare")
+	for selected in [false, true]:
+		if selected:
+			level.call("_on_plot_pressed", 1)
+		for frame in range(3):
+			await process_frame
+		if evidence_body.get_content_height() > evidence_body.size.y:
+			failures.append("手动比较说明必须完整显示，不能因预留结果行而截断。")
+		if evidence_panel.get_global_rect().end.y + 4 > level.water_choices.get_global_rect().position.y:
+			failures.append("手动比较说明不得遮挡水量选择按钮。")
 	level.queue_free()
+	await process_frame
+	story_overlay = (load("res://scenes/ui/story_dialogue_overlay.tscn") as PackedScene).instantiate() as StoryDialogueOverlay
+	root.add_child(story_overlay)
+	await process_frame
+	story_overlay.play_agent_presentation("叮当师傅", null, "这是一段需要完整阅读的较长教学反馈。".repeat(80), "你观察到了什么？", "教学实验")
+	story_overlay.advance()
+	for _frame in range(4):
+		await process_frame
+	var scroll := story_overlay.get_node("DialogueCard/ContentRoot/ContentMargin/Scroll") as ScrollContainer
+	if scroll.get_v_scroll_bar().max_value <= scroll.get_v_scroll_bar().page:
+		failures.append("长教学反馈必须可以滚动阅读，不能超出底部木框。 scroll=%s range=%s page=%s body=%s" % [scroll.size, scroll.get_v_scroll_bar().max_value, scroll.get_v_scroll_bar().page, story_overlay.body_label.size])
+	var enter_event := InputEventKey.new()
+	enter_event.keycode = KEY_ENTER
+	enter_event.pressed = true
+	Input.parse_input_event(enter_event)
+	await create_timer(0.30).timeout
+	if story_overlay.visible:
+		failures.append("完整显示台词后，Enter 必须能继续并结束当前对话。")
+	story_overlay.queue_free()
 	await process_frame
 	if failures.is_empty():
 		print("CROP_ADAPTIVE_WATERING_DEMO_TEST_PASS: 2×4农田、分层错误与0/1/2份规则通过")

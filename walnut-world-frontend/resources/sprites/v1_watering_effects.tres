@@ -1,0 +1,389 @@
+[gd_resource type="SpriteFrames" load_steps=100 format=3]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v1/effects/fx-celebrate-burst-atlas.png" id="fx-celebrate-burst"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v1/effects/fx-water-one-flow-atlas.png" id="fx-water-one-flow"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v1/effects/fx-water-two-flow-atlas.png" id="fx-water-two-flow"]
+[sub_resource type="AtlasTexture" id="frame_1"]
+atlas = ExtResource("fx-celebrate-burst")
+region = Rect2(0, 0, 512, 320)
+[sub_resource type="AtlasTexture" id="frame_2"]
+atlas = ExtResource("fx-celebrate-burst")
+region = Rect2(512, 0, 512, 320)
+[sub_resource type="AtlasTexture" id="frame_3"]
+atlas = ExtResource("fx-celebrate-burst")
+region = Rect2(1024, 0, 512, 320)
+[sub_resource type="AtlasTexture" id="frame_4"]
+atlas = ExtResource("fx-celebrate-burst")
+region = Rect2(1536, 0, 512, 320)
+[sub_resource type="AtlasTexture" id="frame_5"]
+atlas = ExtResource("fx-celebrate-burst")
+region = Rect2(2048, 0, 512, 320)
+[sub_resource type="AtlasTexture" id="frame_6"]
+atlas = ExtResource("fx-celebrate-burst")
+region = Rect2(2560, 0, 512, 320)
+[sub_resource type="AtlasTexture" id="frame_7"]
+atlas = ExtResource("fx-celebrate-burst")
+region = Rect2(0, 320, 512, 320)
+[sub_resource type="AtlasTexture" id="frame_8"]
+atlas = ExtResource("fx-celebrate-burst")
+region = Rect2(512, 320, 512, 320)
+[sub_resource type="AtlasTexture" id="frame_9"]
+atlas = ExtResource("fx-celebrate-burst")
+region = Rect2(1024, 320, 512, 320)
+[sub_resource type="AtlasTexture" id="frame_10"]
+atlas = ExtResource("fx-celebrate-burst")
+region = Rect2(1536, 320, 512, 320)
+[sub_resource type="AtlasTexture" id="frame_11"]
+atlas = ExtResource("fx-celebrate-burst")
+region = Rect2(2048, 320, 512, 320)
+[sub_resource type="AtlasTexture" id="frame_12"]
+atlas = ExtResource("fx-celebrate-burst")
+region = Rect2(2560, 320, 512, 320)
+[sub_resource type="AtlasTexture" id="frame_13"]
+atlas = ExtResource("fx-celebrate-burst")
+region = Rect2(0, 640, 512, 320)
+[sub_resource type="AtlasTexture" id="frame_14"]
+atlas = ExtResource("fx-celebrate-burst")
+region = Rect2(512, 640, 512, 320)
+[sub_resource type="AtlasTexture" id="frame_15"]
+atlas = ExtResource("fx-celebrate-burst")
+region = Rect2(1024, 640, 512, 320)
+[sub_resource type="AtlasTexture" id="frame_16"]
+atlas = ExtResource("fx-celebrate-burst")
+region = Rect2(1536, 640, 512, 320)
+[sub_resource type="AtlasTexture" id="frame_17"]
+atlas = ExtResource("fx-celebrate-burst")
+region = Rect2(2048, 640, 512, 320)
+[sub_resource type="AtlasTexture" id="frame_18"]
+atlas = ExtResource("fx-celebrate-burst")
+region = Rect2(2560, 640, 512, 320)
+[sub_resource type="AtlasTexture" id="frame_19"]
+atlas = ExtResource("fx-celebrate-burst")
+region = Rect2(0, 960, 512, 320)
+[sub_resource type="AtlasTexture" id="frame_20"]
+atlas = ExtResource("fx-celebrate-burst")
+region = Rect2(512, 960, 512, 320)
+[sub_resource type="AtlasTexture" id="frame_21"]
+atlas = ExtResource("fx-celebrate-burst")
+region = Rect2(1024, 960, 512, 320)
+[sub_resource type="AtlasTexture" id="frame_22"]
+atlas = ExtResource("fx-celebrate-burst")
+region = Rect2(1536, 960, 512, 320)
+[sub_resource type="AtlasTexture" id="frame_23"]
+atlas = ExtResource("fx-celebrate-burst")
+region = Rect2(2048, 960, 512, 320)
+[sub_resource type="AtlasTexture" id="frame_24"]
+atlas = ExtResource("fx-celebrate-burst")
+region = Rect2(2560, 960, 512, 320)
+[sub_resource type="AtlasTexture" id="frame_25"]
+atlas = ExtResource("fx-water-one-flow")
+region = Rect2(0, 0, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_26"]
+atlas = ExtResource("fx-water-one-flow")
+region = Rect2(512, 0, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_27"]
+atlas = ExtResource("fx-water-one-flow")
+region = Rect2(1024, 0, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_28"]
+atlas = ExtResource("fx-water-one-flow")
+region = Rect2(1536, 0, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_29"]
+atlas = ExtResource("fx-water-one-flow")
+region = Rect2(2048, 0, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_30"]
+atlas = ExtResource("fx-water-one-flow")
+region = Rect2(2560, 0, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_31"]
+atlas = ExtResource("fx-water-one-flow")
+region = Rect2(0, 256, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_32"]
+atlas = ExtResource("fx-water-one-flow")
+region = Rect2(512, 256, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_33"]
+atlas = ExtResource("fx-water-one-flow")
+region = Rect2(1024, 256, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_34"]
+atlas = ExtResource("fx-water-one-flow")
+region = Rect2(1536, 256, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_35"]
+atlas = ExtResource("fx-water-one-flow")
+region = Rect2(2048, 256, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_36"]
+atlas = ExtResource("fx-water-one-flow")
+region = Rect2(2560, 256, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_37"]
+atlas = ExtResource("fx-water-one-flow")
+region = Rect2(0, 512, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_38"]
+atlas = ExtResource("fx-water-one-flow")
+region = Rect2(512, 512, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_39"]
+atlas = ExtResource("fx-water-one-flow")
+region = Rect2(1024, 512, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_40"]
+atlas = ExtResource("fx-water-one-flow")
+region = Rect2(1536, 512, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_41"]
+atlas = ExtResource("fx-water-one-flow")
+region = Rect2(2048, 512, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_42"]
+atlas = ExtResource("fx-water-one-flow")
+region = Rect2(2560, 512, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_43"]
+atlas = ExtResource("fx-water-one-flow")
+region = Rect2(0, 768, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_44"]
+atlas = ExtResource("fx-water-one-flow")
+region = Rect2(512, 768, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_45"]
+atlas = ExtResource("fx-water-one-flow")
+region = Rect2(1024, 768, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_46"]
+atlas = ExtResource("fx-water-one-flow")
+region = Rect2(1536, 768, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_47"]
+atlas = ExtResource("fx-water-one-flow")
+region = Rect2(2048, 768, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_48"]
+atlas = ExtResource("fx-water-one-flow")
+region = Rect2(2560, 768, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_49"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(0, 0, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_50"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(512, 0, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_51"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(1024, 0, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_52"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(1536, 0, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_53"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(2048, 0, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_54"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(2560, 0, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_55"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(0, 256, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_56"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(512, 256, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_57"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(1024, 256, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_58"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(1536, 256, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_59"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(2048, 256, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_60"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(2560, 256, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_61"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(0, 512, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_62"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(512, 512, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_63"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(1024, 512, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_64"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(1536, 512, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_65"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(2048, 512, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_66"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(2560, 512, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_67"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(0, 768, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_68"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(512, 768, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_69"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(1024, 768, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_70"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(1536, 768, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_71"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(2048, 768, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_72"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(2560, 768, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_73"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(0, 1024, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_74"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(512, 1024, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_75"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(1024, 1024, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_76"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(1536, 1024, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_77"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(2048, 1024, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_78"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(2560, 1024, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_79"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(0, 1280, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_80"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(512, 1280, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_81"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(1024, 1280, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_82"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(1536, 1280, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_83"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(2048, 1280, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_84"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(2560, 1280, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_85"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(0, 1536, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_86"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(512, 1536, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_87"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(1024, 1536, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_88"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(1536, 1536, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_89"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(2048, 1536, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_90"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(2560, 1536, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_91"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(0, 1792, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_92"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(512, 1792, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_93"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(1024, 1792, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_94"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(1536, 1792, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_95"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(2048, 1792, 512, 256)
+[sub_resource type="AtlasTexture" id="frame_96"]
+atlas = ExtResource("fx-water-two-flow")
+region = Rect2(2560, 1792, 512, 256)
+[resource]
+animations = [{"frames": [{"duration": 1.0, "texture": SubResource("frame_1")},
+{"duration": 1.0, "texture": SubResource("frame_2")},
+{"duration": 1.0, "texture": SubResource("frame_3")},
+{"duration": 1.0, "texture": SubResource("frame_4")},
+{"duration": 1.0, "texture": SubResource("frame_5")},
+{"duration": 1.0, "texture": SubResource("frame_6")},
+{"duration": 1.0, "texture": SubResource("frame_7")},
+{"duration": 1.0, "texture": SubResource("frame_8")},
+{"duration": 1.0, "texture": SubResource("frame_9")},
+{"duration": 1.0, "texture": SubResource("frame_10")},
+{"duration": 1.0, "texture": SubResource("frame_11")},
+{"duration": 1.0, "texture": SubResource("frame_12")},
+{"duration": 1.0, "texture": SubResource("frame_13")},
+{"duration": 1.0, "texture": SubResource("frame_14")},
+{"duration": 1.0, "texture": SubResource("frame_15")},
+{"duration": 1.0, "texture": SubResource("frame_16")},
+{"duration": 1.0, "texture": SubResource("frame_17")},
+{"duration": 1.0, "texture": SubResource("frame_18")},
+{"duration": 1.0, "texture": SubResource("frame_19")},
+{"duration": 1.0, "texture": SubResource("frame_20")},
+{"duration": 1.0, "texture": SubResource("frame_21")},
+{"duration": 1.0, "texture": SubResource("frame_22")},
+{"duration": 1.0, "texture": SubResource("frame_23")},
+{"duration": 1.0, "texture": SubResource("frame_24")}], "loop": false, "name": &"celebrate", "speed": 12.0},
+{"frames": [{"duration": 1.0, "texture": SubResource("frame_25")},
+{"duration": 1.0, "texture": SubResource("frame_26")},
+{"duration": 1.0, "texture": SubResource("frame_27")},
+{"duration": 1.0, "texture": SubResource("frame_28")},
+{"duration": 1.0, "texture": SubResource("frame_29")},
+{"duration": 1.0, "texture": SubResource("frame_30")},
+{"duration": 1.0, "texture": SubResource("frame_31")},
+{"duration": 1.0, "texture": SubResource("frame_32")},
+{"duration": 1.0, "texture": SubResource("frame_33")},
+{"duration": 1.0, "texture": SubResource("frame_34")},
+{"duration": 1.0, "texture": SubResource("frame_35")},
+{"duration": 1.0, "texture": SubResource("frame_36")},
+{"duration": 1.0, "texture": SubResource("frame_37")},
+{"duration": 1.0, "texture": SubResource("frame_38")},
+{"duration": 1.0, "texture": SubResource("frame_39")},
+{"duration": 1.0, "texture": SubResource("frame_40")},
+{"duration": 1.0, "texture": SubResource("frame_41")},
+{"duration": 1.0, "texture": SubResource("frame_42")},
+{"duration": 1.0, "texture": SubResource("frame_43")},
+{"duration": 1.0, "texture": SubResource("frame_44")},
+{"duration": 1.0, "texture": SubResource("frame_45")},
+{"duration": 1.0, "texture": SubResource("frame_46")},
+{"duration": 1.0, "texture": SubResource("frame_47")},
+{"duration": 1.0, "texture": SubResource("frame_48")}], "loop": false, "name": &"pour", "speed": 12.0},
+{"frames": [{"duration": 1.0, "texture": SubResource("frame_49")},
+{"duration": 1.0, "texture": SubResource("frame_50")},
+{"duration": 1.0, "texture": SubResource("frame_51")},
+{"duration": 1.0, "texture": SubResource("frame_52")},
+{"duration": 1.0, "texture": SubResource("frame_53")},
+{"duration": 1.0, "texture": SubResource("frame_54")},
+{"duration": 1.0, "texture": SubResource("frame_55")},
+{"duration": 1.0, "texture": SubResource("frame_56")},
+{"duration": 1.0, "texture": SubResource("frame_57")},
+{"duration": 1.0, "texture": SubResource("frame_58")},
+{"duration": 1.0, "texture": SubResource("frame_59")},
+{"duration": 1.0, "texture": SubResource("frame_60")},
+{"duration": 1.0, "texture": SubResource("frame_61")},
+{"duration": 1.0, "texture": SubResource("frame_62")},
+{"duration": 1.0, "texture": SubResource("frame_63")},
+{"duration": 1.0, "texture": SubResource("frame_64")},
+{"duration": 1.0, "texture": SubResource("frame_65")},
+{"duration": 1.0, "texture": SubResource("frame_66")},
+{"duration": 1.0, "texture": SubResource("frame_67")},
+{"duration": 1.0, "texture": SubResource("frame_68")},
+{"duration": 1.0, "texture": SubResource("frame_69")},
+{"duration": 1.0, "texture": SubResource("frame_70")},
+{"duration": 1.0, "texture": SubResource("frame_71")},
+{"duration": 1.0, "texture": SubResource("frame_72")},
+{"duration": 1.0, "texture": SubResource("frame_73")},
+{"duration": 1.0, "texture": SubResource("frame_74")},
+{"duration": 1.0, "texture": SubResource("frame_75")},
+{"duration": 1.0, "texture": SubResource("frame_76")},
+{"duration": 1.0, "texture": SubResource("frame_77")},
+{"duration": 1.0, "texture": SubResource("frame_78")},
+{"duration": 1.0, "texture": SubResource("frame_79")},
+{"duration": 1.0, "texture": SubResource("frame_80")},
+{"duration": 1.0, "texture": SubResource("frame_81")},
+{"duration": 1.0, "texture": SubResource("frame_82")},
+{"duration": 1.0, "texture": SubResource("frame_83")},
+{"duration": 1.0, "texture": SubResource("frame_84")},
+{"duration": 1.0, "texture": SubResource("frame_85")},
+{"duration": 1.0, "texture": SubResource("frame_86")},
+{"duration": 1.0, "texture": SubResource("frame_87")},
+{"duration": 1.0, "texture": SubResource("frame_88")},
+{"duration": 1.0, "texture": SubResource("frame_89")},
+{"duration": 1.0, "texture": SubResource("frame_90")},
+{"duration": 1.0, "texture": SubResource("frame_91")},
+{"duration": 1.0, "texture": SubResource("frame_92")},
+{"duration": 1.0, "texture": SubResource("frame_93")},
+{"duration": 1.0, "texture": SubResource("frame_94")},
+{"duration": 1.0, "texture": SubResource("frame_95")},
+{"duration": 1.0, "texture": SubResource("frame_96")}], "loop": false, "name": &"pour_two", "speed": 12.0}]

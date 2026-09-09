@@ -1,0 +1,44 @@
+{
+  "group": "environment",
+  "id": "B02-workshop-background-ambient",
+  "source": [
+    "components/B02-workshop-background.png"
+  ],
+  "state": "环境待机",
+  "effect": "工坊：灯泡局部暖光、窗前浮尘、盆栽叶片轻摆；木梁与桌面固定",
+  "width": 1280,
+  "height": 720,
+  "frames": 72,
+  "fps": 12,
+  "loop": true,
+  "trigger": "场景可见且未暂停时循环；切出页面暂停",
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "video": true,
+  "atlas": false,
+  "durationMs": 5976,
+  "delayMs": 83,
+  "files": {
+    "webp": "environment/B02-workshop-background-ambient.webp",
+    "poster": "environment/B02-workshop-background-ambient-poster.png",
+    "mp4": "environment/B02-workshop-background-ambient.mp4",
+    "webm": "environment/B02-workshop-background-ambient.webm",
+    "godotVideo": "environment/B02-workshop-background-ambient.ogv",
+    "metadata": "metadata/B02-workshop-background-ambient.json"
+  },
+  "encoded": {
+    "frames": 72,
+    "durationMs": 5976,
+    "bytes": 358116
+  },
+  "playback": {
+    "frameDurationMs": 83,
+    "loop": true,
+    "endBehavior": "continue-until-state-change",
+    "reducedMotion": "environment/B02-workshop-background-ambient-poster.png",
+    "alpha": "opaque",
+    "sizing": "1280x720: fit to original background rectangle; fixed camera"
+  }
+}

@@ -1,91 +1,91 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=68 format=3]
 
+[ext_resource type="PackedScene" path="res://scenes/audio/farm_audio.tscn" id="farm_audio"]
+
+[ext_resource type="PackedScene" path="res://scenes/ui/mentor_question.tscn" id="mentor_question"]
+
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/icon-check.png" id="guide_check"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/B01-farm-background.png" id="proto_farm"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/B02-workshop-background.png" id="proto_workshop"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/char-player-idle.png" id="proto_explorer"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/char-walnut-idle.png" id="proto_walnut"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/char-dingdang-idle.png" id="proto_master"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/char-shushu-idle.png" id="proto_book"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/ui-panel.tres" id="proto_paper"]
+[ext_resource type="Theme" path="res://resources/ui/v2/theme.tres" id="proto_theme"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/prop-skill-tree-v2.png" id="proto_tree"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/ui-dialogue.tres" id="proto_compact"]
 [ext_resource type="Script" path="res://scenes/level_demo/crop_adaptive_watering_demo.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://scenes/level_demo/crop_plot_card.tscn" id="2_card"]
 [ext_resource type="PackedScene" path="res://scenes/ui/story_dialogue_overlay.tscn" id="3_dialogue"]
-[ext_resource type="Texture2D" path="res://assets/art/generated/terrain/grass_plot.png" id="4_grass"]
-[ext_resource type="Texture2D" path="res://assets/art/generated/facilities/farm_water_pump_station.png" id="5_pump"]
-[ext_resource type="Texture2D" path="res://assets/art/generated/facilities/greenhouse.png" id="6_workshop"]
-[ext_resource type="SpriteFrames" path="res://resources/sprites/watering_can_frames_v2.tres" id="7_can"]
-
-[sub_resource type="StyleBoxFlat" id="TaskStyle"]
-bg_color = Color(0.99, 0.95, 0.80, 0.97)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.18, 0.40, 0.28, 1)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
-shadow_color = Color(0.04, 0.12, 0.08, 0.28)
-shadow_size = 7
-shadow_offset = Vector2(0, 4)
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/B01-farm-background.png" id="4_grass"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/prop-pump.png" id="5_pump"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/B04-workshop-exterior-background.png" id="6_workshop"]
+[ext_resource type="SpriteFrames" path="res://resources/sprites/v1_watering_effects.tres" id="7_can"]
+[ext_resource type="Script" path="res://scenes/ui/agent_interaction_presenter.gd" id="8_presenter"]
+[ext_resource type="Resource" path="res://resources/agent/agent_character_catalog.tres" id="9_catalog"]
+[ext_resource type="PackedScene" path="res://scenes/characters/bug_legion/bug_legion_2d.tscn" id="10_legion"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/ui-hud.tres" id="ui-hud"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/ui-dialogue.tres" id="ui-dialogue"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/ui-data-plaque.tres" id="ui-data-plaque"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/button-water-green.tres" id="button-water-green"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/button-water-blue.tres" id="button-water-blue"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/ui-panel.tres" id="ui-panel"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/ui-code.tres" id="ui-code"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/B04-workshop-exterior-background.png" id="B04-workshop-exterior-background"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/char-player-idle.png" id="char-player-idle"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/char-walnut-idle.png" id="char-walnut-idle"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/B02-workshop-background.png" id="B02-workshop-background"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/char-dingdang-idle.png" id="char-dingdang-idle"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/B05-bug-investigation-background.png" id="B05-bug-investigation-background"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/char-bug-idle.png" id="char-bug-idle"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/B06-archive-background.png" id="B06-archive-background"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/char-shushu-idle.png" id="char-shushu-idle"]
+[ext_resource type="Script" path="res://scenes/ui/v2_input.gd" id="v2_input"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/icon-skill-watering.png" id="icon-skill-watering"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/icon-array.png" id="icon-array"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/icon-drop.png" id="icon-drop"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/icon-skill-action.png" id="icon-skill-action"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/icon-lock.png" id="icon-lock"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/icon-star.png" id="icon-star"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/ui-four-star-seal.png" id="ui-four-star-seal"]
+[ext_resource type="Script" path="res://scenes/ui/v2_surface.gd" id="v2_surface"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/empty.tres" id="v2_empty"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/edit-empty.tres" id="v2_edit_empty"]
+[ext_resource type="StyleBox" path="res://resources/ui/v2/input-empty.tres" id="v2_input_empty"]
+[ext_resource type="Font" path="res://resources/ui/v2/bold.tres" id="v2_bold"]
+[ext_resource type="Font" path="res://resources/ui/v2/mono.tres" id="v2_mono"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/icon-scroll.png" id="icon-scroll"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/icon-bulb.png" id="icon-bulb"]
+[ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/icon-drops-two.png" id="icon-drops-two"]
+[ext_resource type="Script" path="res://scenes/ui/art_motion_texture.gd" id="merge_motion"]
+[ext_resource type="Script" path="res://scenes/ui/art_ambient.gd" id="merge_ambient"]
+[ext_resource type="Script" path="res://scenes/ui/art_pump.gd" id="merge_pump"]
+[ext_resource type="Script" path="res://scenes/ui/art_watering_sprite.gd" id="merge_water"]
+[ext_resource type="Script" path="res://scenes/ui/art_workshop_input.gd" id="merge_input"]
+[ext_resource type="Script" path="res://scenes/ui/art_feedback_button.gd" id="merge_feedback"]
 
 [sub_resource type="StyleBoxFlat" id="DarkPill"]
-bg_color = Color(0.09, 0.26, 0.19, 0.96)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
+bg_color = Color(0.98, 0.92, 0.73, 0.98)
+corner_radius_top_left = 9
+corner_radius_top_right = 9
+corner_radius_bottom_right = 9
+corner_radius_bottom_left = 9
 shadow_color = Color(0.03, 0.09, 0.06, 0.26)
 shadow_size = 5
 shadow_offset = Vector2(0, 3)
 
-[sub_resource type="StyleBoxFlat" id="EvidenceStyle"]
-bg_color = Color(1, 0.976, 0.88, 0.98)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0.93, 0.58, 0.16, 1)
-corner_radius_top_left = 22
-corner_radius_top_right = 22
-corner_radius_bottom_right = 22
-corner_radius_bottom_left = 22
-shadow_color = Color(0.08, 0.15, 0.10, 0.26)
-shadow_size = 7
-shadow_offset = Vector2(0, 4)
-
-[sub_resource type="StyleBoxFlat" id="PrimaryStyle"]
-bg_color = Color(0.98, 0.68, 0.19, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.13, 0.35, 0.24, 1)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
-shadow_color = Color(0.24, 0.14, 0.04, 0.30)
-shadow_size = 5
-shadow_offset = Vector2(0, 3)
-
 [sub_resource type="StyleBoxFlat" id="SecondaryStyle"]
-bg_color = Color(0.98, 0.93, 0.75, 0.98)
+bg_color = Color(0.98, 0.92, 0.73, 0.98)
 border_width_left = 3
 border_width_top = 3
 border_width_right = 3
 border_width_bottom = 3
-border_color = Color(0.15, 0.38, 0.26, 1)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
-
-[sub_resource type="StyleBoxFlat" id="DrawerStyle"]
-bg_color = Color(0.985, 0.949, 0.84, 1)
-border_width_left = 7
-border_width_top = 4
-border_width_bottom = 4
-border_color = Color(0.21, 0.49, 0.33, 1)
-corner_radius_top_left = 28
-corner_radius_bottom_left = 28
-shadow_color = Color(0.03, 0.09, 0.06, 0.46)
-shadow_size = 14
-shadow_offset = Vector2(-7, 0)
+border_color = Color(0.50, 0.32, 0.15, 1)
+corner_radius_top_left = 9
+corner_radius_top_right = 9
+corner_radius_bottom_right = 9
+corner_radius_bottom_left = 9
 
 [sub_resource type="StyleBoxFlat" id="EditorStyle"]
 bg_color = Color(0.10, 0.17, 0.14, 1)
@@ -123,32 +123,20 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[sub_resource type="StyleBoxFlat" id="CompletionStyle"]
-bg_color = Color(0.92, 1, 0.82, 0.985)
-border_width_left = 5
-border_width_top = 5
-border_width_right = 5
-border_width_bottom = 5
-border_color = Color(0.18, 0.61, 0.37, 1)
-corner_radius_top_left = 30
-corner_radius_top_right = 30
-corner_radius_bottom_right = 30
-corner_radius_bottom_left = 30
-shadow_color = Color(0.04, 0.14, 0.08, 0.42)
-shadow_size = 14
-shadow_offset = Vector2(0, 8)
-
 [node name="CropAdaptiveWateringDemo" type="Control"]
 layout_mode = 3
+
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
+theme = ExtResource("proto_theme")
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
+
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -159,31 +147,48 @@ color = Color(0.77, 0.93, 0.84, 1)
 
 [node name="Grass" type="TextureRect" parent="."]
 layout_mode = 1
+
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-modulate = Color(1, 1, 1, 0.58)
-texture = ExtResource("4_grass")
+modulate = Color(1, 1, 1, 1)
+texture = ExtResource("proto_farm")
 expand_mode = 1
 stretch_mode = 6
+script = ExtResource("merge_ambient")
+background_id = "B01-farm-background"
+
+[node name="Video" type="VideoStreamPlayer" parent="Grass"]
+layout_mode = 1
+
+anchor_right = 1.0
+anchor_bottom = 1.0
+expand = true
+mouse_filter = 2
+volume_db = -80.0
 
 [node name="Pump" type="TextureRect" parent="."]
 layout_mode = 0
-offset_left = -28.0
-offset_top = 345.0
-offset_right = 196.0
-offset_bottom = 610.0
 mouse_filter = 2
-modulate = Color(1, 1, 1, 0.82)
 texture = ExtResource("5_pump")
 expand_mode = 1
 stretch_mode = 5
 
+offset_left = 4.5908607863974495
+offset_top = 252.49734325185972
+offset_right = 130.07438894792773
+offset_bottom = 465.9723698193411
+visible = true
+modulate = Color(1,1,1,1)
+script = ExtResource("merge_pump")
+motion_id = "prop-pump-standby"
+
 [node name="Workshop" type="TextureRect" parent="."]
 layout_mode = 1
+
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
@@ -197,329 +202,650 @@ modulate = Color(1, 1, 1, 0.78)
 texture = ExtResource("6_workshop")
 expand_mode = 1
 stretch_mode = 5
+visible = false
+
+[node name="Explorer" type="TextureRect" parent="."]
+layout_mode = 0
+mouse_filter = 2
+texture = ExtResource("proto_explorer")
+expand_mode = 1
+stretch_mode = 5
+
+offset_left = 87.99149840595112
+offset_top = 220.36131774707758
+offset_right = 283.10308182784274
+offset_bottom = 559.3198724760892
+script = ExtResource("merge_motion")
+motion_id = "char-player-idle"
+
+[node name="FarmWalnut" type="TextureRect" parent="."]
+layout_mode = 0
+mouse_filter = 2
+texture = ExtResource("proto_walnut")
+expand_mode = 1
+stretch_mode = 5
+
+offset_left = 24.484590860786398
+offset_top = 397.1094580233794
+offset_right = 167.5664187035069
+offset_bottom = 561.6153028692879
+script = ExtResource("merge_motion")
+motion_id = "char-walnut-idle"
 
 [node name="Hud" type="Control" parent="."]
 layout_mode = 1
+
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="TaskCard" type="PanelContainer" parent="Hud"]
+[node name="TaskCard" type="Panel" parent="Hud"]
 layout_mode = 0
-offset_left = 18.0
-offset_top = 16.0
-offset_right = 330.0
-offset_bottom = 102.0
-theme_override_styles/panel = SubResource("TaskStyle")
 
-[node name="Margin" type="MarginContainer" parent="Hud/TaskCard"]
-layout_mode = 2
+offset_left = 26.780021253985122
+offset_top = 19.128586609989373
+offset_right = 286.9287991498406
+offset_bottom = 110.94580233793836
+theme_override_styles/panel = ExtResource("v2_empty")
+
+[node name="OriginalSurface" type="NinePatchRect" parent="Hud/TaskCard"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-hud"
+source_slice = 64.0
+border_width = 22.954303931987248
+patch_margin_left = 64
+patch_margin_top = 64
+patch_margin_right = 64
+patch_margin_bottom = 64
+
+[node name="Margin" type="Control" parent="Hud/TaskCard"]
+layout_mode = 0
 theme_override_constants/margin_left = 18
 theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 18
 theme_override_constants/margin_bottom = 10
 
-[node name="Content" type="VBoxContainer" parent="Hud/TaskCard/Margin"]
-layout_mode = 2
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 260.14877789585546
+offset_bottom = 91.81721572794899
+
+[node name="Content" type="Control" parent="Hud/TaskCard/Margin"]
+layout_mode = 0
 theme_override_constants/separation = 2
 
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 260.14877789585546
+offset_bottom = 91.81721572794899
+
 [node name="TaskTitle" type="Label" parent="Hud/TaskCard/Margin/Content"]
+layout_mode = 0
 unique_name_in_owner = true
-layout_mode = 2
 theme_override_colors/font_color = Color(0.11, 0.31, 0.21, 1)
-theme_override_font_sizes/font_size = 22
 text = "作物适配浇水器"
 
+offset_left = 22.954303931987248
+offset_top = 19.893730074388948
+offset_right = 240.25504782146655
+offset_bottom = 56.620616365568544
+theme_override_font_sizes/font_size = 23
+
+theme_override_fonts/font = ExtResource("v2_bold")
+
+clip_text = true
+text_overrun_behavior = 3
+
 [node name="TaskProgress" type="Label" parent="Hud/TaskCard/Margin/Content"]
+layout_mode = 0
 unique_name_in_owner = true
-layout_mode = 2
 theme_override_colors/font_color = Color(0.67, 0.34, 0.07, 1)
-theme_override_font_sizes/font_size = 14
 text = "进入试验田"
 
-[node name="PhasePill" type="PanelContainer" parent="Hud"]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_left = 355.0
-offset_top = 18.0
-offset_right = -355.0
-offset_bottom = 62.0
-grow_horizontal = 2
-theme_override_styles/panel = SubResource("DarkPill")
+offset_left = 26.014877789585547
+offset_top = 61.211477151965994
+offset_right = 240.25504782146652
+offset_bottom = 84.16578108395325
+theme_override_font_sizes/font_size = 17
+
+[node name="PhasePill" type="Panel" parent="Hud"]
+layout_mode = 0
+
+offset_left = 377.21572794899043
+offset_top = 30.605738575982997
+offset_right = 958.7247608926674
+offset_bottom = 97.93836344314559
+theme_override_styles/panel = ExtResource("v2_empty")
+
+[node name="OriginalSurface" type="NinePatchRect" parent="Hud/PhasePill"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-dialogue"
+source_slice = 64.0
+border_width = 22.954303931987248
+patch_margin_left = 64
+patch_margin_top = 64
+patch_margin_right = 64
+patch_margin_bottom = 64
 
 [node name="PhaseStrip" type="Label" parent="Hud/PhasePill"]
+layout_mode = 0
 unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.91, 0.97, 0.78, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.24, 0.30, 0.17, 1)
 text = "观察旧工具  →  理解数据  →  编写规则  →  世界验证"
 horizontal_alignment = 1
 vertical_alignment = 1
+clip_text = true
+
+offset_left = 18.363443145589798
+offset_top = 11.477151965993624
+offset_right = 563.1455897980871
+offset_bottom = 55.855472901168966
+theme_override_font_sizes/font_size = 17
+autowrap_mode = 2
+text_overrun_behavior = 3
 
 [node name="ToolRail" type="HBoxContainer" parent="Hud"]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -405.0
-offset_top = 16.0
-offset_right = -18.0
-offset_bottom = 66.0
-grow_horizontal = 0
-theme_override_constants/separation = 8
+layout_mode = 0
+
+offset_left = 222.6567481402763
+offset_top = 655.7279489904357
+offset_right = 926.5887353878852
+offset_bottom = 705.4622741764081
+theme_override_constants/separation = 12
 
 [node name="CodeButton" type="Button" parent="Hud/ToolRail"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(112, 50)
 layout_mode = 2
+unique_name_in_owner = true
+
 focus_mode = 2
-theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("SecondaryStyle")
-theme_override_styles/hover = SubResource("PrimaryStyle")
-text = "</> 代码"
+
+custom_minimum_size = Vector2(221.89160467587672,49.73432518597237)
+theme_override_font_sizes/font_size = 18
+text = "打开技能卷轴"
+
+theme_override_styles/normal = ExtResource("v2_empty")
+theme_override_styles/pressed = ExtResource("v2_empty")
+theme_override_styles/hover = ExtResource("v2_empty")
+theme_override_styles/disabled = ExtResource("v2_empty")
+theme_override_styles/focus = ExtResource("v2_empty")
+theme_override_fonts/font = ExtResource("v2_bold")
+
+theme_override_colors/font_color = Color(0.22,0.157,0.075,1)
+theme_override_colors/font_hover_color = Color(0.22,0.157,0.075,1)
+
+[node name="OriginalSurface" type="NinePatchRect" parent="Hud/ToolRail/CodeButton"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "button-normal"
+source_slice = 56.0
+border_width = 16.83315621679065
+patch_margin_left = 56
+patch_margin_top = 56
+patch_margin_right = 56
+patch_margin_bottom = 56
 
 [node name="HintButton" type="Button" parent="Hud/ToolRail"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(112, 50)
+visible = false
 layout_mode = 2
+unique_name_in_owner = true
+
 focus_mode = 2
-theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("SecondaryStyle")
-theme_override_styles/hover = SubResource("PrimaryStyle")
-text = "? 问叮当"
+
+custom_minimum_size = Vector2(221.89160467587672,49.73432518597237)
+theme_override_font_sizes/font_size = 18
+text = "问叮当师傅"
+
+theme_override_styles/normal = ExtResource("v2_empty")
+theme_override_styles/pressed = ExtResource("v2_empty")
+theme_override_styles/hover = ExtResource("v2_empty")
+theme_override_styles/disabled = ExtResource("v2_empty")
+theme_override_styles/focus = ExtResource("v2_empty")
+theme_override_fonts/font = ExtResource("v2_bold")
+
+theme_override_colors/font_color = Color(0.22,0.157,0.075,1)
+theme_override_colors/font_hover_color = Color(0.22,0.157,0.075,1)
+
+[node name="OriginalSurface" type="NinePatchRect" parent="Hud/ToolRail/HintButton"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-data-plaque"
+source_slice = 56.0
+border_width = 16.83315621679065
+patch_margin_left = 56
+patch_margin_top = 56
+patch_margin_right = 56
+patch_margin_bottom = 56
+
+[node name="HintSpace" type="Control" parent="Hud/ToolRail"]
+visible = false
+layout_mode = 2
+custom_minimum_size = Vector2(221.8916, 49.7343)
+mouse_filter = 2
 
 [node name="RequestPatchButton" type="Button" parent="Hud/ToolRail"]
+layout_mode = 2
 unique_name_in_owner = true
 visible = false
-custom_minimum_size = Vector2(142, 50)
-layout_mode = 2
+
 focus_mode = 2
 tooltip_text = "查看并决定是否采用 AI 修改提案"
-theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("PrimaryStyle")
-theme_override_styles/hover = SubResource("PrimaryStyle")
 text = "AI 修改提案"
 
+custom_minimum_size = Vector2(221.89160467587672,49.73432518597237)
+theme_override_font_sizes/font_size = 18
+
+theme_override_styles/normal = ExtResource("v2_empty")
+theme_override_styles/pressed = ExtResource("v2_empty")
+theme_override_styles/hover = ExtResource("v2_empty")
+theme_override_styles/disabled = ExtResource("v2_empty")
+theme_override_styles/focus = ExtResource("v2_empty")
+theme_override_fonts/font = ExtResource("v2_bold")
+
+theme_override_colors/font_color = Color(0.22,0.157,0.075,1)
+theme_override_colors/font_hover_color = Color(0.22,0.157,0.075,1)
+
+[node name="OriginalSurface" type="NinePatchRect" parent="Hud/ToolRail/RequestPatchButton"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "button-normal"
+source_slice = 56.0
+border_width = 16.83315621679065
+patch_margin_left = 56
+patch_margin_top = 56
+patch_margin_right = 56
+patch_margin_bottom = 56
+
 [node name="PlaybackRail" type="HBoxContainer" parent="Hud"]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -242.0
-offset_top = 70.0
-offset_right = -18.0
-offset_bottom = 112.0
-grow_horizontal = 0
-theme_override_constants/separation = 8
+layout_mode = 0
+
+offset_left = 994.6865037194474
+offset_top = 40.55260361317747
+offset_right = 1249.4792773645058
+offset_bottom = 84.16578108395323
+theme_override_constants/separation = 7
 
 [node name="PlaybackSpeedButton" type="Button" parent="Hud/PlaybackRail"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(64, 42)
 layout_mode = 2
+unique_name_in_owner = true
+
 disabled = true
 focus_mode = 2
 tooltip_text = "切换权威世界演出的播放速度（等待逻辑接入）"
-theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("SecondaryStyle")
-theme_override_styles/hover = SubResource("PrimaryStyle")
 text = "1x"
 
+custom_minimum_size = Vector2(80.34006376195536,43.61317747077577)
+theme_override_font_sizes/font_size = 18
+
+theme_override_styles/normal = ExtResource("v2_empty")
+theme_override_styles/pressed = ExtResource("v2_empty")
+theme_override_styles/hover = ExtResource("v2_empty")
+theme_override_styles/disabled = ExtResource("v2_empty")
+theme_override_styles/focus = ExtResource("v2_empty")
+theme_override_fonts/font = ExtResource("v2_bold")
+
+theme_override_colors/font_color = Color(0.22,0.157,0.075,1)
+theme_override_colors/font_hover_color = Color(0.22,0.157,0.075,1)
+
+[node name="OriginalSurface" type="NinePatchRect" parent="Hud/PlaybackRail/PlaybackSpeedButton"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "button-normal"
+source_slice = 56.0
+border_width = 16.83315621679065
+patch_margin_left = 56
+patch_margin_top = 56
+patch_margin_right = 56
+patch_margin_bottom = 56
+
 [node name="SkipPlaybackButton" type="Button" parent="Hud/PlaybackRail"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(72, 42)
 layout_mode = 2
+unique_name_in_owner = true
+
 disabled = true
 focus_mode = 2
 tooltip_text = "跳过当前权威世界演出（等待逻辑接入）"
-theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("SecondaryStyle")
-theme_override_styles/hover = SubResource("PrimaryStyle")
 text = "跳过"
 
+custom_minimum_size = Vector2(80.34006376195536,43.61317747077577)
+theme_override_font_sizes/font_size = 18
+
+theme_override_styles/normal = ExtResource("v2_empty")
+theme_override_styles/pressed = ExtResource("v2_empty")
+theme_override_styles/hover = ExtResource("v2_empty")
+theme_override_styles/disabled = ExtResource("v2_empty")
+theme_override_styles/focus = ExtResource("v2_empty")
+theme_override_fonts/font = ExtResource("v2_bold")
+
+theme_override_colors/font_color = Color(0.22,0.157,0.075,1)
+theme_override_colors/font_hover_color = Color(0.22,0.157,0.075,1)
+
+[node name="OriginalSurface" type="NinePatchRect" parent="Hud/PlaybackRail/SkipPlaybackButton"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "button-normal"
+source_slice = 56.0
+border_width = 16.83315621679065
+patch_margin_left = 56
+patch_margin_top = 56
+patch_margin_right = 56
+patch_margin_bottom = 56
+
 [node name="ReplayPlaybackButton" type="Button" parent="Hud/PlaybackRail"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(72, 42)
 layout_mode = 2
+unique_name_in_owner = true
+
 disabled = true
 focus_mode = 2
 tooltip_text = "重播最近一次已验证结果（等待逻辑接入）"
-theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("SecondaryStyle")
-theme_override_styles/hover = SubResource("PrimaryStyle")
 text = "重播"
 
+custom_minimum_size = Vector2(80.34006376195536,43.61317747077577)
+theme_override_font_sizes/font_size = 18
+
+theme_override_styles/normal = ExtResource("v2_empty")
+theme_override_styles/pressed = ExtResource("v2_empty")
+theme_override_styles/hover = ExtResource("v2_empty")
+theme_override_styles/disabled = ExtResource("v2_empty")
+theme_override_styles/focus = ExtResource("v2_empty")
+theme_override_fonts/font = ExtResource("v2_bold")
+
+theme_override_colors/font_color = Color(0.22,0.157,0.075,1)
+theme_override_colors/font_hover_color = Color(0.22,0.157,0.075,1)
+
+[node name="OriginalSurface" type="NinePatchRect" parent="Hud/PlaybackRail/ReplayPlaybackButton"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "button-normal"
+source_slice = 56.0
+border_width = 16.83315621679065
+patch_margin_left = 56
+patch_margin_top = 56
+patch_margin_right = 56
+patch_margin_bottom = 56
+
 [node name="FarmLayout" type="HBoxContainer" parent="Hud"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 190.0
-offset_top = 112.0
-offset_right = -190.0
-offset_bottom = -185.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 0
+scale = Vector2(0.825, 0.778)
 theme_override_constants/separation = 18
 
+offset_left = 341.254
+offset_top = 203.528
+offset_right = 1060.489
+offset_bottom = 612.880
+
 [node name="PlotGrid" type="GridContainer" parent="Hud/FarmLayout"]
-unique_name_in_owner = true
 layout_mode = 2
+unique_name_in_owner = true
+
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/h_separation = 12
-theme_override_constants/v_separation = 10
 columns = 4
+
+theme_override_constants/h_separation = 3
+theme_override_constants/v_separation = 40
 
 [node name="Plot0" parent="Hud/FarmLayout/PlotGrid" instance=ExtResource("2_card")]
 layout_mode = 2
+
 plot_index = 0
 
 [node name="Plot1" parent="Hud/FarmLayout/PlotGrid" instance=ExtResource("2_card")]
 layout_mode = 2
+
 plot_index = 1
 
 [node name="Plot2" parent="Hud/FarmLayout/PlotGrid" instance=ExtResource("2_card")]
 layout_mode = 2
+
 plot_index = 2
 
 [node name="Plot3" parent="Hud/FarmLayout/PlotGrid" instance=ExtResource("2_card")]
 layout_mode = 2
+
 plot_index = 3
 
 [node name="Plot4" parent="Hud/FarmLayout/PlotGrid" instance=ExtResource("2_card")]
 layout_mode = 2
+
 plot_index = 4
 
 [node name="Plot5" parent="Hud/FarmLayout/PlotGrid" instance=ExtResource("2_card")]
 layout_mode = 2
+
 plot_index = 5
 
 [node name="Plot6" parent="Hud/FarmLayout/PlotGrid" instance=ExtResource("2_card")]
 layout_mode = 2
+
 plot_index = 6
 
 [node name="Plot7" parent="Hud/FarmLayout/PlotGrid" instance=ExtResource("2_card")]
 layout_mode = 2
+
 plot_index = 7
 
-[node name="EvidencePanel" type="PanelContainer" parent="Hud"]
+[node name="EvidencePanel" type="Panel" parent="Hud"]
+layout_mode = 0
 unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 12
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -420.0
-offset_top = -175.0
-offset_right = 420.0
-offset_bottom = -95.0
-grow_horizontal = 2
-grow_vertical = 0
-theme_override_styles/panel = SubResource("EvidenceStyle")
 
-[node name="Margin" type="MarginContainer" parent="Hud/EvidencePanel"]
-layout_mode = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 8
+offset_left = 220.36131774707758
+offset_top = 544.0170031880978
+offset_right = 1076.556854410202
+offset_bottom = 640.4250797024442
+theme_override_styles/panel = ExtResource("v2_empty")
 
-[node name="Content" type="VBoxContainer" parent="Hud/EvidencePanel/Margin"]
-layout_mode = 2
+[node name="OriginalSurface" type="NinePatchRect" parent="Hud/EvidencePanel"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-dialogue"
+source_slice = 64.0
+border_width = 22.954303931987248
+patch_margin_left = 64
+patch_margin_top = 64
+patch_margin_right = 64
+patch_margin_bottom = 64
+
+[node name="Margin" type="Control" parent="Hud/EvidencePanel"]
+layout_mode = 0
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 2
+
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 856.1955366631244
+offset_bottom = 96.40807651434645
+
+[node name="Content" type="Control" parent="Hud/EvidencePanel/Margin"]
+layout_mode = 0
 theme_override_constants/separation = 4
 
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 856.1955366631244
+offset_bottom = 96.40807651434645
+
 [node name="EvidenceTitle" type="Label" parent="Hud/EvidencePanel/Margin/Content"]
+layout_mode = 0
 unique_name_in_owner = true
-layout_mode = 2
 theme_override_colors/font_color = Color(0.15, 0.36, 0.24, 1)
-theme_override_font_sizes/font_size = 18
 text = "清泉试验田"
 
+offset_left = 33.6663124335813
+offset_top = 16.83315621679065
+offset_right = 811.0520722635495
+offset_bottom = 53.560042507970245
+theme_override_font_sizes/font_size = 23
+
+theme_override_fonts/font = ExtResource("v2_bold")
+
 [node name="EvidenceBody" type="RichTextLabel" parent="Hud/EvidencePanel/Margin/Content"]
+layout_mode = 0
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 48)
-layout_mode = 2
 mouse_filter = 2
 theme_override_colors/default_color = Color(0.25, 0.33, 0.22, 1)
-theme_override_font_sizes/normal_font_size = 14
 bbcode_enabled = true
 text = "八块土地正在等待检查。"
+
+offset_left = 33.6663124335813
+offset_top = 57.38575982996812
+offset_right = 811.0520722635495
+offset_bottom = 87.99149840595112
 fit_content = false
+scroll_active = true
+theme_override_font_sizes/normal_font_size = 17
 
 [node name="PrimaryButton" type="Button" parent="Hud"]
+layout_mode = 0
 unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -352.0
-offset_top = -82.0
-offset_right = -24.0
-offset_bottom = -22.0
-grow_horizontal = 0
-grow_vertical = 0
 focus_mode = 2
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("PrimaryStyle")
-theme_override_styles/hover = SubResource("PrimaryStyle")
 text = "查看旧工具演示  →"
 
+offset_left = 768.9691817215728
+offset_top = 651.9022316684378
+offset_right = 1079.6174282678003
+offset_bottom = 706.9925611052072
+theme_override_font_sizes/font_size = 19
+
+theme_override_styles/normal = ExtResource("v2_empty")
+theme_override_styles/pressed = ExtResource("v2_empty")
+theme_override_styles/hover = ExtResource("v2_empty")
+theme_override_styles/disabled = ExtResource("v2_empty")
+theme_override_styles/focus = ExtResource("v2_empty")
+theme_override_fonts/font = ExtResource("v2_bold")
+
+theme_override_colors/font_color = Color(0.22,0.157,0.075,1)
+theme_override_colors/font_hover_color = Color(0.22,0.157,0.075,1)
+
+[node name="OriginalSurface" type="NinePatchRect" parent="Hud/PrimaryButton"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "button-normal"
+source_slice = 56.0
+border_width = 16.83315621679065
+patch_margin_left = 56
+patch_margin_top = 56
+patch_margin_right = 56
+patch_margin_bottom = 56
+
 [node name="WaterChoices" type="HBoxContainer" parent="Hud"]
+layout_mode = 0
 unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -250.0
-offset_top = -82.0
-offset_right = 250.0
-offset_bottom = -20.0
-grow_horizontal = 2
-grow_vertical = 0
-theme_override_constants/separation = 10
+
+offset_left = 260.14877789585546
+offset_top = 645.7810839532413
+offset_right = 1055.8979808714134
+offset_bottom = 703.1668437832094
+theme_override_constants/separation = 34
 
 [node name="SkipWaterButton" type="Button" parent="Hud/WaterChoices"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(156, 58)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
-theme_override_font_sizes/font_size = 17
-theme_override_styles/normal = SubResource("SecondaryStyle")
+unique_name_in_owner = true
+
 text = "不浇水"
 
+custom_minimum_size = Vector2(242.55047821466525,57.38575982996812)
+theme_override_font_sizes/font_size = 22
+
+theme_override_styles/normal = ExtResource("v2_empty")
+theme_override_styles/pressed = ExtResource("v2_empty")
+theme_override_styles/hover = ExtResource("v2_empty")
+theme_override_styles/disabled = ExtResource("v2_empty")
+theme_override_styles/focus = ExtResource("v2_empty")
+theme_override_fonts/font = ExtResource("v2_bold")
+
+theme_override_colors/font_color = Color(0.22,0.157,0.075,1)
+theme_override_colors/font_hover_color = Color(0.22,0.157,0.075,1)
+
+[node name="OriginalSurface" type="NinePatchRect" parent="Hud/WaterChoices/SkipWaterButton"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-data-plaque"
+source_slice = 56.0
+border_width = 16.83315621679065
+patch_margin_left = 56
+patch_margin_top = 56
+patch_margin_right = 56
+patch_margin_bottom = 56
+
 [node name="OneWaterButton" type="Button" parent="Hud/WaterChoices"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(156, 58)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
-theme_override_font_sizes/font_size = 17
-theme_override_styles/normal = SubResource("SecondaryStyle")
+unique_name_in_owner = true
+
 text = "浇 1 份"
 
+custom_minimum_size = Vector2(242.55047821466525,57.38575982996812)
+theme_override_font_sizes/font_size = 22
+
+theme_override_styles/normal = ExtResource("v2_empty")
+theme_override_styles/pressed = ExtResource("v2_empty")
+theme_override_styles/hover = ExtResource("v2_empty")
+theme_override_styles/disabled = ExtResource("v2_empty")
+theme_override_styles/focus = ExtResource("v2_empty")
+theme_override_fonts/font = ExtResource("v2_bold")
+
+theme_override_colors/font_color = Color(0.22,0.157,0.075,1)
+theme_override_colors/font_hover_color = Color(0.22,0.157,0.075,1)
+
+[node name="OriginalSurface" type="NinePatchRect" parent="Hud/WaterChoices/OneWaterButton"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "button-water-green"
+source_slice = 56.0
+border_width = 16.83315621679065
+patch_margin_left = 56
+patch_margin_top = 56
+patch_margin_right = 56
+patch_margin_bottom = 56
+
 [node name="TwoWaterButton" type="Button" parent="Hud/WaterChoices"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(156, 58)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
-theme_override_font_sizes/font_size = 17
-theme_override_styles/normal = SubResource("SecondaryStyle")
+unique_name_in_owner = true
+
 text = "浇 2 份"
+
+custom_minimum_size = Vector2(242.55047821466525,57.38575982996812)
+theme_override_font_sizes/font_size = 22
+
+theme_override_styles/normal = ExtResource("v2_empty")
+theme_override_styles/pressed = ExtResource("v2_empty")
+theme_override_styles/hover = ExtResource("v2_empty")
+theme_override_styles/disabled = ExtResource("v2_empty")
+theme_override_styles/focus = ExtResource("v2_empty")
+theme_override_fonts/font = ExtResource("v2_bold")
+
+theme_override_colors/font_color = Color(0.22,0.157,0.075,1)
+theme_override_colors/font_hover_color = Color(0.22,0.157,0.075,1)
+
+[node name="OriginalSurface" type="NinePatchRect" parent="Hud/WaterChoices/TwoWaterButton"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "button-water-blue"
+source_slice = 56.0
+border_width = 16.83315621679065
+patch_margin_left = 56
+patch_margin_top = 56
+patch_margin_right = 56
+patch_margin_bottom = 56
 
 [node name="WateringCan" type="AnimatedSprite2D" parent="Hud"]
 unique_name_in_owner = true
@@ -527,10 +853,12 @@ visible = false
 sprite_frames = ExtResource("7_can")
 animation = &"pour"
 centered = true
+script = ExtResource("merge_water")
 
 [node name="CodeDrawer" type="Control" parent="."]
-unique_name_in_owner = true
 layout_mode = 1
+unique_name_in_owner = true
+
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -539,8 +867,9 @@ grow_vertical = 2
 mouse_filter = 1
 
 [node name="DismissCodeButton" type="Button" parent="CodeDrawer"]
-unique_name_in_owner = true
 layout_mode = 1
+unique_name_in_owner = true
+
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -549,265 +878,685 @@ grow_vertical = 2
 focus_mode = 0
 flat = true
 
-[node name="Surface" type="PanelContainer" parent="CodeDrawer"]
-layout_mode = 1
-anchors_preset = 11
-anchor_left = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -540.0
-grow_horizontal = 0
-grow_vertical = 2
-theme_override_styles/panel = SubResource("DrawerStyle")
+theme_override_colors/font_color = Color(0.22,0.157,0.075,1)
+theme_override_colors/font_hover_color = Color(0.22,0.157,0.075,1)
 
-[node name="Margin" type="MarginContainer" parent="CodeDrawer/Surface"]
-layout_mode = 2
+[node name="Surface" type="Panel" parent="CodeDrawer"]
+layout_mode = 0
+
+offset_left = 701.6365568544102
+offset_top = 16.83315621679065
+offset_right = 1261.721572794899
+offset_bottom = 701.6365568544102
+theme_override_styles/panel = ExtResource("v2_empty")
+
+[node name="OriginalSurface" type="NinePatchRect" parent="CodeDrawer/Surface"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-panel"
+source_slice = 64.0
+border_width = 22.954303931987248
+patch_margin_left = 64
+patch_margin_top = 64
+patch_margin_right = 64
+patch_margin_bottom = 64
+
+[node name="Margin" type="Control" parent="CodeDrawer/Surface"]
+layout_mode = 0
 theme_override_constants/margin_left = 24
 theme_override_constants/margin_top = 18
 theme_override_constants/margin_right = 18
 theme_override_constants/margin_bottom = 18
 
-[node name="Content" type="VBoxContainer" parent="CodeDrawer/Surface/Margin"]
-layout_mode = 2
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 560.0850159404888
+offset_bottom = 684.8034006376196
+
+[node name="Content" type="Control" parent="CodeDrawer/Surface/Margin"]
+layout_mode = 0
 theme_override_constants/separation = 9
 
-[node name="Header" type="HBoxContainer" parent="CodeDrawer/Surface/Margin/Content"]
-layout_mode = 2
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 560.0850159404888
+offset_bottom = 684.8034006376196
+
+[node name="Header" type="Control" parent="CodeDrawer/Surface/Margin/Content"]
+layout_mode = 0
+
+offset_left = 29.840595111583422
+offset_top = 19.128586609989373
+offset_right = 531.7747077577046
+offset_bottom = 74.21891604675876
 
 [node name="Title" type="Label" parent="CodeDrawer/Surface/Margin/Content/Header"]
-layout_mode = 2
-size_flags_horizontal = 3
+layout_mode = 0
 theme_override_colors/font_color = Color(0.11, 0.31, 0.21, 1)
-theme_override_font_sizes/font_size = 23
 text = "C++ 技能卷轴"
 
+offset_left = 9.181721572794899
+offset_top = 7.651434643995749
+offset_right = 388.6928799149841
+offset_bottom = 51.26461211477152
+theme_override_font_sizes/font_size = 29
+
+theme_override_fonts/font = ExtResource("v2_bold")
+
 [node name="SaveState" type="Label" parent="CodeDrawer/Surface/Margin/Content/Header"]
+layout_mode = 0
 unique_name_in_owner = true
-layout_mode = 2
 theme_override_colors/font_color = Color(0.35, 0.48, 0.28, 1)
-theme_override_font_sizes/font_size = 13
 text = "✓ 草稿已保存"
 vertical_alignment = 1
 
+offset_left = 270.86078639744954
+offset_top = 34.43145589798087
+offset_right = 446.07863974495217
+offset_bottom = 55.090329436769395
+theme_override_font_sizes/font_size = 12
+
 [node name="CloseCodeButton" type="Button" parent="CodeDrawer/Surface/Margin/Content/Header"]
+layout_mode = 0
 unique_name_in_owner = true
-custom_minimum_size = Vector2(44, 42)
-layout_mode = 2
 focus_mode = 2
 tooltip_text = "关闭代码界面"
-theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
 theme_override_font_sizes/font_size = 22
-theme_override_styles/normal = SubResource("SecondaryStyle")
-theme_override_styles/hover = SubResource("PrimaryStyle")
 text = "×"
 
+offset_left = 452.96493092454836
+offset_top = 6.121147715196599
+offset_right = 502.6992561105207
+offset_bottom = 55.090329436769395
+
+theme_override_styles/normal = ExtResource("v2_empty")
+theme_override_styles/pressed = ExtResource("v2_empty")
+theme_override_styles/hover = ExtResource("v2_empty")
+theme_override_styles/disabled = ExtResource("v2_empty")
+theme_override_styles/focus = ExtResource("v2_empty")
+theme_override_fonts/font = ExtResource("v2_bold")
+
+theme_override_colors/font_color = Color(0.22,0.157,0.075,1)
+theme_override_colors/font_hover_color = Color(0.22,0.157,0.075,1)
+
+[node name="OriginalSurface" type="NinePatchRect" parent="CodeDrawer/Surface/Margin/Content/Header/CloseCodeButton"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-data-plaque"
+source_slice = 56.0
+border_width = 16.83315621679065
+patch_margin_left = 56
+patch_margin_top = 56
+patch_margin_right = 56
+patch_margin_bottom = 56
+
 [node name="PrototypeNotice" type="Label" parent="CodeDrawer/Surface/Margin/Content"]
-layout_mode = 2
+layout_mode = 0
 theme_override_colors/font_color = Color(0.69, 0.35, 0.08, 1)
+
+offset_left = 39.022316684378325
+offset_top = 78.04463336875665
+offset_right = 513.4112646121148
+offset_bottom = 98.70350690754518
 theme_override_font_sizes/font_size = 12
-text = "前端教学预演：不会冒充正式 Agent Run 或世界回执"
+
+text = "本地教学练习 · 运行后检查结果"
 
 [node name="CodeEditor" type="CodeEdit" parent="CodeDrawer/Surface/Margin/Content"]
+layout_mode = 0
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 450)
-layout_mode = 2
-size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
 theme_override_colors/caret_color = Color(1, 0.72, 0.24, 1)
 theme_override_colors/selection_color = Color(0.28, 0.55, 0.38, 0.75)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("EditorStyle")
 line_folding = true
 gutters_draw_line_numbers = true
 minimap_draw = false
-wrap_mode = 1
 
-[node name="Actions" type="HBoxContainer" parent="CodeDrawer/Surface/Margin/Content"]
-layout_mode = 2
+offset_left = 29.840595111583422
+offset_top = 107.12008501594049
+offset_right = 524.1232731137088
+offset_bottom = 575.3878852284803
+theme_override_font_sizes/font_size = 15
+
+theme_override_styles/normal = ExtResource("v2_edit_empty")
+theme_override_styles/focus = ExtResource("v2_empty")
+theme_override_fonts/font = ExtResource("v2_mono")
+
+wrap_mode = 0
+theme_override_constants/line_spacing = 3
+
+[node name="OriginalSurface" type="NinePatchRect" parent="CodeDrawer/Surface/Margin/Content/CodeEditor"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-code"
+source_slice = 24.0
+border_width = 10.712008501594049
+patch_margin_left = 24
+patch_margin_top = 24
+patch_margin_right = 24
+patch_margin_bottom = 24
+
+[node name="Actions" type="Control" parent="CodeDrawer/Surface/Margin/Content"]
+layout_mode = 0
 theme_override_constants/separation = 7
 
+offset_left = 30.605738575982997
+offset_top = 612.8799149840595
+offset_right = 522.5929861849097
+offset_bottom = 664.1445270988311
+
 [node name="ResetButton" type="Button" parent="CodeDrawer/Surface/Margin/Content/Actions"]
+layout_mode = 0
 unique_name_in_owner = true
-custom_minimum_size = Vector2(90, 52)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
-theme_override_styles/normal = SubResource("SecondaryStyle")
 text = "重置"
 
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 117.06695005313496
+offset_bottom = 51.26461211477152
+
+theme_override_styles/normal = ExtResource("v2_empty")
+theme_override_styles/pressed = ExtResource("v2_empty")
+theme_override_styles/hover = ExtResource("v2_empty")
+theme_override_styles/disabled = ExtResource("v2_empty")
+theme_override_styles/focus = ExtResource("v2_empty")
+theme_override_fonts/font = ExtResource("v2_bold")
+
+theme_override_colors/font_color = Color(0.22,0.157,0.075,1)
+theme_override_colors/font_hover_color = Color(0.22,0.157,0.075,1)
+
+[node name="OriginalSurface" type="NinePatchRect" parent="CodeDrawer/Surface/Margin/Content/Actions/ResetButton"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-data-plaque"
+source_slice = 56.0
+border_width = 16.83315621679065
+patch_margin_left = 56
+patch_margin_top = 56
+patch_margin_right = 56
+patch_margin_bottom = 56
+
 [node name="RunButton" type="Button" parent="CodeDrawer/Surface/Margin/Content/Actions"]
+layout_mode = 0
 unique_name_in_owner = true
-custom_minimum_size = Vector2(260, 52)
-layout_mode = 2
-size_flags_horizontal = 3
 focus_mode = 2
 tooltip_text = "保存当前代码并直接运行"
-theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("PrimaryStyle")
 text = "直接运行  ▶"
 
-[node name="CompletionCard" type="PanelContainer" parent="."]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -370.0
-offset_top = -190.0
-offset_right = 370.0
-offset_bottom = 190.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("CompletionStyle")
+offset_left = 123.95324123273113
+offset_top = 0.0
+offset_right = 491.9872476089266
+offset_bottom = 51.26461211477152
+theme_override_font_sizes/font_size = 20
 
-[node name="Margin" type="MarginContainer" parent="CompletionCard"]
-layout_mode = 2
+theme_override_styles/normal = ExtResource("v2_empty")
+theme_override_styles/pressed = ExtResource("v2_empty")
+theme_override_styles/hover = ExtResource("v2_empty")
+theme_override_styles/disabled = ExtResource("v2_empty")
+theme_override_styles/focus = ExtResource("v2_empty")
+theme_override_fonts/font = ExtResource("v2_bold")
+
+theme_override_colors/font_color = Color(0.22,0.157,0.075,1)
+theme_override_colors/font_hover_color = Color(0.22,0.157,0.075,1)
+
+[node name="OriginalSurface" type="NinePatchRect" parent="CodeDrawer/Surface/Margin/Content/Actions/RunButton"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "button-normal"
+source_slice = 56.0
+border_width = 16.83315621679065
+patch_margin_left = 56
+patch_margin_top = 56
+patch_margin_right = 56
+patch_margin_bottom = 56
+
+[node name="CompletionShade" type="ColorRect" parent="."]
+layout_mode = 0
+
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 1279.3198724760894
+offset_bottom = 720.0
+visible = false
+mouse_filter = 2
+color = Color(0.063,0.153,0.106,0.53)
+
+[node name="CompletionCard" type="Panel" parent="."]
+layout_mode = 0
+unique_name_in_owner = true
+
+offset_left = 355.7917109458023
+offset_top = 110.94580233793836
+offset_right = 940.3613177470775
+offset_bottom = 605.2284803400638
+theme_override_styles/panel = ExtResource("v2_empty")
+
+[node name="OriginalSurface" type="NinePatchRect" parent="CompletionCard"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-panel"
+source_slice = 64.0
+border_width = 22.954303931987248
+patch_margin_left = 64
+patch_margin_top = 64
+patch_margin_right = 64
+patch_margin_bottom = 64
+
+[node name="Margin" type="Control" parent="CompletionCard"]
+layout_mode = 0
 theme_override_constants/margin_left = 38
 theme_override_constants/margin_top = 30
 theme_override_constants/margin_right = 38
 theme_override_constants/margin_bottom = 28
 
-[node name="Content" type="VBoxContainer" parent="CompletionCard/Margin"]
-layout_mode = 2
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 584.5696068012752
+offset_bottom = 494.2826780021254
+
+[node name="Content" type="Control" parent="CompletionCard/Margin"]
+layout_mode = 0
 theme_override_constants/separation = 14
 
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 584.5696068012752
+offset_bottom = 494.2826780021254
+
 [node name="CompletionTitle" type="Label" parent="CompletionCard/Margin/Content"]
+layout_mode = 0
 unique_name_in_owner = true
-layout_mode = 2
 theme_override_colors/font_color = Color(0.10, 0.38, 0.23, 1)
-theme_override_font_sizes/font_size = 32
 text = "作物适配浇水器已通过验证！"
+
+offset_left = 52.029755579171095
+offset_top = 97.17321997874602
+offset_right = 532.5398512221042
+offset_bottom = 173.6875664187035
+theme_override_font_sizes/font_size = 24
+autowrap_mode = 2
 horizontal_alignment = 1
 
+theme_override_fonts/font = ExtResource("v2_bold")
+
 [node name="CompletionSummary" type="Label" parent="CompletionCard/Margin/Content"]
+layout_mode = 0
 unique_name_in_owner = true
-layout_mode = 2
 theme_override_colors/font_color = Color(0.24, 0.38, 0.22, 1)
-theme_override_font_sizes/font_size = 17
 text = "8块土地全部检查 · 5块正确浇水 · 3块正确跳过\n你让同一个下标把当前湿度与目标湿度配对起来了。"
 horizontal_alignment = 1
 
-[node name="Actions" type="HBoxContainer" parent="CompletionCard/Margin/Content"]
-layout_mode = 2
+offset_left = 53.560042507970245
+offset_top = 191.28586609989372
+offset_right = 531.009564293305
+offset_bottom = 370.32943676939425
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 2
+
+[node name="Actions" type="Control" parent="CompletionCard/Margin/Content"]
+layout_mode = 0
 alignment = 1
 theme_override_constants/separation = 10
 
+offset_left = 45.143464399574924
+offset_top = 405.52603613177473
+offset_right = 532.5398512221042
+offset_bottom = 462.9117959617429
+
 [node name="ReplayButton" type="Button" parent="CompletionCard/Margin/Content/Actions"]
+layout_mode = 0
 unique_name_in_owner = true
-custom_minimum_size = Vector2(180, 58)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
-theme_override_font_sizes/font_size = 17
-theme_override_styles/normal = SubResource("SecondaryStyle")
 text = "重玩本关"
 
-[node name="NextButton" type="Button" parent="CompletionCard/Margin/Content/Actions"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(180, 58)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 140.7863974495218
+offset_bottom = 57.38575982996812
 theme_override_font_sizes/font_size = 17
-theme_override_styles/normal = SubResource("PrimaryStyle")
+
+theme_override_styles/normal = ExtResource("v2_empty")
+theme_override_styles/pressed = ExtResource("v2_empty")
+theme_override_styles/hover = ExtResource("v2_empty")
+theme_override_styles/disabled = ExtResource("v2_empty")
+theme_override_styles/focus = ExtResource("v2_empty")
+theme_override_fonts/font = ExtResource("v2_bold")
+
+theme_override_colors/font_color = Color(0.22,0.157,0.075,1)
+theme_override_colors/font_hover_color = Color(0.22,0.157,0.075,1)
+
+[node name="OriginalSurface" type="NinePatchRect" parent="CompletionCard/Margin/Content/Actions/ReplayButton"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-data-plaque"
+source_slice = 56.0
+border_width = 16.83315621679065
+patch_margin_left = 56
+patch_margin_top = 56
+patch_margin_right = 56
+patch_margin_bottom = 56
+
+[node name="NextButton" type="Button" parent="CompletionCard/Margin/Content/Actions"]
+layout_mode = 0
+unique_name_in_owner = true
 text = "下一关  →"
 
-[node name="ReturnButton" type="Button" parent="CompletionCard/Margin/Content/Actions"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(180, 58)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.12, 0.32, 0.22, 1)
+offset_left = 153.79383634431457
+offset_top = 0.0
+offset_right = 329.0116896918172
+offset_bottom = 57.38575982996812
 theme_override_font_sizes/font_size = 17
-theme_override_styles/normal = SubResource("SecondaryStyle")
+
+theme_override_styles/normal = ExtResource("v2_empty")
+theme_override_styles/pressed = ExtResource("v2_empty")
+theme_override_styles/hover = ExtResource("v2_empty")
+theme_override_styles/disabled = ExtResource("v2_empty")
+theme_override_styles/focus = ExtResource("v2_empty")
+theme_override_fonts/font = ExtResource("v2_bold")
+
+theme_override_colors/font_color = Color(0.22,0.157,0.075,1)
+theme_override_colors/font_hover_color = Color(0.22,0.157,0.075,1)
+
+[node name="OriginalSurface" type="NinePatchRect" parent="CompletionCard/Margin/Content/Actions/NextButton"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "button-normal"
+source_slice = 56.0
+border_width = 16.83315621679065
+patch_margin_left = 56
+patch_margin_top = 56
+patch_margin_right = 56
+patch_margin_bottom = 56
+
+[node name="ReturnButton" type="Button" parent="CompletionCard/Margin/Content/Actions"]
+layout_mode = 0
+unique_name_in_owner = true
 text = "返回农场"
 
+offset_left = 342.01912858661
+offset_top = 0.0
+offset_right = 487.3963868225293
+offset_bottom = 57.38575982996812
+theme_override_font_sizes/font_size = 17
+
+theme_override_styles/normal = ExtResource("v2_empty")
+theme_override_styles/pressed = ExtResource("v2_empty")
+theme_override_styles/hover = ExtResource("v2_empty")
+theme_override_styles/disabled = ExtResource("v2_empty")
+theme_override_styles/focus = ExtResource("v2_empty")
+theme_override_fonts/font = ExtResource("v2_bold")
+
+theme_override_colors/font_color = Color(0.22,0.157,0.075,1)
+theme_override_colors/font_hover_color = Color(0.22,0.157,0.075,1)
+
+[node name="OriginalSurface" type="NinePatchRect" parent="CompletionCard/Margin/Content/Actions/ReturnButton"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-data-plaque"
+source_slice = 56.0
+border_width = 16.83315621679065
+patch_margin_left = 56
+patch_margin_top = 56
+patch_margin_right = 56
+patch_margin_bottom = 56
+
 [node name="SkillTreeOverlay" type="Control" parent="."]
+layout_mode = 1
 unique_name_in_owner = true
 visible = false
-layout_mode = 1
+
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
+
+[node name="WorkshopBackdrop" type="TextureRect" parent="SkillTreeOverlay"]
+layout_mode = 0
+
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 1279.3198724760894
+offset_bottom = 720.0
+mouse_filter = 2
+texture = ExtResource("B04-workshop-exterior-background")
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("merge_ambient")
+background_id = "B04-workshop-exterior-background"
+
+[node name="Video" type="VideoStreamPlayer" parent="SkillTreeOverlay/WorkshopBackdrop"]
+layout_mode = 1
+
+anchor_right = 1.0
+anchor_bottom = 1.0
+expand = true
+mouse_filter = 2
+volume_db = -80.0
 
 [node name="Dimmer" type="ColorRect" parent="SkillTreeOverlay"]
 layout_mode = 1
+
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.035, 0.12, 0.08, 0.72)
 
-[node name="Card" type="PanelContainer" parent="SkillTreeOverlay"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -390.0
-offset_top = -255.0
-offset_right = 390.0
-offset_bottom = 255.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("CompletionStyle")
+color = Color(0,0,0,0)
 
-[node name="Margin" type="MarginContainer" parent="SkillTreeOverlay/Card"]
-layout_mode = 2
-theme_override_constants/margin_left = 42
+[node name="Apprentice" type="TextureRect" parent="SkillTreeOverlay"]
+layout_mode = 0
+
+offset_left = 87.99149840595112
+offset_top = 220.36131774707758
+offset_right = 283.10308182784274
+offset_bottom = 559.3198724760892
+mouse_filter = 2
+texture = ExtResource("char-player-idle")
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("merge_motion")
+motion_id = "char-player-idle"
+
+[node name="Companion" type="TextureRect" parent="SkillTreeOverlay"]
+layout_mode = 0
+
+offset_left = 24.484590860786398
+offset_top = 397.1094580233794
+offset_right = 167.5664187035069
+offset_bottom = 561.6153028692879
+mouse_filter = 2
+texture = ExtResource("char-walnut-idle")
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("merge_motion")
+motion_id = "char-walnut-idle"
+
+[node name="Card" type="Panel" parent="SkillTreeOverlay"]
+layout_mode = 0
+
+offset_left = 244.0807651434644
+offset_top = 47.438894792773645
+offset_right = 1058.9585547290117
+offset_bottom = 640.4250797024442
+theme_override_styles/panel = ExtResource("v2_empty")
+
+[node name="OriginalSurface" type="NinePatchRect" parent="SkillTreeOverlay/Card"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-panel"
+source_slice = 64.0
+border_width = 22.954303931987248
+patch_margin_left = 64
+patch_margin_top = 64
+patch_margin_right = 64
+patch_margin_bottom = 64
+
+[node name="TreeArt" type="Control" parent="SkillTreeOverlay/Card"]
+layout_mode = 0
+mouse_filter = 2
+
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 814.8777895855472
+offset_bottom = 592.9861849096706
+
+[node name="Branches" type="TextureRect" parent="SkillTreeOverlay/Card/TreeArt"]
+layout_mode = 0
+mouse_filter = 2
+texture = ExtResource("proto_tree")
+expand_mode = 1
+stretch_mode = 5
+
+offset_left = 52.029755579171095
+offset_top = 66.56748140276302
+offset_right = 324.42082890541974
+offset_bottom = 475.154091392136
+
+[node name="Crown" type="TextureRect" parent="SkillTreeOverlay/Card/TreeArt"]
+layout_mode = 0
+
+offset_left = 82.0
+offset_top = 52.0
+offset_right = 154.0
+offset_bottom = 110.0
+mouse_filter = 2
+texture = ExtResource("proto_walnut")
+expand_mode = 1
+stretch_mode = 5
+
+visible = false
+
+[node name="TreeCaption" type="Label" parent="SkillTreeOverlay/Card/TreeArt"]
+layout_mode = 0
+offset_left = 58.150903294367694
+offset_top = 496.57810839532414
+offset_right = 314.47396386822527
+offset_bottom = 547.0775770456961
+theme_override_font_sizes/font_size = 17
+text = "观察 · 理解 · 创造"
+horizontal_alignment = 1
+mouse_filter = 2
+
+visible = true
+
+[node name="Margin" type="Control" parent="SkillTreeOverlay/Card"]
+layout_mode = 0
+theme_override_constants/margin_left = 250
 theme_override_constants/margin_top = 32
-theme_override_constants/margin_right = 42
+theme_override_constants/margin_right = 28
 theme_override_constants/margin_bottom = 30
 
-[node name="Content" type="VBoxContainer" parent="SkillTreeOverlay/Card/Margin"]
-layout_mode = 2
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 814.8777895855472
+offset_bottom = 592.9861849096706
+
+[node name="Content" type="Control" parent="SkillTreeOverlay/Card/Margin"]
+layout_mode = 0
 theme_override_constants/separation = 14
 
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 814.8777895855472
+offset_bottom = 592.9861849096706
+
 [node name="SkillTreeBadge" type="Label" parent="SkillTreeOverlay/Card/Margin/Content"]
+layout_mode = 0
 unique_name_in_owner = true
-layout_mode = 2
 theme_override_colors/font_color = Color(0.72, 0.36, 0.08, 1)
-theme_override_font_sizes/font_size = 16
 text = "技能树 · 4★ 节点"
-horizontal_alignment = 1
+
+offset_left = 355.7917109458023
+offset_top = 45.908607863974495
+offset_right = 753.6663124335813
+offset_bottom = 74.98405951115834
+theme_override_font_sizes/font_size = 18
+
+horizontal_alignment = 0
 
 [node name="SkillTreeTitle" type="Label" parent="SkillTreeOverlay/Card/Margin/Content"]
+layout_mode = 0
 unique_name_in_owner = true
-layout_mode = 2
 theme_override_colors/font_color = Color(0.10, 0.36, 0.22, 1)
-theme_override_font_sizes/font_size = 31
 text = "作物适配浇水器"
-horizontal_alignment = 1
+
+offset_left = 352.73113708820404
+offset_top = 85.69606801275239
+offset_right = 756.7268862911797
+offset_bottom = 128.5441020191286
+theme_override_font_sizes/font_size = 28
+
+theme_override_fonts/font = ExtResource("v2_bold")
+
+horizontal_alignment = 0
 
 [node name="SkillTreeBody" type="RichTextLabel" parent="SkillTreeOverlay/Card/Margin/Content"]
+layout_mode = 0
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 285)
-layout_mode = 2
-size_flags_vertical = 3
 mouse_filter = 2
 theme_override_colors/default_color = Color(0.22, 0.36, 0.22, 1)
-theme_override_font_sizes/normal_font_size = 18
 bbcode_enabled = true
 text = "技能节点"
+
+offset_left = 357.3219978746015
+offset_top = 195.87672688629118
+offset_right = 752.1360255047822
+offset_bottom = 231.07332624867163
 fit_content = false
+scroll_active = false
+theme_override_font_sizes/normal_font_size = 22
+theme_override_fonts/normal_font = ExtResource("v2_bold")
 
 [node name="SkillTreeContinueButton" type="Button" parent="SkillTreeOverlay/Card/Margin/Content"]
+layout_mode = 0
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 58)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("PrimaryStyle")
 text = "进入清泉工坊  →"
 
+offset_left = 348.90541976620614
+offset_top = 507.29011689691816
+offset_right = 754.4314558979809
+offset_bottom = 564.6758767268863
+theme_override_font_sizes/font_size = 18
+
+theme_override_styles/normal = ExtResource("v2_empty")
+theme_override_styles/pressed = ExtResource("v2_empty")
+theme_override_styles/hover = ExtResource("v2_empty")
+theme_override_styles/disabled = ExtResource("v2_empty")
+theme_override_styles/focus = ExtResource("v2_empty")
+theme_override_fonts/font = ExtResource("v2_bold")
+
+theme_override_colors/font_color = Color(0.22,0.157,0.075,1)
+theme_override_colors/font_hover_color = Color(0.22,0.157,0.075,1)
+
+[node name="OriginalSurface" type="NinePatchRect" parent="SkillTreeOverlay/Card/Margin/Content/SkillTreeContinueButton"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "button-normal"
+source_slice = 56.0
+border_width = 16.83315621679065
+patch_margin_left = 56
+patch_margin_top = 56
+patch_margin_right = 56
+patch_margin_bottom = 56
+
 [node name="WorkshopOverlay" type="Control" parent="."]
+layout_mode = 1
 unique_name_in_owner = true
 visible = false
-layout_mode = 1
+
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -815,437 +1564,1051 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
 
-[node name="Dimmer" type="ColorRect" parent="WorkshopOverlay"]
+[node name="WorkshopBackdrop" type="TextureRect" parent="WorkshopOverlay"]
 layout_mode = 1
+
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.035, 0.12, 0.08, 0.66)
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
 
-[node name="Card" type="PanelContainer" parent="WorkshopOverlay"]
+texture = ExtResource("B02-workshop-background")
+script = ExtResource("merge_ambient")
+background_id = "B02-workshop-background"
+
+[node name="Video" type="VideoStreamPlayer" parent="WorkshopOverlay/WorkshopBackdrop"]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -420.0
-offset_top = -300.0
-offset_right = 420.0
-offset_bottom = 300.0
+
+anchor_right = 1.0
+anchor_bottom = 1.0
+expand = true
+mouse_filter = 2
+volume_db = -80.0
+
+[node name="Dimmer" type="ColorRect" parent="WorkshopOverlay"]
+layout_mode = 1
+
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("TaskStyle")
 
-[node name="Margin" type="MarginContainer" parent="WorkshopOverlay/Card"]
-layout_mode = 2
-theme_override_constants/margin_left = 46
-theme_override_constants/margin_top = 26
-theme_override_constants/margin_right = 46
-theme_override_constants/margin_bottom = 24
+color = Color(0,0,0,0)
 
-[node name="Content" type="VBoxContainer" parent="WorkshopOverlay/Card/Margin"]
-layout_mode = 2
-theme_override_constants/separation = 14
+[node name="Apprentice" type="TextureRect" parent="WorkshopOverlay"]
+layout_mode = 0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+offset_left = 87.99149840595112
+offset_top = 220.36131774707758
+offset_right = 283.10308182784274
+offset_bottom = 559.3198724760892
+texture = ExtResource("char-player-idle")
+script = ExtResource("merge_motion")
+motion_id = "char-player-idle"
+
+[node name="Companion" type="TextureRect" parent="WorkshopOverlay"]
+layout_mode = 0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+offset_left = 24.484590860786398
+offset_top = 397.1094580233794
+offset_right = 167.5664187035069
+offset_bottom = 561.6153028692879
+texture = ExtResource("char-walnut-idle")
+script = ExtResource("merge_motion")
+motion_id = "char-walnut-idle"
+
+[node name="Mentor" type="TextureRect" parent="WorkshopOverlay"]
+layout_mode = 0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+offset_left = 1042.125398512221
+offset_top = 213.4750265674814
+offset_right = 1257.1307120085016
+offset_bottom = 605.2284803400637
+texture = ExtResource("char-dingdang-idle")
+script = ExtResource("merge_motion")
+motion_id = "char-dingdang-idle"
+
+[node name="Card" type="Panel" parent="WorkshopOverlay"]
+layout_mode = 0
+
+offset_left = 244.0807651434644
+offset_top = 47.438894792773645
+offset_right = 1058.9585547290117
+offset_bottom = 640.4250797024442
+theme_override_styles/panel = ExtResource("v2_empty")
+
+[node name="OriginalSurface" type="NinePatchRect" parent="WorkshopOverlay/Card"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-panel"
+source_slice = 64.0
+border_width = 22.954303931987248
+patch_margin_left = 64
+patch_margin_top = 64
+patch_margin_right = 64
+patch_margin_bottom = 64
+
+[node name="Margin" type="Control" parent="WorkshopOverlay/Card"]
+layout_mode = 0
+theme_override_constants/margin_left = 26
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 26
+theme_override_constants/margin_bottom = 18
+
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 814.8777895855472
+offset_bottom = 592.9861849096706
+
+[node name="Content" type="Control" parent="WorkshopOverlay/Card/Margin"]
+layout_mode = 0
+theme_override_constants/separation = 10
+
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 814.8777895855472
+offset_bottom = 592.9861849096706
 
 [node name="WorkshopBadge" type="Label" parent="WorkshopOverlay/Card/Margin/Content"]
+layout_mode = 0
 unique_name_in_owner = true
-layout_mode = 2
 theme_override_colors/font_color = Color(0.72, 0.36, 0.08, 1)
-theme_override_font_sizes/font_size = 16
 text = "实验 1 / 3"
 
+offset_left = 67.3326248671626
+offset_top = 43.61317747077577
+offset_right = 736.8331562167907
+offset_bottom = 75.74920297555792
+theme_override_font_sizes/font_size = 18
+
 [node name="WorkshopTitle" type="Label" parent="WorkshopOverlay/Card/Margin/Content"]
+layout_mode = 0
 unique_name_in_owner = true
-layout_mode = 2
 theme_override_colors/font_color = Color(0.10, 0.36, 0.22, 1)
-theme_override_font_sizes/font_size = 29
 text = "同一个下标，找到同一块土地"
 
+offset_left = 65.03719447396386
+offset_top = 84.93092454835282
+offset_right = 757.4920297555791
+offset_bottom = 131.6046758767269
+theme_override_font_sizes/font_size = 32
+
+theme_override_fonts/font = ExtResource("v2_bold")
+
 [node name="WorkshopBody" type="RichTextLabel" parent="WorkshopOverlay/Card/Margin/Content"]
+layout_mode = 0
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 82)
-layout_mode = 2
 mouse_filter = 2
 theme_override_colors/default_color = Color(0.23, 0.34, 0.22, 1)
-theme_override_font_sizes/normal_font_size = 17
 bbcode_enabled = true
 text = "实验内容"
+
+offset_left = 65.03719447396386
+offset_top = 135.43039319872477
+offset_right = 757.4920297555791
+offset_bottom = 203.52816153028692
+theme_override_font_sizes/font_size = 19
 fit_content = false
+scroll_active = true
+theme_override_font_sizes/normal_font_size = 19
 
-[node name="WorkshopCodePanel" type="PanelContainer" parent="WorkshopOverlay/Card/Margin/Content"]
-custom_minimum_size = Vector2(0, 300)
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_styles/panel = SubResource("EditorStyle")
+[node name="WorkshopCodePanel" type="Panel" parent="WorkshopOverlay/Card/Margin/Content"]
+layout_mode = 0
 
-[node name="Margin" type="MarginContainer" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel"]
-layout_mode = 2
+offset_left = 58.916046758767266
+offset_top = 205.0584484590861
+offset_right = 751.3708820403825
+offset_bottom = 463.67693942614244
+theme_override_styles/panel = ExtResource("v2_empty")
+
+[node name="OriginalSurface" type="NinePatchRect" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-code"
+source_slice = 24.0
+border_width = 10.712008501594049
+patch_margin_left = 24
+patch_margin_top = 24
+patch_margin_right = 24
+patch_margin_bottom = 24
+
+[node name="Margin" type="Control" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel"]
+layout_mode = 0
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 16
 
-[node name="Stack" type="Control" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin"]
-custom_minimum_size = Vector2(0, 260)
-layout_mode = 2
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 692.4548352816153
+offset_bottom = 258.61849096705635
 
-[node name="WorkshopGapCode" type="VBoxContainer" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack"]
+[node name="Stack" type="Control" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin"]
+layout_mode = 0
+
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 692.4548352816153
+offset_bottom = 258.61849096705635
+
+[node name="WorkshopGapCode" type="Control" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack"]
+layout_mode = 0
 unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
 theme_override_constants/separation = 12
 
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 692.4548352816153
+offset_bottom = 258.61849096705635
+
 [node name="LoopStart" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 18
+layout_mode = 0
 text = "for (int i = 0; i < 8; i++) {"
 
-[node name="GapLine" type="HBoxContainer" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode"]
-layout_mode = 2
+offset_left = 33.6663124335813
+offset_top = 16.83315621679065
+offset_right = 664.9096705632306
+offset_bottom = 58.91604675876727
+theme_override_font_sizes/font_size = 19
+
+theme_override_fonts/font = ExtResource("v2_mono")
+
+theme_override_colors/font_color = Color(0.88,0.91,0.78,1)
+vertical_alignment = 1
+
+[node name="GapLine" type="Control" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode"]
+layout_mode = 0
 theme_override_constants/separation = 8
 
+offset_left = 0.0
+offset_top = 59.681190223166844
+offset_right = 692.4548352816153
+offset_bottom = 102.52922422954305
+
 [node name="Indent" type="Control" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode/GapLine"]
-custom_minimum_size = Vector2(24, 0)
 layout_mode = 2
+custom_minimum_size = Vector2(24, 0)
+
+visible = false
 
 [node name="Prefix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode/GapLine"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 18
+layout_mode = 0
 text = "int gap ="
 vertical_alignment = 1
 
+offset_left = 76.51434643995749
+offset_top = 0.0
+offset_right = 193.58129649309245
+offset_bottom = 42.848034006376196
+theme_override_font_sizes/font_size = 19
+
+theme_override_fonts/font = ExtResource("v2_mono")
+
+theme_override_colors/font_color = Color(0.88,0.91,0.78,1)
+
 [node name="GapTargetInput" type="LineEdit" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode/GapLine"]
+layout_mode = 0
 unique_name_in_owner = true
-custom_minimum_size = Vector2(145, 42)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.31, 0.21, 1)
-theme_override_colors/caret_color = Color(0.10, 0.31, 0.21, 1)
+theme_override_colors/font_color = Color(0.15, 0.27, 0.17, 1)
+theme_override_colors/caret_color = Color(0.15, 0.27, 0.17, 1)
 theme_override_colors/placeholder_color = Color(0.41, 0.51, 0.39, 0.85)
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("WorkshopInputStyle")
-theme_override_styles/focus = SubResource("WorkshopInputFocusStyle")
 placeholder_text = "目标数组"
 max_length = 16
 select_all_on_focus = true
+theme_override_colors/font_placeholder_color = Color(0.43, 0.43, 0.27, 0.85)
+
+offset_left = 201.2327311370882
+offset_top = 0.0
+offset_right = 354.26142401700315
+offset_bottom = 42.848034006376196
+theme_override_font_sizes/font_size = 19
+
+theme_override_styles/normal = ExtResource("v2_input_empty")
+theme_override_styles/focus = ExtResource("v2_input_empty")
+theme_override_styles/read_only = ExtResource("v2_input_empty")
+theme_override_fonts/font = ExtResource("v2_mono")
+script = ExtResource("merge_input")
+expected_value = "target"
+error_message = "请填写目标湿度数组 target。"
+
+[node name="OriginalSurface" type="NinePatchRect" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode/GapLine/GapTargetInput"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "input-normal"
+source_slice = 30.0
+border_width = 8.416578108395324
+patch_margin_left = 30
+patch_margin_top = 30
+patch_margin_right = 30
+patch_margin_bottom = 30
 
 [node name="Middle" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode/GapLine"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 18
+layout_mode = 0
 text = "[i]  -"
 vertical_alignment = 1
 
+offset_left = 361.91285866099895
+offset_top = 0.0
+offset_right = 430.7757704569607
+offset_bottom = 42.848034006376196
+theme_override_font_sizes/font_size = 19
+
+theme_override_fonts/font = ExtResource("v2_mono")
+
+theme_override_colors/font_color = Color(0.88,0.91,0.78,1)
+
 [node name="GapMoistureInput" type="LineEdit" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode/GapLine"]
+layout_mode = 0
 unique_name_in_owner = true
-custom_minimum_size = Vector2(160, 42)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.31, 0.21, 1)
-theme_override_colors/caret_color = Color(0.10, 0.31, 0.21, 1)
+theme_override_colors/font_color = Color(0.15, 0.27, 0.17, 1)
+theme_override_colors/caret_color = Color(0.15, 0.27, 0.17, 1)
 theme_override_colors/placeholder_color = Color(0.41, 0.51, 0.39, 0.85)
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("WorkshopInputStyle")
-theme_override_styles/focus = SubResource("WorkshopInputFocusStyle")
 placeholder_text = "当前数组"
 max_length = 16
 select_all_on_focus = true
+theme_override_colors/font_placeholder_color = Color(0.43, 0.43, 0.27, 0.85)
+
+offset_left = 438.4272051009564
+offset_top = 0.0
+offset_right = 591.4558979808714
+offset_bottom = 42.848034006376196
+theme_override_font_sizes/font_size = 19
+
+theme_override_styles/normal = ExtResource("v2_input_empty")
+theme_override_styles/focus = ExtResource("v2_input_empty")
+theme_override_styles/read_only = ExtResource("v2_input_empty")
+theme_override_fonts/font = ExtResource("v2_mono")
+script = ExtResource("merge_input")
+expected_value = "moisture"
+error_message = "请填写当前湿度数组 moisture。"
+
+[node name="OriginalSurface" type="NinePatchRect" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode/GapLine/GapMoistureInput"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "input-normal"
+source_slice = 30.0
+border_width = 8.416578108395324
+patch_margin_left = 30
+patch_margin_top = 30
+patch_margin_right = 30
+patch_margin_bottom = 30
 
 [node name="Suffix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode/GapLine"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 18
+layout_mode = 0
 text = "[i];"
 vertical_alignment = 1
 
+offset_left = 599.1073326248671
+offset_top = 0.0
+offset_right = 677.9171094580233
+offset_bottom = 42.848034006376196
+theme_override_font_sizes/font_size = 19
+
+theme_override_fonts/font = ExtResource("v2_mono")
+
+theme_override_colors/font_color = Color(0.88,0.91,0.78,1)
+
 [node name="Reserved" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.56, 0.75, 0.62, 1)
-theme_override_font_sizes/font_size = 16
+layout_mode = 0
 text = "    // 下一步：根据 gap 在这里补充 0 / 1 / 2 份的分级判断\n    // if (...) { ... } else if (...) { ... }"
 
+offset_left = 61.211477151965994
+offset_top = 125.48352816153029
+offset_right = 680.9776833156218
+offset_bottom = 195.11158342189162
+theme_override_font_sizes/font_size = 19
+
+theme_override_fonts/font = ExtResource("v2_mono")
+
+theme_override_colors/font_color = Color(0.88,0.91,0.78,1)
+
 [node name="LoopEnd" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 18
+layout_mode = 0
 text = "}"
 
-[node name="WorkshopBranchCode" type="VBoxContainer" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack"]
+offset_left = 33.6663124335813
+offset_top = 197.40701381509032
+offset_right = 645.7810839532413
+offset_bottom = 239.48990435706696
+theme_override_font_sizes/font_size = 19
+
+theme_override_fonts/font = ExtResource("v2_mono")
+
+theme_override_colors/font_color = Color(0.88,0.91,0.78,1)
+vertical_alignment = 1
+
+[node name="WorkshopBranchCode" type="Control" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack"]
+layout_mode = 0
 unique_name_in_owner = true
 visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
 theme_override_constants/separation = 5
 
-[node name="SevereCondition" type="HBoxContainer" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode"]
-layout_mode = 2
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 692.4548352816153
+offset_bottom = 258.61849096705635
+
+[node name="SevereCondition" type="Control" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode"]
+layout_mode = 0
 theme_override_constants/separation = 7
 
+offset_left = 39.787460148777896
+offset_top = 15.302869287991498
+offset_right = 663.3793836344314
+offset_bottom = 55.090329436769395
+
 [node name="Prefix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/SevereCondition"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 17
+layout_mode = 0
 text = "if (gap >="
 vertical_alignment = 1
 
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 119.36238044633369
+offset_bottom = 39.787460148777896
+theme_override_font_sizes/font_size = 19
+
+theme_override_fonts/font = ExtResource("v2_mono")
+
+theme_override_colors/font_color = Color(0.88,0.91,0.78,1)
+
 [node name="SevereBoundaryInput" type="LineEdit" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/SevereCondition"]
+layout_mode = 0
 unique_name_in_owner = true
-custom_minimum_size = Vector2(78, 36)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.31, 0.21, 1)
-theme_override_colors/caret_color = Color(0.10, 0.31, 0.21, 1)
-theme_override_font_sizes/font_size = 17
-theme_override_styles/normal = SubResource("WorkshopInputStyle")
-theme_override_styles/focus = SubResource("WorkshopInputFocusStyle")
+theme_override_colors/font_color = Color(0.15, 0.27, 0.17, 1)
+theme_override_colors/caret_color = Color(0.15, 0.27, 0.17, 1)
 placeholder_text = "边界"
 max_length = 3
 select_all_on_focus = true
+theme_override_colors/font_placeholder_color = Color(0.43, 0.43, 0.27, 0.85)
+
+offset_left = 127.01381509032944
+offset_top = 0.0
+offset_right = 217.3007438894793
+offset_bottom = 39.787460148777896
+theme_override_font_sizes/font_size = 19
+
+theme_override_styles/normal = ExtResource("v2_input_empty")
+theme_override_styles/focus = ExtResource("v2_input_empty")
+theme_override_styles/read_only = ExtResource("v2_input_empty")
+theme_override_fonts/font = ExtResource("v2_mono")
+script = ExtResource("merge_input")
+expected_value = "30"
+error_message = "严重缺水边界为30。"
+
+[node name="OriginalSurface" type="NinePatchRect" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/SevereCondition/SevereBoundaryInput"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "input-normal"
+source_slice = 30.0
+border_width = 8.416578108395324
+patch_margin_left = 30
+patch_margin_top = 30
+patch_margin_right = 30
+patch_margin_bottom = 30
 
 [node name="Suffix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/SevereCondition"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 17
+layout_mode = 0
 text = ") {"
 vertical_alignment = 1
 
-[node name="SevereOutput" type="HBoxContainer" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode"]
-layout_mode = 2
+offset_left = 224.95217853347503
+offset_top = 0.0
+offset_right = 338.1934112646121
+offset_bottom = 39.787460148777896
+theme_override_font_sizes/font_size = 19
+
+theme_override_fonts/font = ExtResource("v2_mono")
+
+theme_override_colors/font_color = Color(0.88,0.91,0.78,1)
+
+[node name="SevereOutput" type="Control" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode"]
+layout_mode = 0
 theme_override_constants/separation = 7
 
+offset_left = 39.787460148777896
+offset_top = 55.855472901168966
+offset_right = 663.3793836344314
+offset_bottom = 95.64293304994686
+
 [node name="Prefix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/SevereOutput"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 17
+layout_mode = 0
 text = "    cout << \"WATER \" << i << \""
 vertical_alignment = 1
 
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 326.71625929861847
+offset_bottom = 39.787460148777896
+theme_override_font_sizes/font_size = 19
+
+theme_override_fonts/font = ExtResource("v2_mono")
+
+theme_override_colors/font_color = Color(0.88,0.91,0.78,1)
+
 [node name="SevereUnitsInput" type="LineEdit" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/SevereOutput"]
+layout_mode = 0
 unique_name_in_owner = true
-custom_minimum_size = Vector2(68, 36)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.31, 0.21, 1)
-theme_override_colors/caret_color = Color(0.10, 0.31, 0.21, 1)
-theme_override_font_sizes/font_size = 17
-theme_override_styles/normal = SubResource("WorkshopInputStyle")
-theme_override_styles/focus = SubResource("WorkshopInputFocusStyle")
+theme_override_colors/font_color = Color(0.15, 0.27, 0.17, 1)
+theme_override_colors/caret_color = Color(0.15, 0.27, 0.17, 1)
 placeholder_text = "份数"
 max_length = 1
 select_all_on_focus = true
+theme_override_colors/font_placeholder_color = Color(0.43, 0.43, 0.27, 0.85)
+
+offset_left = 334.36769394261427
+offset_top = 0.0
+offset_right = 424.6546227417641
+offset_bottom = 39.787460148777896
+theme_override_font_sizes/font_size = 19
+
+theme_override_styles/normal = ExtResource("v2_input_empty")
+theme_override_styles/focus = ExtResource("v2_input_empty")
+theme_override_styles/read_only = ExtResource("v2_input_empty")
+theme_override_fonts/font = ExtResource("v2_mono")
+script = ExtResource("merge_input")
+expected_value = "2"
+error_message = "严重缺水需要2份水。"
+
+[node name="OriginalSurface" type="NinePatchRect" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/SevereOutput/SevereUnitsInput"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "input-normal"
+source_slice = 30.0
+border_width = 8.416578108395324
+patch_margin_left = 30
+patch_margin_top = 30
+patch_margin_right = 30
+patch_margin_bottom = 30
 
 [node name="Suffix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/SevereOutput"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 17
+layout_mode = 0
 text = "\\n\";"
 vertical_alignment = 1
 
-[node name="LightCondition" type="HBoxContainer" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode"]
-layout_mode = 2
+offset_left = 432.30605738575986
+offset_top = 0.0
+offset_right = 545.547290116897
+offset_bottom = 39.787460148777896
+theme_override_font_sizes/font_size = 19
+
+theme_override_fonts/font = ExtResource("v2_mono")
+
+theme_override_colors/font_color = Color(0.88,0.91,0.78,1)
+
+[node name="LightCondition" type="Control" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode"]
+layout_mode = 0
 theme_override_constants/separation = 7
 
+offset_left = 39.787460148777896
+offset_top = 96.40807651434645
+offset_right = 663.3793836344314
+offset_bottom = 136.19553666312436
+
 [node name="Prefix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/LightCondition"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 17
+layout_mode = 0
 text = "} else if (gap >"
 vertical_alignment = 1
 
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 188.22529224229544
+offset_bottom = 39.787460148777896
+theme_override_font_sizes/font_size = 19
+
+theme_override_fonts/font = ExtResource("v2_mono")
+
+theme_override_colors/font_color = Color(0.88,0.91,0.78,1)
+
 [node name="LightBoundaryInput" type="LineEdit" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/LightCondition"]
+layout_mode = 0
 unique_name_in_owner = true
-custom_minimum_size = Vector2(78, 36)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.31, 0.21, 1)
-theme_override_colors/caret_color = Color(0.10, 0.31, 0.21, 1)
-theme_override_font_sizes/font_size = 17
-theme_override_styles/normal = SubResource("WorkshopInputStyle")
-theme_override_styles/focus = SubResource("WorkshopInputFocusStyle")
+theme_override_colors/font_color = Color(0.15, 0.27, 0.17, 1)
+theme_override_colors/caret_color = Color(0.15, 0.27, 0.17, 1)
 placeholder_text = "边界"
 max_length = 3
 select_all_on_focus = true
+theme_override_colors/font_placeholder_color = Color(0.43, 0.43, 0.27, 0.85)
+
+offset_left = 195.87672688629118
+offset_top = 0.0
+offset_right = 286.16365568544103
+offset_bottom = 39.787460148777896
+theme_override_font_sizes/font_size = 19
+
+theme_override_styles/normal = ExtResource("v2_input_empty")
+theme_override_styles/focus = ExtResource("v2_input_empty")
+theme_override_styles/read_only = ExtResource("v2_input_empty")
+theme_override_fonts/font = ExtResource("v2_mono")
+script = ExtResource("merge_input")
+expected_value = "0"
+error_message = "轻度缺水边界为0。"
+
+[node name="OriginalSurface" type="NinePatchRect" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/LightCondition/LightBoundaryInput"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "input-normal"
+source_slice = 30.0
+border_width = 8.416578108395324
+patch_margin_left = 30
+patch_margin_top = 30
+patch_margin_right = 30
+patch_margin_bottom = 30
 
 [node name="Suffix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/LightCondition"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 17
+layout_mode = 0
 text = ") {"
 vertical_alignment = 1
 
-[node name="LightOutput" type="HBoxContainer" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode"]
-layout_mode = 2
+offset_left = 293.81509032943677
+offset_top = 0.0
+offset_right = 407.05632306057385
+offset_bottom = 39.787460148777896
+theme_override_font_sizes/font_size = 19
+
+theme_override_fonts/font = ExtResource("v2_mono")
+
+theme_override_colors/font_color = Color(0.88,0.91,0.78,1)
+
+[node name="LightOutput" type="Control" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode"]
+layout_mode = 0
 theme_override_constants/separation = 7
 
+offset_left = 39.787460148777896
+offset_top = 136.96068012752391
+offset_right = 663.3793836344314
+offset_bottom = 176.7481402763018
+
 [node name="Prefix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/LightOutput"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 17
+layout_mode = 0
 text = "    cout << \"WATER \" << i << \""
 vertical_alignment = 1
 
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 326.71625929861847
+offset_bottom = 39.787460148777896
+theme_override_font_sizes/font_size = 19
+
+theme_override_fonts/font = ExtResource("v2_mono")
+
+theme_override_colors/font_color = Color(0.88,0.91,0.78,1)
+
 [node name="LightUnitsInput" type="LineEdit" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/LightOutput"]
+layout_mode = 0
 unique_name_in_owner = true
-custom_minimum_size = Vector2(68, 36)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.31, 0.21, 1)
-theme_override_colors/caret_color = Color(0.10, 0.31, 0.21, 1)
-theme_override_font_sizes/font_size = 17
-theme_override_styles/normal = SubResource("WorkshopInputStyle")
-theme_override_styles/focus = SubResource("WorkshopInputFocusStyle")
+theme_override_colors/font_color = Color(0.15, 0.27, 0.17, 1)
+theme_override_colors/caret_color = Color(0.15, 0.27, 0.17, 1)
 placeholder_text = "份数"
 max_length = 1
 select_all_on_focus = true
+theme_override_colors/font_placeholder_color = Color(0.43, 0.43, 0.27, 0.85)
+
+offset_left = 334.36769394261427
+offset_top = 0.0
+offset_right = 424.6546227417641
+offset_bottom = 39.787460148777896
+theme_override_font_sizes/font_size = 19
+
+theme_override_styles/normal = ExtResource("v2_input_empty")
+theme_override_styles/focus = ExtResource("v2_input_empty")
+theme_override_styles/read_only = ExtResource("v2_input_empty")
+theme_override_fonts/font = ExtResource("v2_mono")
+script = ExtResource("merge_input")
+expected_value = "1"
+error_message = "轻度缺水需要1份水。"
+
+[node name="OriginalSurface" type="NinePatchRect" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/LightOutput/LightUnitsInput"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "input-normal"
+source_slice = 30.0
+border_width = 8.416578108395324
+patch_margin_left = 30
+patch_margin_top = 30
+patch_margin_right = 30
+patch_margin_bottom = 30
 
 [node name="Suffix" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode/LightOutput"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 17
+layout_mode = 0
 text = "\\n\";"
 vertical_alignment = 1
 
-[node name="CloseAndHint" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.56, 0.75, 0.62, 1)
-theme_override_font_sizes/font_size = 15
-text = "}\n// gap <= 0 时不输出 WATER\n// 完成后，将这段判断放回 for 循环中"
+offset_left = 432.30605738575986
+offset_top = 0.0
+offset_right = 545.547290116897
+offset_bottom = 39.787460148777896
+theme_override_font_sizes/font_size = 19
 
-[node name="WorkshopSummaryCode" type="VBoxContainer" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack"]
+theme_override_fonts/font = ExtResource("v2_mono")
+
+theme_override_colors/font_color = Color(0.88,0.91,0.78,1)
+
+[node name="CloseAndHint" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode"]
+layout_mode = 0
+
+offset_left = 39.787460148777896
+offset_top = 178.27842720510097
+offset_right = 659.5536663124336
+offset_bottom = 254.0276301806589
+theme_override_font_sizes/font_size = 19
+
+theme_override_fonts/font = ExtResource("v2_mono")
+
+text = "}\n// gap <= 0 时不输出 WATER，喷头保持关闭"
+theme_override_colors/font_color = Color(0.88,0.91,0.78,1)
+
+[node name="WorkshopSummaryCode" type="Control" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack"]
+layout_mode = 0
 unique_name_in_owner = true
 visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
 theme_override_constants/separation = 14
 
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 692.4548352816153
+offset_bottom = 258.61849096705635
+
 [node name="Comment" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopSummaryCode"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.56, 0.75, 0.62, 1)
-theme_override_font_sizes/font_size = 16
+layout_mode = 0
 text = "// 把刚才的两条理解结合成一条世界规则"
 
+offset_left = 32.13602550478215
+offset_top = 16.83315621679065
+offset_right = 663.3793836344315
+offset_bottom = 65.03719447396386
+theme_override_font_sizes/font_size = 18
+
+theme_override_fonts/font = ExtResource("v2_mono")
+
+theme_override_colors/font_color = Color(0.88,0.91,0.78,1)
+
 [node name="PairRule" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopSummaryCode"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 20
+layout_mode = 0
 text = "① 同一块土地：target[i] - moisture[i]  →  gap"
 
+offset_left = 32.13602550478215
+offset_top = 58.150903294367694
+offset_right = 663.3793836344315
+offset_bottom = 106.35494155154092
+theme_override_font_sizes/font_size = 18
+
+theme_override_fonts/font = ExtResource("v2_mono")
+
+theme_override_colors/font_color = Color(0.88,0.91,0.78,1)
+
 [node name="BranchRule" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopSummaryCode"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.83, 0.95, 0.80, 1)
-theme_override_font_sizes/font_size = 20
+layout_mode = 0
 text = "② gap ≥ 30 → 2 份   |   gap > 0 → 1 份   |   gap ≤ 0 → 跳过"
 
+offset_left = 32.13602550478215
+offset_top = 97.93836344314559
+offset_right = 663.3793836344315
+offset_bottom = 146.14240170031883
+theme_override_font_sizes/font_size = 18
+
+theme_override_fonts/font = ExtResource("v2_mono")
+
+theme_override_colors/font_color = Color(0.88,0.91,0.78,1)
+
 [node name="WorldRule" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopSummaryCode"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.98, 0.72, 0.28, 1)
-theme_override_font_sizes/font_size = 19
+layout_mode = 0
 text = "③ 数据配对 → 计算缺口 → 选择 0 / 1 / 2 份水"
 
+offset_left = 32.13602550478215
+offset_top = 140.0212539851222
+offset_right = 663.3793836344315
+offset_bottom = 188.22529224229544
+theme_override_font_sizes/font_size = 18
+
+theme_override_fonts/font = ExtResource("v2_mono")
+
+theme_override_colors/font_color = Color(0.88,0.91,0.78,1)
+
 [node name="NextHint" type="Label" parent="WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopSummaryCode"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.56, 0.75, 0.62, 1)
-theme_override_font_sizes/font_size = 16
+layout_mode = 0
 text = "// 下一页：按关卡文档的两步练习，自己把理解写进完整 C++ 卷轴"
 
-[node name="WorkshopActionButton" type="Button" parent="WorkshopOverlay/Card/Margin/Content"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 58)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
+offset_left = 32.13602550478215
+offset_top = 191.28586609989372
+offset_right = 663.3793836344315
+offset_bottom = 239.48990435706696
 theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("PrimaryStyle")
+
+theme_override_fonts/font = ExtResource("v2_mono")
+
+theme_override_colors/font_color = Color(0.88,0.91,0.78,1)
+
+[node name="WorkshopActionButton" type="Button" parent="WorkshopOverlay/Card/Margin/Content"]
+layout_mode = 0
+unique_name_in_owner = true
 text = "继续  →"
 
+offset_left = 58.916046758767266
+offset_top = 481.27523910733265
+offset_right = 752.9011689691818
+offset_bottom = 544.0170031880978
+theme_override_font_sizes/font_size = 22
+
+theme_override_styles/normal = ExtResource("v2_empty")
+theme_override_styles/pressed = ExtResource("v2_empty")
+theme_override_styles/hover = ExtResource("v2_empty")
+theme_override_styles/disabled = ExtResource("v2_empty")
+theme_override_styles/focus = ExtResource("v2_empty")
+theme_override_fonts/font = ExtResource("v2_bold")
+
+theme_override_colors/font_color = Color(0.22,0.157,0.075,1)
+theme_override_colors/font_hover_color = Color(0.22,0.157,0.075,1)
+script = ExtResource("merge_feedback")
+
+[node name="OriginalSurface" type="NinePatchRect" parent="WorkshopOverlay/Card/Margin/Content/WorkshopActionButton"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "button-normal"
+source_slice = 56.0
+border_width = 16.83315621679065
+patch_margin_left = 56
+patch_margin_top = 56
+patch_margin_right = 56
+patch_margin_bottom = 56
+
 [node name="BugChallengeOverlay" type="Control" parent="."]
+layout_mode = 1
 unique_name_in_owner = true
 visible = false
-layout_mode = 1
+
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
+
+[node name="WorkshopBackdrop" type="TextureRect" parent="BugChallengeOverlay"]
+layout_mode = 0
+
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 1279.3198724760894
+offset_bottom = 720.0
+mouse_filter = 2
+texture = ExtResource("B05-bug-investigation-background")
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("merge_ambient")
+background_id = "B05-bug-investigation-background"
+
+[node name="Video" type="VideoStreamPlayer" parent="BugChallengeOverlay/WorkshopBackdrop"]
+layout_mode = 1
+
+anchor_right = 1.0
+anchor_bottom = 1.0
+expand = true
+mouse_filter = 2
+volume_db = -80.0
 
 [node name="Dimmer" type="ColorRect" parent="BugChallengeOverlay"]
 layout_mode = 1
+
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.12, 0.055, 0.035, 0.72)
 
-[node name="Card" type="PanelContainer" parent="BugChallengeOverlay"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -430.0
-offset_top = -245.0
-offset_right = 430.0
-offset_bottom = 245.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("EvidenceStyle")
+color = Color(0,0,0,0)
 
-[node name="Margin" type="MarginContainer" parent="BugChallengeOverlay/Card"]
-layout_mode = 2
+[node name="Apprentice" type="TextureRect" parent="BugChallengeOverlay"]
+layout_mode = 0
+
+offset_left = 87.99149840595112
+offset_top = 387.28378
+offset_right = 283.10308182784274
+offset_bottom = 726.24234
+mouse_filter = 2
+texture = ExtResource("char-player-idle")
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("merge_motion")
+motion_id = "char-player-idle"
+
+[node name="Companion" type="TextureRect" parent="BugChallengeOverlay"]
+layout_mode = 0
+
+offset_left = 24.484590860786398
+offset_top = 559.78934
+offset_right = 167.5664187035069
+offset_bottom = 724.29518
+mouse_filter = 2
+texture = ExtResource("char-walnut-idle")
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("merge_motion")
+motion_id = "char-walnut-idle"
+
+[node name="Mentor" type="TextureRect" parent="BugChallengeOverlay"]
+layout_mode = 0
+
+offset_left = 1042.125398512221
+offset_top = 369.81674
+offset_right = 1257.1307120085016
+offset_bottom = 761.57020
+mouse_filter = 2
+texture = ExtResource("char-bug-idle")
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("merge_motion")
+motion_id = "char-bug-idle"
+
+[node name="Card" type="Panel" parent="BugChallengeOverlay"]
+layout_mode = 0
+
+offset_left = 244.0807651434644
+offset_top = 47.438894792773645
+offset_right = 1058.9585547290117
+offset_bottom = 640.4250797024442
+theme_override_styles/panel = ExtResource("v2_empty")
+
+[node name="OriginalSurface" type="NinePatchRect" parent="BugChallengeOverlay/Card"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-panel"
+source_slice = 64.0
+border_width = 22.954303931987248
+patch_margin_left = 64
+patch_margin_top = 64
+patch_margin_right = 64
+patch_margin_bottom = 64
+
+[node name="Margin" type="Control" parent="BugChallengeOverlay/Card"]
+layout_mode = 0
 theme_override_constants/margin_left = 46
 theme_override_constants/margin_top = 32
 theme_override_constants/margin_right = 46
 theme_override_constants/margin_bottom = 30
 
-[node name="Content" type="VBoxContainer" parent="BugChallengeOverlay/Card/Margin"]
-layout_mode = 2
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 814.8777895855472
+offset_bottom = 592.9861849096706
+
+[node name="Content" type="Control" parent="BugChallengeOverlay/Card/Margin"]
+layout_mode = 0
 theme_override_constants/separation = 14
 
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 814.8777895855472
+offset_bottom = 592.9861849096706
+
 [node name="Title" type="Label" parent="BugChallengeOverlay/Card/Margin/Content"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.67, 0.22, 0.10, 1)
-theme_override_font_sizes/font_size = 29
+layout_mode = 0
 text = "Bug 先生的双作物挑战"
-horizontal_alignment = 1
+horizontal_alignment = 0
+
+theme_override_font_sizes/font_size = 29
+
+theme_override_fonts/font = ExtResource("v2_bold")
+
+offset_left = 65.80233793836345
+offset_top = 89.52178533475026
+offset_right = 777.3857598299682
+offset_bottom = 136.96068012752391
+theme_override_colors/font_color = Color(0.129,0.231,0.173,1)
+
+[node name="TableBoard" type="Panel" parent="BugChallengeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 58.916046758767266
+offset_top = 206.58873538788524
+offset_right = 752.9011689691818
+offset_bottom = 403.230605738576
+mouse_filter = 2
+theme_override_styles/panel = ExtResource("v2_empty")
 
 [node name="BugChallengeBody" type="RichTextLabel" parent="BugChallengeOverlay/Card/Margin/Content"]
+layout_mode = 0
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 290)
-layout_mode = 2
-size_flags_vertical = 3
 mouse_filter = 2
-theme_override_colors/default_color = Color(0.28, 0.28, 0.18, 1)
-theme_override_font_sizes/normal_font_size = 18
 bbcode_enabled = true
 text = "真实反例"
+
 fit_content = false
+scroll_active = true
+theme_override_font_sizes/normal_font_size = 20
+
+offset_left = 85.69606801275239
+offset_top = 219.596174282678
+offset_right = 730.712008501594
+offset_bottom = 387.92773645058446
+theme_override_colors/default_color = Color(0.91,0.91,0.79,1)
+theme_override_constants/table_h_separation = 77
+theme_override_constants/table_v_separation = 20
+visible = false
 
 [node name="BugContinueButton" type="Button" parent="BugChallengeOverlay/Card/Margin/Content"]
+layout_mode = 0
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 58)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("PrimaryStyle")
 text = "带着反例继续修改  →"
 
+offset_left = 58.916046758767266
+offset_top = 500.403825717322
+offset_right = 752.9011689691818
+offset_bottom = 561.6153028692879
+theme_override_font_sizes/font_size = 21
+
+theme_override_styles/normal = ExtResource("v2_empty")
+theme_override_styles/pressed = ExtResource("v2_empty")
+theme_override_styles/hover = ExtResource("v2_empty")
+theme_override_styles/disabled = ExtResource("v2_empty")
+theme_override_styles/focus = ExtResource("v2_empty")
+theme_override_fonts/font = ExtResource("v2_bold")
+
+theme_override_colors/font_color = Color(0.22,0.157,0.075,1)
+theme_override_colors/font_hover_color = Color(0.22,0.157,0.075,1)
+
+[node name="OriginalSurface" type="NinePatchRect" parent="BugChallengeOverlay/Card/Margin/Content/BugContinueButton"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "button-normal"
+source_slice = 56.0
+border_width = 16.83315621679065
+patch_margin_left = 56
+patch_margin_top = 56
+patch_margin_right = 56
+patch_margin_bottom = 56
+
 [node name="GrowthSummaryOverlay" type="Control" parent="."]
+layout_mode = 1
 unique_name_in_owner = true
 visible = false
-layout_mode = 1
+
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -1253,80 +2616,1549 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
 
-[node name="Dimmer" type="ColorRect" parent="GrowthSummaryOverlay"]
+[node name="WorkshopBackdrop" type="TextureRect" parent="GrowthSummaryOverlay"]
 layout_mode = 1
+
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.035, 0.12, 0.08, 0.72)
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
 
-[node name="Card" type="PanelContainer" parent="GrowthSummaryOverlay"]
+texture = ExtResource("B06-archive-background")
+script = ExtResource("merge_ambient")
+background_id = "B06-archive-background"
+
+[node name="Video" type="VideoStreamPlayer" parent="GrowthSummaryOverlay/WorkshopBackdrop"]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -430.0
-offset_top = -260.0
-offset_right = 430.0
-offset_bottom = 260.0
+
+anchor_right = 1.0
+anchor_bottom = 1.0
+expand = true
+mouse_filter = 2
+volume_db = -80.0
+
+[node name="Dimmer" type="ColorRect" parent="GrowthSummaryOverlay"]
+layout_mode = 1
+
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("CompletionStyle")
 
-[node name="Margin" type="MarginContainer" parent="GrowthSummaryOverlay/Card"]
-layout_mode = 2
+color = Color(0,0,0,0)
+
+[node name="Apprentice" type="TextureRect" parent="GrowthSummaryOverlay"]
+layout_mode = 0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+offset_left = 87.99149840595112
+offset_top = 220.36131774707758
+offset_right = 283.10308182784274
+offset_bottom = 559.3198724760892
+texture = ExtResource("char-player-idle")
+script = ExtResource("merge_motion")
+motion_id = "char-player-idle"
+
+[node name="Companion" type="TextureRect" parent="GrowthSummaryOverlay"]
+layout_mode = 0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+offset_left = 24.484590860786398
+offset_top = 397.1094580233794
+offset_right = 167.5664187035069
+offset_bottom = 561.6153028692879
+texture = ExtResource("char-walnut-idle")
+script = ExtResource("merge_motion")
+motion_id = "char-walnut-idle"
+
+[node name="Archivist" type="TextureRect" parent="GrowthSummaryOverlay"]
+layout_mode = 0
+mouse_filter = 2
+texture = ExtResource("proto_book")
+expand_mode = 1
+stretch_mode = 5
+
+offset_left = 1048.2465462274176
+offset_top = 267.8002125398512
+offset_right = 1242.5929861849097
+offset_bottom = 560.0850159404888
+script = ExtResource("merge_motion")
+motion_id = "char-shushu-idle"
+
+[node name="Mentor" type="TextureRect" parent="GrowthSummaryOverlay"]
+layout_mode = 0
+
+offset_left = 1042.125398512221
+offset_top = 213.4750265674814
+offset_right = 1257.1307120085016
+offset_bottom = 605.2284803400637
+mouse_filter = 2
+texture = ExtResource("char-shushu-idle")
+expand_mode = 1
+stretch_mode = 5
+visible = false
+script = ExtResource("merge_motion")
+motion_id = "char-dingdang-idle"
+
+[node name="Card" type="Panel" parent="GrowthSummaryOverlay"]
+layout_mode = 0
+
+offset_left = 244.0807651434644
+offset_top = 47.438894792773645
+offset_right = 1058.9585547290117
+offset_bottom = 640.4250797024442
+theme_override_styles/panel = ExtResource("v2_empty")
+
+[node name="OriginalSurface" type="NinePatchRect" parent="GrowthSummaryOverlay/Card"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-panel"
+source_slice = 64.0
+border_width = 22.954303931987248
+patch_margin_left = 64
+patch_margin_top = 64
+patch_margin_right = 64
+patch_margin_bottom = 64
+
+[node name="Margin" type="Control" parent="GrowthSummaryOverlay/Card"]
+layout_mode = 0
 theme_override_constants/margin_left = 46
 theme_override_constants/margin_top = 32
 theme_override_constants/margin_right = 46
 theme_override_constants/margin_bottom = 30
 
-[node name="Content" type="VBoxContainer" parent="GrowthSummaryOverlay/Card/Margin"]
-layout_mode = 2
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 814.8777895855472
+offset_bottom = 592.9861849096706
+
+[node name="Content" type="Control" parent="GrowthSummaryOverlay/Card/Margin"]
+layout_mode = 0
 theme_override_constants/separation = 14
 
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 814.8777895855472
+offset_bottom = 592.9861849096706
+
 [node name="Title" type="Label" parent="GrowthSummaryOverlay/Card/Margin/Content"]
-layout_mode = 2
+layout_mode = 0
 theme_override_colors/font_color = Color(0.10, 0.38, 0.23, 1)
-theme_override_font_sizes/font_size = 30
 text = "书书 · 成长档案"
-horizontal_alignment = 1
+horizontal_alignment = 0
+
+offset_left = 65.80233793836345
+offset_top = 89.52178533475026
+offset_right = 777.3857598299682
+offset_bottom = 136.96068012752391
+theme_override_font_sizes/font_size = 29
+
+theme_override_fonts/font = ExtResource("v2_bold")
 
 [node name="GrowthSummaryBody" type="RichTextLabel" parent="GrowthSummaryOverlay/Card/Margin/Content"]
+layout_mode = 0
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 330)
-layout_mode = 2
-size_flags_vertical = 3
 mouse_filter = 2
 theme_override_colors/default_color = Color(0.23, 0.35, 0.22, 1)
-theme_override_font_sizes/normal_font_size = 18
 bbcode_enabled = true
 text = "成长总结"
+
 fit_content = false
+scroll_active = true
+
+offset_left = 58.916046758767266
+offset_top = 146.90754516471839
+offset_right = 752.9011689691818
+offset_bottom = 475.9192348565356
+theme_override_font_sizes/normal_font_size = 18
+visible = false
 
 [node name="ArchiveButton" type="Button" parent="GrowthSummaryOverlay/Card/Margin/Content"]
+layout_mode = 0
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 58)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.10, 0.28, 0.19, 1)
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("PrimaryStyle")
 text = "完成归档并查看技能树  →"
+
+offset_left = 58.916046758767266
+offset_top = 500.403825717322
+offset_right = 752.9011689691818
+offset_bottom = 561.6153028692879
+theme_override_font_sizes/font_size = 21
+
+theme_override_styles/normal = ExtResource("v2_empty")
+theme_override_styles/pressed = ExtResource("v2_empty")
+theme_override_styles/hover = ExtResource("v2_empty")
+theme_override_styles/disabled = ExtResource("v2_empty")
+theme_override_styles/focus = ExtResource("v2_empty")
+theme_override_fonts/font = ExtResource("v2_bold")
+
+theme_override_colors/font_color = Color(0.22,0.157,0.075,1)
+theme_override_colors/font_hover_color = Color(0.22,0.157,0.075,1)
+
+[node name="OriginalSurface" type="NinePatchRect" parent="GrowthSummaryOverlay/Card/Margin/Content/ArchiveButton"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "button-normal"
+source_slice = 56.0
+border_width = 16.83315621679065
+patch_margin_left = 56
+patch_margin_top = 56
+patch_margin_right = 56
+patch_margin_bottom = 56
+
+[node name="PatchBackdrop" type="Control" parent="."]
+layout_mode = 1
+visible = false
+
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 0
+
+[node name="WorkshopBackdrop" type="TextureRect" parent="PatchBackdrop"]
+layout_mode = 1
+
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("B02-workshop-background")
+expand_mode = 1
+stretch_mode = 6
+script = ExtResource("merge_ambient")
+background_id = "B02-workshop-background"
+
+[node name="Video" type="VideoStreamPlayer" parent="PatchBackdrop/WorkshopBackdrop"]
+layout_mode = 1
+
+anchor_right = 1.0
+anchor_bottom = 1.0
+expand = true
+mouse_filter = 2
+volume_db = -80.0
+
+[node name="Apprentice" type="TextureRect" parent="PatchBackdrop"]
+layout_mode = 0
+mouse_filter = 2
+texture = ExtResource("proto_explorer")
+expand_mode = 1
+stretch_mode = 5
+
+offset_left = 87.99149840595112
+offset_top = 220.36131774707758
+offset_right = 283.10308182784274
+offset_bottom = 559.3198724760892
+script = ExtResource("merge_motion")
+motion_id = "char-player-idle"
+
+[node name="Mentor" type="TextureRect" parent="PatchBackdrop"]
+layout_mode = 0
+mouse_filter = 2
+texture = ExtResource("proto_master")
+expand_mode = 1
+stretch_mode = 5
+
+offset_left = 1042.125398512221
+offset_top = 213.4750265674814
+offset_right = 1257.1307120085016
+offset_bottom = 605.2284803400637
+script = ExtResource("merge_motion")
+motion_id = "char-dingdang-idle"
+
+[node name="BugLegion2D" parent="." instance=ExtResource("10_legion")]
+unique_name_in_owner = true
+
+[node name="AgentInteractionPresenter" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
+layer = 40
+script = ExtResource("8_presenter")
+character_catalog = ExtResource("9_catalog")
+overlay_path = NodePath("../StoryDialogueOverlay")
+
+[node name="FarmMentor" type="TextureRect" parent="."]
+visible = false
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -224.0
+offset_top = -528.0
+offset_right = -18.0
+offset_bottom = -94.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+texture = ExtResource("proto_master")
+script = ExtResource("merge_motion")
+motion_id = "char-dingdang-idle"
+
+[node name="MentorQuestion" parent="." instance=ExtResource("mentor_question")]
+unique_name_in_owner = true
+visible = false
 
 [node name="StoryDialogueOverlay" parent="." instance=ExtResource("3_dialogue")]
 unique_name_in_owner = true
 
 [node name="PatchDialog" type="ConfirmationDialog" parent="."]
 unique_name_in_owner = true
-title = "AI 修改提案（尚未应用）"
+exclusive = false
 ok_button_text = "接受并生成新草稿"
 cancel_button_text = "关闭预览"
-dialog_text = "等待真实失败记录。"
+dialog_text = ""
+theme = ExtResource("proto_theme")
+
+title = ""
+borderless = true
+transparent_bg = true
+unresizable = true
+min_size = Vector2i(815, 593)
+theme_override_styles/panel = ExtResource("v2_empty")
+theme_override_styles/embedded_border = ExtResource("v2_empty")
+
+[node name="PatchContent" type="Control" parent="PatchDialog"]
+layout_mode = 0
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_bottom = 16
+
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 814.8777895855472
+offset_bottom = 592.9861849096706
+custom_minimum_size = Vector2(814.8777895855472, 592.9861849096706)
+
+[node name="Rows" type="Control" parent="PatchDialog/PatchContent"]
+layout_mode = 0
+theme_override_constants/separation = 18
+
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 814.8777895855472
+offset_bottom = 592.9861849096706
+
+[node name="Title" type="Label" parent="PatchDialog/PatchContent/Rows"]
+layout_mode = 0
+
+theme_override_fonts/font = ExtResource("v2_bold")
+
+offset_left = 65.03719447396386
+offset_top = 87.99149840595112
+offset_right = 759.0223166843783
+offset_bottom = 141.55154091392137
+
+text = "比较修改，再由你决定"
+horizontal_alignment = 0
+theme_override_font_sizes/font_size = 32
+
+[node name="Diff" type="Control" parent="PatchDialog/PatchContent/Rows"]
+layout_mode = 0
+theme_override_constants/separation = 14
+
+offset_left = 58.150903294367694
+offset_top = 237.19447396386823
+offset_right = 752.9011689691818
+offset_bottom = 333.60255047821465
+
+[node name="Before" type="Panel" parent="PatchDialog/PatchContent/Rows/Diff"]
+layout_mode = 0
+
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 341.2539851222104
+offset_bottom = 96.40807651434645
+theme_override_styles/panel = ExtResource("v2_empty")
+
+[node name="Copy" type="Label" parent="PatchDialog/PatchContent/Rows/Diff/Before"]
+layout_mode = 0
+theme_override_colors/font_color = Color(0.91, 0.93, 0.76, 1)
+text = "int gap = 60 - moisture[i];"
+
+vertical_alignment = 1
+horizontal_alignment = 0
+
+offset_left = 16.83315621679065
+offset_top = 13.772582359192349
+offset_right = 325.9511158342189
+offset_bottom = 82.63549415515408
+theme_override_fonts/font = ExtResource("v2_mono")
+theme_override_font_sizes/font_size = 16
+
+[node name="After" type="Panel" parent="PatchDialog/PatchContent/Rows/Diff"]
+layout_mode = 0
+
+offset_left = 349.67056323060575
+offset_top = 0.0
+offset_right = 693.2199787460149
+offset_bottom = 96.40807651434645
+theme_override_styles/panel = ExtResource("v2_empty")
+
+[node name="Copy" type="Label" parent="PatchDialog/PatchContent/Rows/Diff/After"]
+layout_mode = 0
+theme_override_colors/font_color = Color(0.91, 0.93, 0.76, 1)
+text = "int gap = target[i] - moisture[i];"
+
+vertical_alignment = 1
+horizontal_alignment = 0
+
+offset_left = 16.83315621679065
+offset_top = 13.772582359192349
+offset_right = 325.9511158342189
+offset_bottom = 82.63549415515408
+theme_override_fonts/font = ExtResource("v2_mono")
+theme_override_font_sizes/font_size = 16
+
+[node name="PatchExplanation" type="Label" parent="PatchDialog/PatchContent/Rows"]
+layout_mode = 0
+unique_name_in_owner = true
+text = "等待真实失败记录。"
+autowrap_mode = 2
+
+offset_left = 61.211477151965994
+offset_top = 359.6174282678002
+offset_right = 752.1360255047821
+offset_bottom = 470.56323060573857
+theme_override_font_sizes/font_size = 18
 
 [node name="AutosaveTimer" type="Timer" parent="."]
 unique_name_in_owner = true
 wait_time = 0.65
 one_shot = true
+
+[node name="SkillRoot" type="TextureRect" parent="SkillTreeOverlay/Card/TreeArt"]
+layout_mode = 0
+
+offset_left = 145.37725823591924
+offset_top = 107.12008501594049
+offset_right = 231.07332624867163
+offset_bottom = 192.8161530286929
+mouse_filter = 2
+texture = ExtResource("icon-skill-watering")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Array" type="TextureRect" parent="SkillTreeOverlay/Card/TreeArt"]
+layout_mode = 0
+
+offset_left = 81.10520722635493
+offset_top = 272.39107332624866
+offset_right = 125.48352816153027
+offset_bottom = 316.769394261424
+mouse_filter = 2
+texture = ExtResource("icon-array")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Drop" type="TextureRect" parent="SkillTreeOverlay/Card/TreeArt"]
+layout_mode = 0
+
+offset_left = 170.6269925611052
+offset_top = 271.6259298618491
+offset_right = 206.5887353878852
+offset_bottom = 317.5345377258236
+mouse_filter = 2
+texture = ExtResource("icon-drop")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Action" type="TextureRect" parent="SkillTreeOverlay/Card/TreeArt"]
+layout_mode = 0
+
+offset_left = 244.84590860786398
+offset_top = 265.5047821466525
+offset_right = 302.9968119022317
+offset_bottom = 323.6556854410202
+mouse_filter = 2
+texture = ExtResource("icon-skill-action")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Lock" type="TextureRect" parent="SkillTreeOverlay/Card/TreeArt"]
+layout_mode = 0
+
+offset_left = 170.6269925611052
+offset_top = 374.9202975557917
+offset_right = 205.82359192348565
+offset_bottom = 415.4729011689692
+mouse_filter = 2
+texture = ExtResource("icon-lock")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star0" type="TextureRect" parent="SkillTreeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 355.7917109458023
+offset_top = 138.49096705632306
+offset_right = 403.23060573857595
+offset_bottom = 185.9298618490967
+mouse_filter = 2
+texture = ExtResource("icon-star")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star1" type="TextureRect" parent="SkillTreeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 414.7077577045696
+offset_top = 138.49096705632306
+offset_right = 462.1466524973432
+offset_bottom = 185.9298618490967
+mouse_filter = 2
+texture = ExtResource("icon-star")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star2" type="TextureRect" parent="SkillTreeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 473.62380446333685
+offset_top = 138.49096705632306
+offset_right = 521.0626992561105
+offset_bottom = 185.9298618490967
+mouse_filter = 2
+texture = ExtResource("icon-star")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star3" type="TextureRect" parent="SkillTreeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 532.5398512221042
+offset_top = 138.49096705632306
+offset_right = 579.9787460148779
+offset_bottom = 185.9298618490967
+mouse_filter = 2
+texture = ExtResource("icon-star")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Slot0" type="Panel" parent="SkillTreeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 351.20085015940487
+offset_top = 244.0807651434644
+offset_right = 478.2146652497343
+offset_bottom = 387.92773645058446
+mouse_filter = 2
+theme_override_styles/panel = ExtResource("v2_empty")
+
+[node name="OriginalSurface" type="NinePatchRect" parent="SkillTreeOverlay/Card/Margin/Content/Slot0"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-panel"
+source_slice = 64.0
+border_width = 22.954303931987248
+patch_margin_left = 64
+patch_margin_top = 64
+patch_margin_right = 64
+patch_margin_bottom = 64
+
+[node name="Text" type="Label" parent="SkillTreeOverlay/Card/Margin/Content/Slot0"]
+layout_mode = 0
+
+offset_left = 9.181721572794899
+offset_top = 18.363443145589798
+offset_right = 117.83209351753453
+offset_bottom = 42.848034006376196
+text = "数据配对"
+mouse_filter = 2
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+theme_override_fonts/font = ExtResource("v2_bold")
+
+[node name="Icon" type="TextureRect" parent="SkillTreeOverlay/Card/Margin/Content/Slot0"]
+layout_mode = 0
+
+offset_left = 42.082890541976624
+offset_top = 46.67375132837407
+offset_right = 84.93092454835282
+offset_bottom = 89.52178533475026
+mouse_filter = 2
+texture = ExtResource("icon-array")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Slot1" type="Panel" parent="SkillTreeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 488.9266737513284
+offset_top = 244.0807651434644
+offset_right = 615.9404888416578
+offset_bottom = 387.92773645058446
+mouse_filter = 2
+theme_override_styles/panel = ExtResource("v2_empty")
+
+[node name="OriginalSurface" type="NinePatchRect" parent="SkillTreeOverlay/Card/Margin/Content/Slot1"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-panel"
+source_slice = 64.0
+border_width = 22.954303931987248
+patch_margin_left = 64
+patch_margin_top = 64
+patch_margin_right = 64
+patch_margin_bottom = 64
+
+[node name="Text" type="Label" parent="SkillTreeOverlay/Card/Margin/Content/Slot1"]
+layout_mode = 0
+
+offset_left = 9.181721572794899
+offset_top = 18.363443145589798
+offset_right = 117.83209351753453
+offset_bottom = 42.848034006376196
+text = "缺口计算"
+mouse_filter = 2
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+theme_override_fonts/font = ExtResource("v2_bold")
+
+[node name="Icon" type="TextureRect" parent="SkillTreeOverlay/Card/Margin/Content/Slot1"]
+layout_mode = 0
+
+offset_left = 42.082890541976624
+offset_top = 46.67375132837407
+offset_right = 84.93092454835282
+offset_bottom = 89.52178533475026
+mouse_filter = 2
+texture = ExtResource("icon-drop")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Slot2" type="Panel" parent="SkillTreeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 626.6524973432519
+offset_top = 244.0807651434644
+offset_right = 753.6663124335813
+offset_bottom = 387.92773645058446
+mouse_filter = 2
+theme_override_styles/panel = ExtResource("v2_empty")
+
+[node name="OriginalSurface" type="NinePatchRect" parent="SkillTreeOverlay/Card/Margin/Content/Slot2"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-panel"
+source_slice = 64.0
+border_width = 22.954303931987248
+patch_margin_left = 64
+patch_margin_top = 64
+patch_margin_right = 64
+patch_margin_bottom = 64
+
+[node name="Text" type="Label" parent="SkillTreeOverlay/Card/Margin/Content/Slot2"]
+layout_mode = 0
+
+offset_left = 9.181721572794899
+offset_top = 18.363443145589798
+offset_right = 117.83209351753453
+offset_bottom = 42.848034006376196
+text = "分级动作"
+mouse_filter = 2
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+theme_override_fonts/font = ExtResource("v2_bold")
+
+[node name="Icon" type="TextureRect" parent="SkillTreeOverlay/Card/Margin/Content/Slot2"]
+layout_mode = 0
+
+offset_left = 42.082890541976624
+offset_top = 46.67375132837407
+offset_right = 84.93092454835282
+offset_bottom = 89.52178533475026
+mouse_filter = 2
+texture = ExtResource("icon-skill-action")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Locked" type="Button" parent="SkillTreeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 348.90541976620614
+offset_top = 427.7151965993624
+offset_right = 754.4314558979809
+offset_bottom = 498.1083953241233
+disabled = true
+text = ""
+theme_override_font_sizes/font_size = 20
+
+theme_override_styles/normal = ExtResource("v2_empty")
+theme_override_styles/pressed = ExtResource("v2_empty")
+theme_override_styles/hover = ExtResource("v2_empty")
+theme_override_styles/disabled = ExtResource("v2_empty")
+theme_override_styles/focus = ExtResource("v2_empty")
+theme_override_fonts/font = ExtResource("v2_bold")
+
+theme_override_colors/font_color = Color(0.22,0.157,0.075,1)
+theme_override_colors/font_hover_color = Color(0.22,0.157,0.075,1)
+
+[node name="OriginalSurface" type="NinePatchRect" parent="SkillTreeOverlay/Card/Margin/Content/Locked"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "button-normal"
+source_slice = 56.0
+border_width = 16.83315621679065
+patch_margin_left = 56
+patch_margin_top = 56
+patch_margin_right = 56
+patch_margin_bottom = 56
+
+[node name="Seal" type="TextureRect" parent="CompletionCard/Margin/Content"]
+layout_mode = 0
+
+offset_left = 225.7173219978746
+offset_top = 16.83315621679065
+offset_right = 360.3825717321998
+offset_bottom = 74.98405951115834
+mouse_filter = 2
+texture = ExtResource("ui-four-star-seal")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="OriginalSurface" type="NinePatchRect" parent="PatchDialog/PatchContent"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-panel"
+source_slice = 64.0
+border_width = 22.954303931987248
+patch_margin_left = 64
+patch_margin_top = 64
+patch_margin_right = 64
+patch_margin_bottom = 64
+
+[node name="OriginalSurface" type="NinePatchRect" parent="PatchDialog/PatchContent/Rows/Diff/Before"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-code"
+source_slice = 24.0
+border_width = 10.712008501594049
+patch_margin_left = 24
+patch_margin_top = 24
+patch_margin_right = 24
+patch_margin_bottom = 24
+
+[node name="OriginalSurface" type="NinePatchRect" parent="PatchDialog/PatchContent/Rows/Diff/After"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-code"
+source_slice = 24.0
+border_width = 10.712008501594049
+patch_margin_left = 24
+patch_margin_top = 24
+patch_margin_right = 24
+patch_margin_bottom = 24
+
+[node name="ClosePatchButton" type="Button" parent="PatchDialog/PatchContent/Rows"]
+layout_mode = 0
+
+offset_left = 58.150903294367694
+offset_top = 499.6386822529224
+offset_right = 250.201912858661
+offset_bottom = 557.0244420828906
+unique_name_in_owner = true
+text = "关闭预览"
+theme_override_font_sizes/font_size = 18
+theme_override_fonts/font = ExtResource("v2_bold")
+theme_override_styles/normal = ExtResource("v2_empty")
+theme_override_styles/hover = ExtResource("v2_empty")
+theme_override_styles/pressed = ExtResource("v2_empty")
+theme_override_styles/focus = ExtResource("v2_empty")
+theme_override_styles/disabled = ExtResource("v2_empty")
+theme_override_colors/font_color = Color(0.22,0.157,0.075,1)
+theme_override_colors/font_hover_color = Color(0.22,0.157,0.075,1)
+
+[node name="OriginalSurface" type="NinePatchRect" parent="PatchDialog/PatchContent/Rows/ClosePatchButton"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-data-plaque"
+source_slice = 56.0
+border_width = 16.83315621679065
+patch_margin_left = 56
+patch_margin_top = 56
+patch_margin_right = 56
+patch_margin_bottom = 56
+
+[node name="RejectPatchButton" type="Button" parent="PatchDialog/PatchContent/Rows"]
+layout_mode = 0
+
+offset_left = 270.86078639744954
+offset_top = 499.6386822529224
+offset_right = 462.9117959617429
+offset_bottom = 557.0244420828906
+unique_name_in_owner = true
+text = "拒绝修改"
+theme_override_font_sizes/font_size = 18
+theme_override_fonts/font = ExtResource("v2_bold")
+theme_override_styles/normal = ExtResource("v2_empty")
+theme_override_styles/hover = ExtResource("v2_empty")
+theme_override_styles/pressed = ExtResource("v2_empty")
+theme_override_styles/focus = ExtResource("v2_empty")
+theme_override_styles/disabled = ExtResource("v2_empty")
+theme_override_colors/font_color = Color(0.22,0.157,0.075,1)
+theme_override_colors/font_hover_color = Color(0.22,0.157,0.075,1)
+
+[node name="OriginalSurface" type="NinePatchRect" parent="PatchDialog/PatchContent/Rows/RejectPatchButton"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-data-plaque"
+source_slice = 56.0
+border_width = 16.83315621679065
+patch_margin_left = 56
+patch_margin_top = 56
+patch_margin_right = 56
+patch_margin_bottom = 56
+
+[node name="AcceptPatchButton" type="Button" parent="PatchDialog/PatchContent/Rows"]
+layout_mode = 0
+
+offset_left = 482.80552603613177
+offset_top = 499.6386822529224
+offset_right = 751.3708820403826
+offset_bottom = 557.0244420828906
+unique_name_in_owner = true
+text = "接受并生成新草稿"
+theme_override_font_sizes/font_size = 18
+theme_override_fonts/font = ExtResource("v2_bold")
+theme_override_styles/normal = ExtResource("v2_empty")
+theme_override_styles/hover = ExtResource("v2_empty")
+theme_override_styles/pressed = ExtResource("v2_empty")
+theme_override_styles/focus = ExtResource("v2_empty")
+theme_override_styles/disabled = ExtResource("v2_empty")
+theme_override_colors/font_color = Color(0.22,0.157,0.075,1)
+theme_override_colors/font_hover_color = Color(0.22,0.157,0.075,1)
+
+[node name="OriginalSurface" type="NinePatchRect" parent="PatchDialog/PatchContent/Rows/AcceptPatchButton"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "button-normal"
+source_slice = 56.0
+border_width = 16.83315621679065
+patch_margin_left = 56
+patch_margin_top = 56
+patch_margin_right = 56
+patch_margin_bottom = 56
+
+[node name="OriginalSurface" type="NinePatchRect" parent="BugChallengeOverlay/Card/Margin/Content/TableBoard"]
+show_behind_parent = true
+mouse_filter = 2
+script = ExtResource("v2_surface")
+asset_id = "ui-code"
+source_slice = 24.0
+border_width = 10.712008501594049
+patch_margin_left = 24
+patch_margin_top = 24
+patch_margin_right = 24
+patch_margin_bottom = 24
+
+[node name="Subtitle" type="Label" parent="BugChallengeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 65.80233793836345
+offset_top = 133.9001062699256
+offset_right = 759.7874601487779
+offset_bottom = 202.76301806588737
+text = "相同的当前湿度，面对不同目标，需要不同动作。"
+mouse_filter = 2
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 0
+vertical_alignment = 0
+
+[node name="CounterexampleQuestion" type="Label" parent="BugChallengeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 72.68862911795962
+offset_top = 423.12433581296494
+offset_right = 738.3634431455898
+offset_bottom = 484.33581296493094
+text = "固定的 60 缺少了哪一张表？\n这是一条反例，不会替你修改代码。"
+mouse_filter = 2
+theme_override_font_sizes/font_size = 21
+horizontal_alignment = 0
+vertical_alignment = 0
+
+[node name="PatchBadge" type="Label" parent="PatchDialog/PatchContent/Rows"]
+layout_mode = 0
+
+offset_left = 67.3326248671626
+offset_top = 43.61317747077577
+offset_right = 761.3177470775771
+offset_bottom = 77.27948990435706
+text = "AI局部修改 · 尚未应用"
+mouse_filter = 2
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.72,0.408,0.14,1)
+
+[node name="PatchSubtitle" type="Label" parent="PatchDialog/PatchContent/Rows"]
+layout_mode = 0
+
+offset_left = 65.03719447396386
+offset_top = 135.43039319872477
+offset_right = 759.0223166843783
+offset_bottom = 181.33900106269925
+text = "只建议修改缺口计算这一行；接受以后仍需要直接运行。"
+mouse_filter = 2
+theme_override_font_sizes/font_size = 19
+
+[node name="Caption" type="Label" parent="PatchDialog/PatchContent/Rows/Diff/Before"]
+layout_mode = 0
+
+offset_left = 13.007438894792774
+offset_top = -42.082890541976624
+offset_right = 322.125398512221
+offset_bottom = -7.651434643995756
+text = "修改前"
+mouse_filter = 2
+theme_override_font_sizes/font_size = 21
+theme_override_colors/font_color = Color(0.72,0.408,0.14,1)
+
+[node name="Caption" type="Label" parent="PatchDialog/PatchContent/Rows/Diff/After"]
+layout_mode = 0
+
+offset_left = 13.007438894792774
+offset_top = -42.082890541976624
+offset_right = 322.125398512221
+offset_bottom = -7.651434643995756
+text = "修改后"
+mouse_filter = 2
+theme_override_font_sizes/font_size = 21
+theme_override_colors/font_color = Color(0.72,0.408,0.14,1)
+[node name="Still" type="Sprite2D" parent="Hud/WateringCan"]
+visible = false
+
+[node name="BusyMotion" type="TextureRect" parent="Hud"]
+visible = false
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+offset_left = 520.0
+offset_top = 80.0
+offset_right = 650.0
+offset_bottom = 130.0
+script = ExtResource("merge_motion")
+motion_id = "icon-spinner-loop"
+hide_when_finished = false
+
+[node name="UnlockSeal" type="TextureRect" parent="SkillTreeOverlay"]
+visible = false
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+offset_left = 872.0
+offset_top = 66.0
+offset_right = 1002.0
+offset_bottom = 110.0
+script = ExtResource("merge_motion")
+motion_id = "ui-four-star-seal-unlock"
+hide_when_finished = true
+
+[node name="Completed" type="Control" parent="SkillTreeOverlay/Card/Margin/Content/Slot0"]
+layout_mode = 0
+visible = false
+mouse_filter = 2
+offset_left = 99.46865037194473
+offset_top = 49.73432518597237
+offset_right = 118.59723698193412
+offset_bottom = 68.86291179596174
+text = ""
+theme_override_colors/font_color = Color(0.1,0.4,0.2,1)
+
+[node name="Completed" type="Control" parent="SkillTreeOverlay/Card/Margin/Content/Slot1"]
+layout_mode = 0
+visible = false
+mouse_filter = 2
+offset_left = 99.46865037194473
+offset_top = 49.73432518597237
+offset_right = 118.59723698193412
+offset_bottom = 68.86291179596174
+text = ""
+theme_override_colors/font_color = Color(0.1,0.4,0.2,1)
+
+[node name="Completed" type="Control" parent="SkillTreeOverlay/Card/Margin/Content/Slot2"]
+layout_mode = 0
+visible = false
+mouse_filter = 2
+offset_left = 99.46865037194473
+offset_top = 49.73432518597237
+offset_right = 118.59723698193412
+offset_bottom = 68.86291179596174
+text = ""
+theme_override_colors/font_color = Color(0.1,0.4,0.2,1)
+
+[node name="WorkshopError" type="Label" parent="WorkshopOverlay/Card/Margin/Content"]
+unique_name_in_owner = true
+visible = false
+mouse_filter = 2
+offset_left = 58.916046758767266
+offset_top = 473.67693942614244
+offset_right = 751.3708820403825
+offset_bottom = 517.6769394261424
+autowrap_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.65,0.13,0.06,1)
+
+[node name="Feedback" type="TextureRect" parent="WorkshopOverlay/Card/Margin/Content/WorkshopActionButton"]
+visible = false
+self_modulate = Color(1,1,1,0)
+mouse_filter = 2
+script = ExtResource("merge_motion")
+hide_when_finished = true
+
+[node name="RewardTool" type="TextureRect" parent="CompletionCard/Margin/Content"]
+visible = false
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+texture = ExtResource("icon-skill-watering")
+offset_left = 47.438894792773645
+offset_top = 134.6652497343252
+offset_right = 266.2699256110521
+offset_bottom = 353.4962805526036
+
+[node name="RewardCaption" type="Label" parent="CompletionCard/Margin/Content"]
+visible = false
+mouse_filter = 2
+text = "4★ 作物适配浇水器"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 18
+offset_left = 45.143464399574924
+offset_top = 351.20085015940487
+offset_right = 282.33793836344313
+offset_bottom = 378.7460148777896
+
+[node name="Description" type="Label" parent="SkillTreeOverlay/Card/Margin/Content/Slot0"]
+layout_mode = 0
+mouse_filter = 2
+offset_left = 9.181721572794899
+offset_top = 97.93836344314559
+offset_right = 117.83209351753453
+offset_bottom = 130.83953241232732
+horizontal_alignment = 1
+autowrap_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.14,0.28,0.17,1)
+text = "同一块土地\n使用同一个 i"
+
+theme_override_constants/line_spacing = 0
+
+[node name="Description" type="Label" parent="SkillTreeOverlay/Card/Margin/Content/Slot1"]
+layout_mode = 0
+mouse_filter = 2
+offset_left = 9.181721572794899
+offset_top = 97.93836344314559
+offset_right = 117.83209351753453
+offset_bottom = 130.83953241232732
+horizontal_alignment = 1
+autowrap_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.14,0.28,0.17,1)
+text = "目标湿度\n减去当前湿度"
+
+theme_override_constants/line_spacing = 0
+
+[node name="Description" type="Label" parent="SkillTreeOverlay/Card/Margin/Content/Slot2"]
+layout_mode = 0
+mouse_filter = 2
+offset_left = 9.181721572794899
+offset_top = 97.93836344314559
+offset_right = 117.83209351753453
+offset_bottom = 130.83953241232732
+horizontal_alignment = 1
+autowrap_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.14,0.28,0.17,1)
+text = "按缺口选择\n0 / 1 / 2 份水"
+
+theme_override_constants/line_spacing = 0
+
+[node name="Icon" type="TextureRect" parent="SkillTreeOverlay/Card/Margin/Content/Slot0/Completed"]
+layout_mode = 0
+
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 19.128586609989373
+offset_bottom = 19.128586609989373
+mouse_filter = 2
+texture = ExtResource("guide_check")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="SkillTreeOverlay/Card/Margin/Content/Slot1/Completed"]
+layout_mode = 0
+
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 19.128586609989373
+offset_bottom = 19.128586609989373
+mouse_filter = 2
+texture = ExtResource("guide_check")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="SkillTreeOverlay/Card/Margin/Content/Slot2/Completed"]
+layout_mode = 0
+
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 19.128586609989373
+offset_bottom = 19.128586609989373
+mouse_filter = 2
+texture = ExtResource("guide_check")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RuleSummary" type="Label" parent="SkillTreeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 360.3825717321998
+offset_top = 396.3443145589798
+offset_right = 744.4845908607864
+offset_bottom = 422.35919234856533
+mouse_filter = 2
+text = "同一个 i → 计算湿度缺口 → 选择水量"
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.129,0.231,0.173,1)
+
+[node name="LockIcon" type="TextureRect" parent="SkillTreeOverlay/Card/Margin/Content/Locked"]
+layout_mode = 0
+
+offset_left = 16.068012752391073
+offset_top = 17.598299681190223
+offset_right = 43.61317747077577
+offset_bottom = 51.26461211477152
+mouse_filter = 2
+texture = ExtResource("icon-lock")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="SkillTreeOverlay/Card/Margin/Content/Locked"]
+layout_mode = 0
+
+offset_left = 57.38575982996812
+offset_top = 12.242295430393199
+offset_right = 397.1094580233794
+offset_bottom = 34.43145589798087
+mouse_filter = 2
+text = "5★ 区域灌溉 · 功能预告"
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.129,0.231,0.173,1)
+theme_override_fonts/font = ExtResource("v2_bold")
+
+[node name="Description" type="Label" parent="SkillTreeOverlay/Card/Margin/Content/Locked"]
+layout_mode = 0
+
+offset_left = 57.38575982996812
+offset_top = 36.726886291179596
+offset_right = 397.1094580233794
+offset_bottom = 58.916046758767266
+mouse_filter = 2
+text = "等待后续剧情，不能提前学习"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.129,0.231,0.173,1)
+
+[node name="Badge" type="Label" parent="GrowthSummaryOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 68.09776833156216
+offset_top = 45.908607863974495
+offset_right = 737.5982996811903
+offset_bottom = 76.51434643995749
+mouse_filter = 2
+text = "只记录真实发生的事"
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.72,0.408,0.14,1)
+
+[node name="RowTitle0" type="Label" parent="GrowthSummaryOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 85.69606801275239
+offset_top = 155.3241232731137
+offset_right = 251.73219978746016
+offset_bottom = 188.990435706695
+mouse_filter = 2
+text = "完成方式"
+theme_override_font_sizes/font_size = 23
+theme_override_colors/font_color = Color(0.129,0.231,0.173,1)
+theme_override_fonts/font = ExtResource("v2_bold")
+
+[node name="RowValue0" type="Label" parent="GrowthSummaryOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 277.7470775770457
+offset_top = 153.79383634431457
+offset_right = 716.9394261424017
+offset_bottom = 216.5356004250797
+mouse_filter = 2
+text = "由学生完成最终代码修改与验证"
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.129,0.231,0.173,1)
+autowrap_mode = 2
+
+[node name="Divider0" type="ColorRect" parent="GrowthSummaryOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 86.46121147715196
+offset_top = 219.596174282678
+offset_right = 713.1137088204039
+offset_bottom = 220.36131774707758
+mouse_filter = 2
+color = Color(0.741,0.678,0.463,0.4)
+
+[node name="RowTitle1" type="Label" parent="GrowthSummaryOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 85.69606801275239
+offset_top = 235.66418703506906
+offset_right = 251.73219978746016
+offset_bottom = 269.3304994686504
+mouse_filter = 2
+text = "代码变化"
+theme_override_font_sizes/font_size = 23
+theme_override_colors/font_color = Color(0.129,0.231,0.173,1)
+theme_override_fonts/font = ExtResource("v2_bold")
+
+[node name="RowValue1" type="Label" parent="GrowthSummaryOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 277.7470775770457
+offset_top = 234.13390010626992
+offset_right = 716.9394261424017
+offset_bottom = 296.87566418703506
+mouse_filter = 2
+text = "用同一个 i 配对 moisture[i] 与 target[i]，\n计算目标减当前的缺口。"
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.129,0.231,0.173,1)
+autowrap_mode = 2
+
+[node name="Divider1" type="ColorRect" parent="GrowthSummaryOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 86.46121147715196
+offset_top = 299.93623804463334
+offset_right = 713.1137088204039
+offset_bottom = 300.70138150903296
+mouse_filter = 2
+color = Color(0.741,0.678,0.463,0.4)
+
+[node name="RowTitle2" type="Label" parent="GrowthSummaryOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 85.69606801275239
+offset_top = 316.00425079702444
+offset_right = 251.73219978746016
+offset_bottom = 349.67056323060575
+mouse_filter = 2
+text = "提示记录"
+theme_override_font_sizes/font_size = 23
+theme_override_colors/font_color = Color(0.129,0.231,0.173,1)
+theme_override_fonts/font = ExtResource("v2_bold")
+
+[node name="RowValue2" type="Label" parent="GrowthSummaryOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 277.7470775770457
+offset_top = 314.47396386822527
+offset_right = 716.9394261424017
+offset_bottom = 377.21572794899043
+mouse_filter = 2
+text = "未使用分层提示"
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.129,0.231,0.173,1)
+autowrap_mode = 2
+
+[node name="Divider2" type="ColorRect" parent="GrowthSummaryOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 86.46121147715196
+offset_top = 380.2763018065887
+offset_right = 713.1137088204039
+offset_bottom = 381.04144527098833
+mouse_filter = 2
+color = Color(0.741,0.678,0.463,0.4)
+
+[node name="RowTitle3" type="Label" parent="GrowthSummaryOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 85.69606801275239
+offset_top = 396.3443145589798
+offset_right = 251.73219978746016
+offset_bottom = 430.01062699256113
+mouse_filter = 2
+text = "验证记录"
+theme_override_font_sizes/font_size = 23
+theme_override_colors/font_color = Color(0.129,0.231,0.173,1)
+theme_override_fonts/font = ExtResource("v2_bold")
+
+[node name="RowValue3" type="Label" parent="GrowthSummaryOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 277.7470775770457
+offset_top = 394.81402763018065
+offset_right = 716.9394261424017
+offset_bottom = 457.5557917109458
+mouse_filter = 2
+text = "8次循环；3次250 ml；2次500 ml；3次跳过。"
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.129,0.231,0.173,1)
+autowrap_mode = 2
+
+[node name="Divider3" type="ColorRect" parent="GrowthSummaryOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 86.46121147715196
+offset_top = 460.6163655685441
+offset_right = 713.1137088204039
+offset_bottom = 461.38150903294365
+mouse_filter = 2
+color = Color(0.741,0.678,0.463,0.4)
+
+[node name="RewardCompanion" type="TextureRect" parent="CompletionCard"]
+layout_mode = 0
+
+offset_left = 715.4091392136025
+offset_top = 350.4357066950053
+offset_right = 855.4303931987248
+offset_bottom = 535.6004250797024
+mouse_filter = 2
+visible = false
+texture = ExtResource("char-shushu-idle")
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("merge_motion")
+motion_id = "char-shushu-success"
+
+[node name="Badge" type="Label" parent="BugChallengeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 68.09776833156216
+offset_top = 45.908607863974495
+offset_right = 737.5982996811903
+offset_bottom = 76.51434643995749
+mouse_filter = 2
+text = "Bug先生 · 真实反例"
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.72,0.408,0.14,1)
+
+[node name="Table0_0" type="Label" parent="BugChallengeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 81.10520722635493
+offset_top = 221.89160467587672
+offset_right = 240.25504782146652
+offset_bottom = 271.6259298618491
+mouse_filter = 2
+text = "作物"
+theme_override_font_sizes/font_size = 21
+theme_override_colors/font_color = Color(0.91,0.91,0.79,1)
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Table0_1" type="Label" parent="BugChallengeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 240.25504782146652
+offset_top = 221.89160467587672
+offset_right = 384.8671625929862
+offset_bottom = 271.6259298618491
+mouse_filter = 2
+text = "当前湿度"
+theme_override_font_sizes/font_size = 21
+theme_override_colors/font_color = Color(0.91,0.91,0.79,1)
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Table0_2" type="Label" parent="BugChallengeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 384.8671625929862
+offset_top = 221.89160467587672
+offset_right = 529.4792773645058
+offset_bottom = 271.6259298618491
+mouse_filter = 2
+text = "目标湿度"
+theme_override_font_sizes/font_size = 21
+theme_override_colors/font_color = Color(0.91,0.91,0.79,1)
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Table0_3" type="Label" parent="BugChallengeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 529.4792773645058
+offset_top = 221.89160467587672
+offset_right = 730.712008501594
+offset_bottom = 271.6259298618491
+mouse_filter = 2
+text = "正确动作"
+theme_override_font_sizes/font_size = 21
+theme_override_colors/font_color = Color(0.91,0.91,0.79,1)
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TableDivider0" type="ColorRect" parent="BugChallengeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 81.10520722635493
+offset_top = 271.6259298618491
+offset_right = 730.712008501594
+offset_bottom = 272.39107332624866
+mouse_filter = 2
+color = Color(0.46,0.5,0.39,0.33)
+
+[node name="Table1_0" type="Label" parent="BugChallengeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 81.10520722635493
+offset_top = 276.21679064824656
+offset_right = 240.25504782146652
+offset_bottom = 325.9511158342189
+mouse_filter = 2
+text = "土豆"
+theme_override_font_sizes/font_size = 21
+theme_override_colors/font_color = Color(0.91,0.91,0.79,1)
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Table1_1" type="Label" parent="BugChallengeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 240.25504782146652
+offset_top = 276.21679064824656
+offset_right = 384.8671625929862
+offset_bottom = 325.9511158342189
+mouse_filter = 2
+text = "55"
+theme_override_font_sizes/font_size = 21
+theme_override_colors/font_color = Color(0.91,0.91,0.79,1)
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Table1_2" type="Label" parent="BugChallengeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 384.8671625929862
+offset_top = 276.21679064824656
+offset_right = 529.4792773645058
+offset_bottom = 325.9511158342189
+mouse_filter = 2
+text = "50"
+theme_override_font_sizes/font_size = 21
+theme_override_colors/font_color = Color(0.91,0.91,0.79,1)
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Table1_3" type="Label" parent="BugChallengeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 529.4792773645058
+offset_top = 276.21679064824656
+offset_right = 730.712008501594
+offset_bottom = 325.9511158342189
+mouse_filter = 2
+text = "不浇水"
+theme_override_font_sizes/font_size = 21
+theme_override_colors/font_color = Color(0.91,0.91,0.79,1)
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TableDivider1" type="ColorRect" parent="BugChallengeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 81.10520722635493
+offset_top = 325.9511158342189
+offset_right = 730.712008501594
+offset_bottom = 326.71625929861847
+mouse_filter = 2
+color = Color(0.46,0.5,0.39,0.33)
+
+[node name="Table2_0" type="Label" parent="BugChallengeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 81.10520722635493
+offset_top = 333.60255047821465
+offset_right = 240.25504782146652
+offset_bottom = 383.33687566418706
+mouse_filter = 2
+text = "番茄"
+theme_override_font_sizes/font_size = 21
+theme_override_colors/font_color = Color(0.91,0.91,0.79,1)
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Table2_1" type="Label" parent="BugChallengeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 240.25504782146652
+offset_top = 333.60255047821465
+offset_right = 384.8671625929862
+offset_bottom = 383.33687566418706
+mouse_filter = 2
+text = "55"
+theme_override_font_sizes/font_size = 21
+theme_override_colors/font_color = Color(0.91,0.91,0.79,1)
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Table2_2" type="Label" parent="BugChallengeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 384.8671625929862
+offset_top = 333.60255047821465
+offset_right = 529.4792773645058
+offset_bottom = 383.33687566418706
+mouse_filter = 2
+text = "70"
+theme_override_font_sizes/font_size = 21
+theme_override_colors/font_color = Color(0.91,0.91,0.79,1)
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Table2_3" type="Label" parent="BugChallengeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 529.4792773645058
+offset_top = 333.60255047821465
+offset_right = 730.712008501594
+offset_bottom = 383.33687566418706
+mouse_filter = 2
+text = "1份 · 250 ml"
+theme_override_font_sizes/font_size = 21
+theme_override_colors/font_color = Color(0.91,0.91,0.79,1)
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TableDivider2" type="ColorRect" parent="BugChallengeOverlay/Card/Margin/Content"]
+layout_mode = 0
+
+offset_left = 81.10520722635493
+offset_top = 383.33687566418706
+offset_right = 730.712008501594
+offset_bottom = 384.1020191285866
+mouse_filter = 2
+color = Color(0.46,0.5,0.39,0.33)
+
+[node name="FarmAudio" parent="." instance=ExtResource("farm_audio")]

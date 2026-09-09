@@ -1,0 +1,174 @@
+{
+  "group": "ui",
+  "id": "input-error-motion",
+  "source": [
+    "components/input-error.png"
+  ],
+  "state": "输入错误",
+  "effect": "只对皮肤轻微位移／缩放或边缘亮度变化；文字必须继续由前端独立绘制",
+  "width": 704,
+  "height": 208,
+  "frames": 12,
+  "fps": 30,
+  "loop": false,
+  "trigger": "输入错误；disabled 状态不播放，动作不延迟点击处理",
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "durationMs": 396,
+  "delayMs": 33,
+  "files": {
+    "webp": "ui/input-error-motion.webp",
+    "poster": "ui/input-error-motion-poster.png",
+    "atlas": "ui/input-error-motion-atlas.png",
+    "metadata": "metadata/input-error-motion.json"
+  },
+  "atlas": {
+    "columns": 5,
+    "rows": 3,
+    "frameWidth": 704,
+    "frameHeight": 208,
+    "frames": [
+      {
+        "index": 0,
+        "rect": [
+          0,
+          0,
+          704,
+          208
+        ],
+        "durationMs": 33
+      },
+      {
+        "index": 1,
+        "rect": [
+          704,
+          0,
+          704,
+          208
+        ],
+        "durationMs": 33
+      },
+      {
+        "index": 2,
+        "rect": [
+          1408,
+          0,
+          704,
+          208
+        ],
+        "durationMs": 33
+      },
+      {
+        "index": 3,
+        "rect": [
+          2112,
+          0,
+          704,
+          208
+        ],
+        "durationMs": 33
+      },
+      {
+        "index": 4,
+        "rect": [
+          2816,
+          0,
+          704,
+          208
+        ],
+        "durationMs": 33
+      },
+      {
+        "index": 5,
+        "rect": [
+          0,
+          208,
+          704,
+          208
+        ],
+        "durationMs": 33
+      },
+      {
+        "index": 6,
+        "rect": [
+          704,
+          208,
+          704,
+          208
+        ],
+        "durationMs": 33
+      },
+      {
+        "index": 7,
+        "rect": [
+          1408,
+          208,
+          704,
+          208
+        ],
+        "durationMs": 33
+      },
+      {
+        "index": 8,
+        "rect": [
+          2112,
+          208,
+          704,
+          208
+        ],
+        "durationMs": 33
+      },
+      {
+        "index": 9,
+        "rect": [
+          2816,
+          208,
+          704,
+          208
+        ],
+        "durationMs": 33
+      },
+      {
+        "index": 10,
+        "rect": [
+          0,
+          416,
+          704,
+          208
+        ],
+        "durationMs": 33
+      },
+      {
+        "index": 11,
+        "rect": [
+          704,
+          416,
+          704,
+          208
+        ],
+        "durationMs": 33
+      }
+    ]
+  },
+  "encoded": {
+    "frames": 12,
+    "durationMs": 396,
+    "bytes": 91588
+  },
+  "playback": {
+    "frameDurationMs": 33,
+    "loop": false,
+    "endBehavior": "hold-last-frame-until-state-controller-switches",
+    "reducedMotion": "ui/input-error-motion-poster.png",
+    "alpha": "straight-alpha",
+    "sizing": "preserve aspect; use contentBounds and pivot, do not stretch the whole padded canvas into old art bounds"
+  },
+  "contentBounds": [
+    36,
+    27,
+    633,
+    154
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "id": "crop-adaptive-watering",
+  "title": "作物适配浇水器",
+  "stars": 4,
+  "starMeaning": "已验证世界能力的等级，不是学生成绩；剧情可学习不等于已解锁。",
+  "authority": "本文件只描述美术呈现和文案，正式解锁由关卡控制器与服务端记录提供。",
+  "canvas": [1672, 941],
+  "layout": {
+    "tree": [387, 149, 356, 534],
+    "treeAsset": "prop-skill-tree-v2",
+    "treeAssetPath": "./components/prop-skill-tree-v2.png",
+    "badge": [784, 122, 520, 38],
+    "title": [780, 174, 528, 56],
+    "stars": [784, 243, 62, 62],
+    "starStep": 77,
+    "status": [786, 318, 516, 46],
+    "cards": [[778, 381, 166, 188], [958, 381, 166, 188], [1138, 381, 166, 188]],
+    "rule": [790, 580, 502, 34],
+    "futurePanel": [775, 621, 530, 92],
+    "continue": [775, 725, 530, 75],
+    "treeCaption": [395, 711, 335, 66]
+  },
+  "nodes": [
+    {"id": "adaptive-watering", "role": "current-skill", "label": "作物适配浇水器", "icon": "icon-skill-watering", "iconPath": "./components/icon-skill-watering.png", "center": [0.5, 0.205], "iconSize": [112, 112]},
+    {"id": "data-pairing", "role": "concept", "label": "数据配对", "icon": "icon-array", "iconPath": "./components/icon-array.png", "center": [0.187, 0.558], "iconSize": [58, 58]},
+    {"id": "gap-calculation", "role": "concept", "label": "缺口计算", "icon": "icon-drop", "iconPath": "./components/icon-drop.png", "center": [0.5, 0.558], "iconSize": [47, 60]},
+    {"id": "graded-action", "role": "concept", "label": "分级动作", "icon": "icon-skill-action", "iconPath": "./components/icon-skill-action.png", "center": [0.815, 0.558], "iconSize": [76, 76]},
+    {"id": "regional-irrigation", "role": "future-skill", "label": "矩形智能灌溉站", "icon": "icon-lock", "iconPath": "./components/icon-lock.png", "center": [0.5, 0.804], "iconSize": [46, 53], "locked": true}
+  ],
+  "concepts": [
+    {"id": "data-pairing", "title": "数据配对", "description": "同一块土地\n使用同一个 i", "detail": "target[i] 和 moisture[i] 记录同一块土地；三个小节点表示本关理解点，不是三个可独立进入的课程。"},
+    {"id": "gap-calculation", "title": "缺口计算", "description": "目标湿度\n减去当前湿度", "detail": "gap = target[i] - moisture[i]，不把固定的60作为所有作物的目标。"},
+    {"id": "graded-action", "title": "分级动作", "description": "按缺口选择\n0 / 1 / 2 份水", "detail": "gap ≥ 30 浇2份；0 < gap < 30 浇1份；gap ≤ 0 不输出 WATER。"}
+  ],
+  "future": {
+    "id": "regional-irrigation",
+    "name": "矩形智能灌溉站",
+    "shortLabel": "区域灌溉 · 功能预告",
+    "stars": 5,
+    "state": "locked",
+    "description": "等待后续剧情，不能提前学习",
+    "ability": "同时照料多行多列农田",
+    "knowledge": ["双重循环", "二维数组"],
+    "canEnter": false
+  },
+  "states": {
+    "offer": {"page": "E03", "mainNodeState": "available", "label": "剧情可学习", "caption": "三项理解，共同组成\n作物适配浇水器", "cta": "进入清泉工坊 →", "nextPage": "S03", "canEquip": false, "futureLocked": true},
+    "unlocked": {"page": "E10", "mainNodeState": "unlocked", "label": "已解锁 · 完成成长归档", "caption": "理解已连接成完整规则\n现在可以回到农场", "cta": "进入完成后的自由状态 →", "nextPage": "E07", "canEquip": true, "futureLocked": true}
+  },
+  "ruleSummary": "同一个 i → 计算湿度缺口 → 选择水量",
+  "wateringRules": {"indexRange": [0, 7], "gap": "target[i] - moisture[i]", "severeAtLeast": 30, "severeUnits": 2, "lightGreaterThan": 0, "lightUnits": 1, "otherwise": "不输出 WATER", "unitMilliliters": 250},
+  "reward": {
+    "page": "E07",
+    "title": "作物适配浇水器已解锁",
+    "toolNode": "adaptive-watering",
+    "body": "本关记录已完成演示归档。\n\n你可以重玩本关，\n查看下一关预告，\n或返回农场继续探索。",
+    "panel": [465, 145, 764, 646],
+    "seal": [760, 167, 176, 76],
+    "titleRect": [516, 258, 662, 57],
+    "toolRect": [527, 321, 286, 286],
+    "toolCaption": [524, 604, 310, 36],
+    "bodyRect": [854, 379, 301, 215],
+    "buttons": [
+      {"id": "ReplayButton", "label": "重玩本关", "rect": [524, 675, 184, 75], "kind": "secondary"},
+      {"id": "NextButton", "label": "下一关预告 →", "rect": [725, 675, 229, 75], "kind": "normal"},
+      {"id": "ReturnButton", "label": "返回农场", "rect": [971, 675, 190, 75], "kind": "secondary"}
+    ]
+  },
+  "resources": {
+    "background": "B04-workshop-exterior-background",
+    "characters": ["char-player-idle", "char-walnut-idle"],
+    "panel": "ui-panel",
+    "card": "ui-panel",
+    "futurePanel": "button-disabled",
+    "star": "icon-star",
+    "completed": "icon-check",
+    "seal": "ui-four-star-seal",
+    "button": "button-normal",
+    "buttonStates": ["button-normal", "button-hover", "button-pressed", "button-focus", "button-disabled"]
+  },
+  "invariants": [
+    "五个木质节点全部叠加独立图标，不能只显示空底图。",
+    "图标、三项能力文案、星级和状态均来自此文件；所有文字保持原生可读。",
+    "图形分支表示能力组成，不是新任务的依赖表或自动解锁规则。",
+    "E03不可装备或宣称已完成；E10不得伪造Skill版本、Run或Receipt数据。",
+    "未来节点在两种状态下都锁定，不提供跳过剧情的按钮。"
+  ]
+}

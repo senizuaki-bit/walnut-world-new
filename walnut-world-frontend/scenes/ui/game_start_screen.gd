@@ -69,14 +69,8 @@ func play_exit() -> void:
 
 
 func _start_idle_motion() -> void:
-	walnut_art.pivot_offset = walnut_art.size * 0.5
-	_idle_tween = create_tween().set_loops().set_parallel(true)
-	_idle_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	_idle_tween.tween_property(walnut_art, "position:y", walnut_art.position.y - 8.0, 1.25)
-	_idle_tween.tween_property(walnut_art, "rotation", 0.025, 1.25)
-	_idle_tween.chain().set_parallel(true)
-	_idle_tween.tween_property(walnut_art, "position:y", walnut_art.position.y, 1.25)
-	_idle_tween.tween_property(walnut_art, "rotation", -0.018, 1.25)
+	# Breathing and gestures are authored in the delivered atlas.
+	(walnut_art as ArtMotionTexture).play_clip("char-walnut-idle")
 
 
 func _on_enter_pressed() -> void:
@@ -97,11 +91,5 @@ func _on_enter_unhovered() -> void:
 	_bounce_button(enter_button.scale, Vector2.ONE)
 
 
-func _bounce_button(from_scale: Vector2, to_scale: Vector2) -> void:
-	if _button_tween != null and _button_tween.is_valid():
-		_button_tween.kill()
-	enter_button.pivot_offset = enter_button.size * 0.5
-	enter_button.scale = from_scale
-	_button_tween = create_tween()
-	_button_tween.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	_button_tween.tween_property(enter_button, "scale", to_scale, 0.18)
+func _bounce_button(_from_scale: Vector2, _to_scale: Vector2) -> void:
+	enter_button.scale = Vector2.ONE

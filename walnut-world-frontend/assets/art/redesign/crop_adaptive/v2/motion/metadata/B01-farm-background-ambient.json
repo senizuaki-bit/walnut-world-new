@@ -1,0 +1,44 @@
+{
+  "group": "environment",
+  "id": "B01-farm-background-ambient",
+  "source": [
+    "components/B01-farm-background.png"
+  ],
+  "state": "环境待机",
+  "effect": "农田：树冠与前景叶梢轻摆，溪水向下游流动，门灯小幅暖光变化",
+  "width": 1280,
+  "height": 720,
+  "frames": 72,
+  "fps": 12,
+  "loop": true,
+  "trigger": "场景可见且未暂停时循环；切出页面暂停",
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "video": true,
+  "atlas": false,
+  "durationMs": 5976,
+  "delayMs": 83,
+  "files": {
+    "webp": "environment/B01-farm-background-ambient.webp",
+    "poster": "environment/B01-farm-background-ambient-poster.png",
+    "mp4": "environment/B01-farm-background-ambient.mp4",
+    "webm": "environment/B01-farm-background-ambient.webm",
+    "godotVideo": "environment/B01-farm-background-ambient.ogv",
+    "metadata": "metadata/B01-farm-background-ambient.json"
+  },
+  "encoded": {
+    "frames": 72,
+    "durationMs": 5976,
+    "bytes": 1693012
+  },
+  "playback": {
+    "frameDurationMs": 83,
+    "loop": true,
+    "endBehavior": "continue-until-state-change",
+    "reducedMotion": "environment/B01-farm-background-ambient-poster.png",
+    "alpha": "opaque",
+    "sizing": "1280x720: fit to original background rectangle; fixed camera"
+  }
+}

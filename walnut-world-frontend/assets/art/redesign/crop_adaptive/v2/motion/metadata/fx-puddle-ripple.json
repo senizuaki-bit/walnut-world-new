@@ -1,0 +1,415 @@
+{
+  "group": "effects",
+  "id": "fx-puddle-ripple",
+  "source": [
+    "components/fx-puddle.png"
+  ],
+  "state": "积水微波",
+  "effect": "稀疏、缓慢的椭圆反光圈，不掩盖作物湿度",
+  "width": 576,
+  "height": 192,
+  "frames": 36,
+  "fps": 12,
+  "loop": true,
+  "trigger": "积水微波",
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "overlay": true,
+  "durationMs": 2988,
+  "delayMs": 83,
+  "files": {
+    "webp": "effects/fx-puddle-ripple.webp",
+    "poster": "effects/fx-puddle-ripple-poster.png",
+    "atlas": "effects/fx-puddle-ripple-atlas.png",
+    "metadata": "metadata/fx-puddle-ripple.json"
+  },
+  "atlas": {
+    "columns": 6,
+    "rows": 6,
+    "frameWidth": 576,
+    "frameHeight": 192,
+    "frames": [
+      {
+        "index": 0,
+        "rect": [
+          0,
+          0,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 1,
+        "rect": [
+          576,
+          0,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 2,
+        "rect": [
+          1152,
+          0,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 3,
+        "rect": [
+          1728,
+          0,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 4,
+        "rect": [
+          2304,
+          0,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 5,
+        "rect": [
+          2880,
+          0,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 6,
+        "rect": [
+          0,
+          192,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 7,
+        "rect": [
+          576,
+          192,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 8,
+        "rect": [
+          1152,
+          192,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 9,
+        "rect": [
+          1728,
+          192,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 10,
+        "rect": [
+          2304,
+          192,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 11,
+        "rect": [
+          2880,
+          192,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 12,
+        "rect": [
+          0,
+          384,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 13,
+        "rect": [
+          576,
+          384,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 14,
+        "rect": [
+          1152,
+          384,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 15,
+        "rect": [
+          1728,
+          384,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 16,
+        "rect": [
+          2304,
+          384,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 17,
+        "rect": [
+          2880,
+          384,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 18,
+        "rect": [
+          0,
+          576,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 19,
+        "rect": [
+          576,
+          576,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 20,
+        "rect": [
+          1152,
+          576,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 21,
+        "rect": [
+          1728,
+          576,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 22,
+        "rect": [
+          2304,
+          576,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 23,
+        "rect": [
+          2880,
+          576,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 24,
+        "rect": [
+          0,
+          768,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 25,
+        "rect": [
+          576,
+          768,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 26,
+        "rect": [
+          1152,
+          768,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 27,
+        "rect": [
+          1728,
+          768,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 28,
+        "rect": [
+          2304,
+          768,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 29,
+        "rect": [
+          2880,
+          768,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 30,
+        "rect": [
+          0,
+          960,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 31,
+        "rect": [
+          576,
+          960,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 32,
+        "rect": [
+          1152,
+          960,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 33,
+        "rect": [
+          1728,
+          960,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 34,
+        "rect": [
+          2304,
+          960,
+          576,
+          192
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 35,
+        "rect": [
+          2880,
+          960,
+          576,
+          192
+        ],
+        "durationMs": 83
+      }
+    ]
+  },
+  "encoded": {
+    "frames": 36,
+    "durationMs": 2988,
+    "bytes": 90644
+  },
+  "playback": {
+    "frameDurationMs": 83,
+    "loop": true,
+    "endBehavior": "continue-until-state-change",
+    "reducedMotion": "effects/fx-puddle-ripple-poster.png",
+    "alpha": "straight-alpha",
+    "sizing": "preserve aspect; use contentBounds and pivot, do not stretch the whole padded canvas into old art bounds"
+  },
+  "contentBounds": [
+    255,
+    92,
+    178,
+    24
+  ]
+}

@@ -7,17 +7,22 @@ signal world_cue_requested(presentation_key: StringName, active: bool)
 signal presentation_rejected(reason: String)
 
 @export var character_catalog: AgentCharacterCatalog
+@export var overlay_path := NodePath("StoryDialogueOverlay")
 
-@onready var overlay: StoryDialogueOverlay = $StoryDialogueOverlay
+@onready var overlay: StoryDialogueOverlay = get_node_or_null(overlay_path) as StoryDialogueOverlay
 
 var _pending: Array[Dictionary] = []
 var _presented_interaction_ids: Dictionary = {}
 var _active_interaction: Dictionary = {}
+var _presentation_session_id := ""
 
 
 func _ready() -> void:
 	if character_catalog == null:
 		push_error("AgentInteractionPresenter requires an AgentCharacterCatalog.")
+		return
+	if overlay == null:
+		push_error("AgentInteractionPresenter requires one shared StoryDialogueOverlay.")
 		return
 	var validation := character_catalog.validate()
 	if not bool(validation.get("ok", false)):
@@ -36,12 +41,11 @@ func enqueue_interaction(interaction: Dictionary) -> bool:
 	if character_catalog == null:
 		return _reject("Agent character catalog is unavailable.")
 	var interaction_id := str(interaction.get("interaction_id", ""))
+	var session_id := str(interaction.get("session_id", ""))
 	var role_id := StringName(str(interaction.get("role", "")))
 	var response_type := str(interaction.get("response_type", ""))
 	if interaction_id.is_empty():
 		return _reject("AgentInteraction is missing interaction_id.")
-	if _presented_interaction_ids.has(interaction_id) or _contains_pending(interaction_id):
-		return false
 	if role_id == &"system" or response_type in ["skill_patch", "patch"]:
 		return false
 	var profile := character_catalog.profile_for(role_id)
@@ -50,6 +54,10 @@ func enqueue_interaction(interaction: Dictionary) -> bool:
 	var feedback: Variant = interaction.get("feedback")
 	if not feedback is Dictionary or str(feedback.get("message", "")).is_empty():
 		return _reject("AgentInteraction has no presentable feedback message.")
+	if not session_id.is_empty() and session_id != _presentation_session_id:
+		begin_session(session_id)
+	if _presented_interaction_ids.has(interaction_id) or _contains_pending(interaction_id):
+		return false
 	_pending.append(interaction.duplicate(true))
 	if _active_interaction.is_empty():
 		_present_next()
@@ -66,12 +74,30 @@ func is_presenting() -> bool:
 
 func clear_queue() -> void:
 	_pending.clear()
-	if overlay.visible:
+	if not _active_interaction.is_empty() and overlay.visible:
 		overlay.skip_sequence()
+	elif not _active_interaction.is_empty():
+		_finish_active_interaction()
+
+
+func begin_session(session_id: String) -> void:
+	if session_id.is_empty() or session_id == _presentation_session_id:
+		return
+	clear_queue()
+	_presented_interaction_ids.clear()
+	_presentation_session_id = session_id
+
+
+func presentation_session_id() -> String:
+	return _presentation_session_id
+
+
+func active_interaction() -> Dictionary:
+	return _active_interaction.duplicate(true)
 
 
 func _present_next() -> void:
-	if _pending.is_empty():
+	if _pending.is_empty() or overlay == null or overlay.visible:
 		return
 	_active_interaction = _pending.pop_front()
 	var interaction_id := str(_active_interaction.interaction_id)
@@ -99,6 +125,17 @@ func _present_next() -> void:
 
 func _on_sequence_finished() -> void:
 	if _active_interaction.is_empty():
+		# Narrative coroutines awaiting this same signal get one frame to start
+		# their next authored line before queued Agent feedback is considered.
+		# This keeps a multi-part story sequence atomic from the learner's view.
+		call_deferred("_present_next")
+		return
+	_finish_active_interaction()
+	_present_next()
+
+
+func _finish_active_interaction() -> void:
+	if _active_interaction.is_empty():
 		return
 	var interaction_id := str(_active_interaction.interaction_id)
 	var role_id := StringName(str(_active_interaction.role))
@@ -107,7 +144,6 @@ func _on_sequence_finished() -> void:
 		world_cue_requested.emit(profile.world_presentation_key, false)
 	role_presentation_finished.emit(role_id, interaction_id)
 	_active_interaction.clear()
-	_present_next()
 
 
 func _contains_pending(interaction_id: String) -> bool:

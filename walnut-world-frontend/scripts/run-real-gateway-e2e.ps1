@@ -56,9 +56,9 @@ function Stop-VerifiedSpawnedProcessTree {
 
 $projectPath = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
 if ([string]::IsNullOrWhiteSpace($GodotExe)) {
-    $bundledCandidates = @(
-        (Join-Path (Split-Path -Parent $projectPath) 'tools\godot-4.5.2\Godot_v4.5.2-stable_win64_console.exe'),
-        (Join-Path $projectPath '..\..\tools\godot-4.5.2\Godot_v4.5.2-stable_win64_console.exe')
+	$bundledCandidates = @(
+		(Join-Path (Split-Path -Parent $projectPath) 'tools\godot-4.7.1\Godot_v4.7.1-stable_win64_console.exe'),
+		(Join-Path $projectPath '..\..\tools\godot-4.7.1\Godot_v4.7.1-stable_win64_console.exe')
     )
     foreach ($bundledCandidate in $bundledCandidates) {
         if (Test-Path -LiteralPath $bundledCandidate -PathType Leaf) {
@@ -68,7 +68,12 @@ if ([string]::IsNullOrWhiteSpace($GodotExe)) {
     }
 }
 if ([string]::IsNullOrWhiteSpace($GodotExe) -or -not (Test-Path -LiteralPath $GodotExe)) {
-    throw 'Set GODOT_EXE or pass -GodotExe with the Godot 4.5.2 console executable.'
+	throw 'Set GODOT_EXE or pass -GodotExe with the Godot 4.7.1 stable executable.'
+}
+$godotVersionOutput = @(& $GodotExe --version 2>&1)
+$godotVersion = (($godotVersionOutput | ForEach-Object { [string]$_ }) -join "`n").Trim()
+if ($LASTEXITCODE -ne 0 -or $godotVersion -notmatch '^4\.7\.1\.stable') {
+	throw "Godot 4.7.1 stable is required; observed '$godotVersion'."
 }
 if ([string]::IsNullOrWhiteSpace($env:YAYA_API_BASE_URL)) {
     throw 'YAYA_API_BASE_URL must identify the independently running real Gateway.'
@@ -283,7 +288,8 @@ try {
             $fingerprint.ui_display.crop_adaptive_watering_demo -ne $true -or
             $fingerprint.ui_display.crop_agent_bridge -ne $true -or
             $fingerprint.ui_display.run_button -ne $true -or
-            $fingerprint.ui_display.content_draft_interaction_snapshot -ne $true
+            $fingerprint.ui_display.content_draft_interaction_snapshot -ne $true -or
+            $fingerprint.ui_display.recovered_interaction_replayed -ne $false
         ) {
             throw 'Recovery-only Godot PASS fingerprint does not prove persisted authority and formal UI recovery.'
         }
@@ -319,29 +325,44 @@ try {
     }
     else {
         $phase1Audit = $fingerprint.transport_attempt_audit
-        $expectedTurnCount = if ($EnableSkillPatch) { 6 } else { 4 }
+        $expectedTurnCount = if ($EnableSkillPatch) { 6 } else { 9 }
         $expectedRunCount = if ($EnableSkillPatch) { 5 } else { 4 }
-        $expectedPostCount = if ($EnableSkillPatch) { 12 } else { 9 }
-        $expectedPutCount = if ($EnableSkillPatch) { 1 } else { 2 }
-        $expectedDraftUpsertCount = if ($EnableSkillPatch) { 1 } else { 2 }
+        $expectedPostCount = if ($EnableSkillPatch) { 12 } else { 20 }
+        $expectedPutCount = if ($EnableSkillPatch) { 1 } else { 3 }
+        $expectedDraftUpsertCount = if ($EnableSkillPatch) { 1 } else { 3 }
+        $expectedBuildSubmissionCount = if ($EnableSkillPatch) { 2 } else { 8 }
+        $expectedBuildResourceCount = if ($EnableSkillPatch) { 2 } else { 5 }
         $expectedPatchDecisionCount = if ($EnableSkillPatch) { 1 } else { 0 }
         $expectedInteractionRoles = if ($EnableSkillPatch) {
             'teaching_agent,teaching_agent,bug_agent,bug_agent,teaching_agent,book_agent'
         }
         else {
-            'teaching_agent,teaching_agent,bug_agent,book_agent'
+            'teaching_agent,teaching_agent,bug_agent,teaching_agent,teaching_agent,teaching_agent,teaching_agent,bug_agent,book_agent'
         }
         $expectedCommandStatuses = if ($EnableSkillPatch) {
             'REJECTED,REJECTED,REJECTED,REJECTED,APPLIED,APPLIED'
         }
         else {
-            'REJECTED,REJECTED,REJECTED,APPLIED'
+            'APPLIED,APPLIED,APPLIED,REJECTED,APPLIED,REJECTED,APPLIED,REJECTED,APPLIED'
         }
         $expectedRunStatuses = if ($EnableSkillPatch) {
             'REJECTED,REJECTED,REJECTED,REJECTED,SUCCEEDED'
         }
         else {
             'REJECTED,REJECTED,REJECTED,SUCCEEDED'
+        }
+        if (-not $EnableSkillPatch) {
+            if (
+                @($fingerprint.build_rejection_chain.build_ids).Count -ne 3 -or
+                @($fingerprint.build_rejection_chain.build_ids | Sort-Object -Unique).Count -ne 3 -or
+                (@($fingerprint.build_rejection_chain.interaction_roles) -join ',') -ne 'teaching_agent,teaching_agent,bug_agent' -or
+                @($fingerprint.build_rejection_chain.run_ids | Where-Object { $null -ne $_ }).Count -ne 0 -or
+                $fingerprint.build_rejection_chain.world_unchanged -ne $true -or
+                $fingerprint.build_rejection_chain.patch_unavailable -ne $true -or
+                $fingerprint.build_rejection_chain.third_bug_legion_presented -ne $true
+            ) {
+                throw 'Real Gateway fingerprint does not prove the three-rejection teaching/teaching/bug UI chain without Run, World mutation, or Patch.'
+            }
         }
         if (
         [string]$fingerprint.phase1_fingerprint_schema -ne '1.0.0' -or
@@ -355,10 +376,12 @@ try {
         $fingerprint.api_store_closure.run_closed -ne $true -or
         [string]$fingerprint.persistence_identity -notmatch '^[0-9a-f]{16}$' -or
         [int]$fingerprint.starter_draft_revision -ne 1 -or
-        [int]$fingerprint.failure_draft_revision -ne 2 -or
-        [int]$fingerprint.saved_draft_revision -ne 3 -or
+        [int]$fingerprint.compile_failure_draft_revision -ne $(if ($EnableSkillPatch) { -1 } else { 2 }) -or
+        [int]$fingerprint.failure_draft_revision -ne $(if ($EnableSkillPatch) { 2 } else { 3 }) -or
+        [int]$fingerprint.saved_draft_revision -ne $(if ($EnableSkillPatch) { 3 } else { 4 }) -or
         [int]$fingerprint.starter_workspace_revision -ne 1 -or
-        [int]$fingerprint.failure_workspace_revision -ne 2 -or
+        [int]$fingerprint.compile_failure_workspace_revision -ne $(if ($EnableSkillPatch) { -1 } else { 2 }) -or
+        [int]$fingerprint.failure_workspace_revision -ne $(if ($EnableSkillPatch) { 2 } else { 9 }) -or
         [int]$fingerprint.saved_workspace_revision -le [int]$fingerprint.failure_workspace_revision -or
         [int]$fingerprint.final_workspace_revision -lt [int]$fingerprint.saved_workspace_revision -or
         [string]$fingerprint.final_workspace_sha256 -notmatch '^[0-9a-f]{64}$' -or
@@ -374,7 +397,7 @@ try {
         [string]$fingerprint.active_skill_tuple_sha256 -notmatch '^[0-9a-f]{64}$' -or
         [int]$fingerprint.active_skill_tuple.registry_revision -ne 2 -or
         [string]$fingerprint.failure_reason -ne 'TASK_INCOMPLETE' -or
-        @($fingerprint.build_ids).Count -ne 2 -or
+        @($fingerprint.build_ids).Count -ne $expectedBuildResourceCount -or
         @($fingerprint.activation_ids).Count -ne 2 -or
         @($fingerprint.turn_ids).Count -ne $expectedTurnCount -or
         @($fingerprint.command_ids).Count -ne $expectedTurnCount -or
@@ -382,7 +405,7 @@ try {
         @($fingerprint.interaction_ids).Count -ne $expectedTurnCount -or
         @($fingerprint.evidence_ids).Count -ne [int]$fingerprint.evidence_count -or
         [int]$fingerprint.evidence_count -lt 5 -or
-        @($fingerprint.build_ids | Sort-Object -Unique).Count -ne 2 -or
+        @($fingerprint.build_ids | Sort-Object -Unique).Count -ne $expectedBuildResourceCount -or
         @($fingerprint.activation_ids | Sort-Object -Unique).Count -ne 2 -or
         @($fingerprint.turn_ids | Sort-Object -Unique).Count -ne $expectedTurnCount -or
         @($fingerprint.command_ids | Sort-Object -Unique).Count -ne $expectedTurnCount -or
@@ -401,7 +424,7 @@ try {
         (Get-JsonIntProperty $phase1Audit.method_counts 'DELETE') -ne 0 -or
         (Get-JsonIntProperty $phase1Audit.operation_counts 'create_agent_session') -ne 1 -or
         (Get-JsonIntProperty $phase1Audit.operation_counts 'upsert_product_skill_draft') -ne $expectedDraftUpsertCount -or
-        (Get-JsonIntProperty $phase1Audit.operation_counts 'submit_skill_build') -ne 2 -or
+        (Get-JsonIntProperty $phase1Audit.operation_counts 'submit_skill_build') -ne $expectedBuildSubmissionCount -or
         (Get-JsonIntProperty $phase1Audit.operation_counts 'activate_skill_version') -ne 2 -or
         (Get-JsonIntProperty $phase1Audit.operation_counts 'submit_agent_turn') -ne $expectedTurnCount -or
         (Get-JsonIntProperty $phase1Audit.operation_counts 'record_product_patch_decision') -ne $expectedPatchDecisionCount -or
@@ -447,6 +470,17 @@ try {
             [int]$fingerprint.world_presentation.presentation_high_watermark -lt 8
         )) {
             throw 'Real Gateway Godot E2E PASS fingerprint does not prove eight ordered formal HARVEST presentations through PLAYING.'
+        }
+        if (-not $EnableWorldPresentation -and (
+            $fingerprint.world_presentation.enabled -ne $false -or
+            [int]$fingerprint.world_presentation.playback_started -ne 0 -or
+            [int]$fingerprint.world_presentation.playback_finished -ne 0 -or
+            $fingerprint.world_presentation.playing_observed -ne $false -or
+            @($fingerprint.world_presentation.event_ids_started).Count -ne 0 -or
+            @($fingerprint.world_presentation.event_ids_finished).Count -ne 0 -or
+            [int]$fingerprint.world_presentation.presentation_high_watermark -ne 0
+        )) {
+            throw 'Disabled World presentation unexpectedly produced client playback authority.'
         }
         if (
             $fingerprint.persistence_reset_performed -ne $true -or

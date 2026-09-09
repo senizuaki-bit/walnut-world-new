@@ -1,0 +1,60 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scenes/audio/farm_audio.gd" id="script"]
+[ext_resource type="AudioStream" path="res://assets/audio/click.wav" id="click"]
+[ext_resource type="AudioStream" path="res://assets/audio/panel_open.wav" id="open"]
+[ext_resource type="AudioStream" path="res://assets/audio/panel_close.wav" id="close"]
+[ext_resource type="AudioStream" path="res://assets/audio/confirm.wav" id="confirm"]
+[ext_resource type="AudioStream" path="res://assets/audio/retry.wav" id="retry"]
+[ext_resource type="AudioStream" path="res://assets/audio/activate.wav" id="activate"]
+[ext_resource type="AudioStream" path="res://assets/audio/complete.wav" id="complete"]
+[ext_resource type="AudioStream" path="res://assets/audio/watering.wav" id="water"]
+[ext_resource type="AudioStream" path="res://assets/audio/birds.ogg" id="birds"]
+
+[node name="FarmAudio" type="Node"]
+script = ExtResource("script")
+
+[node name="Click" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("click")
+volume_db = -16.0
+bus = &"UI"
+
+[node name="PanelOpen" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("open")
+volume_db = -16.0
+bus = &"UI"
+
+[node name="PanelClose" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("close")
+volume_db = -16.0
+bus = &"UI"
+
+[node name="Confirm" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("confirm")
+volume_db = -12.0
+bus = &"SFX"
+
+[node name="Retry" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("retry")
+volume_db = -17.0
+bus = &"SFX"
+
+[node name="Activate" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("activate")
+volume_db = -13.0
+bus = &"SFX"
+
+[node name="Complete" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("complete")
+volume_db = -12.0
+bus = &"SFX"
+
+[node name="Watering" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("water")
+volume_db = -16.0
+bus = &"SFX"
+
+[node name="Birds" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("birds")
+volume_db = -27.0
+bus = &"Ambience"

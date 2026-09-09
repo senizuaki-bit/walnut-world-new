@@ -34,6 +34,11 @@ public static class FakeGodotTimeoutProcess
 {
     public static void Main(string[] args)
     {
+        if (Array.IndexOf(args, "--version") >= 0)
+        {
+            Console.WriteLine("4.7.1.stable.official.fake");
+            return;
+        }
         var child = Process.Start(new ProcessStartInfo
         {
             FileName = "powershell.exe",
@@ -56,6 +61,11 @@ public static class FakeGodotExitProcess
 {
     public static int Main(string[] args)
     {
+        if (Array.IndexOf(args, "--version") >= 0)
+        {
+            Console.WriteLine("4.7.1.stable.official.fake");
+            return 0;
+        }
         var exitCode = Int32.Parse(Environment.GetEnvironmentVariable("YAYA_EXIT_TEST_CODE"));
         Console.WriteLine("FAKE_GODOT_EXIT_{0}_DIAGNOSTIC", exitCode);
         if (exitCode == 0)
@@ -210,12 +220,14 @@ public static class FakeTaskKillNonzero
         }
         persistence_identity = '0123456789abcdef'
         starter_draft_revision = 1
-        failure_draft_revision = 2
-        saved_draft_revision = 3
+        compile_failure_draft_revision = 2
+        failure_draft_revision = 3
+        saved_draft_revision = 4
         starter_workspace_revision = 1
-        failure_workspace_revision = 2
-        saved_workspace_revision = 3
-        final_workspace_revision = 3
+        compile_failure_workspace_revision = 2
+        failure_workspace_revision = 9
+        saved_workspace_revision = 10
+        final_workspace_revision = 10
         final_workspace_sha256 = $hashA
         failure_draft_source_sha256 = $hashA
         failure_draft_sha256 = $hashB
@@ -226,29 +238,37 @@ public static class FakeTaskKillNonzero
         active_skill_tuple_sha256 = $hashC
         active_skill_tuple = @{ registry_revision = 2 }
         failure_reason = 'TASK_INCOMPLETE'
-        build_ids = @('build_1', 'build_2')
+        build_ids = @('build_1', 'build_2', 'build_3', 'build_4', 'build_5')
         activation_ids = @('activation_1', 'activation_2')
-        turn_ids = @('turn_1', 'turn_2', 'turn_3', 'turn_4')
-        command_ids = @('command_1', 'command_2', 'command_3', 'command_4')
+        turn_ids = @('turn_1', 'turn_2', 'turn_3', 'turn_4', 'turn_5', 'turn_6', 'turn_7', 'turn_8', 'turn_9')
+        command_ids = @('command_1', 'command_2', 'command_3', 'command_4', 'command_5', 'command_6', 'command_7', 'command_8', 'command_9')
         run_ids = @('run_1', 'run_2', 'run_3', 'run_4')
-        interaction_ids = @('interaction_1', 'interaction_2', 'interaction_3', 'interaction_4')
-        evidence_ids = @('evidence_1', 'evidence_2', 'evidence_3', 'evidence_4', 'evidence_5')
-        evidence_count = 5
-        interaction_roles = @('teaching_agent', 'teaching_agent', 'bug_agent', 'book_agent')
-        command_statuses = @('REJECTED', 'REJECTED', 'REJECTED', 'APPLIED')
+        interaction_ids = @('interaction_1', 'interaction_2', 'interaction_3', 'interaction_4', 'interaction_5', 'interaction_6', 'interaction_7', 'interaction_8', 'interaction_9')
+        evidence_ids = @('evidence_1', 'evidence_2', 'evidence_3', 'evidence_4', 'evidence_5', 'evidence_6', 'evidence_7', 'evidence_8')
+        evidence_count = 8
+        interaction_roles = @('teaching_agent', 'teaching_agent', 'bug_agent', 'teaching_agent', 'teaching_agent', 'teaching_agent', 'teaching_agent', 'bug_agent', 'book_agent')
+        command_statuses = @('APPLIED', 'APPLIED', 'APPLIED', 'REJECTED', 'APPLIED', 'REJECTED', 'APPLIED', 'REJECTED', 'APPLIED')
         run_statuses = @('REJECTED', 'REJECTED', 'REJECTED', 'SUCCEEDED')
         interaction_role = 'book_agent'
-        interaction_sequence = 4
+        interaction_sequence = 9
+        build_rejection_chain = @{
+            build_ids = @('build_rejection_1', 'build_rejection_2', 'build_rejection_3')
+            interaction_roles = @('teaching_agent', 'teaching_agent', 'bug_agent')
+            run_ids = @($null, $null, $null)
+            world_unchanged = $true
+            patch_unavailable = $true
+            third_bug_legion_presented = $true
+        }
         transport_attempt_audit = [ordered]@{
-            total_started = 12
-            total_completed = 12
-            method_counts = @{ GET = 1; POST = 9; PUT = 2; PATCH = 0; DELETE = 0 }
+            total_started = 23
+            total_completed = 23
+            method_counts = @{ GET = 0; POST = 20; PUT = 3; PATCH = 0; DELETE = 0 }
             operation_counts = @{
                 create_agent_session = 1
-                upsert_product_skill_draft = 2
-                submit_skill_build = 2
+                upsert_product_skill_draft = 3
+                submit_skill_build = 8
                 activate_skill_version = 2
-                submit_agent_turn = 4
+                submit_agent_turn = 9
                 record_product_patch_decision = 0
             }
         }
@@ -259,6 +279,15 @@ public static class FakeTaskKillNonzero
             crop_agent_bridge = $true
             run_button = $true
             content_draft_interaction_snapshot = $true
+        }
+        world_presentation = @{
+            enabled = $false
+            playback_started = 0
+            playback_finished = 0
+            playing_observed = $false
+            event_ids_started = @()
+            event_ids_finished = @()
+            presentation_high_watermark = 0
         }
         persistence_reset_performed = $true
         persistence_reset_residual_count = 0

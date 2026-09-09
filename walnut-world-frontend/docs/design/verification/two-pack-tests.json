@@ -1,0 +1,24 @@
+{
+  "suite": "OFFLINE",
+  "discovered": 80,
+  "executed": 80,
+  "passed": 80,
+  "failed": 0,
+  "skipped": 0,
+  "real_opt_in": [
+    {
+      "path": "tests/client/real_gateway_chain_e2e_test.gd",
+      "suite": "REAL_GATEWAY_OPT_IN",
+      "executed": false,
+      "status": "EXCLUDED_NOT_RUN",
+      "runner": "scripts/run-real-gateway-e2e.ps1"
+    },
+    {
+      "path": "tests/client/real_gateway_chain_recovery_e2e_test.gd",
+      "suite": "REAL_GATEWAY_OPT_IN",
+      "executed": false,
+      "status": "EXCLUDED_NOT_RUN",
+      "runner": "scripts/run-real-gateway-e2e.ps1"
+    }
+  ]
+}

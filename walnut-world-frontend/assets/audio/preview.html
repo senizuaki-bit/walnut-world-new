@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>核桃代码世界 · 音效试听</title>
+<style>
+body{font:16px/1.7 system-ui,sans-serif;background:#f7f4e9;color:#244834;max-width:900px;margin:40px auto;padding:0 24px}h1{font-size:28px}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}section{background:#fffdf5;border:1px solid #dce4d2;border-radius:14px;padding:18px}h2{font-size:18px;margin:0 0 12px}audio{width:100%}p{color:#556655}a{color:#356b44}
+</style>
+<h1>核桃代码世界 · 音效试听</h1>
+<p>9 个 CC0 音效。这里以接近游戏中的默认音量试听，每次播放会停止其他片段。</p>
+<main>
+<section><h2>按钮点击</h2><audio controls preload="none" src="click.wav" data-db="-19"></audio></section>
+<section><h2>展开代码卷轴</h2><audio controls preload="none" src="panel_open.wav" data-db="-19"></audio></section>
+<section><h2>收起代码卷轴</h2><audio controls preload="none" src="panel_close.wav" data-db="-19"></audio></section>
+<section><h2>构建通过 / 实验正确</h2><audio controls preload="none" src="confirm.wav" data-db="-15"></audio></section>
+<section><h2>需要再修改</h2><audio controls preload="none" src="retry.wav" data-db="-20"></audio></section>
+<section><h2>技能激活</h2><audio controls preload="none" src="activate.wav" data-db="-16"></audio></section>
+<section><h2>世界目标完成</h2><audio controls preload="none" src="complete.wav" data-db="-15"></audio></section>
+<section><h2>浇水</h2><audio controls preload="none" src="watering.wav" data-db="-19"></audio></section>
+<section><h2>农场鸟鸣</h2><audio controls preload="none" src="birds.ogg" data-db="-30"></audio></section>
+</main>
+<p>素材来源、原文件对应关系和授权记录见 <a href="README.md">音效清单</a>。</p>
+<script>
+const players=[...document.querySelectorAll('audio')];
+for(const player of players){player.volume=10**(Number(player.dataset.db)/20);player.addEventListener('play',()=>{for(const other of players){if(other!==player)other.pause();}});}
+</script>
+</html>

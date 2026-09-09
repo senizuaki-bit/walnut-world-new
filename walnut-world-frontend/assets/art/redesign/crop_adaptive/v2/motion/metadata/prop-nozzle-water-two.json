@@ -1,0 +1,534 @@
+{
+  "group": "equipment",
+  "id": "prop-nozzle-water-two",
+  "source": [
+    "components/prop-nozzle.png"
+  ],
+  "state": "喷 2 份",
+  "effect": "喷头向外喷水，落点水花随水流变化；播放时长对应一份／两份",
+  "width": 448,
+  "height": 480,
+  "frames": 48,
+  "fps": 12,
+  "loop": false,
+  "trigger": "喷 2 份",
+  "pivot": [
+    0.5,
+    0.95
+  ],
+  "durationMs": 3984,
+  "delayMs": 83,
+  "files": {
+    "webp": "equipment/prop-nozzle-water-two.webp",
+    "poster": "equipment/prop-nozzle-water-two-poster.png",
+    "atlas": "equipment/prop-nozzle-water-two-atlas.png",
+    "metadata": "metadata/prop-nozzle-water-two.json"
+  },
+  "atlas": {
+    "columns": 6,
+    "rows": 8,
+    "frameWidth": 448,
+    "frameHeight": 480,
+    "frames": [
+      {
+        "index": 0,
+        "rect": [
+          0,
+          0,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 1,
+        "rect": [
+          448,
+          0,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 2,
+        "rect": [
+          896,
+          0,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 3,
+        "rect": [
+          1344,
+          0,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 4,
+        "rect": [
+          1792,
+          0,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 5,
+        "rect": [
+          2240,
+          0,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 6,
+        "rect": [
+          0,
+          480,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 7,
+        "rect": [
+          448,
+          480,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 8,
+        "rect": [
+          896,
+          480,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 9,
+        "rect": [
+          1344,
+          480,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 10,
+        "rect": [
+          1792,
+          480,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 11,
+        "rect": [
+          2240,
+          480,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 12,
+        "rect": [
+          0,
+          960,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 13,
+        "rect": [
+          448,
+          960,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 14,
+        "rect": [
+          896,
+          960,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 15,
+        "rect": [
+          1344,
+          960,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 16,
+        "rect": [
+          1792,
+          960,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 17,
+        "rect": [
+          2240,
+          960,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 18,
+        "rect": [
+          0,
+          1440,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 19,
+        "rect": [
+          448,
+          1440,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 20,
+        "rect": [
+          896,
+          1440,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 21,
+        "rect": [
+          1344,
+          1440,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 22,
+        "rect": [
+          1792,
+          1440,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 23,
+        "rect": [
+          2240,
+          1440,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 24,
+        "rect": [
+          0,
+          1920,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 25,
+        "rect": [
+          448,
+          1920,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 26,
+        "rect": [
+          896,
+          1920,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 27,
+        "rect": [
+          1344,
+          1920,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 28,
+        "rect": [
+          1792,
+          1920,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 29,
+        "rect": [
+          2240,
+          1920,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 30,
+        "rect": [
+          0,
+          2400,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 31,
+        "rect": [
+          448,
+          2400,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 32,
+        "rect": [
+          896,
+          2400,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 33,
+        "rect": [
+          1344,
+          2400,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 34,
+        "rect": [
+          1792,
+          2400,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 35,
+        "rect": [
+          2240,
+          2400,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 36,
+        "rect": [
+          0,
+          2880,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 37,
+        "rect": [
+          448,
+          2880,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 38,
+        "rect": [
+          896,
+          2880,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 39,
+        "rect": [
+          1344,
+          2880,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 40,
+        "rect": [
+          1792,
+          2880,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 41,
+        "rect": [
+          2240,
+          2880,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 42,
+        "rect": [
+          0,
+          3360,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 43,
+        "rect": [
+          448,
+          3360,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 44,
+        "rect": [
+          896,
+          3360,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 45,
+        "rect": [
+          1344,
+          3360,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 46,
+        "rect": [
+          1792,
+          3360,
+          448,
+          480
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 47,
+        "rect": [
+          2240,
+          3360,
+          448,
+          480
+        ],
+        "durationMs": 83
+      }
+    ]
+  },
+  "encoded": {
+    "frames": 48,
+    "durationMs": 3984,
+    "bytes": 274542
+  },
+  "playback": {
+    "frameDurationMs": 83,
+    "loop": false,
+    "endBehavior": "hold-last-frame-until-state-controller-switches",
+    "reducedMotion": "equipment/prop-nozzle-water-two-poster.png",
+    "alpha": "straight-alpha",
+    "sizing": "preserve aspect; use contentBounds and pivot, do not stretch the whole padded canvas into old art bounds"
+  },
+  "contentBounds": [
+    45,
+    51,
+    358,
+    384
+  ]
+}

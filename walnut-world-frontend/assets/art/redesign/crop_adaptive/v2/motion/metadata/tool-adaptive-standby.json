@@ -1,0 +1,414 @@
+{
+  "group": "equipment",
+  "id": "tool-adaptive-standby",
+  "source": [
+    "components/icon-skill-watering.png"
+  ],
+  "state": "待机",
+  "effect": "无喷水；读数时表盘亮，故障时停止并一次橙红提示",
+  "width": 512,
+  "height": 512,
+  "frames": 36,
+  "fps": 12,
+  "loop": true,
+  "trigger": "待机",
+  "pivot": [
+    0.5,
+    0.87
+  ],
+  "durationMs": 2988,
+  "delayMs": 83,
+  "files": {
+    "webp": "equipment/tool-adaptive-standby.webp",
+    "poster": "equipment/tool-adaptive-standby-poster.png",
+    "atlas": "equipment/tool-adaptive-standby-atlas.png",
+    "metadata": "metadata/tool-adaptive-standby.json"
+  },
+  "atlas": {
+    "columns": 6,
+    "rows": 6,
+    "frameWidth": 512,
+    "frameHeight": 512,
+    "frames": [
+      {
+        "index": 0,
+        "rect": [
+          0,
+          0,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 1,
+        "rect": [
+          512,
+          0,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 2,
+        "rect": [
+          1024,
+          0,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 3,
+        "rect": [
+          1536,
+          0,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 4,
+        "rect": [
+          2048,
+          0,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 5,
+        "rect": [
+          2560,
+          0,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 6,
+        "rect": [
+          0,
+          512,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 7,
+        "rect": [
+          512,
+          512,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 8,
+        "rect": [
+          1024,
+          512,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 9,
+        "rect": [
+          1536,
+          512,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 10,
+        "rect": [
+          2048,
+          512,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 11,
+        "rect": [
+          2560,
+          512,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 12,
+        "rect": [
+          0,
+          1024,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 13,
+        "rect": [
+          512,
+          1024,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 14,
+        "rect": [
+          1024,
+          1024,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 15,
+        "rect": [
+          1536,
+          1024,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 16,
+        "rect": [
+          2048,
+          1024,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 17,
+        "rect": [
+          2560,
+          1024,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 18,
+        "rect": [
+          0,
+          1536,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 19,
+        "rect": [
+          512,
+          1536,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 20,
+        "rect": [
+          1024,
+          1536,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 21,
+        "rect": [
+          1536,
+          1536,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 22,
+        "rect": [
+          2048,
+          1536,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 23,
+        "rect": [
+          2560,
+          1536,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 24,
+        "rect": [
+          0,
+          2048,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 25,
+        "rect": [
+          512,
+          2048,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 26,
+        "rect": [
+          1024,
+          2048,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 27,
+        "rect": [
+          1536,
+          2048,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 28,
+        "rect": [
+          2048,
+          2048,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 29,
+        "rect": [
+          2560,
+          2048,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 30,
+        "rect": [
+          0,
+          2560,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 31,
+        "rect": [
+          512,
+          2560,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 32,
+        "rect": [
+          1024,
+          2560,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 33,
+        "rect": [
+          1536,
+          2560,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 34,
+        "rect": [
+          2048,
+          2560,
+          512,
+          512
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 35,
+        "rect": [
+          2560,
+          2560,
+          512,
+          512
+        ],
+        "durationMs": 83
+      }
+    ]
+  },
+  "encoded": {
+    "frames": 10,
+    "durationMs": 2988,
+    "bytes": 53884
+  },
+  "playback": {
+    "frameDurationMs": 83,
+    "loop": true,
+    "endBehavior": "continue-until-state-change",
+    "reducedMotion": "equipment/tool-adaptive-standby-poster.png",
+    "alpha": "straight-alpha",
+    "sizing": "preserve aspect; use contentBounds and pivot, do not stretch the whole padded canvas into old art bounds"
+  },
+  "contentBounds": [
+    66,
+    60,
+    379,
+    355
+  ]
+}

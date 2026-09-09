@@ -1,0 +1,294 @@
+{
+  "group": "ui",
+  "id": "input-focus-motion",
+  "source": [
+    "components/input-focus.png"
+  ],
+  "state": "输入框聚焦",
+  "effect": "只对皮肤轻微位移／缩放或边缘亮度变化；文字必须继续由前端独立绘制",
+  "width": 704,
+  "height": 208,
+  "frames": 24,
+  "fps": 12,
+  "loop": true,
+  "trigger": "输入框聚焦；disabled 状态不播放",
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "durationMs": 1992,
+  "delayMs": 83,
+  "files": {
+    "webp": "ui/input-focus-motion.webp",
+    "poster": "ui/input-focus-motion-poster.png",
+    "atlas": "ui/input-focus-motion-atlas.png",
+    "metadata": "metadata/input-focus-motion.json"
+  },
+  "atlas": {
+    "columns": 5,
+    "rows": 5,
+    "frameWidth": 704,
+    "frameHeight": 208,
+    "frames": [
+      {
+        "index": 0,
+        "rect": [
+          0,
+          0,
+          704,
+          208
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 1,
+        "rect": [
+          704,
+          0,
+          704,
+          208
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 2,
+        "rect": [
+          1408,
+          0,
+          704,
+          208
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 3,
+        "rect": [
+          2112,
+          0,
+          704,
+          208
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 4,
+        "rect": [
+          2816,
+          0,
+          704,
+          208
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 5,
+        "rect": [
+          0,
+          208,
+          704,
+          208
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 6,
+        "rect": [
+          704,
+          208,
+          704,
+          208
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 7,
+        "rect": [
+          1408,
+          208,
+          704,
+          208
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 8,
+        "rect": [
+          2112,
+          208,
+          704,
+          208
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 9,
+        "rect": [
+          2816,
+          208,
+          704,
+          208
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 10,
+        "rect": [
+          0,
+          416,
+          704,
+          208
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 11,
+        "rect": [
+          704,
+          416,
+          704,
+          208
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 12,
+        "rect": [
+          1408,
+          416,
+          704,
+          208
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 13,
+        "rect": [
+          2112,
+          416,
+          704,
+          208
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 14,
+        "rect": [
+          2816,
+          416,
+          704,
+          208
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 15,
+        "rect": [
+          0,
+          624,
+          704,
+          208
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 16,
+        "rect": [
+          704,
+          624,
+          704,
+          208
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 17,
+        "rect": [
+          1408,
+          624,
+          704,
+          208
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 18,
+        "rect": [
+          2112,
+          624,
+          704,
+          208
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 19,
+        "rect": [
+          2816,
+          624,
+          704,
+          208
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 20,
+        "rect": [
+          0,
+          832,
+          704,
+          208
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 21,
+        "rect": [
+          704,
+          832,
+          704,
+          208
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 22,
+        "rect": [
+          1408,
+          832,
+          704,
+          208
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 23,
+        "rect": [
+          2112,
+          832,
+          704,
+          208
+        ],
+        "durationMs": 83
+      }
+    ]
+  },
+  "encoded": {
+    "frames": 17,
+    "durationMs": 1992,
+    "bytes": 97994
+  },
+  "playback": {
+    "frameDurationMs": 83,
+    "loop": true,
+    "endBehavior": "continue-until-state-change",
+    "reducedMotion": "ui/input-focus-motion-poster.png",
+    "alpha": "straight-alpha",
+    "sizing": "preserve aspect; use contentBounds and pivot, do not stretch the whole padded canvas into old art bounds"
+  },
+  "contentBounds": [
+    37,
+    27,
+    630,
+    154
+  ]
+}

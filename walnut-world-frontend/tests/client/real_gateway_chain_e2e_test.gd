@@ -26,10 +26,16 @@ const DEFAULT_TOTAL_DEADLINE_SECONDS := 600.0
 const DEFAULT_RESOURCE_DEADLINE_SECONDS := 180.0
 const DEFAULT_INTERACTION_DEADLINE_SECONDS := 90.0
 const INTERACTION_RETRY_SECONDS := 0.25
+const COMPILE_FAILURE_DRAFT_MARKER := "// INT1_REAL_GATEWAY_COMPILE_FAILURE_DRAFT_V1"
 const DRAFT_MUTATION_MARKER := "// INT1_REAL_GATEWAY_FAILURE_DRAFT_V1"
 const CORRECTED_DRAFT_MARKER := "// INT1_REAL_GATEWAY_CORRECTED_DRAFT_V2"
 const RUNTIME_SEED_ENV := "YAYA_DETERMINISTIC_SEED"
 const INT1_FAILURE_ROLES := ["teaching_agent", "teaching_agent", "bug_agent"]
+const INT1_BUILD_FAILURE_ROLES := ["teaching_agent", "teaching_agent", "bug_agent"]
+const INT1_EXPECTED_POST_COUNT := 20
+const INT1_EXPECTED_PUT_COUNT := 3
+const INT1_EXPECTED_TURN_COUNT := 9
+const INT1_EXPECTED_BUILD_SUBMISSION_COUNT := 8
 const EXPECTED_WATERING_FAILURE_INTENT_COUNT := 5
 const M2_FAILURE_ROLES := ["teaching_agent", "teaching_agent", "bug_agent", "bug_agent"]
 const EXPECTED_M2_POST_COUNT := 12
@@ -156,6 +162,91 @@ func _initialize() -> void:
 		_abort("STARTER_DRAFT_REQUIRED", "Real acceptance must begin from the server-created revision-1 starter Draft and Workspace.")
 		return
 	var starter_source := store.local_source
+	var pre_failure_draft := starter_draft.duplicate(true)
+	var pre_failure_workspace := starter_workspace.duplicate(true)
+	var compile_failure_draft: Dictionary = {}
+	var compile_failure_workspace: Dictionary = {}
+	var rejected_builds: Array[Dictionary] = []
+	var build_feedback_interactions: Array[Dictionary] = []
+	var ordered_turn_records: Array[Dictionary] = []
+	var build_rejection_evidence: Array[Dictionary] = []
+	if not skill_patch_enabled:
+		var compile_failure_source := _deterministic_compile_failure_draft(starter_source)
+		if compile_failure_source.is_empty():
+			_abort("COMPILE_FAILURE_DRAFT_MUTATION_INVALID", "The canonical starter source cannot produce the deterministic compile-failure Draft.")
+			return
+		store.mark_draft_dirty(compile_failure_source)
+		var compile_save_result: Dictionary = await controller.request_save()
+		if not compile_save_result.get("ok", false) or store.draft_state != WalnutClientStore.DraftState.CLEAN:
+			_abort_store("COMPILE_FAILURE_DRAFT_CAS_FAILED", "The deterministic compile-failure Draft PUT/CAS did not close.", store)
+			return
+		compile_failure_draft = store.draft.duplicate(true)
+		var compile_draft_guard := _verify_saved_draft(
+			starter_draft, compile_failure_draft, compile_failure_source,
+		)
+		if not compile_draft_guard.ok:
+			_abort(str(compile_draft_guard.code), str(compile_draft_guard.message))
+			return
+		var compile_workspace_result: Dictionary = await product_gateway.get_workspace(
+			_new_context(bootstrap), str(store.authoritative_session.session_id),
+		)
+		if not compile_workspace_result.get("ok", false):
+			_abort_result("COMPILE_FAILURE_DRAFT_WORKSPACE_QUERY_FAILED", compile_workspace_result)
+			return
+		compile_failure_workspace = compile_workspace_result.value
+		var compile_workspace_guard := _verify_saved_draft_workspace(
+			starter_workspace, compile_failure_workspace, compile_failure_draft,
+		)
+		if not compile_workspace_guard.ok:
+			_abort(str(compile_workspace_guard.code), str(compile_workspace_guard.message))
+			return
+		store.set_workspace(compile_failure_workspace)
+		store.set_authoritative_session(compile_failure_workspace.session)
+		controller.configure_authority(bootstrap, compile_failure_workspace.session)
+		pre_failure_draft = compile_failure_draft.duplicate(true)
+		pre_failure_workspace = compile_failure_workspace.duplicate(true)
+		var compile_world := store.world_snapshot.duplicate(true)
+		for build_failure_index in range(INT1_BUILD_FAILURE_ROLES.size()):
+			var build_failure: Dictionary = await _execute_rejected_build_turn(
+				controller,
+				game_gateway,
+				product_gateway,
+				store,
+				bootstrap,
+				str(INT1_BUILD_FAILURE_ROLES[build_failure_index]),
+				absolute_deadline,
+				crop_agent_bridge,
+				crop_level,
+			)
+			if not build_failure.ok:
+				_abort(str(build_failure.code), str(build_failure.message))
+				return
+			rejected_builds.append(build_failure.build)
+			build_feedback_interactions.append(build_failure.interaction)
+			build_rejection_evidence.append(build_failure.evidence)
+			ordered_turn_records.append({
+				"interaction": build_failure.interaction,
+				"command": build_failure.command,
+			})
+			var build_presentation := await _verify_and_close_agent_presentation(
+				crop_level,
+				build_failure.interaction,
+				str(INT1_BUILD_FAILURE_ROLES[build_failure_index]),
+				absolute_deadline,
+			)
+			if not build_presentation.ok:
+				_abort(str(build_presentation.code), str(build_presentation.message))
+				return
+			var build_synchronized: Dictionary = await _synchronize_workspace_session(
+				product_gateway, store, controller, bootstrap,
+			)
+			if not build_synchronized.ok:
+				_abort(str(build_synchronized.code), str(build_synchronized.message))
+				return
+			if store.world_snapshot != compile_world:
+				_abort("BUILD_FEEDBACK_WORLD_AUTHORITY_MOVED", "A rejected Build feedback Turn changed the canonical World authority.")
+				return
+		pre_failure_workspace = store.workspace.duplicate(true)
 	var failure_source := _deterministic_failure_draft(starter_source)
 	if failure_source.is_empty():
 		_abort("FAILURE_DRAFT_MUTATION_INVALID", "The canonical starter source cannot produce the deterministic runtime-failure Draft.")
@@ -172,7 +263,7 @@ func _initialize() -> void:
 	if failure_save_result.get("value") != failure_draft:
 		_abort("FAILURE_DRAFT_CAS_STORE_DRIFT", "ClientStore failure Draft does not equal the canonical PUT/CAS response.")
 		return
-	var failure_draft_guard := _verify_saved_draft(starter_draft, failure_draft, failure_source)
+	var failure_draft_guard := _verify_saved_draft(pre_failure_draft, failure_draft, failure_source)
 	if not failure_draft_guard.ok:
 		_abort(str(failure_draft_guard.code), str(failure_draft_guard.message))
 		return
@@ -184,7 +275,7 @@ func _initialize() -> void:
 		return
 	var failure_workspace: Dictionary = failure_workspace_result.value
 	var failure_workspace_guard := _verify_saved_draft_workspace(
-		starter_workspace, failure_workspace, failure_draft,
+		pre_failure_workspace, failure_workspace, failure_draft,
 	)
 	if not failure_workspace_guard.ok:
 		_abort(str(failure_workspace_guard.code), str(failure_workspace_guard.message))
@@ -199,6 +290,7 @@ func _initialize() -> void:
 	var failure_runs: Array[Dictionary] = []
 	var failure_commands: Array[Dictionary] = []
 	var failure_interactions: Array[Dictionary] = []
+	var hint_interactions: Array[Dictionary] = []
 	var failure_evidence: Array[Dictionary] = []
 	var common_failure_reason := ""
 	for failure_index in range(failure_roles.size()):
@@ -239,10 +331,23 @@ func _initialize() -> void:
 		failure_commands.append(failure_turn.command)
 		failure_interactions.append(failure_turn.interaction)
 		failure_evidence.append_array(failure_turn.evidence)
+		ordered_turn_records.append({
+			"interaction": failure_turn.interaction,
+			"command": failure_turn.command,
+		})
 		if common_failure_reason.is_empty():
 			common_failure_reason = str(failure_turn.failure_reason)
 		elif str(failure_turn.failure_reason) != common_failure_reason:
 			_abort("FAILURE_REASON_DRIFT", "The objective-failure Runs did not preserve one canonical failure reason.")
+			return
+		var failure_presentation := await _verify_and_close_agent_presentation(
+			crop_level,
+			failure_turn.interaction,
+			str(failure_roles[failure_index]),
+			absolute_deadline,
+		)
+		if not failure_presentation.ok:
+			_abort(str(failure_presentation.code), str(failure_presentation.message))
 			return
 		var synchronized: Dictionary = await _synchronize_workspace_session(
 			product_gateway, store, controller, bootstrap,
@@ -253,6 +358,39 @@ func _initialize() -> void:
 		if store.world_snapshot != initial_world:
 			_abort("FAILURE_WORLD_AUTHORITY_MOVED", "A rejected objective Turn changed the canonical World authority.")
 			return
+		if not skill_patch_enabled and failure_index < failure_roles.size() - 1:
+			var hint_turn: Dictionary = await _execute_hint_turn(
+				controller,
+				game_gateway,
+				store,
+				bootstrap,
+				failure_turn.run,
+				absolute_deadline,
+				crop_level,
+			)
+			if not hint_turn.ok:
+				_abort(str(hint_turn.code), str(hint_turn.message))
+				return
+			hint_interactions.append(hint_turn.interaction)
+			ordered_turn_records.append({
+				"interaction": hint_turn.interaction,
+				"command": hint_turn.command,
+			})
+			var hint_presentation := await _verify_and_close_agent_presentation(
+				crop_level, hint_turn.interaction, "teaching_agent", absolute_deadline,
+			)
+			if not hint_presentation.ok:
+				_abort(str(hint_presentation.code), str(hint_presentation.message))
+				return
+			var hint_synchronized: Dictionary = await _synchronize_workspace_session(
+				product_gateway, store, controller, bootstrap,
+			)
+			if not hint_synchronized.ok:
+				_abort(str(hint_synchronized.code), str(hint_synchronized.message))
+				return
+			if store.world_snapshot != initial_world:
+				_abort("HINT_WORLD_AUTHORITY_MOVED", "An intermediate Hint Turn changed the canonical World authority.")
+				return
 
 	var saved_draft: Dictionary
 	var saved_workspace: Dictionary
@@ -431,6 +569,16 @@ func _initialize() -> void:
 	if str(interaction_guard.value.get("role", "")) != "book_agent":
 		_abort("SUCCESS_ROLE_NOT_BOOK", "The corrected success Interaction did not close through Book authority.")
 		return
+	ordered_turn_records.append({
+		"interaction": interaction_guard.value,
+		"command": command_run_guard.value.command,
+	})
+	var success_presentation := await _verify_and_close_agent_presentation(
+		crop_level, interaction_guard.value, "book_agent", absolute_deadline,
+	)
+	if not success_presentation.ok:
+		_abort(str(success_presentation.code), str(success_presentation.message))
+		return
 	if store.last_interaction_sequence < int(interaction_guard.value.sequence):
 		_abort("INTERACTION_CURSOR_NOT_PERSISTED", "ClientStore did not persist the verified AgentInteraction cursor.")
 		return
@@ -487,6 +635,8 @@ func _initialize() -> void:
 		skill_patch_fingerprint = m2_public_read_guard.value
 
 	var evidence_ids: Array[String] = []
+	for evidence: Dictionary in build_rejection_evidence:
+		evidence_ids.append(str(evidence.get("evidence_ref", {}).get("evidence_id", "")))
 	for evidence: Dictionary in failure_evidence:
 		evidence_ids.append(str(evidence.get("evidence_ref", {}).get("evidence_id", "")))
 	for evidence: Dictionary in evidence_guard.value:
@@ -498,14 +648,17 @@ func _initialize() -> void:
 	var interaction_roles: Array[String] = []
 	var run_statuses: Array[String] = []
 	var command_statuses: Array[String] = []
+	for record: Dictionary in ordered_turn_records:
+		var record_interaction: Dictionary = record.interaction
+		var record_command: Dictionary = record.command
+		turn_ids.append(str(record_interaction.turn_id))
+		command_ids.append(str(record_command.command_id))
+		interaction_ids.append(str(record_interaction.interaction_id))
+		interaction_roles.append(str(record_interaction.role))
+		command_statuses.append(str(record_command.status))
 	for failure_index in range(failure_runs.size()):
-		turn_ids.append(str(failure_runs[failure_index].turn_id))
-		command_ids.append(str(failure_runs[failure_index].command_id))
 		run_ids.append(str(failure_runs[failure_index].run_id))
-		interaction_ids.append(str(failure_interactions[failure_index].interaction_id))
-		interaction_roles.append(str(failure_interactions[failure_index].role))
 		run_statuses.append(str(failure_runs[failure_index].status))
-		command_statuses.append(str(failure_commands[failure_index].status))
 	if skill_patch_enabled:
 		var patch_turn_guard := _canonical_patch_turn_id(patch_chain)
 		if not patch_turn_guard.ok:
@@ -516,13 +669,13 @@ func _initialize() -> void:
 		interaction_ids.append(str(patch_chain.decided_interaction.interaction_id))
 		interaction_roles.append(str(patch_chain.decided_interaction.role))
 		command_statuses.append(str(patch_chain.command.status))
-	turn_ids.append(str(run.turn_id))
-	command_ids.append(str(run.command_id))
 	run_ids.append(str(run.run_id))
-	interaction_ids.append(str(interaction_guard.value.interaction_id))
-	interaction_roles.append(str(interaction_guard.value.role))
 	run_statuses.append(str(run.status))
-	command_statuses.append(str(command_run_guard.value.command.status))
+	var all_build_ids: Array[String] = []
+	for rejected_build: Dictionary in rejected_builds:
+		all_build_ids.append(str(rejected_build.build_id))
+	all_build_ids.append(str(failure_build.get("build_id", "")))
+	all_build_ids.append(str(build.get("build_id", "")))
 	var persistence_bytes := FileAccess.get_file_as_string(persistence_path)
 	if persistence_bytes.is_empty():
 		_abort("PERSISTENCE_FINGERPRINT_MISSING", "Phase 1 did not leave a readable canonical persistence file for the recovery process.")
@@ -582,9 +735,11 @@ func _initialize() -> void:
 		"persistence_identity": persistence_identity,
 		"persistence_sha256": persistence_bytes.sha256_text(),
 		"starter_draft_revision": int(starter_draft.revision),
+		"compile_failure_draft_revision": int(compile_failure_draft.get("revision", -1)),
 		"failure_draft_revision": int(failure_draft.revision),
 		"saved_draft_revision": int(saved_draft.revision),
 		"starter_workspace_revision": int(starter_workspace.workspace_revision),
+		"compile_failure_workspace_revision": int(compile_failure_workspace.get("workspace_revision", -1)),
 		"failure_workspace_revision": int(failure_workspace.workspace_revision),
 		"saved_workspace_revision": int(saved_workspace.workspace_revision),
 		"failure_draft_source_sha256": failure_source.sha256_text(),
@@ -599,7 +754,16 @@ func _initialize() -> void:
 		"final_workspace_sha256": JSON.stringify(final_workspace).sha256_text(),
 		"draft_id": str(saved_draft.draft_id),
 		"build_id": str(build.get("build_id", "")),
-		"build_ids": [str(failure_build.get("build_id", "")), str(build.get("build_id", ""))],
+		"build_ids": all_build_ids,
+		"build_rejection_chain": {
+			"build_ids": rejected_builds.map(func(value: Dictionary) -> String: return str(value.build_id)),
+			"interaction_ids": build_feedback_interactions.map(func(value: Dictionary) -> String: return str(value.interaction_id)),
+			"interaction_roles": build_feedback_interactions.map(func(value: Dictionary) -> String: return str(value.role)),
+			"run_ids": build_feedback_interactions.map(func(value: Dictionary) -> Variant: return value.feedback.run_id),
+			"world_unchanged": true,
+			"patch_unavailable": build_feedback_interactions.all(func(value: Dictionary) -> bool: return value.skill_patch == null),
+			"third_bug_legion_presented": build_feedback_interactions.size() == 3,
+		},
 		"activation_id": str(store.active_skill_tuple.activation_id),
 		"activation_ids": [str(failure_active.activation_id), str(store.active_skill_tuple.activation_id)],
 		"active_skill_tuple": store.active_skill_tuple.duplicate(true),
@@ -823,17 +987,17 @@ func _verify_phase1_transport_audit(transport: Variant, skill_patch_enabled: boo
 		if skill_patch_enabled
 		else {
 			"create_agent_session": 1,
-			"upsert_product_skill_draft": 2,
-			"submit_skill_build": 2,
+			"upsert_product_skill_draft": 3,
+			"submit_skill_build": INT1_EXPECTED_BUILD_SUBMISSION_COUNT,
 			"activate_skill_version": 2,
-			"submit_agent_turn": 4,
+			"submit_agent_turn": INT1_EXPECTED_TURN_COUNT,
 		}
 	)
 	for operation in expected_mutations:
 		if int(operation_counts.get(operation, 0)) != int(expected_mutations[operation]):
 			return _failure("TRANSPORT_MUTATION_COUNT_MISMATCH", "Production HTTP operation %s was not attempted exactly %d time(s)." % [operation, expected_mutations[operation]])
-	var expected_post_count := EXPECTED_M2_POST_COUNT if skill_patch_enabled else 9
-	var expected_put_count := EXPECTED_M2_PUT_COUNT if skill_patch_enabled else 2
+	var expected_post_count := EXPECTED_M2_POST_COUNT if skill_patch_enabled else INT1_EXPECTED_POST_COUNT
+	var expected_put_count := EXPECTED_M2_PUT_COUNT if skill_patch_enabled else INT1_EXPECTED_PUT_COUNT
 	if (
 		int(method_counts.get("POST", 0)) != expected_post_count
 		or int(method_counts.get("PUT", 0)) != expected_put_count
@@ -886,30 +1050,70 @@ func _clear_client_cache_for_fresh_phase(store: WalnutClientStore) -> void:
 	store.last_interaction_sequence = 0
 
 
-func _deterministic_failure_draft(source: String) -> String:
-	var fixed_target_anchor := "        int gap = 60 - moisture[i];"
+func _deterministic_compile_failure_draft(source: String) -> String:
 	if (
-		source.contains(DRAFT_MUTATION_MARKER)
+		source.contains(COMPILE_FAILURE_DRAFT_MARKER)
+		or source.contains(DRAFT_MUTATION_MARKER)
 		or source.contains(CORRECTED_DRAFT_MARKER)
-		or source.contains(RUNTIME_SEED_ENV)
-		or source.count(fixed_target_anchor) != 1
 	):
 		return ""
-	return "%s%s%s\n" % [source, "" if source.ends_with("\n") else "\n", DRAFT_MUTATION_MARKER]
+	return "%s%s%s\nINT1_COMPILE_FAILURE_TOKEN\n" % [
+		source,
+		"" if source.ends_with("\n") else "\n",
+		COMPILE_FAILURE_DRAFT_MARKER,
+	]
+
+
+func _deterministic_failure_draft(source: String) -> String:
+	if (
+		source.contains(COMPILE_FAILURE_DRAFT_MARKER)
+		or source.contains(DRAFT_MUTATION_MARKER)
+		or source.contains(CORRECTED_DRAFT_MARKER)
+		or source.contains(RUNTIME_SEED_ENV)
+	):
+		return ""
+	var compileable_source := _deterministic_fixed_target_source(source)
+	if compileable_source.is_empty():
+		return ""
+	# The production C++ gate treats warnings as errors. Use target[0] to retain
+	# the intentionally wrong fixed-60 behavior while still consuming the
+	# published target array and producing a genuinely runnable failed Skill.
+	compileable_source = compileable_source.replace(
+		"        int gap = 60 - moisture[i];",
+		"        int gap = target[0] - moisture[i];",
+	)
+	return "%s%s%s\n" % [
+		compileable_source,
+		"" if compileable_source.ends_with("\n") else "\n",
+		DRAFT_MUTATION_MARKER,
+	]
 
 
 func _deterministic_corrected_draft(source: String) -> String:
 	var fixed_target_anchor := "        int gap = 60 - moisture[i];"
 	var adaptive_target_anchor := "        int gap = target[i] - moisture[i];"
 	if (
-		source.contains(DRAFT_MUTATION_MARKER)
+		source.contains(COMPILE_FAILURE_DRAFT_MARKER)
+		or source.contains(DRAFT_MUTATION_MARKER)
 		or source.contains(CORRECTED_DRAFT_MARKER)
-		or source.count(fixed_target_anchor) != 1
 		or source.contains(adaptive_target_anchor)
 	):
 		return ""
-	var corrected := source.replace(fixed_target_anchor, adaptive_target_anchor)
+	var compileable_source := _deterministic_fixed_target_source(source)
+	if compileable_source.is_empty():
+		return ""
+	var corrected := compileable_source.replace(fixed_target_anchor, adaptive_target_anchor)
 	return "%s%s%s\n" % [corrected, "" if corrected.ends_with("\n") else "\n", CORRECTED_DRAFT_MARKER]
+
+
+func _deterministic_fixed_target_source(source: String) -> String:
+	var normalized := source.replace("\r\n", "\n")
+	if normalized == CropAdaptiveWateringDemo.INITIAL_PRACTICE_CODE:
+		return CropAdaptiveWateringDemo.STARTER_CODE
+	var fixed_target_anchor := "        int gap = 60 - moisture[i];"
+	if source.count(fixed_target_anchor) != 1:
+		return ""
+	return source
 
 
 func _open_crop_formal_run_ui(
@@ -995,6 +1199,87 @@ func _press_crop_run_action(
 	result["stage_results"] = stage_results.duplicate(true)
 	result["observed_stages"] = stages.duplicate()
 	return result
+
+
+func _press_crop_rejected_build_action(
+	crop_agent_bridge: Node,
+	crop_level: CropAdaptiveWateringDemo,
+	absolute_deadline: int,
+) -> Dictionary:
+	var completion := {"done": false}
+	var stages: Array[String] = []
+	var stage_results: Dictionary = {}
+	crop_agent_bridge.build_action_finished.connect(func(result: Dictionary) -> void:
+		stages.append("BUILD")
+		stage_results["BUILD"] = result.duplicate(true)
+	, Object.CONNECT_ONE_SHOT)
+	crop_agent_bridge.submit_action_finished.connect(func(result: Dictionary) -> void:
+		stages.append("SUBMIT")
+		stage_results["SUBMIT"] = result.duplicate(true)
+		completion.done = true
+	, Object.CONNECT_ONE_SHOT)
+	var run_button := crop_level.get_node_or_null(
+		"CodeDrawer/Surface/Margin/Content/Actions/RunButton",
+	) as Button
+	if run_button == null or run_button.disabled:
+		return _failure("FORMAL_BUILD_REJECTION_BUTTON_UNAVAILABLE", "Crop RunButton is not actionable before a rejected Build attempt.")
+	run_button.pressed.emit()
+	while not bool(completion.done) and Time.get_ticks_msec() < absolute_deadline:
+		await process_frame
+	if not bool(completion.done):
+		return _failure("FORMAL_BUILD_REJECTION_TIMEOUT", "Rejected Build did not close through CropAgentBridge before the total deadline.")
+	if stages != ["BUILD", "SUBMIT"]:
+		return _failure("FORMAL_BUILD_REJECTION_STAGE_ORDER_INVALID", "Rejected Build stages were %s instead of BUILD,SUBMIT without Activation or Run." % [stages])
+	var build_result: Variant = stage_results.get("BUILD")
+	var submit_result: Variant = stage_results.get("SUBMIT")
+	if (
+		not build_result is Dictionary
+		or not submit_result is Dictionary
+		or bool(build_result.get("ok", true))
+		or bool(submit_result.get("ok", true))
+	):
+		return _failure("FORMAL_BUILD_REJECTION_RESULT_INVALID", "Rejected Build did not expose exact failed BUILD and SUBMIT stage results.")
+	return {"ok": true, "stage_results": stage_results, "observed_stages": stages}
+
+
+func _verify_and_close_agent_presentation(
+	crop_level: CropAdaptiveWateringDemo,
+	interaction: Dictionary,
+	expected_role: String,
+	absolute_deadline: int,
+) -> Dictionary:
+	var presenter := crop_level.get_node_or_null("AgentInteractionPresenter") as AgentInteractionPresenter
+	var legion := crop_level.get_node_or_null("BugLegion2D") as BugLegion2D
+	if presenter == null or presenter.overlay == null or legion == null:
+		return _failure("FORMAL_AGENT_PRESENTATION_MISSING", "Crop level has no shared Agent presenter, dialogue overlay, or 2D Bug legion.")
+	var interaction_id := str(interaction.get("interaction_id", ""))
+	# The first feedback can arrive while the authored opening narrative still
+	# owns the shared overlay. Prove that it stayed queued, then close the story
+	# exactly as a learner would before asserting the FIFO Agent presentation.
+	if (
+		presenter.overlay.visible
+		and presenter.active_interaction().is_empty()
+		and presenter.pending_count() > 0
+	):
+		presenter.overlay.skip_sequence()
+		await process_frame
+	while (
+		str(presenter.active_interaction().get("interaction_id", "")) != interaction_id
+		and Time.get_ticks_msec() < absolute_deadline
+	):
+		await process_frame
+	var active := presenter.active_interaction()
+	if str(active.get("interaction_id", "")) != interaction_id or str(active.get("role", "")) != expected_role:
+		return _failure("FORMAL_AGENT_PRESENTATION_ORDER_INVALID", "The shared presenter did not reach the expected FIFO Interaction and role.")
+	var expects_legion := expected_role == "bug_agent"
+	if legion.is_legion_visible() != expects_legion:
+		return _failure("FORMAL_BUG_LEGION_CUE_INVALID", "The 2D Bug legion visibility did not match the authoritative bug_agent role.")
+	presenter.overlay.skip_sequence()
+	while (presenter.is_presenting() or legion.is_legion_visible()) and Time.get_ticks_msec() < absolute_deadline:
+		await process_frame
+	if presenter.is_presenting() or legion.is_legion_visible():
+		return _failure("FORMAL_AGENT_PRESENTATION_CLOSE_TIMEOUT", "The Agent presentation or 2D Bug legion did not close before the total deadline.")
+	return {"ok": true, "bug_legion_was_visible": expects_legion}
 
 
 func _press_task_workspace_action(
@@ -1512,6 +1797,204 @@ func _execute_failed_objective_turn(
 	}
 
 
+func _execute_rejected_build_turn(
+	controller: Node,
+	game_gateway: RefCounted,
+	product_gateway: RefCounted,
+	store: WalnutClientStore,
+	bootstrap: Dictionary,
+	expected_role: String,
+	absolute_deadline: int,
+	crop_agent_bridge: Node,
+	crop_level: CropAdaptiveWateringDemo,
+) -> Dictionary:
+	var pre_world := store.world_snapshot.duplicate(true)
+	var pre_interaction_cursor := store.last_interaction_sequence
+	var captured_build := {"value": {}}
+	var captured_interactions := {"value": []}
+	controller.build_resolved.connect(func(value: Dictionary) -> void:
+		captured_build.value = value.duplicate(true)
+	, Object.CONNECT_ONE_SHOT)
+	controller.interactions_recovered.connect(func(values: Array[Dictionary]) -> void:
+		captured_interactions.value = values.duplicate(true)
+	, Object.CONNECT_ONE_SHOT)
+	var submission := await _press_crop_rejected_build_action(
+		crop_agent_bridge, crop_level, absolute_deadline,
+	)
+	if not submission.ok:
+		return submission
+	var build: Variant = captured_build.value
+	var interactions: Variant = captured_interactions.value
+	if not build is Dictionary or build.is_empty():
+		return _failure("BUILD_REJECTION_RESOURCE_MISSING", "Formal rejected Build exposed no canonical SkillBuild.")
+	var build_guard := ContractValidator.validate_skill_build(build)
+	if (
+		not build_guard.ok
+		or str(build.get("status", "")) != "REJECTED"
+		or not bool(build.get("terminal", false))
+		or not build.get("evidence_refs") is Array
+		or build.evidence_refs.size() != 1
+		or build.get("artifact") != null
+		or build.get("certification") != null
+	):
+		return _failure("BUILD_REJECTION_RESOURCE_INVALID", "Formal compile failure did not close as one evidence-backed REJECTED SkillBuild.")
+	if not interactions is Array or interactions.size() != 1:
+		return _failure("BUILD_FEEDBACK_INTERACTION_MISSING", "Rejected Build feedback did not recover exactly one Product AgentInteraction.")
+	var interaction: Variant = interactions[0]
+	if not interaction is Dictionary:
+		return _failure("BUILD_FEEDBACK_INTERACTION_INVALID", "Rejected Build feedback returned a non-object Interaction.")
+	var feedback: Variant = interaction.get("feedback")
+	if (
+		str(interaction.get("role", "")) != expected_role
+		or int(interaction.get("sequence", -1)) != pre_interaction_cursor + 1
+		or not feedback is Dictionary
+		or feedback.get("run_id") != null
+		or feedback.get("evidence_refs") != build.evidence_refs
+		or interaction.get("skill_patch") != null
+	):
+		return _failure(
+			"BUILD_FEEDBACK_AUTHORITY_INVALID",
+			"Rejected Build feedback authority mismatch: expected_role=%s actual_role=%s pre_cursor=%s sequence=%s run_id=%s evidence_match=%s skill_patch=%s."
+			% [
+				expected_role,
+				str(interaction.get("role", "")),
+				pre_interaction_cursor,
+				interaction.get("sequence"),
+				feedback.get("run_id") if feedback is Dictionary else "INVALID_FEEDBACK",
+				feedback.get("evidence_refs") == build.evidence_refs if feedback is Dictionary else false,
+				interaction.get("skill_patch"),
+			],
+		)
+	var canonical_interaction_result: Dictionary = await product_gateway.get_interaction(
+		_new_context(bootstrap), str(interaction.session_id), str(interaction.interaction_id),
+	)
+	if not canonical_interaction_result.get("ok", false) or canonical_interaction_result.value != interaction:
+		return _gateway_failure("BUILD_FEEDBACK_INTERACTION_QUERY_FAILED", canonical_interaction_result)
+	var evidence_ref: Dictionary = build.evidence_refs[0]
+	var evidence_result: Dictionary = await game_gateway.get_build_rejection_evidence(
+		_new_context(bootstrap), str(evidence_ref.evidence_id),
+	)
+	if not evidence_result.get("ok", false):
+		return _gateway_failure("BUILD_REJECTION_EVIDENCE_QUERY_FAILED", evidence_result)
+	var evidence: Dictionary = evidence_result.value
+	var evidence_payload: Variant = evidence.get("payload")
+	var evidence_source: Variant = evidence.get("source")
+	if (
+		evidence.get("evidence_ref") != evidence_ref
+		or not evidence_payload is Dictionary
+		or not evidence_source is Dictionary
+		or str(evidence_payload.get("evidence_kind", "")) != "BUILD_REJECTION"
+		or str(evidence_payload.get("build_id", "")) != str(build.build_id)
+		or str(evidence_source.get("source_type", "")) != "SKILL_BUILD"
+		or str(evidence_source.get("source_id", "")) != str(build.build_id)
+	):
+		return _failure("BUILD_REJECTION_EVIDENCE_INVALID", "BUILD_REJECTION Evidence does not bind the exact rejected Build.")
+	var command_result: Dictionary = await game_gateway.get_command(
+		_new_context(bootstrap), str(feedback.command_id),
+	)
+	if not command_result.get("ok", false):
+		return _gateway_failure("BUILD_FEEDBACK_COMMAND_QUERY_FAILED", command_result)
+	var command: Dictionary = command_result.value
+	var command_guard := ContractValidator.validate_command_result(command)
+	if (
+		not command_guard.ok
+		or str(command.get("status", "")) != "APPLIED"
+		or not bool(command.get("terminal", false))
+		or command.get("links", {}).has("run")
+		or str(command.get("command_id", "")) != str(feedback.command_id)
+	):
+		return _failure("BUILD_FEEDBACK_COMMAND_INVALID", "Build feedback Agent Turn did not close as an APPLIED no-Run command.")
+	var world_guard := await _verify_world_unchanged(
+		game_gateway, bootstrap, pre_world, absolute_deadline,
+	)
+	if not world_guard.ok or store.world_snapshot != pre_world:
+		return _failure("BUILD_FEEDBACK_WORLD_MOVED", "Rejected Build feedback changed local or public World authority.")
+	return {
+		"ok": true,
+		"build": build.duplicate(true),
+		"interaction": interaction.duplicate(true),
+		"command": command.duplicate(true),
+		"evidence": evidence.duplicate(true),
+	}
+
+
+func _execute_hint_turn(
+	controller: Node,
+	game_gateway: RefCounted,
+	store: WalnutClientStore,
+	bootstrap: Dictionary,
+	latest_failed_run: Dictionary,
+	absolute_deadline: int,
+	crop_level: CropAdaptiveWateringDemo,
+) -> Dictionary:
+	var pre_world := store.world_snapshot.duplicate(true)
+	var pre_interaction_cursor := store.last_interaction_sequence
+	var captured_interactions := {"value": []}
+	controller.interactions_recovered.connect(func(values: Array[Dictionary]) -> void:
+		captured_interactions.value = values.duplicate(true)
+	, Object.CONNECT_ONE_SHOT)
+	var hint_button := crop_level.get_node_or_null("Hud/ToolRail/HintButton") as Button
+	if hint_button == null or hint_button.disabled or not hint_button.visible:
+		return _failure("FORMAL_HINT_BUTTON_UNAVAILABLE", "The natural Crop HintButton is not visible and actionable between failed Runs.")
+	hint_button.pressed.emit()
+	while (
+		(captured_interactions.value as Array).is_empty()
+		and Time.get_ticks_msec() < absolute_deadline
+	):
+		await process_frame
+	var interactions: Variant = captured_interactions.value
+	if not interactions is Array or interactions.size() != 1:
+		return _failure("FORMAL_HINT_INTERACTION_MISSING", "Natural HintButton did not recover exactly one Product AgentInteraction.")
+	var interaction: Variant = interactions[0]
+	var feedback: Variant = interaction.get("feedback") if interaction is Dictionary else null
+	if (
+		not interaction is Dictionary
+		or str(interaction.get("role", "")) != "teaching_agent"
+		or int(interaction.get("sequence", -1)) != pre_interaction_cursor + 1
+		or not feedback is Dictionary
+		or str(feedback.get("run_id", "")) != str(latest_failed_run.run_id)
+		or feedback.get("evidence_refs") != latest_failed_run.evidence_refs
+		or interaction.get("skill_patch") != null
+	):
+		return _failure(
+			"FORMAL_HINT_FAILURE_AUTHORITY_INVALID",
+			"Intermediate Hint authority mismatch: expected_role=teaching_agent actual_role=%s pre_cursor=%s sequence=%s expected_run=%s actual_run=%s evidence_match=%s skill_patch=%s."
+			% [
+				str(interaction.get("role", "")) if interaction is Dictionary else "INVALID_INTERACTION",
+				pre_interaction_cursor,
+				interaction.get("sequence") if interaction is Dictionary else null,
+				str(latest_failed_run.get("run_id", "")),
+				feedback.get("run_id") if feedback is Dictionary else "INVALID_FEEDBACK",
+				feedback.get("evidence_refs") == latest_failed_run.evidence_refs if feedback is Dictionary else false,
+				interaction.get("skill_patch") if interaction is Dictionary else "INVALID_INTERACTION",
+			],
+		)
+	var command_result: Dictionary = await game_gateway.get_command(
+		_new_context(bootstrap), str(feedback.command_id),
+	)
+	if not command_result.get("ok", false):
+		return _gateway_failure("FORMAL_HINT_COMMAND_QUERY_FAILED", command_result)
+	var command: Dictionary = command_result.value
+	var command_guard := ContractValidator.validate_command_result(command)
+	if (
+		not command_guard.ok
+		or str(command.get("status", "")) != "APPLIED"
+		or not bool(command.get("terminal", false))
+		or command.get("links", {}).has("run")
+	):
+		return _failure("FORMAL_HINT_COMMAND_INVALID", "Intermediate Hint did not close as one APPLIED no-Run Agent Turn.")
+	var world_guard := await _verify_world_unchanged(
+		game_gateway, bootstrap, pre_world, absolute_deadline,
+	)
+	if not world_guard.ok or store.world_snapshot != pre_world:
+		return _failure("FORMAL_HINT_WORLD_MOVED", "Intermediate Hint changed local or public World authority.")
+	return {
+		"ok": true,
+		"interaction": interaction.duplicate(true),
+		"command": command.duplicate(true),
+	}
+
+
 func _synchronize_workspace_session(
 	product_gateway: RefCounted,
 	store: WalnutClientStore,
@@ -1777,7 +2260,7 @@ func _positive_environment_seconds(name: String, fallback: float) -> float:
 func _production_clients_are_wired(app: Node) -> bool:
 	var expected := {
 		"_transport": "res://scripts/client/audited_http_agent_api_transport.gd",
-		"_game_gateway": "res://addons/yaya_contract_client/agent_api_gateway.gd",
+		"_game_gateway": "res://scripts/client/extended_agent_api_gateway.gd",
 		"_product_gateway": "res://scripts/client/product_interaction_gateway.gd",
 	}
 	for property in expected:

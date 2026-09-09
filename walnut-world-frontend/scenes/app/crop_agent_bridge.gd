@@ -23,6 +23,7 @@ var _last_error_code := ""
 var _projection_active := false
 var _pending_interactions: Array[Dictionary] = []
 var _pending_submission_interactions: Array[Dictionary] = []
+var _interaction_cursor_at_configuration := 0
 var _candidate_config: Dictionary = {"enabled": false, "content_ref": {}, "plot_rules": {}}
 var _pre_run_snapshot: Dictionary = {}
 var _last_run: Dictionary = {}
@@ -44,6 +45,8 @@ func configure(
 	_projection_active = false
 	_pending_interactions.clear()
 	_pending_submission_interactions.clear()
+	var interaction_cursor: Variant = _store.get("last_interaction_sequence") if _store != null else null
+	_interaction_cursor_at_configuration = int(interaction_cursor) if typeof(interaction_cursor) == TYPE_INT else 0
 	_pre_run_snapshot.clear()
 	_last_run.clear()
 	_local_candidate_result.clear()
@@ -58,6 +61,8 @@ func configure(
 		push_error("CropAgentBridge requires store, session and level dependencies.")
 		return
 	_level.configure_agent_mode(true)
+	build_action_finished.connect(_level.present_stage_audio)
+	activation_action_finished.connect(_level.present_stage_audio)
 	_level.configure_candidate_compatibility_available(bool(_candidate_config.get("enabled", false)))
 	_level.agent_submit_requested.connect(_on_submit_requested)
 	_level.agent_build_requested.connect(_on_build_requested)
@@ -100,7 +105,19 @@ func activate_initial_projection() -> Dictionary:
 	_projection_active = true
 	if not _pending_interactions.is_empty():
 		var visible := _candidate_hints_only(_pending_interactions) if _candidate_mode_enabled() else _pending_interactions
-		_level.present_agent_interactions(visible)
+		var historical: Array[Dictionary] = []
+		var unseen: Array[Dictionary] = []
+		for interaction: Dictionary in visible:
+			if int(interaction.get("sequence", -1)) <= _interaction_cursor_at_configuration:
+				historical.append(interaction)
+			else:
+				unseen.append(interaction)
+		if not historical.is_empty():
+			# Startup recovery must rebuild the final visible projection without
+			# replaying dialogue or Bug-legion cues already consumed in this Session.
+			_level.restore_agent_interaction(historical.back())
+		if not unseen.is_empty():
+			_level.present_agent_interactions(unseen)
 		_pending_interactions.clear()
 	return {"ok": true}
 
@@ -440,6 +457,10 @@ func _exit_tree() -> void:
 
 func _disconnect_dependencies() -> void:
 	if is_instance_valid(_level):
+		if build_action_finished.is_connected(_level.present_stage_audio):
+			build_action_finished.disconnect(_level.present_stage_audio)
+		if activation_action_finished.is_connected(_level.present_stage_audio):
+			activation_action_finished.disconnect(_level.present_stage_audio)
 		if _level.agent_submit_requested.is_connected(_on_submit_requested):
 			_level.agent_submit_requested.disconnect(_on_submit_requested)
 		if _level.agent_build_requested.is_connected(_on_build_requested):

@@ -7,18 +7,25 @@ func _initialize() -> void:
 	var presenter := PRESENTER_SCENE.instantiate()
 	root.add_child(presenter)
 	await process_frame
+	var overlay := presenter.get_node("StoryDialogueOverlay") as StoryDialogueOverlay
+	overlay.play_sequence("芽芽", null, ["先完成当前关卡叙事。"])
 	var bug := _interaction("interaction_bug_0001", "bug_agent", "message", "边界问题出现了。", null, null)
 	if not presenter.enqueue_interaction(bug):
 		push_error("A valid Bug AgentInteraction must enter the presentation queue.")
 		quit(1)
 		return
+	if presenter.is_presenting() or presenter.pending_count() != 1 or overlay.speaker_label.text != "芽芽":
+		push_error("Agent feedback must wait without overwriting an active narrative sequence.")
+		quit(1)
+		return
+	overlay.skip_sequence()
 	await process_frame
-	var overlay := presenter.get_node("StoryDialogueOverlay") as StoryDialogueOverlay
+	await process_frame
 	if (
 		not overlay.visible
 		or overlay.speaker_label.text != "Bug 先生"
 		or overlay.portrait.texture == null
-		or not overlay.portrait.texture.resource_path.ends_with("pest_bug.png")
+		or (overlay.portrait as ArtMotionTexture).motion_id != "char-bug-talk"
 		or overlay.body_label.text != "边界问题出现了。"
 		or overlay.response_badge.text != "任务说明"
 	):
@@ -38,7 +45,7 @@ func _initialize() -> void:
 	await process_frame
 	if (
 		overlay.speaker_label.text != "叮当师傅"
-		or not overlay.portrait.texture.resource_path.ends_with("master_ding_dang.png")
+		or (overlay.portrait as ArtMotionTexture).motion_id != "char-dingdang-talk"
 		or overlay.response_badge.text != "概念提示"
 		or not overlay.question_label.visible
 		or not overlay.question_label.text.contains("循环何时停止")
@@ -49,6 +56,26 @@ func _initialize() -> void:
 	var patch := _interaction("interaction_patch_0001", "teaching_agent", "skill_patch", "查看修改建议。", null, 4)
 	if presenter.enqueue_interaction(patch):
 		push_error("Skill Patch must remain in its dedicated confirmation dialog instead of the story overlay.")
+		quit(1)
+		return
+	overlay.skip_sequence()
+	await process_frame
+	var session_one := _interaction("interaction_session_scoped_0001", "bug_agent", "message", "第一局反馈。", null, null)
+	session_one["session_id"] = "session_presenter_0001"
+	if not presenter.enqueue_interaction(session_one):
+		push_error("The first Interaction in a Session must be presentable.")
+		quit(1)
+		return
+	overlay.skip_sequence()
+	await process_frame
+	if presenter.enqueue_interaction(session_one):
+		push_error("The same interaction_id must remain deduplicated within one Session.")
+		quit(1)
+		return
+	var session_two := session_one.duplicate(true)
+	session_two["session_id"] = "session_presenter_0002"
+	if not presenter.enqueue_interaction(session_two) or presenter.presentation_session_id() != "session_presenter_0002":
+		push_error("A new Session must receive a fresh interaction_id deduplication ledger.")
 		quit(1)
 		return
 	print("AGENT_INTERACTION_PRESENTER_TEST_PASS")

@@ -1,0 +1,3497 @@
+{
+  "scope": "Crop-adaptive student UI; native text/fonts/code are not art deliveries",
+  "staticAssets": 100,
+  "animationClips": 98,
+  "referenceStates": 74,
+  "installedMedia": 302,
+  "referencedRuntimeArt": [
+    "assets/art/redesign/crop_adaptive/v1/effects/fx-celebrate-burst-atlas.png",
+    "assets/art/redesign/crop_adaptive/v1/effects/fx-water-one-flow-atlas.png",
+    "assets/art/redesign/crop_adaptive/v1/effects/fx-water-two-flow-atlas.png",
+    "assets/art/redesign/crop_adaptive/v2/components/B01-farm-background.png",
+    "assets/art/redesign/crop_adaptive/v2/components/B02-workshop-background.png",
+    "assets/art/redesign/crop_adaptive/v2/components/B03-start-background.png",
+    "assets/art/redesign/crop_adaptive/v2/components/B04-workshop-exterior-background.png",
+    "assets/art/redesign/crop_adaptive/v2/components/B05-bug-investigation-background.png",
+    "assets/art/redesign/crop_adaptive/v2/components/B06-archive-background.png",
+    "assets/art/redesign/crop_adaptive/v2/components/button-disabled.png",
+    "assets/art/redesign/crop_adaptive/v2/components/button-error.png",
+    "assets/art/redesign/crop_adaptive/v2/components/button-focus.png",
+    "assets/art/redesign/crop_adaptive/v2/components/button-hover.png",
+    "assets/art/redesign/crop_adaptive/v2/components/button-loading.png",
+    "assets/art/redesign/crop_adaptive/v2/components/button-normal.png",
+    "assets/art/redesign/crop_adaptive/v2/components/button-pressed.png",
+    "assets/art/redesign/crop_adaptive/v2/components/button-success.png",
+    "assets/art/redesign/crop_adaptive/v2/components/button-water-blue.png",
+    "assets/art/redesign/crop_adaptive/v2/components/button-water-green.png",
+    "assets/art/redesign/crop_adaptive/v2/components/char-bug-idle.png",
+    "assets/art/redesign/crop_adaptive/v2/components/char-dingdang-idle.png",
+    "assets/art/redesign/crop_adaptive/v2/components/char-player-idle.png",
+    "assets/art/redesign/crop_adaptive/v2/components/char-shushu-idle.png",
+    "assets/art/redesign/crop_adaptive/v2/components/char-walnut-idle.png",
+    "assets/art/redesign/crop_adaptive/v2/components/char-yaya-idle.png",
+    "assets/art/redesign/crop_adaptive/v2/components/crop-carrot-light-thirst.png",
+    "assets/art/redesign/crop_adaptive/v2/components/crop-carrot-target-met.png",
+    "assets/art/redesign/crop_adaptive/v2/components/crop-corn-light-thirst.png",
+    "assets/art/redesign/crop_adaptive/v2/components/crop-potato-light-thirst.png",
+    "assets/art/redesign/crop_adaptive/v2/components/crop-tomato-light-thirst.png",
+    "assets/art/redesign/crop_adaptive/v2/components/crop-tomato-target-met.png",
+    "assets/art/redesign/crop_adaptive/v2/components/icon-array.png",
+    "assets/art/redesign/crop_adaptive/v2/components/icon-bulb.png",
+    "assets/art/redesign/crop_adaptive/v2/components/icon-check.png",
+    "assets/art/redesign/crop_adaptive/v2/components/icon-drop.png",
+    "assets/art/redesign/crop_adaptive/v2/components/icon-drops-two.png",
+    "assets/art/redesign/crop_adaptive/v2/components/icon-lock.png",
+    "assets/art/redesign/crop_adaptive/v2/components/icon-scroll.png",
+    "assets/art/redesign/crop_adaptive/v2/components/icon-skill-action.png",
+    "assets/art/redesign/crop_adaptive/v2/components/icon-skill-watering.png",
+    "assets/art/redesign/crop_adaptive/v2/components/icon-star.png",
+    "assets/art/redesign/crop_adaptive/v2/components/input-disabled.png",
+    "assets/art/redesign/crop_adaptive/v2/components/input-error.png",
+    "assets/art/redesign/crop_adaptive/v2/components/input-filled.png",
+    "assets/art/redesign/crop_adaptive/v2/components/input-focus.png",
+    "assets/art/redesign/crop_adaptive/v2/components/input-hover.png",
+    "assets/art/redesign/crop_adaptive/v2/components/input-normal.png",
+    "assets/art/redesign/crop_adaptive/v2/components/prop-pump.png",
+    "assets/art/redesign/crop_adaptive/v2/components/prop-skill-tree-v2.png",
+    "assets/art/redesign/crop_adaptive/v2/components/soil-severe-dry.png",
+    "assets/art/redesign/crop_adaptive/v2/components/soil-target-met.png",
+    "assets/art/redesign/crop_adaptive/v2/components/ui-code.png",
+    "assets/art/redesign/crop_adaptive/v2/components/ui-data-plaque.png",
+    "assets/art/redesign/crop_adaptive/v2/components/ui-dialogue.png",
+    "assets/art/redesign/crop_adaptive/v2/components/ui-four-star-seal.png",
+    "assets/art/redesign/crop_adaptive/v2/components/ui-hero-crest.png",
+    "assets/art/redesign/crop_adaptive/v2/components/ui-hero-frame.png",
+    "assets/art/redesign/crop_adaptive/v2/components/ui-hud.png",
+    "assets/art/redesign/crop_adaptive/v2/components/ui-nameplate.png",
+    "assets/art/redesign/crop_adaptive/v2/components/ui-panel.png"
+  ],
+  "comparisons": [
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/ui-panel.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\ui-panel.png",
+      "sha256": "9dc1c61398134d55e4353ddfb389f6df8517ece3e934056752f16a2803c6e72a",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/ui-dialogue.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\ui-dialogue.png",
+      "sha256": "53cfdc3289e70205ad219bb8996524b0419bbaf3212a9a838b210e3a4f94b612",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/ui-code.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\ui-code.png",
+      "sha256": "22574628ddd042b829b64fe8fd4bf063438fbc517f2764465eff73b962c5b110",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/ui-hud.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\ui-hud.png",
+      "sha256": "fd44857a563c64beb5b080d19915437256e2d7e5f859ecedce068474f97114bf",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/ui-nameplate.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\ui-nameplate.png",
+      "sha256": "08fd7f1ef2ca2708cc28727942ea61e25acbbfe655cf94e017d99ee9905d8ed8",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/ui-data-plaque.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\ui-data-plaque.png",
+      "sha256": "c19ddb91a5168ff5d102286e8589b17a7a316a0a03b621072ae03ae757f686ab",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/button-normal.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\button-normal.png",
+      "sha256": "955d8848140ee5d6d97522b451cf65a4c827d0d4fd3e8442e9661ae7a35261df",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/button-hover.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\button-hover.png",
+      "sha256": "799de64232626e5522d17819395735f9a64d0d5b5e5a549007e27212eb5fbf7f",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/button-pressed.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\button-pressed.png",
+      "sha256": "cb5dc4455ba539320ad0cb02b1c273360329daebaa1ac9287abceee6d831b64f",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/button-disabled.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\button-disabled.png",
+      "sha256": "3df35ba822a6595f64df8f6acb464f003002729be5654263bfee2efbc5fc01ad",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/button-loading.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\button-loading.png",
+      "sha256": "b549e1dcca588802ce596e2cedef20c61b75bef36324e49039c4c491adf91ac7",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/button-success.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\button-success.png",
+      "sha256": "28b6736a30acdc928bcf2fc35b562086e304773311299914cccb43ad59ed86dd",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/button-focus.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\button-focus.png",
+      "sha256": "8d985c497b11adb4a83fd22e0acaf7cb3f791aba349982b943c8103d930e9d7a",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/button-error.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\button-error.png",
+      "sha256": "7e2c368775300451534435641b817a8f3bf6fa203f419a437c416373c984c5ba",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/input-normal.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\input-normal.png",
+      "sha256": "587dabf4a636b28cc812f3a8e7a884c6d9b09fa7dbcd2cdc073bc73e042c15fd",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/input-hover.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\input-hover.png",
+      "sha256": "ea08cbda36ad0c1139a3d31a9f9454b376c099939df73ec052144c415be9a6bd",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/input-focus.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\input-focus.png",
+      "sha256": "1675490ed8da7d944d761dba675cbf60a55c2e37936afdbd89890483614b0777",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/input-filled.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\input-filled.png",
+      "sha256": "de8a56493793955837cb6a23a6a8f178078c100b42617a133c6e3339467fdff4",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/input-error.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\input-error.png",
+      "sha256": "ce6df9ac02b01af21ff1a84c77d78cae851f647d7cbe06787476f5413420ec2f",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/input-disabled.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\input-disabled.png",
+      "sha256": "e24f953219c2c0e26eae9ce863ecd204ff6b56fcb8ff70d94303fdce3985613a",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/crop-carrot-severe-dry.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\crop-carrot-severe-dry.png",
+      "sha256": "f4ceb033af56e348bddace2f9fb296b6cd4a340957b530948a0ff165dd9f7b4c",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/crop-carrot-light-thirst.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\crop-carrot-light-thirst.png",
+      "sha256": "245c856fd24a5188b6316be0510d094ad4b20bc4e4856ad66bb7412d0d804169",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/crop-carrot-target-met.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\crop-carrot-target-met.png",
+      "sha256": "47d2f3d938315c14f7aa8fe39de80dc44e2c27170aae63b0c9ed88aded6731bd",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/crop-carrot-waterlogged.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\crop-carrot-waterlogged.png",
+      "sha256": "51ca82b893c9d4662b15497d2d65b15554d2e3f6d8291296e6fee8c196326fd8",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/crop-tomato-severe-dry.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\crop-tomato-severe-dry.png",
+      "sha256": "61e23a5ec8092043784d7f35abaf05e53a57deaf4386410da310cd1fdb416489",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/crop-tomato-light-thirst.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\crop-tomato-light-thirst.png",
+      "sha256": "0e9a642b385bee0d84561cafc3b90a0f465678a7ee466578c9475310a0dea5b5",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/crop-tomato-target-met.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\crop-tomato-target-met.png",
+      "sha256": "90e26027ea220aec95bff416a0085265a2bc6528e01d872601dc5b51b1dca524",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/crop-tomato-waterlogged.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\crop-tomato-waterlogged.png",
+      "sha256": "5376e4e3a0751c2ddb423946bfa284977c38403b3658cd4bdba72192a8f2b9bf",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/crop-potato-severe-dry.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\crop-potato-severe-dry.png",
+      "sha256": "f68e57bb5f725634c53d2880e09a431dc2d305e42fb507ea40d6a2baece69136",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/crop-potato-light-thirst.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\crop-potato-light-thirst.png",
+      "sha256": "5ed2604ce5e973604cb65894019438d9097b092362cf521020dba961f639c7c5",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/crop-potato-target-met.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\crop-potato-target-met.png",
+      "sha256": "7c2c60f7665862fe38aa92dfe7ca3a2ff258aa05376eb47dd936cfdad2cc621c",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/crop-potato-waterlogged.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\crop-potato-waterlogged.png",
+      "sha256": "8b4b95007782ec3bb21dc643c125b87ba1097985d29834b5d79f32d4f18c1c7d",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/crop-corn-severe-dry.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\crop-corn-severe-dry.png",
+      "sha256": "f3c975ef07fd25a397adea2a23156c2e22bae6d35a59ba28a5398c0c56e64980",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/crop-corn-light-thirst.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\crop-corn-light-thirst.png",
+      "sha256": "86a34765d43aef89b171b6a89a9c9c48ea5a93eebb75346447e6057f24344312",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/crop-corn-target-met.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\crop-corn-target-met.png",
+      "sha256": "8b5783a2a08b7161cbd915b676dedcc109befbb5b8f99e79eaf9a0d6631cfd57",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/crop-corn-waterlogged.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\crop-corn-waterlogged.png",
+      "sha256": "1a2dbb95b0e3232fbaa8a85582d50898825d822f4739f1504f17c2ae12af3760",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/soil-severe-dry.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\soil-severe-dry.png",
+      "sha256": "0e347552223243f43e04b2ca4e4bf9c0f57ff1959a979bcedce3bb6034100108",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/soil-light-thirst.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\soil-light-thirst.png",
+      "sha256": "041a2e381a4d5de8dc02ae192882999277f1bf12f53ce5783f39c97e9bc035dd",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/soil-target-met.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\soil-target-met.png",
+      "sha256": "3332dd49e69808b8e8060350549bbfd8a4fc20d57d67897f383386e5b0619803",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/soil-waterlogged.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\soil-waterlogged.png",
+      "sha256": "ed2e3458f571646bb6933469d8a13b0769191095bc39f28052feb8f579f7cf37",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/char-player-idle.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\char-player-idle.png",
+      "sha256": "9d205644649f62c8a22311efbf77d443bcefca49f3c55fd1ae4d080a75f41f00",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/char-walnut-idle.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\char-walnut-idle.png",
+      "sha256": "03f8863b32d89c8e44cc7b1920cff6449b6dd24309f5f777d7c71f23df5da9e5",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/char-dingdang-idle.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\char-dingdang-idle.png",
+      "sha256": "cac6064671537ad3864c3658323ec16ada421f5bddd8347428783d2e3925b3a1",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/char-yaya-idle.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\char-yaya-idle.png",
+      "sha256": "c0346d620ba8e4bbdaada79e662845c8cecf8363c3952f98d1f485d022447dbd",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/char-shushu-idle.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\char-shushu-idle.png",
+      "sha256": "5d7edc7e563da3ed5a9233159fbfe068b3c062fda9764cfd6d41c35be30c0d94",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/char-bug-idle.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\char-bug-idle.png",
+      "sha256": "491bf61eba5ec375ae24ee4001b23b565e7f27f8f1ec6b5d6326a150826f6c4c",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/char-player-thinking.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\char-player-thinking.png",
+      "sha256": "3ce62cf73069437303dfb18ac1bb311d245ab67df2c31d26ed24d811ec5e8d65",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/char-walnut-thinking.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\char-walnut-thinking.png",
+      "sha256": "2ef8dbe31207005a3329087cfa786534d4bae8ed381e80561f4b73613f9f684c",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/char-dingdang-thinking.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\char-dingdang-thinking.png",
+      "sha256": "7abe611b239d7efc4a989224ef2b0e0a99ffd5c23f3e0edb2bcd96923bb6ae2a",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/char-yaya-thinking.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\char-yaya-thinking.png",
+      "sha256": "7a0ce90ce976365a8883f989600e7ac62929cd757134a5addc987e7926a6997a",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/char-shushu-thinking.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\char-shushu-thinking.png",
+      "sha256": "1a430c19ad3c8fee7d5cde3d91540205ecbe2efa2c76c7bbffa976f97784fa55",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/char-bug-thinking.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\char-bug-thinking.png",
+      "sha256": "9ba3799c96e98417d98db13f7348abd6cdde9ae58f9813c69d79ee442d11a541",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/char-player-success.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\char-player-success.png",
+      "sha256": "9a7c40957f12de0190668bc2c68ed8783f108d84867b6a7f0cadfefd781a2bff",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/char-walnut-success.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\char-walnut-success.png",
+      "sha256": "7bd41e15782ad9bff35c2ca6000b976a95683f0bff45f6224dc21537a8fc0f47",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/char-dingdang-success.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\char-dingdang-success.png",
+      "sha256": "82326a615154c7eaa0b0e43533483b622d6d83f103b776832fe9f675a2d7fa0c",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/char-yaya-success.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\char-yaya-success.png",
+      "sha256": "870ec21d0a3988c4ac9f02528fd5838a9a390a80f37b436d044da4b58423c1c3",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/char-shushu-success.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\char-shushu-success.png",
+      "sha256": "26b09801e45c6ca15fc92354e901c468e7e509394a9790f86d40c3d177ff2a26",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/char-bug-success.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\char-bug-success.png",
+      "sha256": "bab4de5e66d64156fbae3925f8a1c1993d9e8c2f51011ad08dd449f5cf3bc176",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/prop-pump.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\prop-pump.png",
+      "sha256": "df64d5a440b7c5369173a367ace5ed9fab9abc82c6183c3ed4091033f3857d59",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/prop-nozzle.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\prop-nozzle.png",
+      "sha256": "0afcf5fecf809b493e6313dd659ed57046b0f5f5ca8f47025162ba9c895efe1a",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/prop-archive-book.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\prop-archive-book.png",
+      "sha256": "1bf5c08608ba170e47357617c16f555f2b18650cad0588181dd5f546dccfcb12",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/prop-skill-tree.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\prop-skill-tree.png",
+      "sha256": "e8ea909b8c139aaa10c486369462e73cdebd2129fb854e67600d1bb524b5a884",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/prop-blueprint.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\prop-blueprint.png",
+      "sha256": "fd86268390cd10ad469e207709f9d1f261e139b6cd83a594746f6fa7bc87729d",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/prop-leaf-corner.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\prop-leaf-corner.png",
+      "sha256": "723f25f72c00476dfc4f2dbcc658b0cbd930f3b1029bb0c33f9d4c1bdcef62e7",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/icon-drop.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\icon-drop.png",
+      "sha256": "96a8ac01013d8b41199f85ffe907171c0057aee0f4da02c1c7f2c0187afbca93",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/icon-drops-two.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\icon-drops-two.png",
+      "sha256": "8e8540dcb3b507ce213674cf081a9ae3b245116ea3ab1bb7131b85f7958d2bdf",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/icon-star.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\icon-star.png",
+      "sha256": "b9e71c8ba492515147a18f955ec039db951d96c2fed846012fa2458ab1e07c09",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/icon-check.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\icon-check.png",
+      "sha256": "feb11b0b57da4aeba23d9cad8852bb2634629e009c07ca9367445643d28ef161",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/icon-warning.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\icon-warning.png",
+      "sha256": "bea423c2dfbae859679457de156e35d9834c53f458a97cfa4f13d0ddb9b3db7f",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/icon-close.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\icon-close.png",
+      "sha256": "f27f1aa21c3f3e8d458a98d8abe8e57b39648be99c1292ca5d87062febbaddeb",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/icon-play.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\icon-play.png",
+      "sha256": "c5f9dffbcf546fc565521be085c2c7afb0f1197a48e96455dd8a34dae8593880",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/icon-replay.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\icon-replay.png",
+      "sha256": "a61eb7139dc32e38f22779894dbde38add62cd1c70bec96db62d19ca96780de3",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/icon-lock.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\icon-lock.png",
+      "sha256": "a986b82991ea08277b37cfebecd8e17e59a415550f8346568eca2eab57919a31",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/icon-bulb.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\icon-bulb.png",
+      "sha256": "c05539e0d5fdf681db93a18e2383a54d4c2f792876ebdffa858ef1faae2ba0c2",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/icon-book.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\icon-book.png",
+      "sha256": "72c1d56dafc6f5380fc49f9c2008234d0767612bdbf7aacdee8195e290f09945",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/icon-array.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\icon-array.png",
+      "sha256": "66698e8e87374d1c7c23ba409920fa716b5d1e351d93d5412bcfba44a35fabb8",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/icon-scroll.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\icon-scroll.png",
+      "sha256": "8b24239656e064cec2b2ef82f655296097e482af09697e54bac1f3df75a37126",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/icon-arrow.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\icon-arrow.png",
+      "sha256": "7450c03c829a503d207bdd4991db8339033893df9b7e392bf9cd2a81d2f2df8e",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/icon-spinner.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\icon-spinner.png",
+      "sha256": "a7b1795a48338275dbe0538fec0b371964c1349573353574b8a8bb53dbdc1225",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/icon-skip.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\icon-skip.png",
+      "sha256": "5171fdddbad475604ab6bc01837c6367b5205af2896c738c025743ac42480090",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/fx-water-one.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\fx-water-one.png",
+      "sha256": "766f193ba9859a3b47bf97a85b7f16db173636d2cf77d37c952401845b0f8507",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/fx-water-two.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\fx-water-two.png",
+      "sha256": "6ddbaf68f54ac792a57577a4b0b8aa1a22afc5526f5cf525c58f15b4cdaf984d",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/fx-splash.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\fx-splash.png",
+      "sha256": "a12fcff61df150a713d5bddba2895e3a98ae4c8fc57be021a436b4b744b13122",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/fx-puddle.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\fx-puddle.png",
+      "sha256": "dd1d449e79e891198166bb3f6f0ce17d2febb3d81f854f67f79b99dd84800093",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/fx-celebrate.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\fx-celebrate.png",
+      "sha256": "0dbe6756aa9bada0663e2602b287f8efa5e21a65b420de7abcbbf733b4a2d86a",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/ui-hero-crest.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\ui-hero-crest.png",
+      "sha256": "60766f362fa3a67e90dda566ebe65bf1aab13c5b1214b6015de417641ccb9587",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/ui-hero-frame.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\ui-hero-frame.png",
+      "sha256": "c24708d9ca8dbca33e7af3b5263aade1d18d2ea9c9aa6bc3ae81d30f3e34bf8f",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/button-water-blue.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\button-water-blue.png",
+      "sha256": "052a98bb83c58164d29905077c5152e0e976e681f948b4ffbedef52ff3ddadcd",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/button-water-green.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\button-water-green.png",
+      "sha256": "6f921719de4a3052d63a92d88377e9ae5e2bb7e0591c113fbb42780661b1f2c4",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/ui-portrait-ring.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\ui-portrait-ring.png",
+      "sha256": "7b26b925f5758b9e75e6eb5533d5813a9ee355e9f45fa3419b2c7803efc05838",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/ui-four-star-seal.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\ui-four-star-seal.png",
+      "sha256": "d95501a63c1b2250b4c19f7f25dc297b8ed19384eb63aadeffa671624557260c",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/B01-farm-background.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\B01-farm-background.png",
+      "sha256": "8cc85bdbcc314b4dfcb8aacd54010ceb523205487b2558dbff1b3924c3f0c9c0",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/B02-workshop-background.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\B02-workshop-background.png",
+      "sha256": "edb7e5793727737fbd834748c3de0bcb07710fc21bd56e4d51801f7bfb591d94",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/B03-start-background.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\B03-start-background.png",
+      "sha256": "31a5bca9d56f437f9dbed79447045c07307dc975ecab677d67cd77c67a3a0deb",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/B04-workshop-exterior-background.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\B04-workshop-exterior-background.png",
+      "sha256": "9948bc2699a36423dd59fdb61b689b7540bc88b42c2e2aaecc29ed6fae06d1ee",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/B05-bug-investigation-background.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\B05-bug-investigation-background.png",
+      "sha256": "bd6bc3eb8abc5ca50e9909bb146724828ab08adcbbc9612339f81aac3b413b57",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/B06-archive-background.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\B06-archive-background.png",
+      "sha256": "18b5681be73b70f8950d2c534190158b1c4e6f339d74c0f545ef27f477752044",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/prop-skill-tree-v2.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\prop-skill-tree-v2.png",
+      "sha256": "4a6cdcc0ebc9aa42ca882997187ba77003a64bc1a5b75e7da7ec765de6ed2831",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/icon-skill-watering.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\icon-skill-watering.png",
+      "sha256": "01e917425cbdc4b8558f6c54c04a3e02974062d162cec64f69207ba48a567a5c",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/components/icon-skill-action.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\components\\icon-skill-action.png",
+      "sha256": "3b429b43ea09e75e2ddfcf4af74d1c0ea2a782a4e5ec498517051d5a427663f9",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/asset-manifest.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\asset-manifest.json",
+      "sha256": "bb98cd7c4de10751057614e9fa076c5bc04accc8572ac9defe4a901d998b67f4",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/guide-layout.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\guide-layout.json",
+      "sha256": "4357595f09bdd2a05944ceff3905c0a8ddaf8e0182583419d079ec33a8170777",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/skill-tree-data.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\作物适配浇水器_美术资源包_V2\\skill-tree-data.json",
+      "sha256": "797ff7ae277916fd621acfe5c5b936488fc8bff7a258233c142d9dff478f90c3",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v1/animation-manifest.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\animation-manifest.json",
+      "sha256": "138e37cf828f64b75e108d7f356e75570a1c46bdbb79758345de1793aea41a15",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/B01-farm-background-ambient.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\B01-farm-background-ambient.json",
+      "sha256": "a37f6b935c5619cbd8ac5dcfdcd6d9630435b7c34c2bee744d9a29b550abcb72",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/environment/B01-farm-background-ambient-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\environment\\B01-farm-background-ambient-poster.png",
+      "sha256": "4d4b9a08bf960b7d121f8b69f557cf9e4c11727bbef999e9e6a37d194947f233",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/environment/B01-farm-background-ambient.ogv",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\environment\\B01-farm-background-ambient.ogv",
+      "sha256": "4f99b84717a8ef145a193eeeaef718116d533805f95068d4f49515c4c8b4cc08",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/B02-workshop-background-ambient.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\B02-workshop-background-ambient.json",
+      "sha256": "1f602a16c734c4f9aef74663a91867b64ad4683412865d0105a36ad4e1ff688c",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/environment/B02-workshop-background-ambient-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\environment\\B02-workshop-background-ambient-poster.png",
+      "sha256": "4268283bd18097f2f438b1a3c72542564c23eeead394fc456f8b7a8765dc7a64",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/environment/B02-workshop-background-ambient.ogv",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\environment\\B02-workshop-background-ambient.ogv",
+      "sha256": "d4e5055e3f346cc6dde0cf0c9e29e550749b11370204a1cb17a133216cb3a38c",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/B03-start-background-ambient.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\B03-start-background-ambient.json",
+      "sha256": "48516c9d68623f96f4b4e52f4fbd03ebd6e1e43998ffc85016bea2bc9040a311",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/environment/B03-start-background-ambient-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\environment\\B03-start-background-ambient-poster.png",
+      "sha256": "07b10c82df9906786e443197ba2f5b45f6e79a7247d73cb381b21c2d9a45724d",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/environment/B03-start-background-ambient.ogv",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\environment\\B03-start-background-ambient.ogv",
+      "sha256": "065a6f398604713e998e8b854d2f07cf56a328509e8939f68f73016708c99457",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/B04-workshop-exterior-background-ambient.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\B04-workshop-exterior-background-ambient.json",
+      "sha256": "2edd82ca4736064315b31dfec25230efcbaf26d75ca42f06b3422fc8c953c6b2",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/environment/B04-workshop-exterior-background-ambient-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\environment\\B04-workshop-exterior-background-ambient-poster.png",
+      "sha256": "7bdb3036032178e19b37ab1caab190ad73c9ecfc4a8beef0b4d26988275f1c40",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/environment/B04-workshop-exterior-background-ambient.ogv",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\environment\\B04-workshop-exterior-background-ambient.ogv",
+      "sha256": "21d271f3ad1d0c983d24651ef59873164d06ac651ec790928b30a483b4b5fe86",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/B05-bug-investigation-background-ambient.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\B05-bug-investigation-background-ambient.json",
+      "sha256": "7dcd1879239890eea4177dcdc169dc6cf29fd155de6d9ac7b617667bedbf0769",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/environment/B05-bug-investigation-background-ambient-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\environment\\B05-bug-investigation-background-ambient-poster.png",
+      "sha256": "f121a3671d7c7de260b1989d64260e1444bcbf457cbb60b26b79fa2217575be5",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/environment/B05-bug-investigation-background-ambient.ogv",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\environment\\B05-bug-investigation-background-ambient.ogv",
+      "sha256": "0b98190c6b3b70c03905176e5e2f98f3ab6fb8d28cd84be4ef116f4f1d50f140",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/B06-archive-background-ambient.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\B06-archive-background-ambient.json",
+      "sha256": "5b3a08665b560888fcc33c381cf24e0833c482dfe49cdbb2bd4e67f1fe2d56c6",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/environment/B06-archive-background-ambient-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\environment\\B06-archive-background-ambient-poster.png",
+      "sha256": "1dc87b4448bc5dc7083222b6869a2e8a4b007d81be8158ffb67686e9dcdb9bde",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/environment/B06-archive-background-ambient.ogv",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\environment\\B06-archive-background-ambient.ogv",
+      "sha256": "b4df88547901d901b784b069d9661ca1f7670221cd8ac35762a4971c2e0c390e",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/button-error-motion.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\button-error-motion.json",
+      "sha256": "43895d82df8880dc33a20aa31916fa09b7ae540173fadfefab3dab1343b1568e",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/ui/button-error-motion-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\ui\\button-error-motion-poster.png",
+      "sha256": "8cae6f4725140b3baefc8eecf0056bb630e28e8e4e4943b68c75ace1d5b50cb7",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/ui/button-error-motion-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\ui\\button-error-motion-atlas.png",
+      "sha256": "fa71ce3d960aec6842cf4358871e66fe985182de39600157f30362c1e1dc484d",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/button-focus-motion.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\button-focus-motion.json",
+      "sha256": "75bc93c5c3bb07c92af9c1af20fb7447e688c578653d144475cd1472adec8265",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/ui/button-focus-motion-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\ui\\button-focus-motion-poster.png",
+      "sha256": "8d6eae71deabc157619ac6ab9565c9f37aa3a061518164f51ca8e00529f95fa0",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/ui/button-focus-motion-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\ui\\button-focus-motion-atlas.png",
+      "sha256": "1aeedc0f8ddc0e1d7528e9d777c43646e303dd0a8e42a0e609b056ad0da762b1",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/button-hover-motion.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\button-hover-motion.json",
+      "sha256": "0d56ba5d9f758cd1fb4db80164ff8bdc6049592c2ed367e435144515b93c7583",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/ui/button-hover-motion-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\ui\\button-hover-motion-poster.png",
+      "sha256": "bf6b4e09fb424b1cb1ab6567507d3dee7491c661787fb706502d3455cbb3e794",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/ui/button-hover-motion-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\ui\\button-hover-motion-atlas.png",
+      "sha256": "4451a7e80a9fc7eaa5ca157ea85b1b56446750d5087dbd1e31d72c31b02bf7b1",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/button-pressed-motion.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\button-pressed-motion.json",
+      "sha256": "fdce332ec4330ef09dab7c6461d18dd580f366b754812efe61b586e71e138589",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/ui/button-pressed-motion-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\ui\\button-pressed-motion-poster.png",
+      "sha256": "743520037a0a3ef3b5539c55450b9f671becf5454ec78f097b73ea640efd3a7d",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/ui/button-pressed-motion-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\ui\\button-pressed-motion-atlas.png",
+      "sha256": "f508d3d1d14285e72c3c6ef901d2f42b40c125a7713f0056d1a093e727b21a5e",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/button-success-motion.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\button-success-motion.json",
+      "sha256": "62a535c4946d99a1a5114508780084fc71fe6e4ba60826b8642b205ea9372e60",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/ui/button-success-motion-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\ui\\button-success-motion-poster.png",
+      "sha256": "9ee26fb436ac8b43fab4ac45f64a481370dfd83ffe04f2b2e0558ea92fe0e619",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/ui/button-success-motion-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\ui\\button-success-motion-atlas.png",
+      "sha256": "4f1a325718a950955c769c479829971972b1d7bda78097fd318652a14f4ac3b0",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-bug-idle.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-bug-idle.json",
+      "sha256": "eb37a274ec653514d3e4990934dc908c57718c201fb229b86fd3e1b8a7a36bf6",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-bug-idle-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-bug-idle-poster.png",
+      "sha256": "7a1577966ad976bdd8b32db9f5181b5ba8b407241befe5dec7051a3538cfac88",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-bug-idle-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-bug-idle-atlas.png",
+      "sha256": "c21a547579177c022f4892ecac0583242eb39144c124ba43028f86991eacee03",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-bug-success.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-bug-success.json",
+      "sha256": "d473f99d19254a2fa860f609b1875c8d43d735f144159ca22cb77edc19b95c8b",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-bug-success-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-bug-success-poster.png",
+      "sha256": "b3659e3df0f526112f4cce2fe3a6cc9bd965ce096be66341a2b571a3d3a5da7c",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-bug-success-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-bug-success-atlas.png",
+      "sha256": "1f4cb4e86faf4c4ad4f283e74c2d5364bfa0b275f839bb361b492cf2e91b363f",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-bug-talk.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-bug-talk.json",
+      "sha256": "65c8b04bc9d25110c087857f73ca16ece011e696e2ca04385e2c60e74d5f158f",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-bug-talk-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-bug-talk-poster.png",
+      "sha256": "7a1577966ad976bdd8b32db9f5181b5ba8b407241befe5dec7051a3538cfac88",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-bug-talk-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-bug-talk-atlas.png",
+      "sha256": "a822a932b185ea875557fa737ff517e48ea483cbbb17abea311330ef9d0b5cb7",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-bug-thinking.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-bug-thinking.json",
+      "sha256": "4047150bc3f463c412b83ab73350154037ed55d41ed87ddaf128455462446289",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-bug-thinking-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-bug-thinking-poster.png",
+      "sha256": "72abe9586fa07d8f7b7bbcfd042893d8e5c73d4f96a88b4d659b0eac81d6e2bb",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-bug-thinking-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-bug-thinking-atlas.png",
+      "sha256": "475eef87e7476f2355cb65d92a05c098d3e0ffc33bffc0e8c7f6cde141b63a0d",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-dingdang-idle.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-dingdang-idle.json",
+      "sha256": "ecaab0f357d257698ee63fb69a2b3d380fbc1c0e8ccbc9f40a3a28f3b4d99801",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-dingdang-idle-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-dingdang-idle-poster.png",
+      "sha256": "c585d46e0af82cbea0358e1fad40207c423ee987bbaa5934c7ffe42d723feea6",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-dingdang-idle-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-dingdang-idle-atlas.png",
+      "sha256": "633810505ba9b15b8a09f18afcfe51ff8a9c7866a422844c0286c48c354a7ea9",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-dingdang-success.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-dingdang-success.json",
+      "sha256": "452be4910c31df8b5440b5de473d19e6ad41ec83dcb70b4eb40ca6368f7c8137",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-dingdang-success-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-dingdang-success-poster.png",
+      "sha256": "79c208a17e803765bd2e73b1abcaf341e860f0c5184f4b998d0301239164bb93",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-dingdang-success-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-dingdang-success-atlas.png",
+      "sha256": "b81199501ad7352a4a09c787f5c0a78701185112e4122941bad69c9f3fd4e2a7",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-dingdang-talk.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-dingdang-talk.json",
+      "sha256": "57c01f54c9327645a981a0a67cab4afb4a791058ac7362e8754387a77987ce8a",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-dingdang-talk-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-dingdang-talk-poster.png",
+      "sha256": "c585d46e0af82cbea0358e1fad40207c423ee987bbaa5934c7ffe42d723feea6",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-dingdang-talk-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-dingdang-talk-atlas.png",
+      "sha256": "d19a43dd5707235e69070ad5c54a2b825e9d6404e6f3fdc4ca25304639fbf675",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-dingdang-thinking.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-dingdang-thinking.json",
+      "sha256": "ef8ee7b092f42ffa3a5d9acb2d7c45ce0a03fe9029c15f29c98b83c40d5c66e7",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-dingdang-thinking-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-dingdang-thinking-poster.png",
+      "sha256": "309d8e67a20d1db373ce4d6fba6d5c4384f8273c1060d4e561fc2cbe67ca4637",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-dingdang-thinking-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-dingdang-thinking-atlas.png",
+      "sha256": "a4d57c5f249130d16186fc46e0a686df9210ff2fffe8d6f630ca0bd91623941d",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-player-idle.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-player-idle.json",
+      "sha256": "2cfd027a1a74fe44ad8720f89998c634a950351e077f5f007c14662b2db5af97",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-player-idle-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-player-idle-poster.png",
+      "sha256": "166194b246d5d351e8ff774175d1201494dd64276421ea64a201b4b20688c95f",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-player-idle-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-player-idle-atlas.png",
+      "sha256": "69a52af401db1f9d7a2aaabba64f87cc4781ce2cadbadfac65b3d3bc9187819f",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-player-recover.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-player-recover.json",
+      "sha256": "6957cd1bc82c08eaf70ccf531cb9fca976aea687071ad549fc4ee2ccad1aa228",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-player-recover-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-player-recover-poster.png",
+      "sha256": "e39e81ca72606baffcbf9d71b5beddfc800d0b79060ee0e40ca59d56ae27c1f1",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-player-recover-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-player-recover-atlas.png",
+      "sha256": "2d9b968e29d75ba2b44afa8552e4cc308697e0805bcc8c5ede67f5ccb47847b3",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-player-success.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-player-success.json",
+      "sha256": "416d8fbca54ad7908f6d5721018217e18d2b57dfce83caaaa0855456317aa610",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-player-success-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-player-success-poster.png",
+      "sha256": "355e77d05edd6b9a8057c097742033381e92be900f8a485caddfa9cc9db04170",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-player-success-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-player-success-atlas.png",
+      "sha256": "c33bfaefc668c5c85b5452c07b041066e60460257e1116e789ec16bc1f132ff3",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-player-talk.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-player-talk.json",
+      "sha256": "a92ecc6cf0085f87c6d95f7fcaee1d3e90ea5f9d9fc43e166884adae2338809d",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-player-talk-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-player-talk-poster.png",
+      "sha256": "166194b246d5d351e8ff774175d1201494dd64276421ea64a201b4b20688c95f",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-player-talk-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-player-talk-atlas.png",
+      "sha256": "29396e679f3200682df7da05b82b72f4da3c33a75a5bacf523b56c32a40d42c0",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-player-thinking.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-player-thinking.json",
+      "sha256": "40108d533aa25ee5a9f195a1b337cf56248a3ecf0887e89f1d7b5db4248cc0d8",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-player-thinking-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-player-thinking-poster.png",
+      "sha256": "e39e81ca72606baffcbf9d71b5beddfc800d0b79060ee0e40ca59d56ae27c1f1",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-player-thinking-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-player-thinking-atlas.png",
+      "sha256": "8b6f1e56edc1e3ac9d4f6fa49b9af505c92ad6cf2ee33f56d0bd7ae0cee0aa1f",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-player-write.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-player-write.json",
+      "sha256": "8dd30387052aad82cce1e7fc4e29447f42ef1f7bd0cb39878e9c94b76cff09ac",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-player-write-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-player-write-poster.png",
+      "sha256": "213b5dda53bb866eaaa636f7818d9cb1845554228f60b3510246f7424ae459fd",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-player-write-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-player-write-atlas.png",
+      "sha256": "613af3d6ccaa20bdf14c6d6ec82d5cdff676b090e83eb60597a9b1325671bf91",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-shushu-idle.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-shushu-idle.json",
+      "sha256": "341bd2b8a739c9c057e911c3072ef3725f5cdf18a114f0df6b7b7bbb7f8fcef8",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-shushu-idle-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-shushu-idle-poster.png",
+      "sha256": "a02d1b96e87b155552f14f262b2e9353f3a73138f07a1f5282185525225dcdbe",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-shushu-idle-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-shushu-idle-atlas.png",
+      "sha256": "cff04cc333da9929f954045eff56e7053daa7bf8442764964eb0b95285d1ee21",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-shushu-success.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-shushu-success.json",
+      "sha256": "9e005712aebdf9d83d36b6d8c01e7f74fee01bce159b60ad1b7771e367d3d40d",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-shushu-success-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-shushu-success-poster.png",
+      "sha256": "06f9a3c4f243e0b7ffea374ae2dc586b584a923ff5f32eed5178a12634151d60",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-shushu-success-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-shushu-success-atlas.png",
+      "sha256": "d9b3d27fdfacde7c6f9417e25d415904078ed0376a89e3f10bdf33364b0576d6",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-shushu-talk.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-shushu-talk.json",
+      "sha256": "e77a7a927373765f94a3ebb87d4120524091d18e255f001aa7c877c8f4629a1a",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-shushu-talk-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-shushu-talk-poster.png",
+      "sha256": "a02d1b96e87b155552f14f262b2e9353f3a73138f07a1f5282185525225dcdbe",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-shushu-talk-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-shushu-talk-atlas.png",
+      "sha256": "648c058567ae024a0daf0e903fcd75aa084298beb278d6eac3950f22e16c408f",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-shushu-thinking.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-shushu-thinking.json",
+      "sha256": "d2372e6e5e3c0390ffba908e9dc39e2d92dde704efd233f6a4c0089de6d21276",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-shushu-thinking-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-shushu-thinking-poster.png",
+      "sha256": "157351483bac1aced9bb75d2fbb09feb7b56e7a2a4f836c1552e3d55819a147f",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-shushu-thinking-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-shushu-thinking-atlas.png",
+      "sha256": "d4bc68976ab47f0b1c46a951b19d51fe85c8953d521d8a8b6386ca27007b042e",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-walnut-idle.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-walnut-idle.json",
+      "sha256": "c26e9da312aa9177445283756c7a44edd5928be963fe3a55132f5893dd7201f0",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-walnut-idle-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-walnut-idle-poster.png",
+      "sha256": "a55855e47e57d224cb8c295a8ebde1e592f18a4f8110de0c7c4bb1c01160110c",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-walnut-idle-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-walnut-idle-atlas.png",
+      "sha256": "98471ffcc551f55fbd28cd3c8bbdc4abae3b5c1c008643ad07a41618001846c5",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-walnut-read.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-walnut-read.json",
+      "sha256": "e86f5c235d9b345cd13ac99d272d5b2ef58da67c80405b9fcb86aa8029917778",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-walnut-read-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-walnut-read-poster.png",
+      "sha256": "772194cfa4b44014f538f8ec5bd311e94551f79d2c93e02f0a9a6ffa0a38948e",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-walnut-read-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-walnut-read-atlas.png",
+      "sha256": "95a170838da0e2eeb1452a0d6f38c355d85d93b63bfcd8f71ef73437765a1b41",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-walnut-recover.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-walnut-recover.json",
+      "sha256": "6889ec253306616cb362e21f774f67fb11f9f1e7f88fb13cfb4bda0c4632984d",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-walnut-recover-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-walnut-recover-poster.png",
+      "sha256": "aae3fa833e4d2d3174c436d590ffd08e54ec0fb12d725300da9993c36b6b493b",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-walnut-recover-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-walnut-recover-atlas.png",
+      "sha256": "0384578d03eacafad0011ed4a808e1817a810cc2b92c00a40c30a14ac42e9255",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-walnut-success.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-walnut-success.json",
+      "sha256": "8b5240b3cae3fc54fa295190f4bc2d131b669e38ae6298982afb231a579cbb53",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-walnut-success-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-walnut-success-poster.png",
+      "sha256": "aac7dff22e77bbd95f616520843bf1e75ed90eef7826286a6a7b8df9c8345409",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-walnut-success-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-walnut-success-atlas.png",
+      "sha256": "4883a507680603d00ed3cb85e8972cf5bfade7bff615af9fe660c3c9c007b706",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-walnut-talk.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-walnut-talk.json",
+      "sha256": "426f3d02f6c0c796f05f53c2ecb40eef09cb9b71d2cb12fac0ba89afda422476",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-walnut-talk-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-walnut-talk-poster.png",
+      "sha256": "a55855e47e57d224cb8c295a8ebde1e592f18a4f8110de0c7c4bb1c01160110c",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-walnut-talk-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-walnut-talk-atlas.png",
+      "sha256": "9c4c0775560988280596032fad9f29e9129c043629c6c7fdedbb61364d4edb44",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-walnut-thinking.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-walnut-thinking.json",
+      "sha256": "6d52ed6a411c2cb6baabe629c87ae6853b3ce12557aa34b0d11b591d216eadb1",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-walnut-thinking-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-walnut-thinking-poster.png",
+      "sha256": "aae3fa833e4d2d3174c436d590ffd08e54ec0fb12d725300da9993c36b6b493b",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-walnut-thinking-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-walnut-thinking-atlas.png",
+      "sha256": "6c067cc2adaf622bf64e3a33371da7a8369bfc4c5100063ad77333f84cd29228",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-yaya-idle.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-yaya-idle.json",
+      "sha256": "58d92681c37f7676af9539f937b68d950f5c6e80938e721a7d08db90577c8951",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-yaya-idle-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-yaya-idle-poster.png",
+      "sha256": "f9a81f10d26eac48b52c8f45543c1c2cd262ed069019ab43a04b49d1fac112c5",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-yaya-idle-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-yaya-idle-atlas.png",
+      "sha256": "1c340e256ecf6c4914cc5f2ea839e652d47cca3599edac210ce31f1b274780fa",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-yaya-success.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-yaya-success.json",
+      "sha256": "80b2879234241303c278565a66c17c2f77a034ebe9bcab02d6e9a7e3a048b919",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-yaya-success-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-yaya-success-poster.png",
+      "sha256": "710e6108d6e6e61a5c29cf0def177f92d94147698318e85fd613977346280b90",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-yaya-success-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-yaya-success-atlas.png",
+      "sha256": "6651e6f942b25dfe0978004b42c4e48979141cf79505921112841c084f7d8f57",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-yaya-talk.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-yaya-talk.json",
+      "sha256": "fb7b243eb85b8b4b222590a0d810f302969cc93b9871699c4aaea50f5e3389d1",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-yaya-talk-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-yaya-talk-poster.png",
+      "sha256": "f9a81f10d26eac48b52c8f45543c1c2cd262ed069019ab43a04b49d1fac112c5",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-yaya-talk-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-yaya-talk-atlas.png",
+      "sha256": "2a3d451e1ae21c25cad9f07be5cd86a8254c3fb0d6247c6236744f664bbfb206",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/char-yaya-thinking.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\char-yaya-thinking.json",
+      "sha256": "bbf45f2b0c804f02084361b41d95de30d9fe8c87c336f5000061aa3006e52a6c",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-yaya-thinking-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-yaya-thinking-poster.png",
+      "sha256": "c778e87d3959b02331dbc9b26a55e5903713f25e84bec2c8c57baadc0883fb64",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/characters/char-yaya-thinking-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\characters\\char-yaya-thinking-atlas.png",
+      "sha256": "a0b7502a1186188376c88d084ee9f262c2b69820eb5a982df6a3f7bb052382bc",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/crop-carrot-light-thirst-sway.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\crop-carrot-light-thirst-sway.json",
+      "sha256": "6d516da219acbf521f71c424deb7be6e52c484c2b93ef28222babbcead3144f7",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-carrot-light-thirst-sway-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-carrot-light-thirst-sway-poster.png",
+      "sha256": "e7dcab41fbb8de204b4b8bd5ef999a998815bbf6ec3f9a50bd71e5c7dff9dbb5",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-carrot-light-thirst-sway-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-carrot-light-thirst-sway-atlas.png",
+      "sha256": "f295467b24893208cf7e5a01aa9685449575917eac6850a57ea03ab1eea26c3b",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/crop-carrot-receive-water.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\crop-carrot-receive-water.json",
+      "sha256": "3d30f18bf3b3e40eacd4d495c6592a4042ccbf74334be9c511284f37f390277d",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-carrot-receive-water-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-carrot-receive-water-poster.png",
+      "sha256": "79a5f5e85a6ce642a8c5cc2ece2390a6cd1ab30005f08fa665bb809688eb5df5",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-carrot-receive-water-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-carrot-receive-water-atlas.png",
+      "sha256": "0151f962719be9ba679dcd2999dc030b7e1e642ee13c1da0a7e01515bc436c0b",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/crop-carrot-severe-dry-sway.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\crop-carrot-severe-dry-sway.json",
+      "sha256": "3fdc6183f426eebf2d3fcb2e8b8bdbc67f9e027d0f9b66e77307cf9bb314c7b1",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-carrot-severe-dry-sway-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-carrot-severe-dry-sway-poster.png",
+      "sha256": "578ee76953dca2a062e601d27a8ca12b5cce7163f6d1f40f9fe09ba6f82e2a10",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-carrot-severe-dry-sway-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-carrot-severe-dry-sway-atlas.png",
+      "sha256": "fd10411b2f81f736133a29a5d493d0b50a4d5493d9c796943042ec330d2f1dd4",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/crop-carrot-target-met-sway.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\crop-carrot-target-met-sway.json",
+      "sha256": "8c1b6cbfdd6ce0bacbbd4106ac5112a9e294d4f6991af63a7bb9851b80b99857",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-carrot-target-met-sway-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-carrot-target-met-sway-poster.png",
+      "sha256": "985dbcd0f79038ada8d9ffb1b2f0be83ddaafc609fb22a48fbe00aa3800af5a2",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-carrot-target-met-sway-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-carrot-target-met-sway-atlas.png",
+      "sha256": "3621df048668f1f5ecb58f3ddeddaa26ff48b906aad2435c78ee7c31b41e86fd",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/crop-carrot-waterlogged-sway.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\crop-carrot-waterlogged-sway.json",
+      "sha256": "dfe947f7d09522a8eba7f9014516a1d89e098a7b02bc4be25673fb45c0b40f05",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-carrot-waterlogged-sway-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-carrot-waterlogged-sway-poster.png",
+      "sha256": "b78d39c0b2e08de523fd6f973c80f11b174a1613fe51bb055f7ff754b55657ba",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-carrot-waterlogged-sway-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-carrot-waterlogged-sway-atlas.png",
+      "sha256": "e0b92d41151cde99693bb03ddf14cee5b6497453a9b70f19dd104a042aac9609",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/crop-corn-light-thirst-sway.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\crop-corn-light-thirst-sway.json",
+      "sha256": "41e865e3bd3dc9a0861c835492457a353be3c78af90e4b926ab3441d4fc6dbf7",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-corn-light-thirst-sway-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-corn-light-thirst-sway-poster.png",
+      "sha256": "020bbc07d85c68dbd00c78a916ef88aaa8a2f5ae3a255e977800cd2c4aa8d1b1",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-corn-light-thirst-sway-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-corn-light-thirst-sway-atlas.png",
+      "sha256": "769ef9d0301d03e5ebbf464f24a527613de53dc33fd026b6c6845cfe5aa15558",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/crop-corn-receive-water.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\crop-corn-receive-water.json",
+      "sha256": "fe0ddfbd0fb1c128d70818874cc424d74396394b653ec0a755c0eb05f70f6f76",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-corn-receive-water-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-corn-receive-water-poster.png",
+      "sha256": "694f1acf9513d854b196f302341678f7656d53a9080025fc75a65e9177bdd54e",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-corn-receive-water-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-corn-receive-water-atlas.png",
+      "sha256": "95a30202cf0375ec611315d1ad07df5e814ade2fed279a36d45461933f200424",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/crop-corn-severe-dry-sway.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\crop-corn-severe-dry-sway.json",
+      "sha256": "92f1d1cd390a7241e0b2d7d5b286cdf4a679099fd0639e978d24ecabf1029658",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-corn-severe-dry-sway-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-corn-severe-dry-sway-poster.png",
+      "sha256": "38e3480a83d86579fd5c65c8f501a53e02182c30bceeb4c89272d36cb693fbd5",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-corn-severe-dry-sway-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-corn-severe-dry-sway-atlas.png",
+      "sha256": "1f5a14343c8d4802b3ed3a81f48c5acb36dfd6cb38e40efbf3606a12e9b8c033",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/crop-corn-target-met-sway.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\crop-corn-target-met-sway.json",
+      "sha256": "588e8cd8339619da093757a3ffbd115e4e61309bb8504e733ee893b7d2f979fa",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-corn-target-met-sway-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-corn-target-met-sway-poster.png",
+      "sha256": "7519ea3c54d3d242df3fb1a154a47bf9a7da0d9c04de27dc0c7241fe84d023b5",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-corn-target-met-sway-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-corn-target-met-sway-atlas.png",
+      "sha256": "91c6b8eacf5f28929133102caa3abe21ef306ba5b6a6d8ebd364bcbd3f1ad733",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/crop-corn-waterlogged-sway.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\crop-corn-waterlogged-sway.json",
+      "sha256": "01d3355aad5deb024c1809ee26040400d4bab9b9b1acee5dbe19fe9c9be350ce",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-corn-waterlogged-sway-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-corn-waterlogged-sway-poster.png",
+      "sha256": "cb9747c47f8fe916b8f793d0442fb7fa6a63417d1ff4d1710a536d38a07a4240",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-corn-waterlogged-sway-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-corn-waterlogged-sway-atlas.png",
+      "sha256": "9df6b611d7929a2c62731b90c1db8ef4d6bd34ffbfd6cb071f22fb6873b02190",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/crop-potato-light-thirst-sway.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\crop-potato-light-thirst-sway.json",
+      "sha256": "18bc567b863f7370793980d4409da72664f0e0247a6660140fa6160d04fd8f9c",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-potato-light-thirst-sway-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-potato-light-thirst-sway-poster.png",
+      "sha256": "34b306467f0555c8a3f5de019b67242c265470f25d2e6458625526905fa213ba",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-potato-light-thirst-sway-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-potato-light-thirst-sway-atlas.png",
+      "sha256": "8c3260af3f1c1e17c726790874b2aee6463b0b1bc57a1272b7c9f00db823bc40",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/crop-potato-receive-water.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\crop-potato-receive-water.json",
+      "sha256": "baa44c4a243d3641b59d189fe42e754480417f91759aad2271da46b3aecf4ec4",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-potato-receive-water-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-potato-receive-water-poster.png",
+      "sha256": "df7d813e0c9ff65fd68dc86ba99467c7431ec6f8d1323fbc1cbe918f45e3b8ff",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-potato-receive-water-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-potato-receive-water-atlas.png",
+      "sha256": "0c54f74bc558d5aa102b936b39b58f21f36ca5a695a77832c9e29f338574b13e",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/crop-potato-severe-dry-sway.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\crop-potato-severe-dry-sway.json",
+      "sha256": "2b1cb39c8db348874e00d4072c28de1d45762d0a7237279b860d5013b496703d",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-potato-severe-dry-sway-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-potato-severe-dry-sway-poster.png",
+      "sha256": "c7a21a56dcc37857a85ef6410f0d417a991d34080757500a96acf72fa38f6ed7",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-potato-severe-dry-sway-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-potato-severe-dry-sway-atlas.png",
+      "sha256": "3757e65f07ac91cf8803546007d2dc391309daf5825031e437eec13682d1cd43",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/crop-potato-target-met-sway.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\crop-potato-target-met-sway.json",
+      "sha256": "096655e9ae5e0bd769d791816da87b48dc2623e41de8ae4bd03b49a562514d31",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-potato-target-met-sway-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-potato-target-met-sway-poster.png",
+      "sha256": "ed07727467ef41c4ca3dbc38b93b6a61df5a9b9bf165768c20b49414a8db691f",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-potato-target-met-sway-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-potato-target-met-sway-atlas.png",
+      "sha256": "e2ee09f22a7b333c7e8747319c695dd414e8f078908833c68c9983f4c9dba08b",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/crop-potato-waterlogged-sway.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\crop-potato-waterlogged-sway.json",
+      "sha256": "d4c1eadcfdbadc009c4fbf57a9b489d853b975d02bcf44dc7e2a9b1b710fe8fc",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-potato-waterlogged-sway-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-potato-waterlogged-sway-poster.png",
+      "sha256": "ba6d3db327aae69d09ec5365ff165979b98234e0ba493785f5bd459cfa5bf170",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-potato-waterlogged-sway-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-potato-waterlogged-sway-atlas.png",
+      "sha256": "8de646f84136545e682be117ff010c5bd6fff1bde28407c35184783c28334257",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/crop-tomato-light-thirst-sway.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\crop-tomato-light-thirst-sway.json",
+      "sha256": "c9801258c37135df4d94a235eb5f3b50733ee43153679fe67fce4c5948106524",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-tomato-light-thirst-sway-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-tomato-light-thirst-sway-poster.png",
+      "sha256": "052551ed85683d10754d785510f93d792c77cde8ae04e66a07de29fe6e67097f",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-tomato-light-thirst-sway-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-tomato-light-thirst-sway-atlas.png",
+      "sha256": "257f9d769d8f0067e1fe564630ee301b08775670d7a526746aafb00f5d3144b2",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/crop-tomato-receive-water.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\crop-tomato-receive-water.json",
+      "sha256": "215394ed007cfc1df24f2af8eb20527d545ead66aaeb7e2cd31600ea4fbaf050",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-tomato-receive-water-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-tomato-receive-water-poster.png",
+      "sha256": "a7e4372134fe64a546bdc5dd771e3d03fed0b20d3a6f4a0cedfe9c2bbc4ebaad",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-tomato-receive-water-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-tomato-receive-water-atlas.png",
+      "sha256": "a29fc6f0751df86a7450c207eafc7ab0a61d345ce2745fb8f3b83bc531550e5f",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/crop-tomato-severe-dry-sway.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\crop-tomato-severe-dry-sway.json",
+      "sha256": "bebdea4f8c94d7c534158d11da2fa4c9efa0eb32751c12c0ab3e474bd5dad450",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-tomato-severe-dry-sway-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-tomato-severe-dry-sway-poster.png",
+      "sha256": "d504dc07111e09c1f971e68ee0998ead4abc81d5da33f98fa80d76991bfa8910",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-tomato-severe-dry-sway-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-tomato-severe-dry-sway-atlas.png",
+      "sha256": "9e56220693fc48334b55e0f75a224ba02c5af97191bc9b4db11cb1546936f334",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/crop-tomato-target-met-sway.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\crop-tomato-target-met-sway.json",
+      "sha256": "90f95cb9acddd2b7105a2c70a292f3c480714d3314e906cb61c9748f2bb41c52",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-tomato-target-met-sway-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-tomato-target-met-sway-poster.png",
+      "sha256": "c31c1f2e1b6d53375e9a60e242363c23a9d57d9aa299d3b2d4baef935014e056",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-tomato-target-met-sway-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-tomato-target-met-sway-atlas.png",
+      "sha256": "ea9a6ff7bcdd61c7efbe0f88b26f2469fca4cce258e80ad887a5f19fccf468b9",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/crop-tomato-waterlogged-sway.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\crop-tomato-waterlogged-sway.json",
+      "sha256": "b5863dd1007b3e046efa38f5cce975b3261d866c6befa9208c9e12a3425a40f2",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-tomato-waterlogged-sway-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-tomato-waterlogged-sway-poster.png",
+      "sha256": "e28f4cbdb1841c5c3b424e453fc16d798f2e366a12a080e19fbba2abf20109a8",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/crops/crop-tomato-waterlogged-sway-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\crops\\crop-tomato-waterlogged-sway-atlas.png",
+      "sha256": "f32053205faafc4cf8a0a6135b1520c2ef0a8c3aed12bc1243d0b855f1238a27",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/fx-celebrate-burst.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\fx-celebrate-burst.json",
+      "sha256": "573ca2c917624f8c265937f38f4727db4d3a1b9df5c05dec698a19dcfde92793",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/effects/fx-celebrate-burst-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\effects\\fx-celebrate-burst-poster.png",
+      "sha256": "04c400a913e67e603ddb03df08440af8c26727cad71872793b0d77f3fda6c1f6",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/effects/fx-celebrate-burst-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\effects\\fx-celebrate-burst-atlas.png",
+      "sha256": "a5997f0918321b4e30d7d23d404d1b212cf3cab225a2f76e60aafac0633c6194",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/fx-puddle-ripple.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\fx-puddle-ripple.json",
+      "sha256": "c25c3c18281fc514dd25c0891b87b4933ba0eb7d7169d31385754086e571bad2",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/effects/fx-puddle-ripple-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\effects\\fx-puddle-ripple-poster.png",
+      "sha256": "73c36772fa2fae232e8be2ee0f19e18c21e7da0d2513df8a587c2e6a8a954a9c",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/effects/fx-puddle-ripple-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\effects\\fx-puddle-ripple-atlas.png",
+      "sha256": "03ce9e484e97d024e17e785df78792ca3b63a01896bab83c58984a6a78c0f8b8",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/fx-splash-impact.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\fx-splash-impact.json",
+      "sha256": "a3d0fca9712fa8e5183e4a25f074b19364e99a73f95ee4f879d378f8870cc9f5",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/effects/fx-splash-impact-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\effects\\fx-splash-impact-poster.png",
+      "sha256": "8f97a46d783512d63e50881951db20a4ba13aefc175d068c18e46a137a196acd",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/effects/fx-splash-impact-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\effects\\fx-splash-impact-atlas.png",
+      "sha256": "0fec19e4bec11842b41a0077997f6750df2db4937d855d47cb4db0a1e2f2e4c8",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/fx-water-one-flow.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\fx-water-one-flow.json",
+      "sha256": "c7a8a063aa724fa4ea77d3fde1e719b990e84db56057a0f0f40dbddff10a4b93",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/effects/fx-water-one-flow-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\effects\\fx-water-one-flow-poster.png",
+      "sha256": "df2ac9fff6c98c2ad4b270366027930dd233fe9b37bd2c6c4e3ccdaf723fa211",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/effects/fx-water-one-flow-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\effects\\fx-water-one-flow-atlas.png",
+      "sha256": "8bd37454a57229c51b5ed030dfe3f1a996842ce11e006da76729e19dfd9c00f8",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/fx-water-two-flow.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\fx-water-two-flow.json",
+      "sha256": "e67c98243f2b9672e09ce977065ccc2c52caa0fdb54e29084237a9403320c37c",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/effects/fx-water-two-flow-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\effects\\fx-water-two-flow-poster.png",
+      "sha256": "df2ac9fff6c98c2ad4b270366027930dd233fe9b37bd2c6c4e3ccdaf723fa211",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/effects/fx-water-two-flow-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\effects\\fx-water-two-flow-atlas.png",
+      "sha256": "1e9d8a3f695a0c5bf85e41f3827f88c321d7954102a6aa245fd6293958a2cdb9",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/icon-spinner-loop.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\icon-spinner-loop.json",
+      "sha256": "6e36ce6ed12c5e1a87a5f8ddc4daa434e68a572789ea792c14dfa9ca6c9c77c7",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/ui/icon-spinner-loop-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\ui\\icon-spinner-loop-poster.png",
+      "sha256": "8a8ecc6e96f91f4397cfa8d2a15058187bb13127106883827bbea92b776ea5e8",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/ui/icon-spinner-loop-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\ui\\icon-spinner-loop-atlas.png",
+      "sha256": "7eb582e4b008f8b0b7245aa6a9a177722028af32c3c2d689bacfd7ef1a58dafd",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/input-error-motion.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\input-error-motion.json",
+      "sha256": "a1a77bd8f622fdfc264f438757719cf73435d05dbf47b4bae7aee7e85f3b8f79",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/ui/input-error-motion-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\ui\\input-error-motion-poster.png",
+      "sha256": "d0d971430632eb09b2a2757c1109ffd448584b68a26d7688b1a82add3803b198",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/ui/input-error-motion-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\ui\\input-error-motion-atlas.png",
+      "sha256": "aaa694ca95930c102f8aec6b640008a25d4d93af14d2c1d725f55f132c7c4f4d",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/input-focus-motion.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\input-focus-motion.json",
+      "sha256": "b03119fe7938e1bdd9859ba9d78a6221d2b478fbe8e44cc7b150de52c1ac8fb7",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/ui/input-focus-motion-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\ui\\input-focus-motion-poster.png",
+      "sha256": "79eb2588401bc28002967758fb5e001f15da3a49190108312c0ed3508de4f46f",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/ui/input-focus-motion-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\ui\\input-focus-motion-atlas.png",
+      "sha256": "16016195ef97944a85ab77e6c0ea45afbbf66afc3794f8585cd6c4953fa7c6c3",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/prop-archive-book-record.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\prop-archive-book-record.json",
+      "sha256": "4b6b197a4ab44c84d7565532cff6e336149e1e3f16b1a9b0406cdf47393649cf",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/effects/prop-archive-book-record-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\effects\\prop-archive-book-record-poster.png",
+      "sha256": "427d3376007fb52d11e26714313720d6ed1fdf747cc5b27e910439332f4cb57d",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/effects/prop-archive-book-record-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\effects\\prop-archive-book-record-atlas.png",
+      "sha256": "ea49b7c3c73556a679ec13e9d840d2bc31b149f420f609ce7ccec25b83efe17f",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/prop-nozzle-stop.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\prop-nozzle-stop.json",
+      "sha256": "bda94734b36f01a1241a57efa504095f5b8f57af1bf10b066f851961492512b9",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/prop-nozzle-stop-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\prop-nozzle-stop-poster.png",
+      "sha256": "a027013205d80720a8cad30c53ffba6e0659b31d6cb1486b3e66a63b0460f0a0",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/prop-nozzle-stop-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\prop-nozzle-stop-atlas.png",
+      "sha256": "989ba277bca40ae2c5733f70de429e78e3cef49b6295c1b9f35a364c2c5c1b5c",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/prop-nozzle-water-one.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\prop-nozzle-water-one.json",
+      "sha256": "e94c93a5ad5bdf2352209ad76a203d4f6f1fadbc813595b629dc0dac70daba77",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/prop-nozzle-water-one-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\prop-nozzle-water-one-poster.png",
+      "sha256": "51644164add1b8d10381a8937bab63b2449eb0f52fb8ac555ff601c001bd7406",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/prop-nozzle-water-one-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\prop-nozzle-water-one-atlas.png",
+      "sha256": "72d70624bdd11cd0dddd6f83ce735623b286886bc886efd819cc9b334496cf1d",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/prop-nozzle-water-two.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\prop-nozzle-water-two.json",
+      "sha256": "0e927a854f0deb43e87b994aacf7a20557863ef2f566b356febddc980c4510ce",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/prop-nozzle-water-two-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\prop-nozzle-water-two-poster.png",
+      "sha256": "51644164add1b8d10381a8937bab63b2449eb0f52fb8ac555ff601c001bd7406",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/prop-nozzle-water-two-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\prop-nozzle-water-two-atlas.png",
+      "sha256": "8bea5a105ecfbf3d810a6bbba4bdd278ff20e2717f7fee5f6f71b7848d839c79",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/prop-pump-fault.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\prop-pump-fault.json",
+      "sha256": "b0a072af22493850101f6313c567c5124e1ae2f6d76f182dc351f08c7fb777a2",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/prop-pump-fault-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\prop-pump-fault-poster.png",
+      "sha256": "7798971233479d93604c5ea9700e4e5d4d26083e94dd9c43b78250ad4a6b4e67",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/prop-pump-fault-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\prop-pump-fault-atlas.png",
+      "sha256": "9fe7f060ade2a11af7c2631e6baf39cb7e6b8b901568cb5ebf83c0f3f2754293",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/prop-pump-standby.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\prop-pump-standby.json",
+      "sha256": "619325324338652c2a9347d510436443ba052b295ac455a5ca868d38af49b5a5",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/prop-pump-standby-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\prop-pump-standby-poster.png",
+      "sha256": "5f1e8cd5597d127cefa099b16b8e18e584491d0a68d5eb00200fb3d59a04082f",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/prop-pump-standby-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\prop-pump-standby-atlas.png",
+      "sha256": "4f28ab9db726db4b590c3c85804250943a495d76a09f01d3d84f98a7e4e0bef2",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/prop-pump-start.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\prop-pump-start.json",
+      "sha256": "09e1260cbef0a78c1ca5586e9533092fe5329793f81c6cb172a65f4f53a7a179",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/prop-pump-start-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\prop-pump-start-poster.png",
+      "sha256": "7798971233479d93604c5ea9700e4e5d4d26083e94dd9c43b78250ad4a6b4e67",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/prop-pump-start-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\prop-pump-start-atlas.png",
+      "sha256": "888c2fc5d21fa64f836e6a9d0b921226818acdd9665256e92a8fe7bf6afa9827",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/prop-pump-stop.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\prop-pump-stop.json",
+      "sha256": "1e620d8ad48a0c4c18995daecd4757cee2d11f5de2de98e0139ff7d6ab5a35b7",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/prop-pump-stop-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\prop-pump-stop-poster.png",
+      "sha256": "3bf0c39ead3dc94da6b21d60bff28d2b2966e86b6be32fcac6c206f35681287b",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/prop-pump-stop-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\prop-pump-stop-atlas.png",
+      "sha256": "97ea140f44da111cef73c21b803659d77a289c147152ed0ae724ac27d25372fc",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/prop-pump-working.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\prop-pump-working.json",
+      "sha256": "99ef5f8a6e55b8fb3ffcd811a62f5005f71558ea5c68c01dd2f34369dfdba1c6",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/prop-pump-working-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\prop-pump-working-poster.png",
+      "sha256": "3bf0c39ead3dc94da6b21d60bff28d2b2966e86b6be32fcac6c206f35681287b",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/prop-pump-working-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\prop-pump-working-atlas.png",
+      "sha256": "bd3e3a0e394dce89b2be1d574e1886eb4dff54f3360d082b348b2fca5b9f29d4",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/soil-light-thirst-error-glow.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\soil-light-thirst-error-glow.json",
+      "sha256": "673f281e89f285f72924f014726024608ab40454c8f00d83e6847ead32128a3e",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-light-thirst-error-glow-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-light-thirst-error-glow-poster.png",
+      "sha256": "034a6840865e0f5971f4e8e3dbc3f36fc7e7df01014a48c7b9dd3ce06c445ae7",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-light-thirst-error-glow-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-light-thirst-error-glow-atlas.png",
+      "sha256": "f8cb3caeb07946d64f834b67cb98943fe75a996f32a641bb38cd55d9e58828d6",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/soil-light-thirst-focus-glow.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\soil-light-thirst-focus-glow.json",
+      "sha256": "9cde70da7b7d8d0c56447acdb991a24e2bb0706ca86fb368f01e1b0ffc39fbb3",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-light-thirst-focus-glow-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-light-thirst-focus-glow-poster.png",
+      "sha256": "d5d1c15b64eb21b59158c78dd8deef7b3576c1936a7c6ac481bc05479ac1a888",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-light-thirst-focus-glow-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-light-thirst-focus-glow-atlas.png",
+      "sha256": "3369a9ea55c63968e5423c039afdd7a1b161454d4eb9aaecffd7b06264e0bb66",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/soil-light-thirst-selected-glow.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\soil-light-thirst-selected-glow.json",
+      "sha256": "d69450e9dcd86c33d80f54e3e31b647560bbc22dc0ee09a413c110a264023c52",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-light-thirst-selected-glow-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-light-thirst-selected-glow-poster.png",
+      "sha256": "ea9daa36bb163eb9aacb3500d21d72f020c6f817263507b19d8803276b9ec220",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-light-thirst-selected-glow-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-light-thirst-selected-glow-atlas.png",
+      "sha256": "617fe65aafaae03e74fe33e1429746a33a0eefce408ae1bd158a414909886197",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/soil-receive-water.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\soil-receive-water.json",
+      "sha256": "1ef616967a0fbeae7e9ec961e5268a2f2f0df50ebeb178d8af2cbb9e6b3b284b",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-receive-water-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-receive-water-poster.png",
+      "sha256": "394832dda1c3d79b29ea3263966aed286ababa1f02bde57a3a72f0a9d8c81f62",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-receive-water-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-receive-water-atlas.png",
+      "sha256": "a9b8c0db3bcd2876d3d600f0f97da5dce692a008cd68d1f37e54025d7e3aa45c",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/soil-severe-dry-error-glow.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\soil-severe-dry-error-glow.json",
+      "sha256": "96fe0d3a7b325d03c3b1a35f07db4f01eb4f9cd1f71c09b222bb33cc55b24c3e",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-severe-dry-error-glow-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-severe-dry-error-glow-poster.png",
+      "sha256": "83515b44549e90cca91bc753b359603c6bbd50869aea6967c2d0b7e743f5f00f",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-severe-dry-error-glow-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-severe-dry-error-glow-atlas.png",
+      "sha256": "81f13fa84d96a83b600e46a33105b9b2e364f5fb837ab97b6909dd443ef01c0f",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/soil-severe-dry-focus-glow.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\soil-severe-dry-focus-glow.json",
+      "sha256": "c13c4f4faa72737aebb7f7f9028f0ea4d22a2eadba5a8dadd485fdc7f9df464e",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-severe-dry-focus-glow-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-severe-dry-focus-glow-poster.png",
+      "sha256": "a778d87d3c92e132f52d77c86e3e8d52fb6342175878bb8777a5a08a515a27d3",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-severe-dry-focus-glow-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-severe-dry-focus-glow-atlas.png",
+      "sha256": "a81b52c916e05508c3186e44c47eee8e67bbb7ec08acb27a42578467d31121bf",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/soil-severe-dry-selected-glow.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\soil-severe-dry-selected-glow.json",
+      "sha256": "7bca874ffdaa6cabdf8cf4461b95be85a9a4e5b3450318ada5e380d3c3a75578",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-severe-dry-selected-glow-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-severe-dry-selected-glow-poster.png",
+      "sha256": "e42ad7beedf2ebfa17620169fa0c0ba72b610f915f5c588b506aec244ae860d3",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-severe-dry-selected-glow-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-severe-dry-selected-glow-atlas.png",
+      "sha256": "d4b6fdde870f754adc143caca22f803b461a48123cd4aaddc704511672f44088",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/soil-target-met-ambient.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\soil-target-met-ambient.json",
+      "sha256": "c7a418d924017006fb03eb01d886ff8300cc411cd724582bb684e04805b233b1",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-target-met-ambient-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-target-met-ambient-poster.png",
+      "sha256": "872664841dd3dd34d4b4fd732801f448c8f65558ecb6d18929ae48f8aee1c885",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-target-met-ambient-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-target-met-ambient-atlas.png",
+      "sha256": "1daa4163998004bdfa3bc65fa01def122c27e433a8cd1ebba912b3ef5b262da4",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/soil-target-met-error-glow.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\soil-target-met-error-glow.json",
+      "sha256": "4d1880bdbe43a1e3402d4db99462e3f23a3dec504446f7bd02e6aed05f720c81",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-target-met-error-glow-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-target-met-error-glow-poster.png",
+      "sha256": "6f8038e62ce897c8c0009ee0409bf11d70ec0a93562b5cda89944cb7dde71931",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-target-met-error-glow-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-target-met-error-glow-atlas.png",
+      "sha256": "ad36ae0bef7c2d5328d8def94e239ec9d9858bbc54e88c8afdfc7414b4436de6",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/soil-target-met-focus-glow.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\soil-target-met-focus-glow.json",
+      "sha256": "820673a64c49368d199cb557700330a0884ef5afb15b71de0e6332babcfb3d62",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-target-met-focus-glow-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-target-met-focus-glow-poster.png",
+      "sha256": "b7b7e096d6b9298bf5e67cbd0eac4c2bf5588e0641d768c87c837e7cd4a6148e",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-target-met-focus-glow-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-target-met-focus-glow-atlas.png",
+      "sha256": "afdbb16dbdb788bb946af2febc54329388fcab7fd930e44e0f6f2b8b47c1e3a9",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/soil-target-met-selected-glow.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\soil-target-met-selected-glow.json",
+      "sha256": "42a4d625173768e3c61b34f8c6259d1d210b8d0f149e175855440d37d604be6f",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-target-met-selected-glow-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-target-met-selected-glow-poster.png",
+      "sha256": "87dac465e642c3619bc47a2ee68d148ae8a78f378223f3f2da5b7bed66836943",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-target-met-selected-glow-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-target-met-selected-glow-atlas.png",
+      "sha256": "50f7d31da37a705d7e0a45eb4d8804ab42cc9467f55385ad62e7d3b29ee49f43",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/soil-waterlogged-ambient.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\soil-waterlogged-ambient.json",
+      "sha256": "00f2342f406baff35bcfa06223dc1606fcd653d0b467092c30759391fb1f8511",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-waterlogged-ambient-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-waterlogged-ambient-poster.png",
+      "sha256": "6642c153b0a661f62cac45c2f93ab6dc6f597a6da40d285294773d0f8271ee80",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-waterlogged-ambient-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-waterlogged-ambient-atlas.png",
+      "sha256": "b3b84753abf27c79545d78b2b131dfa3dba1759c37001d1acb712957d76d6fa7",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/soil-waterlogged-error-glow.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\soil-waterlogged-error-glow.json",
+      "sha256": "abb4d34af8c6ca76ef1625cfc2f5a866fdbdb21bfacb493fa494a2c9c5feefd9",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-waterlogged-error-glow-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-waterlogged-error-glow-poster.png",
+      "sha256": "295feb48cc5f16a4722d4d5f64b1cf5c0cf90dd789245cc6029309c51cbdc9a3",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-waterlogged-error-glow-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-waterlogged-error-glow-atlas.png",
+      "sha256": "5160b575e17c2172bb46168906c807eec32779f775cbe219c80878f02ddf0c0d",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/soil-waterlogged-focus-glow.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\soil-waterlogged-focus-glow.json",
+      "sha256": "1209d297fb2cf13a26e257e8b375d9efad19c18efca9ed22741fb1c26b92610f",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-waterlogged-focus-glow-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-waterlogged-focus-glow-poster.png",
+      "sha256": "2ffa567067a97514d24043770d8cb4b1f2a85af18128d9ed91d0009f9b53cf84",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-waterlogged-focus-glow-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-waterlogged-focus-glow-atlas.png",
+      "sha256": "0196b697324b0fe053c3923ba5edfbc60428d8de9a2cea782a8e1eb3a4e55e7d",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/soil-waterlogged-selected-glow.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\soil-waterlogged-selected-glow.json",
+      "sha256": "53bd7af2d7f8956cf641efa1df333542039460aeb89e8e8d3a22a000db7b3cc3",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-waterlogged-selected-glow-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-waterlogged-selected-glow-poster.png",
+      "sha256": "a788a32a9acd7f061c1c5497f0c275b6fa6d6e29d50342ca63fb3236b5bdb60e",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/soil/soil-waterlogged-selected-glow-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\soil\\soil-waterlogged-selected-glow-atlas.png",
+      "sha256": "9c339983f0e635ba20f1096505c881fd994cc81a6e4bffce28608344eb9346ff",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/tool-adaptive-fault.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\tool-adaptive-fault.json",
+      "sha256": "bc948907ddbfc6483d9efb407ecb80db13aa52367087510e3ff843c6ea657fe2",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/tool-adaptive-fault-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\tool-adaptive-fault-poster.png",
+      "sha256": "dfe436858588696358d5d5227568d2db9aa681c49282a2eca8ea8adc24383ef4",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/tool-adaptive-fault-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\tool-adaptive-fault-atlas.png",
+      "sha256": "b7054461c3f7b022b723495ced70bd1a3e250f2c825a277b7e8fc06dcd2b5855",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/tool-adaptive-scan.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\tool-adaptive-scan.json",
+      "sha256": "17c5cc7730813df75778a80c8240c23eb64f7c112cc5ef814d9c452fd2ceb73c",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/tool-adaptive-scan-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\tool-adaptive-scan-poster.png",
+      "sha256": "704b8754fd8818dd9e31fc25dbd7fce8459d1778807822d10a78a9ed1d1dab85",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/tool-adaptive-scan-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\tool-adaptive-scan-atlas.png",
+      "sha256": "4904e98c03f813e79729266abab80f7e2d48eec7539e69e7270bfcf6b5e21ade",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/tool-adaptive-standby.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\tool-adaptive-standby.json",
+      "sha256": "720da9b1975aa79efc975d754af49d4febb71b49ed02c1086caaaa6a04557758",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/tool-adaptive-standby-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\tool-adaptive-standby-poster.png",
+      "sha256": "a0a4416cf9c48c7d5190e0408be7846ead2c54a96c374d304976e496069c7b4e",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/tool-adaptive-standby-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\tool-adaptive-standby-atlas.png",
+      "sha256": "f1d20402a8be79d2118acea492b0d304fcb5d2022d3d20641d23e9048be377bc",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/tool-adaptive-stop.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\tool-adaptive-stop.json",
+      "sha256": "333826c169400d8875bf5681ba00abd62484b1880af9ad5d882fcefa0e0d015e",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/tool-adaptive-stop-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\tool-adaptive-stop-poster.png",
+      "sha256": "dfe436858588696358d5d5227568d2db9aa681c49282a2eca8ea8adc24383ef4",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/tool-adaptive-stop-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\tool-adaptive-stop-atlas.png",
+      "sha256": "92839c976967b5034895698b4fc4a3313460458aa081e7b5a2038e1228c88385",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/tool-adaptive-water-one.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\tool-adaptive-water-one.json",
+      "sha256": "58b7aa456da6e2c702a1be266bc98c75a747eb88c5c5f86a23802c30bd587895",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/tool-adaptive-water-one-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\tool-adaptive-water-one-poster.png",
+      "sha256": "bbd8b0aa99cdf1cf6a94859be7c33b17bd7137bbaf74ee556a931acc77a4c275",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/tool-adaptive-water-one-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\tool-adaptive-water-one-atlas.png",
+      "sha256": "0e7f7e2b1ae2ab38f030bcb50432eb034dae5d3cdf3a740598a00281a3bcabf4",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/tool-adaptive-water-two.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\tool-adaptive-water-two.json",
+      "sha256": "4649ea89a39dd9fdb2d1dbb5df484753ef601763adf77a3b850a75773c3dab02",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/tool-adaptive-water-two-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\tool-adaptive-water-two-poster.png",
+      "sha256": "bbd8b0aa99cdf1cf6a94859be7c33b17bd7137bbaf74ee556a931acc77a4c275",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/equipment/tool-adaptive-water-two-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\equipment\\tool-adaptive-water-two-atlas.png",
+      "sha256": "c4971ddbd165ea44d62ddf71f5e328d2c2d4d2b74a3267e9bd95261ab8924be2",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/metadata/ui-four-star-seal-unlock.json",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\metadata\\ui-four-star-seal-unlock.json",
+      "sha256": "1791a9eaea9a6d7a33da4af333423f039e9c9fdad7b8ea4de3a948af49071e9a",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/effects/ui-four-star-seal-unlock-poster.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\effects\\ui-four-star-seal-unlock-poster.png",
+      "sha256": "782d61cf5e910a578a71f711a6d95d4a3aecdd24f6caf6d4f8a17b9a6e150c26",
+      "equal": true
+    },
+    {
+      "path": "assets/art/redesign/crop_adaptive/v2/motion/effects/ui-four-star-seal-unlock-atlas.png",
+      "source": "D:\\WeChat Files\\xwechat_files\\wxid_go81hts4yiiu22_4547\\msg\\file\\2026-09\\动态素材包_V1\\effects\\ui-four-star-seal-unlock-atlas.png",
+      "sha256": "9e0df7286ac4b5c4054c9f0c334f7dd4603462bcd599be7a7f1776b69a0786c6",
+      "equal": true
+    }
+  ],
+  "clips": [
+    {
+      "id": "B01-farm-background-ambient",
+      "trigger": "场景可见且未暂停时循环；切出页面暂停",
+      "durationMs": 5976,
+      "loop": true
+    },
+    {
+      "id": "B02-workshop-background-ambient",
+      "trigger": "场景可见且未暂停时循环；切出页面暂停",
+      "durationMs": 5976,
+      "loop": true
+    },
+    {
+      "id": "B03-start-background-ambient",
+      "trigger": "场景可见且未暂停时循环；切出页面暂停",
+      "durationMs": 5976,
+      "loop": true
+    },
+    {
+      "id": "B04-workshop-exterior-background-ambient",
+      "trigger": "场景可见且未暂停时循环；切出页面暂停",
+      "durationMs": 5976,
+      "loop": true
+    },
+    {
+      "id": "B05-bug-investigation-background-ambient",
+      "trigger": "场景可见且未暂停时循环；切出页面暂停",
+      "durationMs": 5976,
+      "loop": true
+    },
+    {
+      "id": "B06-archive-background-ambient",
+      "trigger": "场景可见且未暂停时循环；切出页面暂停",
+      "durationMs": 5976,
+      "loop": true
+    },
+    {
+      "id": "button-error-motion",
+      "trigger": "操作不通过；disabled 状态不播放，动作不延迟点击处理",
+      "durationMs": 396,
+      "loop": false
+    },
+    {
+      "id": "button-focus-motion",
+      "trigger": "键盘聚焦；disabled 状态不播放",
+      "durationMs": 1992,
+      "loop": true
+    },
+    {
+      "id": "button-hover-motion",
+      "trigger": "按钮悬停；disabled 状态不播放",
+      "durationMs": 1992,
+      "loop": true
+    },
+    {
+      "id": "button-pressed-motion",
+      "trigger": "按钮按下；disabled 状态不播放，动作不延迟点击处理",
+      "durationMs": 150,
+      "loop": false
+    },
+    {
+      "id": "button-success-motion",
+      "trigger": "操作成功；disabled 状态不播放，动作不延迟点击处理",
+      "durationMs": 594,
+      "loop": false
+    },
+    {
+      "id": "char-bug-idle",
+      "trigger": "角色可见、未说话、未执行动作",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "char-bug-success",
+      "trigger": "收到确认成功事件后播放一次；不可用动画自行宣布通关",
+      "durationMs": 1992,
+      "loop": false
+    },
+    {
+      "id": "char-bug-talk",
+      "trigger": "该角色正在播放台词／语音；结束后切待机",
+      "durationMs": 1500,
+      "loop": true
+    },
+    {
+      "id": "char-bug-thinking",
+      "trigger": "思考、等输入或检查数据，不能当作报错",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "char-dingdang-idle",
+      "trigger": "角色可见、未说话、未执行动作",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "char-dingdang-success",
+      "trigger": "收到确认成功事件后播放一次；不可用动画自行宣布通关",
+      "durationMs": 1992,
+      "loop": false
+    },
+    {
+      "id": "char-dingdang-talk",
+      "trigger": "该角色正在播放台词／语音；结束后切待机",
+      "durationMs": 1500,
+      "loop": true
+    },
+    {
+      "id": "char-dingdang-thinking",
+      "trigger": "思考、等输入或检查数据，不能当作报错",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "char-player-idle",
+      "trigger": "角色可见、未说话、未执行动作",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "char-player-recover",
+      "trigger": "收到具体失败／反例；完成后转思考，不循环表示失败",
+      "durationMs": 1992,
+      "loop": false
+    },
+    {
+      "id": "char-player-success",
+      "trigger": "收到确认成功事件后播放一次；不可用动画自行宣布通关",
+      "durationMs": 1992,
+      "loop": false
+    },
+    {
+      "id": "char-player-talk",
+      "trigger": "该角色正在播放台词／语音；结束后切待机",
+      "durationMs": 1500,
+      "loop": true
+    },
+    {
+      "id": "char-player-thinking",
+      "trigger": "思考、等输入或检查数据，不能当作报错",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "char-player-write",
+      "trigger": "学生在代码输入区编辑时",
+      "durationMs": 2000,
+      "loop": true
+    },
+    {
+      "id": "char-shushu-idle",
+      "trigger": "角色可见、未说话、未执行动作",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "char-shushu-success",
+      "trigger": "收到确认成功事件后播放一次；不可用动画自行宣布通关",
+      "durationMs": 1992,
+      "loop": false
+    },
+    {
+      "id": "char-shushu-talk",
+      "trigger": "该角色正在播放台词／语音；结束后切待机",
+      "durationMs": 1500,
+      "loop": true
+    },
+    {
+      "id": "char-shushu-thinking",
+      "trigger": "思考、等输入或检查数据，不能当作报错",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "char-walnut-idle",
+      "trigger": "角色可见、未说话、未执行动作",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "char-walnut-read",
+      "trigger": "当前土地进入读取阶段",
+      "durationMs": 2000,
+      "loop": true
+    },
+    {
+      "id": "char-walnut-recover",
+      "trigger": "收到具体失败／反例；完成后转思考，不循环表示失败",
+      "durationMs": 1992,
+      "loop": false
+    },
+    {
+      "id": "char-walnut-success",
+      "trigger": "收到确认成功事件后播放一次；不可用动画自行宣布通关",
+      "durationMs": 1992,
+      "loop": false
+    },
+    {
+      "id": "char-walnut-talk",
+      "trigger": "该角色正在播放台词／语音；结束后切待机",
+      "durationMs": 1500,
+      "loop": true
+    },
+    {
+      "id": "char-walnut-thinking",
+      "trigger": "思考、等输入或检查数据，不能当作报错",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "char-yaya-idle",
+      "trigger": "角色可见、未说话、未执行动作",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "char-yaya-success",
+      "trigger": "收到确认成功事件后播放一次；不可用动画自行宣布通关",
+      "durationMs": 1992,
+      "loop": false
+    },
+    {
+      "id": "char-yaya-talk",
+      "trigger": "该角色正在播放台词／语音；结束后切待机",
+      "durationMs": 1500,
+      "loop": true
+    },
+    {
+      "id": "char-yaya-thinking",
+      "trigger": "思考、等输入或检查数据，不能当作报错",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "crop-carrot-light-thirst-sway",
+      "trigger": "对应湿度状态，循环；8 块土地错开起播时间",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "crop-carrot-receive-water",
+      "trigger": "该地块实际应用浇水动作；不能自行变成达标",
+      "durationMs": 1494,
+      "loop": false
+    },
+    {
+      "id": "crop-carrot-severe-dry-sway",
+      "trigger": "对应湿度状态，循环；8 块土地错开起播时间",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "crop-carrot-target-met-sway",
+      "trigger": "对应湿度状态，循环；8 块土地错开起播时间",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "crop-carrot-waterlogged-sway",
+      "trigger": "对应湿度状态，循环；8 块土地错开起播时间",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "crop-corn-light-thirst-sway",
+      "trigger": "对应湿度状态，循环；8 块土地错开起播时间",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "crop-corn-receive-water",
+      "trigger": "该地块实际应用浇水动作；不能自行变成达标",
+      "durationMs": 1494,
+      "loop": false
+    },
+    {
+      "id": "crop-corn-severe-dry-sway",
+      "trigger": "对应湿度状态，循环；8 块土地错开起播时间",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "crop-corn-target-met-sway",
+      "trigger": "对应湿度状态，循环；8 块土地错开起播时间",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "crop-corn-waterlogged-sway",
+      "trigger": "对应湿度状态，循环；8 块土地错开起播时间",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "crop-potato-light-thirst-sway",
+      "trigger": "对应湿度状态，循环；8 块土地错开起播时间",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "crop-potato-receive-water",
+      "trigger": "该地块实际应用浇水动作；不能自行变成达标",
+      "durationMs": 1494,
+      "loop": false
+    },
+    {
+      "id": "crop-potato-severe-dry-sway",
+      "trigger": "对应湿度状态，循环；8 块土地错开起播时间",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "crop-potato-target-met-sway",
+      "trigger": "对应湿度状态，循环；8 块土地错开起播时间",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "crop-potato-waterlogged-sway",
+      "trigger": "对应湿度状态，循环；8 块土地错开起播时间",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "crop-tomato-light-thirst-sway",
+      "trigger": "对应湿度状态，循环；8 块土地错开起播时间",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "crop-tomato-receive-water",
+      "trigger": "该地块实际应用浇水动作；不能自行变成达标",
+      "durationMs": 1494,
+      "loop": false
+    },
+    {
+      "id": "crop-tomato-severe-dry-sway",
+      "trigger": "对应湿度状态，循环；8 块土地错开起播时间",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "crop-tomato-target-met-sway",
+      "trigger": "对应湿度状态，循环；8 块土地错开起播时间",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "crop-tomato-waterlogged-sway",
+      "trigger": "对应湿度状态，循环；8 块土地错开起播时间",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "fx-celebrate-burst",
+      "trigger": "庆祝一次",
+      "durationMs": 1992,
+      "loop": false
+    },
+    {
+      "id": "fx-puddle-ripple",
+      "trigger": "积水微波",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "fx-splash-impact",
+      "trigger": "水花落地",
+      "durationMs": 1494,
+      "loop": false
+    },
+    {
+      "id": "fx-water-one-flow",
+      "trigger": "水流 1 份",
+      "durationMs": 1992,
+      "loop": false
+    },
+    {
+      "id": "fx-water-two-flow",
+      "trigger": "水流 2 份",
+      "durationMs": 3984,
+      "loop": false
+    },
+    {
+      "id": "icon-spinner-loop",
+      "trigger": "处理中",
+      "durationMs": 1992,
+      "loop": true
+    },
+    {
+      "id": "input-error-motion",
+      "trigger": "输入错误；disabled 状态不播放，动作不延迟点击处理",
+      "durationMs": 396,
+      "loop": false
+    },
+    {
+      "id": "input-focus-motion",
+      "trigger": "输入框聚焦；disabled 状态不播放",
+      "durationMs": 1992,
+      "loop": true
+    },
+    {
+      "id": "prop-archive-book-record",
+      "trigger": "成长归档",
+      "durationMs": 2490,
+      "loop": false
+    },
+    {
+      "id": "prop-nozzle-stop",
+      "trigger": "关闭喷头",
+      "durationMs": 1494,
+      "loop": false
+    },
+    {
+      "id": "prop-nozzle-water-one",
+      "trigger": "喷 1 份",
+      "durationMs": 1992,
+      "loop": false
+    },
+    {
+      "id": "prop-nozzle-water-two",
+      "trigger": "喷 2 份",
+      "durationMs": 3984,
+      "loop": false
+    },
+    {
+      "id": "prop-pump-fault",
+      "trigger": "设备停机／动作被拒绝",
+      "durationMs": 1992,
+      "loop": false
+    },
+    {
+      "id": "prop-pump-standby",
+      "trigger": "设备状态变化",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "prop-pump-start",
+      "trigger": "设备状态变化",
+      "durationMs": 1494,
+      "loop": false
+    },
+    {
+      "id": "prop-pump-stop",
+      "trigger": "设备状态变化",
+      "durationMs": 1494,
+      "loop": false
+    },
+    {
+      "id": "prop-pump-working",
+      "trigger": "已开始执行合法浇水动作",
+      "durationMs": 1992,
+      "loop": true
+    },
+    {
+      "id": "soil-light-thirst-error-glow",
+      "trigger": "一次明确的地块错误反馈",
+      "durationMs": 1494,
+      "loop": false
+    },
+    {
+      "id": "soil-light-thirst-focus-glow",
+      "trigger": "键盘焦点落在该地块",
+      "durationMs": 2490,
+      "loop": true
+    },
+    {
+      "id": "soil-light-thirst-selected-glow",
+      "trigger": "当前选择地块",
+      "durationMs": 2490,
+      "loop": true
+    },
+    {
+      "id": "soil-receive-water",
+      "trigger": "浇水落点",
+      "durationMs": 1494,
+      "loop": false
+    },
+    {
+      "id": "soil-severe-dry-error-glow",
+      "trigger": "一次明确的地块错误反馈",
+      "durationMs": 1494,
+      "loop": false
+    },
+    {
+      "id": "soil-severe-dry-focus-glow",
+      "trigger": "键盘焦点落在该地块",
+      "durationMs": 2490,
+      "loop": true
+    },
+    {
+      "id": "soil-severe-dry-selected-glow",
+      "trigger": "当前选择地块",
+      "durationMs": 2490,
+      "loop": true
+    },
+    {
+      "id": "soil-target-met-ambient",
+      "trigger": "湿润稳定",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "soil-target-met-error-glow",
+      "trigger": "一次明确的地块错误反馈",
+      "durationMs": 1494,
+      "loop": false
+    },
+    {
+      "id": "soil-target-met-focus-glow",
+      "trigger": "键盘焦点落在该地块",
+      "durationMs": 2490,
+      "loop": true
+    },
+    {
+      "id": "soil-target-met-selected-glow",
+      "trigger": "当前选择地块",
+      "durationMs": 2490,
+      "loop": true
+    },
+    {
+      "id": "soil-waterlogged-ambient",
+      "trigger": "过湿积水",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "soil-waterlogged-error-glow",
+      "trigger": "一次明确的地块错误反馈",
+      "durationMs": 1494,
+      "loop": false
+    },
+    {
+      "id": "soil-waterlogged-focus-glow",
+      "trigger": "键盘焦点落在该地块",
+      "durationMs": 2490,
+      "loop": true
+    },
+    {
+      "id": "soil-waterlogged-selected-glow",
+      "trigger": "当前选择地块",
+      "durationMs": 2490,
+      "loop": true
+    },
+    {
+      "id": "tool-adaptive-fault",
+      "trigger": "错误锁止",
+      "durationMs": 1992,
+      "loop": false
+    },
+    {
+      "id": "tool-adaptive-scan",
+      "trigger": "读取目标",
+      "durationMs": 1992,
+      "loop": true
+    },
+    {
+      "id": "tool-adaptive-standby",
+      "trigger": "待机",
+      "durationMs": 2988,
+      "loop": true
+    },
+    {
+      "id": "tool-adaptive-stop",
+      "trigger": "停机",
+      "durationMs": 1494,
+      "loop": false
+    },
+    {
+      "id": "tool-adaptive-water-one",
+      "trigger": "合法 WATER 动作的 1 份表现，完成事件由逻辑发出",
+      "durationMs": 1992,
+      "loop": false
+    },
+    {
+      "id": "tool-adaptive-water-two",
+      "trigger": "合法 WATER 动作的 2 份表现，完成事件由逻辑发出",
+      "durationMs": 3984,
+      "loop": false
+    },
+    {
+      "id": "ui-four-star-seal-unlock",
+      "trigger": "技能解锁",
+      "durationMs": 2490,
+      "loop": false
+    }
+  ],
+  "pages": [
+    {
+      "view": "S01",
+      "state": "default",
+      "assetCount": 7,
+      "referencesValid": true
+    },
+    {
+      "view": "S01",
+      "state": "resume",
+      "assetCount": 7,
+      "referencesValid": true
+    },
+    {
+      "view": "S01",
+      "state": "entering",
+      "assetCount": 7,
+      "referencesValid": true
+    },
+    {
+      "view": "S02",
+      "state": "typing",
+      "assetCount": 45,
+      "referencesValid": true
+    },
+    {
+      "view": "S02",
+      "state": "default",
+      "assetCount": 45,
+      "referencesValid": true
+    },
+    {
+      "view": "S02",
+      "state": "ready",
+      "assetCount": 42,
+      "referencesValid": true
+    },
+    {
+      "view": "E01",
+      "state": "scan",
+      "assetCount": 43,
+      "referencesValid": true
+    },
+    {
+      "view": "E01",
+      "state": "default",
+      "assetCount": 51,
+      "referencesValid": true
+    },
+    {
+      "view": "E02",
+      "state": "default",
+      "assetCount": 42,
+      "referencesValid": true
+    },
+    {
+      "view": "E02",
+      "state": "selected",
+      "assetCount": 45,
+      "referencesValid": true
+    },
+    {
+      "view": "E02",
+      "state": "wrong",
+      "assetCount": 45,
+      "referencesValid": true
+    },
+    {
+      "view": "E02",
+      "state": "next6",
+      "assetCount": 43,
+      "referencesValid": true
+    },
+    {
+      "view": "E02",
+      "state": "next5",
+      "assetCount": 44,
+      "referencesValid": true
+    },
+    {
+      "view": "E03",
+      "state": "default",
+      "assetCount": 23,
+      "referencesValid": true
+    },
+    {
+      "view": "E03",
+      "state": "locked",
+      "assetCount": 23,
+      "referencesValid": true
+    },
+    {
+      "view": "S03",
+      "state": "typing",
+      "assetCount": 12,
+      "referencesValid": true
+    },
+    {
+      "view": "S03",
+      "state": "default",
+      "assetCount": 12,
+      "referencesValid": true
+    },
+    {
+      "view": "S04",
+      "state": "default",
+      "assetCount": 9,
+      "referencesValid": true
+    },
+    {
+      "view": "S04",
+      "state": "filled",
+      "assetCount": 9,
+      "referencesValid": true
+    },
+    {
+      "view": "S04",
+      "state": "error",
+      "assetCount": 9,
+      "referencesValid": true
+    },
+    {
+      "view": "S04",
+      "state": "checking",
+      "assetCount": 9,
+      "referencesValid": true
+    },
+    {
+      "view": "S04",
+      "state": "success",
+      "assetCount": 9,
+      "referencesValid": true
+    },
+    {
+      "view": "S05",
+      "state": "default",
+      "assetCount": 11,
+      "referencesValid": true
+    },
+    {
+      "view": "S05",
+      "state": "filled",
+      "assetCount": 11,
+      "referencesValid": true
+    },
+    {
+      "view": "S05",
+      "state": "error",
+      "assetCount": 11,
+      "referencesValid": true
+    },
+    {
+      "view": "S05",
+      "state": "checking",
+      "assetCount": 11,
+      "referencesValid": true
+    },
+    {
+      "view": "S05",
+      "state": "success",
+      "assetCount": 11,
+      "referencesValid": true
+    },
+    {
+      "view": "S06",
+      "state": "default",
+      "assetCount": 7,
+      "referencesValid": true
+    },
+    {
+      "view": "S07",
+      "state": "default",
+      "assetCount": 49,
+      "referencesValid": true
+    },
+    {
+      "view": "S07",
+      "state": "closed",
+      "assetCount": 44,
+      "referencesValid": true
+    },
+    {
+      "view": "S07",
+      "state": "dirty",
+      "assetCount": 49,
+      "referencesValid": true
+    },
+    {
+      "view": "S07",
+      "state": "saving",
+      "assetCount": 49,
+      "referencesValid": true
+    },
+    {
+      "view": "S07",
+      "state": "saved",
+      "assetCount": 49,
+      "referencesValid": true
+    },
+    {
+      "view": "S07",
+      "state": "compile-error",
+      "assetCount": 49,
+      "referencesValid": true
+    },
+    {
+      "view": "S07",
+      "state": "conflict",
+      "assetCount": 49,
+      "referencesValid": true
+    },
+    {
+      "view": "S07",
+      "state": "save-failed",
+      "assetCount": 49,
+      "referencesValid": true
+    },
+    {
+      "view": "S07",
+      "state": "accepted",
+      "assetCount": 49,
+      "referencesValid": true
+    },
+    {
+      "view": "S08",
+      "state": "goal",
+      "assetCount": 44,
+      "referencesValid": true
+    },
+    {
+      "view": "S08",
+      "state": "default",
+      "assetCount": 44,
+      "referencesValid": true
+    },
+    {
+      "view": "S08",
+      "state": "l1",
+      "assetCount": 44,
+      "referencesValid": true
+    },
+    {
+      "view": "S08",
+      "state": "l2",
+      "assetCount": 44,
+      "referencesValid": true
+    },
+    {
+      "view": "S08",
+      "state": "l3",
+      "assetCount": 44,
+      "referencesValid": true
+    },
+    {
+      "view": "S09",
+      "state": "default",
+      "assetCount": 42,
+      "referencesValid": true
+    },
+    {
+      "view": "S09",
+      "state": "water1",
+      "assetCount": 46,
+      "referencesValid": true
+    },
+    {
+      "view": "S09",
+      "state": "water2",
+      "assetCount": 45,
+      "referencesValid": true
+    },
+    {
+      "view": "S09",
+      "state": "skip",
+      "assetCount": 45,
+      "referencesValid": true
+    },
+    {
+      "view": "S09",
+      "state": "submitting",
+      "assetCount": 46,
+      "referencesValid": true
+    },
+    {
+      "view": "S09",
+      "state": "building",
+      "assetCount": 46,
+      "referencesValid": true
+    },
+    {
+      "view": "S09",
+      "state": "certified",
+      "assetCount": 45,
+      "referencesValid": true
+    },
+    {
+      "view": "S09",
+      "state": "activating",
+      "assetCount": 46,
+      "referencesValid": true
+    },
+    {
+      "view": "S09",
+      "state": "active",
+      "assetCount": 45,
+      "referencesValid": true
+    },
+    {
+      "view": "S09",
+      "state": "candidate-success",
+      "assetCount": 52,
+      "referencesValid": true
+    },
+    {
+      "view": "S09",
+      "state": "candidate-failed",
+      "assetCount": 52,
+      "referencesValid": true
+    },
+    {
+      "view": "S09",
+      "state": "chain-error",
+      "assetCount": 44,
+      "referencesValid": true
+    },
+    {
+      "view": "S09",
+      "state": "formal-success",
+      "assetCount": 51,
+      "referencesValid": true
+    },
+    {
+      "view": "S09",
+      "state": "formal-failed",
+      "assetCount": 53,
+      "referencesValid": true
+    },
+    {
+      "view": "E08",
+      "state": "default",
+      "assetCount": 52,
+      "referencesValid": true
+    },
+    {
+      "view": "E08",
+      "state": "eligible",
+      "assetCount": 53,
+      "referencesValid": true
+    },
+    {
+      "view": "E04",
+      "state": "speech",
+      "assetCount": 10,
+      "referencesValid": true
+    },
+    {
+      "view": "E04",
+      "state": "default",
+      "assetCount": 7,
+      "referencesValid": true
+    },
+    {
+      "view": "E05",
+      "state": "default",
+      "assetCount": 10,
+      "referencesValid": true
+    },
+    {
+      "view": "E05",
+      "state": "stale",
+      "assetCount": 10,
+      "referencesValid": true
+    },
+    {
+      "view": "E05",
+      "state": "rejected",
+      "assetCount": 52,
+      "referencesValid": true
+    },
+    {
+      "view": "E05",
+      "state": "accepted",
+      "assetCount": 49,
+      "referencesValid": true
+    },
+    {
+      "view": "E05",
+      "state": "closed",
+      "assetCount": 52,
+      "referencesValid": true
+    },
+    {
+      "view": "E09",
+      "state": "default",
+      "assetCount": 54,
+      "referencesValid": true
+    },
+    {
+      "view": "S10",
+      "state": "default",
+      "assetCount": 7,
+      "referencesValid": true
+    },
+    {
+      "view": "S10",
+      "state": "second",
+      "assetCount": 7,
+      "referencesValid": true
+    },
+    {
+      "view": "S10",
+      "state": "formal",
+      "assetCount": 7,
+      "referencesValid": true
+    },
+    {
+      "view": "E06",
+      "state": "default",
+      "assetCount": 6,
+      "referencesValid": true
+    },
+    {
+      "view": "E06",
+      "state": "assisted",
+      "assetCount": 6,
+      "referencesValid": true
+    },
+    {
+      "view": "E10",
+      "state": "default",
+      "assetCount": 26,
+      "referencesValid": true
+    },
+    {
+      "view": "E07",
+      "state": "default",
+      "assetCount": 48,
+      "referencesValid": true
+    },
+    {
+      "view": "E11",
+      "state": "default",
+      "assetCount": 47,
+      "referencesValid": true
+    }
+  ],
+  "failures": [],
+  "note": "Reference/file validation is separate from runtime behavior and visual acceptance."
+}

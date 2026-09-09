@@ -22,6 +22,7 @@ class FakeStore:
 	var flow_state := 1
 	var active_skill_tuple: Dictionary = {}
 	var objective_result: Dictionary = {}
+	var last_interaction_sequence := 1
 
 	func mark_draft_dirty(source: String) -> void:
 		local_source = source
@@ -106,12 +107,40 @@ func _initialize() -> void:
 	var bridge := BridgeScript.new()
 	root.add_child(bridge)
 	await process_frame
+	var story_overlay := level.get_node("StoryDialogueOverlay") as StoryDialogueOverlay
+	story_overlay.skip_sequence()
+	await process_frame
 	store.local_source = CropAdaptiveWateringDemo.STARTER_CODE
+	var audio_cues: Array[StringName] = []
+	level.sfx.cue_played.connect(func(cue: StringName) -> void: audio_cues.append(cue))
 	bridge.configure(store, session, level)
+	bridge.configure(store, session, level)
+	var historical_interactions: Array[Dictionary] = [{
+		"interaction_id": "interaction_historical_0001",
+		"sequence": 1,
+		"role": "teaching_agent",
+		"response_type": "hint",
+		"hint_level": 1,
+		"question": null,
+		"feedback": {"message": "这是已经展示过的恢复反馈。"},
+	}]
+	session.interactions_recovered.emit(historical_interactions)
 	var activation: Dictionary = bridge.activate_initial_projection()
 	if not activation.get("ok", false):
 		failures.append("权威恢复完成后必须打开作物适配关卡的首次投影门禁。")
+	var presenter := level.get_node("AgentInteractionPresenter") as AgentInteractionPresenter
+	var bug_legion := level.get_node("BugLegion2D") as BugLegion2D
+	var recovered_projection: Dictionary = level.formal_projection_state()
+	if (
+		presenter.is_presenting()
+		or presenter.pending_count() != 0
+		or bug_legion.is_legion_visible()
+		or recovered_projection.get("interaction") != historical_interactions.back()
+	):
+		failures.append("首次恢复必须静态投影已展示 Interaction，不得重播对话或角色军团。")
 	level.call("_enter_code_phase")
+	if not audio_cues.all(func(cue: StringName) -> bool: return cue == &"PanelOpen"):
+		failures.append("恢复历史结果不得重播业务成功音。")
 	var source := CropAdaptiveWateringDemo.CORRECT_CODE
 	(level.get_node("CodeDrawer/Surface/Margin/Content/CodeEditor") as CodeEdit).text = source
 	var action_stages: Array[String] = []
@@ -134,6 +163,8 @@ func _initialize() -> void:
 		await process_frame
 	if session.stages != ["build", "activate", "turn"]:
 		failures.append("一次直接运行必须在后台严格串行完成 Draft→Build→Activation→Agent Turn。")
+	if audio_cues.count(&"Confirm") != 1 or audio_cues.count(&"Activate") != 1 or audio_cues.count(&"Complete") != 1 or audio_cues.has(&"Watering"):
+		failures.append("正式构建、激活、完成应各播放一次对应音效；没有 WATER 演出时不能有水声。")
 	if store.local_source != source:
 		failures.append("正式链路必须提交代码界面的当前草稿。")
 	if (level.get_node("Hud/WateringCan") as AnimatedSprite2D).visible:
@@ -169,6 +200,8 @@ func _initialize() -> void:
 		or not str(failed_action.get("message", "")).contains("did not reach a terminal state")
 	):
 		failures.append("资源轮询超时必须保留净化后的 code/message，不得折叠成无结构结果。")
+	story_overlay.skip_sequence()
+	await process_frame
 	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.CODE)
 	level.call("_on_hint_pressed")
 	for _frame in range(5):

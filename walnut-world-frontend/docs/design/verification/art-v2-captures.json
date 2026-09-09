@@ -1,0 +1,127 @@
+{
+  "engine": "Godot 4.7.1",
+  "designCanvas": [
+    1672,
+    941
+  ],
+  "logicalCanvas": [
+    1280,
+    720
+  ],
+  "scale": 0.7651434643995749,
+  "captureKind": "local teaching fixtures; no formal gateway receipt is claimed",
+  "views": [
+    {
+      "id": "S01",
+      "title": "首页",
+      "image": "verification/art-v2-S01.png",
+      "reference": "verification/reference-v2-S01.png"
+    },
+    {
+      "id": "S02",
+      "title": "进入试验田",
+      "image": "verification/art-v2-S02.png"
+    },
+    {
+      "id": "E01",
+      "title": "观察旧工具",
+      "image": "verification/art-v2-E01.png"
+    },
+    {
+      "id": "E02",
+      "title": "手动比较",
+      "image": "verification/art-v2-E02.png",
+      "reference": "verification/reference-v2-E02.png"
+    },
+    {
+      "id": "E03",
+      "title": "技能升级委托",
+      "image": "verification/art-v2-E03.png",
+      "reference": "verification/reference-v2-E03.png"
+    },
+    {
+      "id": "S03",
+      "title": "叮当教学",
+      "image": "verification/art-v2-S03.png"
+    },
+    {
+      "id": "S04",
+      "title": "数据配对",
+      "image": "verification/art-v2-S04.png",
+      "reference": "verification/reference-v2-S04.png"
+    },
+    {
+      "id": "S05",
+      "title": "分级动作",
+      "image": "verification/art-v2-S05.png"
+    },
+    {
+      "id": "S06",
+      "title": "理解汇总",
+      "image": "verification/art-v2-S06.png"
+    },
+    {
+      "id": "S07",
+      "title": "C++ 技能卷轴",
+      "image": "verification/art-v2-S07.png",
+      "reference": "verification/reference-v2-S07.png"
+    },
+    {
+      "id": "S08",
+      "title": "分层教学提示",
+      "image": "verification/art-v2-S08.png"
+    },
+    {
+      "id": "S09",
+      "title": "世界验证",
+      "image": "verification/art-v2-S09.png"
+    },
+    {
+      "id": "E08",
+      "title": "运行失败反馈",
+      "image": "verification/art-v2-E08.png"
+    },
+    {
+      "id": "E04",
+      "title": "Bug 双作物反例",
+      "image": "verification/art-v2-E04.png"
+    },
+    {
+      "id": "E05",
+      "title": "AI 修改确认",
+      "image": "verification/art-v2-E05.png",
+      "reference": "verification/reference-v2-E05.png"
+    },
+    {
+      "id": "E09",
+      "title": "目标完成",
+      "image": "verification/art-v2-E09.png"
+    },
+    {
+      "id": "S10",
+      "title": "验证反馈",
+      "image": "verification/art-v2-S10.png"
+    },
+    {
+      "id": "E06",
+      "title": "成长归档",
+      "image": "verification/art-v2-E06.png"
+    },
+    {
+      "id": "E10",
+      "title": "技能解锁",
+      "image": "verification/art-v2-E10.png"
+    },
+    {
+      "id": "E07",
+      "title": "自由复习",
+      "image": "verification/art-v2-E07.png"
+    },
+    {
+      "id": "E11",
+      "title": "下一关预告",
+      "image": "verification/art-v2-E11.png"
+    }
+  ],
+  "responsiveCapture": "art-v2-workshop-1600.png"
+}

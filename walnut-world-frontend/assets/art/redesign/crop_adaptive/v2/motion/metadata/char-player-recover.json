@@ -1,0 +1,294 @@
+{
+  "group": "characters",
+  "id": "char-player-recover",
+  "source": [
+    "components/char-player-thinking.png"
+  ],
+  "state": "发现不一致／重新检查",
+  "effect": "短暂停顿后轻微侧摆、低头复查；不惩罚、不剧烈摇屏",
+  "width": 448,
+  "height": 576,
+  "frames": 24,
+  "fps": 12,
+  "loop": false,
+  "trigger": "收到具体失败／反例；完成后转思考，不循环表示失败",
+  "pivot": [
+    0.5,
+    0.95
+  ],
+  "durationMs": 1992,
+  "delayMs": 83,
+  "files": {
+    "webp": "characters/char-player-recover.webp",
+    "poster": "characters/char-player-recover-poster.png",
+    "atlas": "characters/char-player-recover-atlas.png",
+    "metadata": "metadata/char-player-recover.json"
+  },
+  "atlas": {
+    "columns": 6,
+    "rows": 4,
+    "frameWidth": 448,
+    "frameHeight": 576,
+    "frames": [
+      {
+        "index": 0,
+        "rect": [
+          0,
+          0,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 1,
+        "rect": [
+          448,
+          0,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 2,
+        "rect": [
+          896,
+          0,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 3,
+        "rect": [
+          1344,
+          0,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 4,
+        "rect": [
+          1792,
+          0,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 5,
+        "rect": [
+          2240,
+          0,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 6,
+        "rect": [
+          0,
+          576,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 7,
+        "rect": [
+          448,
+          576,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 8,
+        "rect": [
+          896,
+          576,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 9,
+        "rect": [
+          1344,
+          576,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 10,
+        "rect": [
+          1792,
+          576,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 11,
+        "rect": [
+          2240,
+          576,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 12,
+        "rect": [
+          0,
+          1152,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 13,
+        "rect": [
+          448,
+          1152,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 14,
+        "rect": [
+          896,
+          1152,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 15,
+        "rect": [
+          1344,
+          1152,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 16,
+        "rect": [
+          1792,
+          1152,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 17,
+        "rect": [
+          2240,
+          1152,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 18,
+        "rect": [
+          0,
+          1728,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 19,
+        "rect": [
+          448,
+          1728,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 20,
+        "rect": [
+          896,
+          1728,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 21,
+        "rect": [
+          1344,
+          1728,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 22,
+        "rect": [
+          1792,
+          1728,
+          448,
+          576
+        ],
+        "durationMs": 83
+      },
+      {
+        "index": 23,
+        "rect": [
+          2240,
+          1728,
+          448,
+          576
+        ],
+        "durationMs": 83
+      }
+    ]
+  },
+  "encoded": {
+    "frames": 24,
+    "durationMs": 1992,
+    "bytes": 950558
+  },
+  "playback": {
+    "frameDurationMs": 83,
+    "loop": false,
+    "endBehavior": "hold-last-frame-until-state-controller-switches",
+    "reducedMotion": "characters/char-player-recover-poster.png",
+    "alpha": "straight-alpha",
+    "sizing": "preserve aspect; use contentBounds and pivot, do not stretch the whole padded canvas into old art bounds"
+  },
+  "contentBounds": [
+    95,
+    39,
+    258,
+    498
+  ]
+}

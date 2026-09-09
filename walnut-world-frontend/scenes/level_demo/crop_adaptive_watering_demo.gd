@@ -64,16 +64,16 @@ const WORKSHOP_EXPERIMENTS: Array[Dictionary] = [
 	{
 		"badge": "理解汇总 · 准备完整练习",
 		"title": "把刚才学到的两条理解结合起来",
-		"body": "先用同一个 i 配对 target[i] 与 moisture[i]，再让计算出的 gap 进入 0 / 1 / 2 份分级。\n下一页将严格按关卡文档打开完整 C++ 练习，你要把这两条理解自己写进卷轴。",
+		"body": "先用同一个 i 配对 target 与 moisture，再让 gap 进入 0 / 1 / 2 份分级。\n下一页打开完整 C++ 练习，由你自己把两条理解写进卷轴。",
 		"action": "把两条规则结合起来，开始完整练习  →",
 	},
 ]
 const PROFILE_CATALOG := preload("res://resources/agent/agent_character_catalog.tres")
 const CROP_TEXTURES := [
-	preload("res://assets/art/generated/crops/carrot.png"),
-	preload("res://assets/art/generated/crops/tomato.png"),
-	preload("res://assets/art/generated/crops/potato.png"),
-	preload("res://assets/art/generated/crops/corn.png"),
+	preload("res://assets/art/redesign/crop_adaptive/v2/components/crop-carrot-light-thirst.png"),
+	preload("res://assets/art/redesign/crop_adaptive/v2/components/crop-tomato-light-thirst.png"),
+	preload("res://assets/art/redesign/crop_adaptive/v2/components/crop-potato-light-thirst.png"),
+	preload("res://assets/art/redesign/crop_adaptive/v2/components/crop-corn-light-thirst.png"),
 ]
 
 @export_range(0.05, 2.0, 0.05) var timing_scale: float = 1.0
@@ -87,6 +87,8 @@ const CROP_TEXTURES := [
 @onready var evidence_body: RichTextLabel = %EvidenceBody
 @onready var primary_button: Button = %PrimaryButton
 @onready var hint_button: Button = %HintButton
+@onready var mentor_question: MentorQuestion = %MentorQuestion
+@onready var farm_mentor: ArtMotionTexture = $FarmMentor
 @onready var request_patch_button: Button = %RequestPatchButton
 @onready var code_button: Button = %CodeButton
 @onready var water_choices: HBoxContainer = %WaterChoices
@@ -101,6 +103,8 @@ const CROP_TEXTURES := [
 @onready var reset_button: Button = %ResetButton
 @onready var save_state: Label = %SaveState
 @onready var story_dialogue: StoryDialogueOverlay = %StoryDialogueOverlay
+@onready var agent_interaction_presenter: AgentInteractionPresenter = %AgentInteractionPresenter
+@onready var bug_legion_2d: Control = %BugLegion2D
 @onready var watering_can: AnimatedSprite2D = %WateringCan
 @onready var completion_card: Control = %CompletionCard
 @onready var completion_title: Label = %CompletionTitle
@@ -132,12 +136,15 @@ const CROP_TEXTURES := [
 @onready var light_boundary_input: LineEdit = %LightBoundaryInput
 @onready var light_units_input: LineEdit = %LightUnitsInput
 @onready var workshop_action_button: Button = %WorkshopActionButton
+@onready var _workshop_card_rest_height: float = $WorkshopOverlay/Card.size.y
+@onready var _workshop_action_rest_y: float = workshop_action_button.position.y
 @onready var bug_challenge_overlay: Control = %BugChallengeOverlay
 @onready var bug_challenge_body: RichTextLabel = %BugChallengeBody
 @onready var bug_continue_button: Button = %BugContinueButton
 @onready var growth_summary_overlay: Control = %GrowthSummaryOverlay
 @onready var growth_summary_body: RichTextLabel = %GrowthSummaryBody
 @onready var archive_button: Button = %ArchiveButton
+@onready var sfx: FarmAudio = $FarmAudio
 
 var _phase: int = Phase.INTRO
 var _manual_cursor: int = 0
@@ -176,6 +183,22 @@ var _last_candidate_result: Dictionary = {}
 
 
 func _ready() -> void:
+	for overlay: CanvasItem in [story_dialogue, code_drawer, skill_tree_overlay, workshop_overlay, bug_challenge_overlay, growth_summary_overlay, completion_card]:
+		overlay.visibility_changed.connect(_refresh_audio_ambience)
+	patch_dialog.visibility_changed.connect(_refresh_audio_ambience)
+	visibility_changed.connect(_refresh_audio_ambience)
+	watering_can.visibility_changed.connect(func() -> void:
+		if not watering_can.is_visible_in_tree():
+			sfx.stop_watering()
+	)
+	call_deferred("_refresh_audio_ambience")
+	for overlay: Control in [story_dialogue, code_drawer, skill_tree_overlay, bug_challenge_overlay, growth_summary_overlay, completion_card]:
+		overlay.visibility_changed.connect(_refresh_mentor_question)
+	patch_dialog.visibility_changed.connect(_refresh_mentor_question)
+	visibility_changed.connect(_refresh_mentor_question)
+	mentor_question.answering_changed.connect(_on_mentor_answering_changed)
+	code_drawer.visibility_changed.connect(_update_workspace_composition)
+	patch_dialog.visibility_changed.connect(func() -> void: $PatchBackdrop.visible = patch_dialog.visible)
 	primary_button.pressed.connect(_on_primary_pressed)
 	hint_button.pressed.connect(_on_hint_pressed)
 	request_patch_button.pressed.connect(_on_patch_requested)
@@ -192,12 +215,18 @@ func _ready() -> void:
 	return_button.pressed.connect(func() -> void: return_home_requested.emit())
 	patch_dialog.confirmed.connect(_accept_patch)
 	patch_dialog.custom_action.connect(_on_patch_custom_action)
-	reject_patch_button = patch_dialog.add_button("拒绝修改", true, "reject_patch")
-	reject_patch_button.name = "RejectPatchButton"
+	reject_patch_button = %RejectPatchButton
+	reject_patch_button.pressed.connect(_on_patch_custom_action.bind(&"reject_patch"))
+	%ClosePatchButton.pressed.connect(patch_dialog.hide)
+	%AcceptPatchButton.pressed.connect(_accept_patch)
+	patch_dialog.get_ok_button().hide()
+	patch_dialog.get_cancel_button().hide()
 	reject_patch_button.disabled = false
 	reject_patch_button.tooltip_text = "拒绝当前提案，并保留自己的代码"
 	skill_tree_continue_button.pressed.connect(_on_skill_tree_continue_pressed)
 	workshop_action_button.pressed.connect(_on_workshop_action_pressed)
+	for field in _workshop_inputs():
+		field.validation_changed.connect(_refresh_workshop_errors)
 	bug_continue_button.pressed.connect(_on_bug_continue_pressed)
 	archive_button.pressed.connect(_on_archive_pressed)
 	code_editor.text_changed.connect(_on_code_changed)
@@ -205,23 +234,31 @@ func _ready() -> void:
 	playback_speed_button.pressed.connect(_on_playback_speed_pressed)
 	skip_playback_button.pressed.connect(_on_skip_playback_pressed)
 	replay_playback_button.pressed.connect(_on_replay_playback_pressed)
+	agent_interaction_presenter.role_presentation_started.connect(_on_agent_role_presentation_started)
+	agent_interaction_presenter.world_cue_requested.connect(_on_agent_world_cue_requested)
 	for index in range(plot_grid.get_child_count()):
 		var card := plot_grid.get_child(index) as CropPlotCard
 		card.configure(index, CROPS[index], MOISTURE[index], TARGET[index], CROP_TEXTURES[index % 4])
 		card.plot_pressed.connect(_on_plot_pressed)
 	code_editor.text = INITIAL_PRACTICE_CODE
+	completion_card.visibility_changed.connect(func(): $CompletionShade.visible = completion_card.visible)
 	completion_card.visible = false
 	code_drawer.visible = false
 	_hide_lesson_overlays()
 	water_choices.visible = false
 	watering_can.visible = false
+	_update_workspace_composition()
 	_set_phase(Phase.INTRO)
 	if is_visible_in_tree():
 		call_deferred("_play_intro")
 
 
 func restart_level() -> void:
+	sfx.stop_all()
+	mentor_question.reset()
+	agent_interaction_presenter.clear_queue()
 	story_dialogue.skip_sequence()
+	bug_legion_2d.hide_immediately()
 	if patch_dialog.visible:
 		patch_dialog.hide()
 	_manual_cursor = 0
@@ -242,6 +279,12 @@ func restart_level() -> void:
 	_candidate_skip_requested = false
 	_candidate_playing = false
 	_last_candidate_result.clear()
+	_candidate_playback_speed = 1.0
+	_last_chain_error_detail = ""
+	_agent_stage_message_visible = false
+	_last_agent_interaction.clear()
+	watering_can.stop()
+	watering_can.visible = false
 	if _agent_mode:
 		_synchronizing_agent_draft = true
 		code_editor.text = _agent_source if not _agent_source.is_empty() else INITIAL_PRACTICE_CODE
@@ -363,7 +406,7 @@ func _play_old_tool_demo() -> void:
 		var units: int = 2 if gap >= 30 else (1 if gap > 0 else 0)
 		card.set_result(units, true, units != EXPECTED_UNITS[index])
 		evidence_title.text = "旧工具把 60 当作所有土地的目标湿度"
-		evidence_body.text = "[color=#c45622]1号番茄漏浇[/color]　[color=#c45622]5号番茄水量不足[/color]　[color=#c45622]6号土豆被多浇[/color]"
+		evidence_body.text = "[color=#963519]1号番茄漏浇[/color]　[color=#963519]5号番茄水量不足[/color]　[color=#963519]6号土豆被多浇[/color]"
 	_reveal_evidence()
 	primary_button.disabled = false
 	primary_button.text = "亲自比较三块土地  →"
@@ -374,7 +417,7 @@ func _begin_manual_compare() -> void:
 	for child in plot_grid.get_children():
 		var card := child as CropPlotCard
 		card.set_result(-1, false)
-		card.show_gap(true)
+		card.show_gap(false)
 		card.set_attention(false)
 	_selected_manual_plot = -1
 	_manual_cursor = 0
@@ -435,21 +478,15 @@ func _show_skill_tree(unlocked: bool) -> void:
 	_set_phase(Phase.SKILL_UNLOCKED if unlocked else Phase.SKILL_TREE)
 	skill_tree_badge.text = "技能树 · 4★ 节点"
 	skill_tree_title.text = "作物适配浇水器"
-	if unlocked:
-		skill_tree_body.text = (
-			"[center][color=#2a8a4f][font_size=28]★★★★  已解锁[/font_size][/color][/center]\n"
-			+ "[center]读取每块土地的当前湿度与作物目标湿度，计算缺口并决定 0 / 1 / 2 份水。[/center]\n\n"
-			+ "[color=#738276]★★★★★  区域灌溉 · 未来能力（尚未解锁）[/color]"
-		)
-		skill_tree_continue_button.text = "进入完成后的自由状态  →"
-	else:
-		skill_tree_body.text = (
-			"[center][color=#d28a18][font_size=28]★★★★  剧情可学习[/font_size][/color][/center]\n"
-			+ "[center]能力槽：数据配对　缺口计算　分级动作[/center]\n\n"
-			+ "[color=#738276]★★★★★  区域灌溉 · 功能预告（不能提前学习）[/color]"
-		)
-		skill_tree_continue_button.text = "进入清泉工坊  →"
+	skill_tree_body.text = "已解锁 · 完成成长归档" if unlocked else "剧情可学习"
+	$SkillTreeOverlay/Card/TreeArt/TreeCaption.text = "理解已连接成完整规则\n现在可以回到农场" if unlocked else "三项理解，共同组成\n作物适配浇水器"
+	skill_tree_continue_button.text = "进入完成后的自由状态  →" if unlocked else "进入清泉工坊  →"
+	for index in range(3):
+		get_node("SkillTreeOverlay/Card/Margin/Content/Slot%d/Completed" % index).visible = unlocked
 	skill_tree_overlay.visible = true
+	$SkillTreeOverlay/UnlockSeal.visible = false
+	if unlocked:
+		($SkillTreeOverlay/UnlockSeal as ArtMotionTexture).play_clip("ui-four-star-seal-unlock", true)
 
 
 func _on_skill_tree_continue_pressed() -> void:
@@ -472,13 +509,17 @@ func _begin_workshop_experiments() -> void:
 		story_dialogue.play_agent_presentation(
 			profile.display_name,
 			profile.portrait,
-			"我们不背答案。先做三个小实验，把数组、缺口和水量在世界里一一对应起来。",
+			"先做两个小实验，把数组、缺口和水量在世界里一一对应起来。",
 			"两个数组为什么要使用同一个 i？",
 			"教学实验",
 		)
 
 
 func _show_workshop_step() -> void:
+	_refresh_mentor_question()
+	workshop_action_button.remove_meta("art_feedback")
+	for field in [gap_target_input, gap_moisture_input, severe_boundary_input, severe_units_input, light_boundary_input, light_units_input]:
+		field.clear_validation()
 	var experiment: Dictionary = WORKSHOP_EXPERIMENTS[_workshop_step]
 	workshop_badge.text = str(experiment.badge)
 	workshop_title.text = str(experiment.title)
@@ -487,6 +528,10 @@ func _show_workshop_step() -> void:
 	workshop_gap_code.visible = _workshop_step == 0
 	workshop_branch_code.visible = _workshop_step == 1
 	workshop_summary_code.visible = _workshop_step == 2
+	const K := 720.0 / 941.0
+	var board := $WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel as Control
+	board.position.y = ([330, 317, 347][_workshop_step] - 62) * K
+	board.size.y = [338, 352, 321][_workshop_step] * K
 	match _workshop_step:
 		0:
 			gap_target_input.text = ""
@@ -504,32 +549,61 @@ func _show_workshop_step() -> void:
 		2:
 			evidence_title.text = "水量单位已经对应"
 			evidence_body.text = "1份 = 250 ml　2份 = 500 ml；达到目标的土地保持喷头关闭。"
+	# Programmatic text assignment does not emit LineEdit.text_changed.
+	for field in _workshop_inputs():
+		field.clear_validation()
+	_refresh_workshop_errors()
 
 
 func _on_workshop_action_pressed() -> void:
-	_bounce(workshop_action_button)
-	if _workshop_step == 0 and (
-		gap_target_input.text.strip_edges() != "target"
-		or gap_moisture_input.text.strip_edges() != "moisture"
-	):
-		workshop_body.text = str(WORKSHOP_EXPERIMENTS[0].body) + "\n⚠ 请在两个输入框中依次填入 target 和 moisture。"
-		gap_target_input.grab_focus()
+	var first_error: LineEdit = null
+	var fields: Array = _workshop_inputs().slice(0, 2) if _workshop_step == 0 else (_workshop_inputs().slice(2) if _workshop_step == 1 else [])
+	for field in fields:
+		if not field.validate() and first_error == null:
+			first_error = field
+	_refresh_workshop_errors()
+	if first_error != null:
+		_show_workshop_feedback(false)
+		first_error.grab_focus()
 		return
-	if _workshop_step == 1 and not (
-		severe_boundary_input.text.strip_edges() == "30"
-		and severe_units_input.text.strip_edges() == "2"
-		and light_boundary_input.text.strip_edges() == "0"
-		and light_units_input.text.strip_edges() == "1"
-	):
-		workshop_body.text = str(WORKSHOP_EXPERIMENTS[1].body) + "\n⚠ 请检查四个输入框：30、2、0、1。"
-		severe_boundary_input.grab_focus()
-		return
+	_show_workshop_feedback(true)
 	_workshop_step += 1
 	if _workshop_step >= WORKSHOP_EXPERIMENTS.size():
 		workshop_overlay.visible = false
 		_enter_code_phase()
 		return
 	_show_workshop_step()
+
+
+func _workshop_inputs() -> Array:
+	return [gap_target_input, gap_moisture_input, severe_boundary_input, severe_units_input, light_boundary_input, light_units_input]
+
+
+func _refresh_workshop_errors() -> void:
+	var messages: Array[String] = []
+	for field in _workshop_inputs():
+		if field.has_error:
+			messages.append(field.error_message)
+	var label := %WorkshopError as Label
+	label.text = "；".join(messages)
+	label.visible = not messages.is_empty()
+	_layout_workshop_errors.call_deferred()
+
+
+func _layout_workshop_errors() -> void:
+	var label := %WorkshopError as Label
+	var board := $WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel as Control
+	var card := $WorkshopOverlay/Card as Control
+	if not label.visible:
+		workshop_action_button.position.y = _workshop_action_rest_y
+		card.size.y = _workshop_card_rest_height
+		return
+	# Reserve a separate paper area after the board; never write over its border.
+	label.position = Vector2(board.position.x, board.position.y + board.size.y + 10.0)
+	label.size.x = board.size.x
+	label.size.y = maxf(44.0, label.get_minimum_size().y)
+	workshop_action_button.position.y = label.position.y + label.size.y + 10.0
+	card.size.y = maxf(_workshop_card_rest_height, workshop_action_button.position.y + workshop_action_button.size.y + 24.0)
 
 
 func _hide_lesson_overlays() -> void:
@@ -552,6 +626,8 @@ func _enter_code_phase() -> void:
 func _show_code_drawer() -> void:
 	if _phase < Phase.CODE or _phase in [Phase.RUNNING, Phase.CANDIDATE_VALIDATING, Phase.CANDIDATE_PRESENTING]:
 		return
+	if not code_drawer.visible:
+		sfx.play_cue(&"PanelOpen")
 	if _drawer_tween != null and _drawer_tween.is_valid():
 		_drawer_tween.kill()
 	code_drawer.visible = true
@@ -568,6 +644,7 @@ func _show_code_drawer() -> void:
 func _hide_code_drawer() -> void:
 	if not code_drawer.visible:
 		return
+	sfx.play_cue(&"PanelClose")
 	if _drawer_tween != null and _drawer_tween.is_valid():
 		_drawer_tween.kill()
 	code_drawer.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -584,6 +661,7 @@ func _request_run() -> void:
 	_flush_autosave()
 	_build_result = evaluate_source(code_editor.text)
 	if not _build_result.get("build_ok", false):
+		sfx.play_cue(&"Retry")
 		_set_phase(Phase.CODE)
 		evidence_title.text = "构建失败 · 世界没有变化"
 		evidence_body.text = str(_build_result.get("message", "编译失败。"))
@@ -614,10 +692,12 @@ func _request_run() -> void:
 		_reveal_evidence()
 		if units > 0:
 			watering_can.visible = true
-			watering_can.position = card.global_position + Vector2(card.size.x * 0.50, 68.0)
-			watering_can.scale = Vector2.ONE * 0.22
+			watering_can.position = card.global_position + Vector2(card.size.x * 0.50, 88.0)
+			watering_can.scale = Vector2.ONE * 0.35
 			watering_can.frame = 0
-			watering_can.play(&"pour")
+			watering_can.speed_scale = 1.0 / maxf(timing_scale, 0.05)
+			watering_can.play(&"pour_two" if units >= 2 else &"pour")
+			sfx.start_watering()
 			await watering_can.animation_finished
 			watering_can.visible = false
 		card.set_result(units, true, units != EXPECTED_UNITS[index])
@@ -629,13 +709,17 @@ func _request_run() -> void:
 
 
 func _fail_run() -> void:
+	if _agent_mode:
+		fail_agent_submission("验证", "LOCAL_FAILURE_ROUTER_DISABLED_IN_FORMAL_AGENT_MODE")
+		return
 	var key := str(_build_result.get("failure_key", "UNKNOWN"))
 	_same_failure_count = _same_failure_count + 1 if key == _same_failure_key else 1
 	_same_failure_key = key
 	_hint_level = mini(_hint_level, 3)
 	_set_phase(Phase.FAILED)
-	evidence_title.text = "世界事实 · 本轮未通过"
-	evidence_body.text = "%s\n失败类型：[code]%s[/code]　同类失败：%d 次\n先看事实，再决定自己修改或询问叮当师傅。" % [_build_result.message, key, _same_failure_count]
+	evidence_title.text = "本轮未通过 · 先看事实，再修改"
+	evidence_body.text = "%s 同类失败 %d 次。" % [_build_result.message, _same_failure_count]
+	evidence_body.tooltip_text = "失败类型：%s" % key
 	_reveal_evidence()
 	if key == "FIXED_TARGET_VALUE" and _same_failure_count == 3 and not _bug_challenge_seen:
 		call_deferred("_show_bug_challenge")
@@ -645,11 +729,11 @@ func _fail_run() -> void:
 func _show_bug_challenge() -> void:
 	_bug_challenge_seen = true
 	bug_challenge_body.text = (
-		"[center][font_size=21][b]公开测试：相同当前湿度，不同目标[/b][/font_size][/center]\n\n"
+		""
 		+ "[table=4][cell][b]作物[/b][/cell][cell][b]当前[/b][/cell][cell][b]目标[/b][/cell][cell][b]正确动作[/b][/cell]"
 		+ "[cell]土豆[/cell][cell]55[/cell][cell]50[/cell][cell]不浇水[/cell]"
 		+ "[cell]番茄[/cell][cell]55[/cell][cell]70[/cell][cell]1份 · 250 ml[/cell][/table]\n\n"
-		+ "相同的当前湿度 55，却需要两个不同动作。固定的 60 缺少了哪一张表？"
+		+ ""
 	)
 	bug_challenge_overlay.visible = true
 	var profile = PROFILE_CATALOG.profile_for(&"bug_agent")
@@ -683,6 +767,7 @@ func _on_hint_pressed() -> void:
 	if _same_failure_key.is_empty():
 		evidence_title.text = "叮当师傅 · 目标复述"
 		evidence_body.text = "两个数组要用同一个 i 找到同一块土地。现在还没有失败 Run，我不会假装某一行已经出错。"
+		_show_teaching_dialogue("目标复述")
 		_reveal_evidence()
 		return
 	_hint_level = mini(3, _hint_level + 1)
@@ -695,6 +780,7 @@ func _on_hint_pressed() -> void:
 	]
 	evidence_title.text = "叮当师傅 · L%d" % _hint_level
 	evidence_body.text = hints[_hint_level]
+	_show_teaching_dialogue("L%d · 分层教学" % _hint_level)
 	_reveal_evidence()
 	_refresh_patch_button()
 
@@ -705,10 +791,11 @@ func _on_patch_requested() -> void:
 	if not _can_request_patch():
 		return
 	_bounce(request_patch_button)
+	story_dialogue.skip_sequence()
 	_patch_pending = true
 	_patch_stale = false
-	patch_dialog.dialog_text = "AI 建议修改（尚未应用）\n\n修改前：int gap = 60 - moisture[i];\n修改后：int gap = target[i] - moisture[i];\n\n依据：1号漏浇、5号不足、6号多浇，以及 Bug 先生的同为55公开测试。\n影响范围：只修改缺口计算这一行。\n接受后只生成新草稿，仍需由你点击“直接运行”验证。"
-	patch_dialog.popup_centered()
+	%PatchExplanation.text = "依据：1号漏浇、5号不足、6号多浇，以及 Bug 先生的同为55公开测试。\n\n影响范围：只修改缺口计算这一行。\n接受后只生成新草稿，仍需由你点击“直接运行”验证。"
+	patch_dialog.popup(Rect2i(244, 47, 815, 593))
 
 
 func _can_request_patch() -> bool:
@@ -758,6 +845,7 @@ func _on_patch_custom_action(action: StringName) -> void:
 
 
 func _complete_level() -> void:
+	_layout_completion(true)
 	_set_phase(Phase.OBJECTIVE_COMPLETE)
 	completion_card.visible = true
 	completion_card.modulate.a = 0.0
@@ -767,15 +855,16 @@ func _complete_level() -> void:
 	tween.set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 	tween.tween_property(completion_card, "modulate:a", 1.0, _duration(0.24))
 	tween.tween_property(completion_card, "scale", Vector2.ONE, _duration(0.58))
-	completion_title.text = "世界目标已经客观完成！"
-	completion_summary.text = "8块土地全部检查 · 5块正确浇水 · 3块正确跳过\n最后一条本地教学动作已经结束，接下来由角色根据记录总结。"
+	completion_title.text = "世界目标已完成"
+	completion_summary.text = "检查土地 8/8 · 正确浇水 5块 · 正确跳过 3块。\n水量不足0，水量过多0。\n先查看成长归档，再进入自由复习。"
 	replay_button.visible = false
 	return_button.visible = false
 	next_button.visible = true
 	next_button.disabled = false
-	next_button.text = "听芽芽和书书总结  →"
+	next_button.text = "查看成长归档  →"
 	evidence_title.text = "世界目标已完成"
 	evidence_body.text = "检查土地 8/8　正确浇水 5块　正确跳过 3块\n250 ml 动作 3次　500 ml 动作 2次　水量不足 0　水量过多 0"
+	evidence_panel.hide()
 
 
 func _on_completion_next_pressed() -> void:
@@ -819,12 +908,14 @@ func _show_growth_summary() -> void:
 	var route := "接受 AI 局部修改后，由学生再次直接运行并验证" if _used_ai_patch else "由学生完成最终代码修改与验证"
 	var assistance := "、".join(hint_names) if not hint_names.is_empty() else "未使用分层提示"
 	growth_summary_body.text = (
-		"[b]完成方式[/b]：%s\n\n" % route
-		+ "[b]代码变化[/b]：使用同一个 i 配对 moisture[i] 与 target[i]，计算目标减当前的缺口。\n\n"
-		+ "[b]提示记录[/b]：%s\n\n" % assistance
-		+ "[b]验证记录[/b]：8 次循环；3 次 250 ml；2 次 500 ml；3 次跳过。"
+		"[img=34]res://assets/art/redesign/crop_adaptive/v2/components/icon-skill-watering.png[/img]  [b]完成方式[/b]：%s\n\n" % route
+		+ "[img=34]res://assets/art/redesign/crop_adaptive/v2/components/icon-scroll.png[/img]  [b]代码变化[/b]：使用同一个 i 配对 moisture[lb]i[rb] 与 target[lb]i[rb]，计算目标减当前的缺口。\n\n"
+		+ "[img=34]res://assets/art/redesign/crop_adaptive/v2/components/icon-bulb.png[/img]  [b]提示记录[/b]：%s\n\n" % assistance
+		+ "[img=34]res://assets/art/redesign/crop_adaptive/v2/components/icon-drops-two.png[/img]  [b]验证记录[/b]：8 次循环；3 次 250 ml；2 次 500 ml；3 次跳过。"
 	)
 	growth_summary_overlay.visible = true
+	$GrowthSummaryOverlay/Card/Margin/Content/RowValue0.text = route
+	$GrowthSummaryOverlay/Card/Margin/Content/RowValue2.text = assistance
 
 
 func _on_archive_pressed() -> void:
@@ -834,12 +925,13 @@ func _on_archive_pressed() -> void:
 
 
 func _enter_free_play() -> void:
+	_layout_completion(false)
 	_set_phase(Phase.FREE_PLAY)
 	completion_card.visible = true
 	completion_card.modulate.a = 1.0
 	completion_card.scale = Vector2.ONE
-	completion_title.text = "4★ 作物适配浇水器已解锁"
-	completion_summary.text = "本次关卡记录已经完成前端归档。\n你可以重玩本关、查看下一关预告，或返回农场。"
+	completion_title.text = "作物适配浇水器已解锁"
+	completion_summary.text = "本关记录已完成归档。\n\n你可以重玩本关，\n查看下一关预告，\n或返回农场继续探索。"
 	replay_button.visible = true
 	return_button.visible = true
 	next_button.visible = true
@@ -848,11 +940,21 @@ func _enter_free_play() -> void:
 	evidence_title.text = "完成后的自由状态"
 	evidence_body.text = "已解锁：读取同下标数据、计算缺口、按 0 / 1 / 2 份执行。"
 	_reveal_evidence()
+	evidence_panel.hide()
 
 
 func show_next_level_preview() -> void:
+	_layout_completion(true)
+	const K := 720.0 / 941.0
+	$CompletionCard/RewardCompanion.visible = true
+	$CompletionCard/RewardCompanion.position = Vector2(1400 - 485, 603 - 211) * K
+	var actions := $CompletionCard/Margin/Content/Actions as Control
+	actions.position = Vector2(55, 386) * K
+	for item in [[replay_button, 0, 183], [next_button, 197, 225], [return_button, 436, 178]]:
+		(item[0] as Control).position = Vector2(item[1], 0) * K
+		(item[0] as Control).size = Vector2(item[2], 75) * K
 	completion_title.text = "下一关正在准备中"
-	completion_summary.text = "未来能力：让同一套规则管理更大范围的区域灌溉。\n当前可以返回农场或重玩本关。"
+	completion_summary.text = "未来能力：让同一套规则管理更大范围的区域灌溉。\n下一关尚未开放，当前可以返回农场或重玩本关。"
 	next_button.disabled = true
 
 
@@ -950,7 +1052,7 @@ func open_formal_run_workspace() -> Dictionary:
 func _refresh_authority_strip() -> void:
 	if not _agent_mode or _authoritative_snapshot.is_empty():
 		return
-	phase_strip.text = "正式世界 %s · revision %d · state %s" % [
+	phase_strip.tooltip_text = "正式世界 %s · revision %d · state %s" % [
 		str(_authoritative_snapshot.get("world_id", "")),
 		int(_authoritative_snapshot.get("revision", -1)),
 		str(_authoritative_snapshot.get("state_hash", "")),
@@ -1010,11 +1112,13 @@ func present_candidate_evaluation(result: Dictionary, replay := false) -> Dictio
 			if not is_instance_valid(self):
 				return {"ok": false, "code": "CANDIDATE_PRESENTATION_CANCELLED"}
 			watering_can.visible = true
-			watering_can.position = card.global_position + Vector2(card.size.x * 0.50, 68.0)
-			watering_can.scale = Vector2.ONE * 0.22
+			watering_can.position = card.global_position + Vector2(card.size.x * 0.50, 88.0)
+			watering_can.scale = Vector2.ONE * 0.35
 			watering_can.frame = 0
 			watering_can.speed_scale = _candidate_playback_speed / maxf(timing_scale, 0.05)
-			watering_can.play(&"pour")
+			watering_can.play(&"pour_two" if int(action.get("amount_ml", 0)) >= 500 else &"pour")
+			if not _candidate_skip_requested:
+				sfx.start_watering()
 			await watering_can.animation_finished
 			if not is_instance_valid(self):
 				return {"ok": false, "code": "CANDIDATE_PRESENTATION_CANCELLED"}
@@ -1051,18 +1155,19 @@ func present_candidate_evaluation(result: Dictionary, replay := false) -> Dictio
 	else:
 		_set_phase(Phase.LOCAL_FAILED)
 		evidence_title.text = "本地候选结果 · 仍需修改"
-	evidence_body.text = "%s\n[color=#c45622]权威后端仍为 TASK_INCOMPLETE，世界未提交；该结果不会写入 ClientStore。[/color]" % str(result.get("summary", "候选判题已完成。"))
+	evidence_body.text = "%s\n[color=#963519]权威后端仍为 TASK_INCOMPLETE，世界未提交；该结果不会写入 ClientStore。[/color]" % str(result.get("summary", "候选判题已完成。"))
 	_reveal_evidence()
 	return {"ok": true, "skipped": _candidate_skip_requested}
 
 
 func present_candidate_chain_error(code: String) -> void:
+	_last_chain_error_detail = code
 	_agent_stage_message_visible = false
 	_candidate_playing = false
 	_candidate_skip_requested = false
 	_set_phase(Phase.CHAIN_ERROR)
 	evidence_title.text = "无法安全生成候选结果"
-	evidence_body.text = "[%s] 本轮保持后端失败结论，世界未提交。" % code
+	evidence_body.text = "这次候选演示没有完成，权威失败结论保持不变，世界也没有提交。\n可以修改代码后再次运行。"
 	_reveal_evidence()
 
 
@@ -1076,6 +1181,7 @@ func _on_playback_speed_pressed() -> void:
 func _on_skip_playback_pressed() -> void:
 	if _candidate_playing:
 		_candidate_skip_requested = true
+		sfx.stop_watering()
 		watering_can.speed_scale = 1000.0
 
 
@@ -1160,35 +1266,52 @@ func update_agent_submission_stage(message: String, keep_running := true) -> voi
 
 
 func present_agent_interactions(interactions: Array[Dictionary]) -> void:
-	if interactions.is_empty():
+	for interaction: Dictionary in interactions:
+		agent_interaction_presenter.enqueue_interaction(interaction)
+
+
+func restore_agent_interaction(interaction: Dictionary) -> bool:
+	# Rebuild the persisted HUD projection without replaying its dialogue or
+	# character cue. Newly recovered interactions still use the presenter FIFO.
+	return _project_agent_interaction(interaction)
+
+
+func _on_agent_role_presentation_started(_role_id: StringName, interaction_id: String) -> void:
+	var interaction := agent_interaction_presenter.active_interaction()
+	if str(interaction.get("interaction_id", "")) != interaction_id:
 		return
-	var latest: Dictionary = interactions.back()
-	var feedback: Variant = latest.get("feedback")
+	_project_agent_interaction(interaction)
+
+
+func _project_agent_interaction(interaction: Dictionary) -> bool:
+	var feedback: Variant = interaction.get("feedback")
 	if not feedback is Dictionary:
-		return
+		return false
 	var message := str(feedback.get("message", ""))
 	if message.is_empty():
-		return
+		return false
 	_agent_stage_message_visible = false
-	_last_agent_interaction = latest.duplicate(true)
-	var role_id := StringName(str(latest.get("role", "")))
-	var profile = PROFILE_CATALOG.profile_for(role_id)
-	var display_name: String = str(profile.display_name) if profile != null else "系统"
-	var response_type := str(latest.get("response_type", "message"))
-	var hint_level_value: Variant = latest.get("hint_level")
+	_last_agent_interaction = interaction.duplicate(true)
+	var role_id := StringName(str(interaction.get("role", "")))
+	var response_type := str(interaction.get("response_type", "message"))
+	var hint_level_value: Variant = interaction.get("hint_level")
 	var hint_level := int(hint_level_value) if typeof(hint_level_value) == TYPE_INT else 0
-	evidence_title.text = "%s · %s" % [display_name, "L%d" % hint_level if response_type == "hint" else "Agent 反馈"]
+	evidence_title.text = "%s · %s" % [
+		agent_interaction_presenter.display_name_for(role_id),
+		"L%d" % hint_level if response_type == "hint" else "Agent 反馈",
+	]
 	evidence_body.text = message
 	_reveal_evidence()
-	if profile != null:
-		var question_value: Variant = latest.get("question")
-		story_dialogue.play_agent_presentation(
-			profile.display_name,
-			profile.portrait,
-			message,
-			"" if question_value == null else str(question_value),
-			"教学提示" if response_type in ["hint", "question"] else "验证反馈",
-		)
+	return true
+
+
+func _on_agent_world_cue_requested(presentation_key: StringName, active: bool) -> void:
+	if presentation_key != &"bug_legion":
+		return
+	if active:
+		bug_legion_2d.show_legion()
+	else:
+		bug_legion_2d.hide_legion()
 
 
 ## Agent/Gateway failures must never show the student a raw backend message, and
@@ -1213,20 +1336,19 @@ func present_agent_error(message: String) -> void:
 
 
 func fail_agent_submission(stage: String, message: String) -> void:
+	_last_chain_error_detail = "%s: %s" % [stage, message]
 	_agent_stage_message_visible = false
 	_set_phase(Phase.FAILED)
-	evidence_title.text = "继续完善规则"
-	# The stage and reason used to be discarded here, so every failure looked
-	# identical -- a compile error, a refused activation and a broken world
-	# cursor all read as "keep improving your rules". A learner cannot act on
-	# that, and neither can anyone helping them.
-	var detail := message.strip_edges()
-	evidence_body.text = (
-		"可以继续修改代码并重新验证。"
-		if detail.is_empty()
-		else "%s
-（%s）" % [detail, stage]
-	)
+	match stage:
+		"构建":
+			evidence_title.text = "代码还没准备好"
+			evidence_body.text = "编译检查没有通过，世界没有变化。\n请根据角色提示检查代码，再点一次“直接运行”。"
+		"激活", "运行准备":
+			evidence_title.text = "运行准备暂未完成"
+			evidence_body.text = "这次没有取得可运行版本，世界没有变化。\n请稍后重试；如果仍未完成，可以先请求提示。"
+		_:
+			evidence_title.text = "这次验证没有完成"
+			evidence_body.text = "世界没有变化，你的代码也还在。\n可以再点一次“直接运行”，或者先问问叮当师傅。"
 	_reveal_evidence()
 
 
@@ -1258,7 +1380,25 @@ func _authoritative_snapshot_line() -> String:
 
 
 func _set_phase(value: Phase) -> void:
+	var previous_phase := _phase
 	_phase = value
+	if value != previous_phase:
+		match value:
+			Phase.FAILED, Phase.LOCAL_FAILED, Phase.CHAIN_ERROR:
+				sfx.stop_watering()
+				sfx.play_cue(&"Retry")
+			Phase.COMPLETED:
+				sfx.play_cue(&"Complete")
+			Phase.OBJECTIVE_COMPLETE:
+				# Only the standalone lesson uses this local completion route.
+				if not _agent_mode:
+					sfx.play_cue(&"Complete")
+	$Hud/BusyMotion.visible = value in [Phase.BUILDING, Phase.ACTIVATING, Phase.CANDIDATE_VALIDATING]
+	$Pump.set_activity(value in [Phase.OLD_TOOL, Phase.CANDIDATE_PRESENTING] or (value == Phase.RUNNING and not _agent_mode), value == Phase.CHAIN_ERROR)
+	var backdrop: String = {Phase.WORKSHOP: "B02-workshop-background", Phase.SKILL_TREE: "B04-workshop-exterior-background", Phase.SKILL_UNLOCKED: "B04-workshop-exterior-background", Phase.GROWTH_SUMMARY: "B06-archive-background"}.get(value, "B01-farm-background")
+	$Grass.set_background(backdrop)
+	($Explorer as ArtMotionTexture).play_clip("char-player-write" if value == Phase.CODE else ("char-player-recover" if value in [Phase.FAILED, Phase.LOCAL_FAILED, Phase.CHAIN_ERROR] else "char-player-idle"))
+	($FarmWalnut as ArtMotionTexture).play_clip("char-walnut-read" if value == Phase.CANDIDATE_PRESENTING else "char-walnut-idle")
 	task_title.text = _agent_task_title if _agent_mode and not _agent_task_title.is_empty() else "作物适配浇水器"
 	var names := {
 		Phase.INTRO: "进入试验田",
@@ -1270,7 +1410,7 @@ func _set_phase(value: Phase) -> void:
 		Phase.CERTIFIED: "准备交付",
 		Phase.ACTIVE: "准备验证",
 		Phase.RUNNING: "世界验证",
-		Phase.FAILED: "分层教学",
+		Phase.FAILED: "分层教学 · 失败复盘",
 		Phase.OBJECTIVE_COMPLETE: "世界目标完成",
 		Phase.GROWTH_SUMMARY: "书书成长总结",
 		Phase.SKILL_UNLOCKED: "4★技能解锁",
@@ -1287,9 +1427,12 @@ func _set_phase(value: Phase) -> void:
 	task_progress.text = str(names.get(value, "进行中"))
 	phase_strip.text = "观察旧工具  →  叮当实验  →  编写规则  →  世界验证  →  成长归档"
 	_refresh_authority_strip()
+	_apply_v2_layout(value)
 	primary_button.visible = value in [Phase.INTRO, Phase.OLD_TOOL, Phase.FAILED]
-	hint_button.visible = value in [Phase.CODE, Phase.CERTIFIED, Phase.ACTIVE, Phase.FAILED, Phase.LOCAL_FAILED, Phase.LOCAL_COMPLETED, Phase.CHAIN_ERROR]
-	code_button.visible = value in [Phase.CODE, Phase.CERTIFIED, Phase.ACTIVE, Phase.FAILED, Phase.LOCAL_FAILED, Phase.LOCAL_COMPLETED, Phase.CHAIN_ERROR]
+	hint_button.visible = false
+	# Preserve the existing scroll button position without a second question entry.
+	$Hud/ToolRail/HintSpace.visible = value in [Phase.CODE, Phase.CERTIFIED, Phase.ACTIVE, Phase.FAILED, Phase.LOCAL_FAILED, Phase.LOCAL_COMPLETED, Phase.CHAIN_ERROR]
+	code_button.visible = value in [Phase.CODE, Phase.CERTIFIED, Phase.ACTIVE, Phase.LOCAL_FAILED, Phase.LOCAL_COMPLETED, Phase.CHAIN_ERROR]
 	_refresh_patch_button()
 	run_button.disabled = value not in [Phase.CODE, Phase.CERTIFIED, Phase.ACTIVE, Phase.FAILED, Phase.LOCAL_FAILED, Phase.LOCAL_COMPLETED, Phase.CHAIN_ERROR]
 	match value:
@@ -1297,32 +1440,156 @@ func _set_phase(value: Phase) -> void:
 			primary_button.text = "查看旧工具演示  →"
 		Phase.FAILED:
 			primary_button.text = "我自己修改  →"
+	_refresh_mentor_question()
+
+
+func _refresh_mentor_question() -> void:
+	if not is_node_ready():
+		return
+	var supported := _phase in [Phase.WORKSHOP, Phase.CODE, Phase.CERTIFIED, Phase.ACTIVE, Phase.FAILED, Phase.LOCAL_FAILED, Phase.LOCAL_COMPLETED, Phase.CHAIN_ERROR, Phase.FREE_PLAY]
+	var available := supported and is_visible_in_tree() and not (
+		story_dialogue.visible or code_drawer.visible
+		or skill_tree_overlay.visible or bug_challenge_overlay.visible
+		or growth_summary_overlay.visible or completion_card.visible
+	)
+	var reply := "两个数组使用同一个下标，才能找到同一块土地。先计算目标湿度减去当前湿度，再根据缺口决定浇几份水。想清楚后，再去补全代码。"
+	if _phase == Phase.WORKSHOP:
+		if _workshop_step == 0:
+			reply = "同一个下标，才能找到同一块土地。比如 1 号番茄，目标湿度是 70，当前湿度是 65。\n\n先从目标数组和当前数组里，各取出下标为 i 的数，再计算目标减去当前。这样得到的，就是这块土地的湿度缺口。想清楚后，再去补全代码。"
+		elif _workshop_step == 1:
+			reply = "先看看 gap 有多大。缺口达到 30，需要浇 2 份；大于 0 但不到 30，浇 1 份就够了。\n\n如果缺口是 0 或负数，土地已经不缺水，喷头保持关闭。可以分别用 35、5 和 0 试一试你的判断。"
+	elif _phase in [Phase.FAILED, Phase.LOCAL_FAILED]:
+		reply = "先别急着改所有条件。看看结果不同的几块土地：它们种的作物一样吗？目标湿度一样吗？\n\n回到 gap 这一行，检查目标值是否也会随着 i 一起变化。先确认取到的是同一块土地的两份数据，再试着运行。"
+	if patch_dialog.visible:
+		reply = "先比较修改前后的 gap 这一行。固定的目标值，只适合部分作物；用 target[i]，才能取到当前这块土地自己的目标湿度。\n\n接受修改只会生成新草稿。你还可以检查代码，再点击直接运行，看看每块土地是否得到了合适的水量。"
+	mentor_question.configure_context("%d:%d:%s" % [_phase, _workshop_step, patch_dialog.visible], reply)
+	mentor_question.set_available(available)
+	farm_mentor.visible = available and _phase != Phase.WORKSHOP and not patch_dialog.visible
+
+
+func _on_mentor_answering_changed(answering: bool) -> void:
+	var mentor := $WorkshopOverlay/Mentor as ArtMotionTexture if _phase == Phase.WORKSHOP else farm_mentor
+	if patch_dialog.visible:
+		mentor = $PatchBackdrop/Mentor as ArtMotionTexture
+	mentor.play_clip("char-dingdang-talk" if answering else "char-dingdang-idle")
 
 
 func _reveal_evidence() -> void:
-	if _evidence_tween != null and _evidence_tween.is_valid():
-		_evidence_tween.kill()
+	# Keep the source's evidence rectangle fixed even during repeated interactions.
 	evidence_panel.visible = true
-	evidence_panel.modulate.a = 0.0
-	evidence_panel.position.y += 8.0
-	_evidence_tween = create_tween().set_parallel(true)
-	_evidence_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	_evidence_tween.tween_property(evidence_panel, "modulate:a", 1.0, _duration(0.18))
-	_evidence_tween.tween_property(evidence_panel, "position:y", evidence_panel.position.y - 8.0, _duration(0.18))
+	evidence_panel.modulate.a = 1.0
 
 
 func _bounce(control: Control) -> void:
-	var id := control.get_instance_id()
-	var active := _button_tweens.get(id) as Tween
-	if active != null and active.is_valid():
-		active.kill()
-	control.pivot_offset = control.size * 0.5
-	var tween := create_tween()
-	_button_tweens[id] = tween
-	tween.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tween.tween_property(control, "scale", Vector2(0.94, 0.94), _duration(0.06))
-	tween.tween_property(control, "scale", Vector2.ONE, _duration(0.15))
+	control.scale = Vector2.ONE
 
 
 func _duration(seconds: float) -> float:
 	return maxf(0.01, seconds * timing_scale)
+
+
+func _show_workshop_feedback(success: bool) -> void:
+	sfx.play_cue(&"Confirm" if success else &"Retry")
+	workshop_action_button.show_feedback(success)
+
+
+func present_stage_audio(result: Dictionary) -> void:
+	# Called only by the bridge's completed Build/Activation result signals.
+	# Failure feedback is handled by the existing failure phase, once.
+	if not bool(result.get("ok", false)):
+		return
+	match str(result.get("stage", "")):
+		"BUILD":
+			sfx.play_cue(&"Confirm")
+		"ACTIVATION":
+			sfx.play_cue(&"Activate")
+
+
+func _refresh_audio_ambience() -> void:
+	if not is_node_ready():
+		return
+	var quiet := patch_dialog.visible
+	for overlay: CanvasItem in [story_dialogue, code_drawer, skill_tree_overlay, workshop_overlay, bug_challenge_overlay, growth_summary_overlay, completion_card]:
+		quiet = quiet or overlay.visible
+	sfx.set_ambience_enabled(not quiet and is_visible_in_tree())
+
+func _update_workspace_composition() -> void:
+	# Opening the scroll preserves the approved farm layout.
+	code_button.disabled = code_drawer.visible
+	$Hud/ToolRail.move_child(hint_button, 0)
+	$Hud/ToolRail.move_child($Hud/ToolRail/HintSpace, 1)
+	evidence_body.size.x = (570.0 if code_drawer.visible else 1020.0) * (720.0 / 941.0)
+
+func _apply_v2_layout(value: Phase) -> void:
+	const K := 720.0 / 941.0
+	$Grass.set_background("B06-archive-background" if value == Phase.GROWTH_SUMMARY else "B01-farm-background")
+	$Hud.visible = value != Phase.GROWTH_SUMMARY
+	var tall := value == Phase.MANUAL_COMPARE
+	$Hud/FarmLayout.position = Vector2(446, 266) * K
+	# Reserve result labels in every phase so the second row never shifts.
+	$Hud/FarmLayout.size = Vector2(940, 535) * K
+	# Keep the owner's approved compact farm in every phase, including recovery.
+	$Hud/FarmLayout.scale = Vector2(0.825, 0.778)
+	plot_grid.add_theme_constant_override("v_separation", roundi(52 * K))
+	evidence_panel.position = Vector2(288, 694 if tall else 711) * K
+	evidence_panel.size = Vector2(1119, 142 if tall else 126) * K
+	evidence_title.position.y = 10.0 if tall else 22.0 * K
+	evidence_title.add_theme_font_size_override("font_size", 21 if tall else 23)
+	evidence_body.position.y = 44.0 if tall else 75.0 * K
+	evidence_body.size.y = 54.0 if tall else 40.0 * K
+	phase_strip.tooltip_text = _authoritative_snapshot_line() if _agent_mode else ""
+	if value == Phase.FAILED:
+		primary_button.position = Vector2(295, 853) * K
+		primary_button.size = Vector2(345, 74) * K
+		$Hud/ToolRail.position = Vector2(661, 857) * K
+		hint_button.custom_minimum_size = Vector2(312, 65) * K
+		$Hud/ToolRail/HintSpace.custom_minimum_size = Vector2(312, 65) * K
+	else:
+		primary_button.position = Vector2(1005, 852) * K
+		primary_button.size = Vector2(409, 74) * K
+		$Hud/ToolRail.position = Vector2(291, 857) * K
+		hint_button.custom_minimum_size = Vector2(290, 65) * K
+		$Hud/ToolRail/HintSpace.custom_minimum_size = Vector2(290, 65) * K
+
+func _layout_completion(compact: bool) -> void:
+	const K := 720.0 / 941.0
+	completion_card.position = Vector2(485, 211) * K if compact else Vector2(465, 145) * K
+	completion_card.size = Vector2(724, 497) * K if compact else Vector2(764, 646) * K
+	var content := $CompletionCard/Margin/Content as Control
+	content.size = completion_card.size
+	$CompletionCard/Margin.size = completion_card.size
+	(content.get_node("Seal") as Control).position = Vector2(259, 30) * K if compact else Vector2(295, 22) * K
+	completion_title.position = Vector2(60, 119) * K if compact else Vector2(68, 127) * K
+	completion_title.size = Vector2(604, 85) * K
+	completion_summary.position = Vector2(70, 223) * K if compact else Vector2(70, 250) * K
+	completion_summary.size = Vector2(584, 149) * K if compact else Vector2(301, 215) * K
+	if not compact:
+		completion_summary.position = Vector2(389, 234) * K
+		completion_title.position = Vector2(51, 113) * K
+		completion_title.size = Vector2(662, 57) * K
+	completion_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT if compact else HORIZONTAL_ALIGNMENT_CENTER
+	if compact:
+		completion_title.position = Vector2(57, 125) * K
+		completion_title.size = Vector2(613, 67) * K
+		completion_summary.position = Vector2(58, 215) * K
+		completion_summary.size = Vector2(611, 130) * K
+	completion_title.add_theme_font_size_override("font_size", 27)
+	completion_summary.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	completion_summary.add_theme_font_size_override("font_size", 18)
+	$CompletionCard/RewardCompanion.visible = not compact
+	$CompletionCard/RewardCompanion.position = Vector2(1400 - 465, 603 - 145) * K
+	$CompletionCard/Margin/Content/RewardTool.visible = not compact
+	$CompletionCard/Margin/Content/RewardCaption.visible = not compact
+	(content.get_node("Actions") as Control).position = Vector2(70, 387) * K if compact else Vector2(59, 530) * K
+	next_button.position = Vector2.ZERO if compact else Vector2(201, 0) * K
+	next_button.size = Vector2(586, 76) * K if compact else Vector2(229, 75) * K
+	if not compact:
+		replay_button.position = Vector2.ZERO
+		replay_button.size = Vector2(183, 75) * K
+		return_button.position = Vector2(448, 0) * K
+		return_button.size = Vector2(188, 75) * K
+
+func _show_teaching_dialogue(badge: String) -> void:
+	var profile = PROFILE_CATALOG.profile_for(&"teaching_agent")
+	if profile != null:
+		story_dialogue.play_agent_presentation(profile.display_name, profile.portrait, evidence_body.text, "", badge)
