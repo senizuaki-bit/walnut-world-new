@@ -156,6 +156,8 @@ func _initialize() -> void:
 	(level.get_node("StoryDialogueOverlay") as StoryDialogueOverlay).skip_sequence()
 	await process_frame
 	bridge.configure(store, session, level, _candidate_config())
+	var audio_cues: Array[StringName] = []
+	level.sfx.cue_played.connect(func(cue: StringName) -> void: audio_cues.append(cue))
 	if not bool(bridge.activate_initial_projection().get("ok", false)):
 		failures.append("候选兼容测试必须先通过首次权威投影门禁。")
 	level.call("_enter_code_phase")
@@ -169,6 +171,8 @@ func _initialize() -> void:
 		failures.append("合法 WATER-only REJECTED Run 应进入本地候选完成状态。")
 	if store.world_snapshot != session.authoritative_snapshot_before_run:
 		failures.append("候选演出不得修改 ClientStore.world_snapshot。")
+	if not audio_cues.has(&"Watering") or audio_cues.has(&"Complete") or level.sfx.get_node("Watering").playing:
+		failures.append("候选 WATER 动画应有水声并在结束后停止，不能播放正式完成音。")
 	if int(store.world_snapshot.get("revision", -1)) != 5:
 		failures.append("候选判题必须使用紧邻 Run 前捕获的最新权威 Snapshot。")
 	if store.objective_result.get("objective_succeeded") != false:

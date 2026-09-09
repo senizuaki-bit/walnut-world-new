@@ -111,6 +111,9 @@ func _initialize() -> void:
 	story_overlay.skip_sequence()
 	await process_frame
 	store.local_source = CropAdaptiveWateringDemo.STARTER_CODE
+	var audio_cues: Array[StringName] = []
+	level.sfx.cue_played.connect(func(cue: StringName) -> void: audio_cues.append(cue))
+	bridge.configure(store, session, level)
 	bridge.configure(store, session, level)
 	var historical_interactions: Array[Dictionary] = [{
 		"interaction_id": "interaction_historical_0001",
@@ -136,6 +139,8 @@ func _initialize() -> void:
 	):
 		failures.append("首次恢复必须静态投影已展示 Interaction，不得重播对话或角色军团。")
 	level.call("_enter_code_phase")
+	if not audio_cues.all(func(cue: StringName) -> bool: return cue == &"PanelOpen"):
+		failures.append("恢复历史结果不得重播业务成功音。")
 	var source := CropAdaptiveWateringDemo.CORRECT_CODE
 	(level.get_node("CodeDrawer/Surface/Margin/Content/CodeEditor") as CodeEdit).text = source
 	var action_stages: Array[String] = []
@@ -158,6 +163,8 @@ func _initialize() -> void:
 		await process_frame
 	if session.stages != ["build", "activate", "turn"]:
 		failures.append("一次直接运行必须在后台严格串行完成 Draft→Build→Activation→Agent Turn。")
+	if audio_cues.count(&"Confirm") != 1 or audio_cues.count(&"Activate") != 1 or audio_cues.count(&"Complete") != 1 or audio_cues.has(&"Watering"):
+		failures.append("正式构建、激活、完成应各播放一次对应音效；没有 WATER 演出时不能有水声。")
 	if store.local_source != source:
 		failures.append("正式链路必须提交代码界面的当前草稿。")
 	if (level.get_node("Hud/WateringCan") as AnimatedSprite2D).visible:

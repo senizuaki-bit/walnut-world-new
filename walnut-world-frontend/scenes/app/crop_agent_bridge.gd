@@ -61,6 +61,8 @@ func configure(
 		push_error("CropAgentBridge requires store, session and level dependencies.")
 		return
 	_level.configure_agent_mode(true)
+	build_action_finished.connect(_level.present_stage_audio)
+	activation_action_finished.connect(_level.present_stage_audio)
 	_level.configure_candidate_compatibility_available(bool(_candidate_config.get("enabled", false)))
 	_level.agent_submit_requested.connect(_on_submit_requested)
 	_level.agent_build_requested.connect(_on_build_requested)
@@ -455,6 +457,10 @@ func _exit_tree() -> void:
 
 func _disconnect_dependencies() -> void:
 	if is_instance_valid(_level):
+		if build_action_finished.is_connected(_level.present_stage_audio):
+			build_action_finished.disconnect(_level.present_stage_audio)
+		if activation_action_finished.is_connected(_level.present_stage_audio):
+			activation_action_finished.disconnect(_level.present_stage_audio)
 		if _level.agent_submit_requested.is_connected(_on_submit_requested):
 			_level.agent_submit_requested.disconnect(_on_submit_requested)
 		if _level.agent_build_requested.is_connected(_on_build_requested):

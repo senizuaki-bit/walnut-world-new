@@ -1,4 +1,6 @@
-[gd_scene load_steps=27 format=3]
+[gd_scene load_steps=28 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/audio/farm_audio.tscn" id="farm_audio"]
 
 [ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/B03-start-background.png" id="proto_farm"]
 [ext_resource type="Texture2D" path="res://assets/art/redesign/crop_adaptive/v2/components/char-player-idle.png" id="proto_explorer"]
@@ -495,3 +497,5 @@ mouse_filter = 2
 texture = ExtResource("ui-hero-crest")
 expand_mode = 1
 stretch_mode = 5
+
+[node name="FarmAudio" parent="." instance=ExtResource("farm_audio")]

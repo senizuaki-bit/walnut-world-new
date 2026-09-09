@@ -142,6 +142,7 @@ const CROP_TEXTURES := [
 @onready var growth_summary_overlay: Control = %GrowthSummaryOverlay
 @onready var growth_summary_body: RichTextLabel = %GrowthSummaryBody
 @onready var archive_button: Button = %ArchiveButton
+@onready var sfx: FarmAudio = $FarmAudio
 
 var _phase: int = Phase.INTRO
 var _manual_cursor: int = 0
@@ -180,6 +181,15 @@ var _last_candidate_result: Dictionary = {}
 
 
 func _ready() -> void:
+	for overlay: CanvasItem in [story_dialogue, code_drawer, skill_tree_overlay, workshop_overlay, bug_challenge_overlay, growth_summary_overlay, completion_card]:
+		overlay.visibility_changed.connect(_refresh_audio_ambience)
+	patch_dialog.visibility_changed.connect(_refresh_audio_ambience)
+	visibility_changed.connect(_refresh_audio_ambience)
+	watering_can.visibility_changed.connect(func() -> void:
+		if not watering_can.is_visible_in_tree():
+			sfx.stop_watering()
+	)
+	call_deferred("_refresh_audio_ambience")
 	for overlay: Control in [story_dialogue, code_drawer, skill_tree_overlay, bug_challenge_overlay, growth_summary_overlay, completion_card]:
 		overlay.visibility_changed.connect(_refresh_mentor_question)
 	patch_dialog.visibility_changed.connect(_refresh_mentor_question)
@@ -242,6 +252,7 @@ func _ready() -> void:
 
 
 func restart_level() -> void:
+	sfx.stop_all()
 	mentor_question.reset()
 	agent_interaction_presenter.clear_queue()
 	story_dialogue.skip_sequence()
@@ -596,6 +607,8 @@ func _enter_code_phase() -> void:
 func _show_code_drawer() -> void:
 	if _phase < Phase.CODE or _phase in [Phase.RUNNING, Phase.CANDIDATE_VALIDATING, Phase.CANDIDATE_PRESENTING]:
 		return
+	if not code_drawer.visible:
+		sfx.play_cue(&"PanelOpen")
 	if _drawer_tween != null and _drawer_tween.is_valid():
 		_drawer_tween.kill()
 	code_drawer.visible = true
@@ -612,6 +625,7 @@ func _show_code_drawer() -> void:
 func _hide_code_drawer() -> void:
 	if not code_drawer.visible:
 		return
+	sfx.play_cue(&"PanelClose")
 	if _drawer_tween != null and _drawer_tween.is_valid():
 		_drawer_tween.kill()
 	code_drawer.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -628,6 +642,7 @@ func _request_run() -> void:
 	_flush_autosave()
 	_build_result = evaluate_source(code_editor.text)
 	if not _build_result.get("build_ok", false):
+		sfx.play_cue(&"Retry")
 		_set_phase(Phase.CODE)
 		evidence_title.text = "构建失败 · 世界没有变化"
 		evidence_body.text = str(_build_result.get("message", "编译失败。"))
@@ -663,6 +678,7 @@ func _request_run() -> void:
 			watering_can.frame = 0
 			watering_can.speed_scale = 1.0 / maxf(timing_scale, 0.05)
 			watering_can.play(&"pour_two" if units >= 2 else &"pour")
+			sfx.start_watering()
 			await watering_can.animation_finished
 			watering_can.visible = false
 		card.set_result(units, true, units != EXPECTED_UNITS[index])
@@ -1082,6 +1098,8 @@ func present_candidate_evaluation(result: Dictionary, replay := false) -> Dictio
 			watering_can.frame = 0
 			watering_can.speed_scale = _candidate_playback_speed / maxf(timing_scale, 0.05)
 			watering_can.play(&"pour_two" if int(action.get("amount_ml", 0)) >= 500 else &"pour")
+			if not _candidate_skip_requested:
+				sfx.start_watering()
 			await watering_can.animation_finished
 			if not is_instance_valid(self):
 				return {"ok": false, "code": "CANDIDATE_PRESENTATION_CANCELLED"}
@@ -1144,6 +1162,7 @@ func _on_playback_speed_pressed() -> void:
 func _on_skip_playback_pressed() -> void:
 	if _candidate_playing:
 		_candidate_skip_requested = true
+		sfx.stop_watering()
 		watering_can.speed_scale = 1000.0
 
 
@@ -1342,7 +1361,19 @@ func _authoritative_snapshot_line() -> String:
 
 
 func _set_phase(value: Phase) -> void:
+	var previous_phase := _phase
 	_phase = value
+	if value != previous_phase:
+		match value:
+			Phase.FAILED, Phase.LOCAL_FAILED, Phase.CHAIN_ERROR:
+				sfx.stop_watering()
+				sfx.play_cue(&"Retry")
+			Phase.COMPLETED:
+				sfx.play_cue(&"Complete")
+			Phase.OBJECTIVE_COMPLETE:
+				# Only the standalone lesson uses this local completion route.
+				if not _agent_mode:
+					sfx.play_cue(&"Complete")
 	$Hud/BusyMotion.visible = value in [Phase.BUILDING, Phase.ACTIVATING, Phase.CANDIDATE_VALIDATING]
 	$Pump.set_activity(value in [Phase.OLD_TOOL, Phase.CANDIDATE_PRESENTING] or (value == Phase.RUNNING and not _agent_mode), value == Phase.CHAIN_ERROR)
 	var backdrop: String = {Phase.WORKSHOP: "B02-workshop-background", Phase.SKILL_TREE: "B04-workshop-exterior-background", Phase.SKILL_UNLOCKED: "B04-workshop-exterior-background", Phase.GROWTH_SUMMARY: "B06-archive-background"}.get(value, "B01-farm-background")
@@ -1435,7 +1466,29 @@ func _duration(seconds: float) -> float:
 
 
 func _show_workshop_feedback(success: bool) -> void:
+	sfx.play_cue(&"Confirm" if success else &"Retry")
 	workshop_action_button.show_feedback(success)
+
+
+func present_stage_audio(result: Dictionary) -> void:
+	# Called only by the bridge's completed Build/Activation result signals.
+	# Failure feedback is handled by the existing failure phase, once.
+	if not bool(result.get("ok", false)):
+		return
+	match str(result.get("stage", "")):
+		"BUILD":
+			sfx.play_cue(&"Confirm")
+		"ACTIVATION":
+			sfx.play_cue(&"Activate")
+
+
+func _refresh_audio_ambience() -> void:
+	if not is_node_ready():
+		return
+	var quiet := patch_dialog.visible
+	for overlay: CanvasItem in [story_dialogue, code_drawer, skill_tree_overlay, workshop_overlay, bug_challenge_overlay, growth_summary_overlay, completion_card]:
+		quiet = quiet or overlay.visible
+	sfx.set_ambience_enabled(not quiet and is_visible_in_tree())
 
 func _update_workspace_composition() -> void:
 	# S07 intentionally occludes the right farm; never shrink or move the plots.

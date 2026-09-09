@@ -1,4 +1,6 @@
-[gd_scene load_steps=67 format=3]
+[gd_scene load_steps=68 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/audio/farm_audio.tscn" id="farm_audio"]
 
 [ext_resource type="PackedScene" path="res://scenes/ui/mentor_question.tscn" id="mentor_question"]
 
@@ -4156,3 +4158,5 @@ offset_right = 730.712008501594
 offset_bottom = 384.1020191285866
 mouse_filter = 2
 color = Color(0.46,0.5,0.39,0.33)
+
+[node name="FarmAudio" parent="." instance=ExtResource("farm_audio")]
