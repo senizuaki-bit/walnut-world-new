@@ -583,7 +583,7 @@ theme_override_constants/separation = 18
 offset_left = 341.254
 offset_top = 203.528
 offset_right = 1060.489
-offset_bottom = 551.668
+offset_bottom = 612.880
 
 [node name="PlotGrid" type="GridContainer" parent="Hud/FarmLayout"]
 layout_mode = 2
@@ -594,7 +594,7 @@ size_flags_vertical = 3
 columns = 4
 
 theme_override_constants/h_separation = 3
-theme_override_constants/v_separation = 10
+theme_override_constants/v_separation = 40
 
 [node name="Plot0" parent="Hud/FarmLayout/PlotGrid" instance=ExtResource("2_card")]
 layout_mode = 2

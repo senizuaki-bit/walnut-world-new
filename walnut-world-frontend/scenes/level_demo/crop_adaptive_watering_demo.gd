@@ -1525,15 +1525,18 @@ func _apply_v2_layout(value: Phase) -> void:
 	$Grass.set_background("B06-archive-background" if value == Phase.GROWTH_SUMMARY else "B01-farm-background")
 	$Hud.visible = value != Phase.GROWTH_SUMMARY
 	var tall := value == Phase.MANUAL_COMPARE
-	var outcomes := value in [Phase.OLD_TOOL, Phase.RUNNING, Phase.CANDIDATE_VALIDATING, Phase.CANDIDATE_PRESENTING, Phase.FAILED, Phase.LOCAL_FAILED, Phase.LOCAL_COMPLETED]
 	$Hud/FarmLayout.position = Vector2(446, 266) * K
-	$Hud/FarmLayout.size = Vector2(940, 535 if outcomes else 455) * K
+	# Reserve result labels in every phase so the second row never shifts.
+	$Hud/FarmLayout.size = Vector2(940, 535) * K
 	# Keep the owner's approved compact farm in every phase, including recovery.
 	$Hud/FarmLayout.scale = Vector2(0.825, 0.778)
-	plot_grid.add_theme_constant_override("v_separation", roundi((52 if outcomes else 13) * K))
-	evidence_panel.position = Vector2(288, 639 if tall else 711) * K
-	evidence_panel.size = Vector2(1119, 190 if tall else 126) * K
-	evidence_body.size.y = (104 if tall else 40) * K
+	plot_grid.add_theme_constant_override("v_separation", roundi(52 * K))
+	evidence_panel.position = Vector2(288, 694 if tall else 711) * K
+	evidence_panel.size = Vector2(1119, 142 if tall else 126) * K
+	evidence_title.position.y = 10.0 if tall else 22.0 * K
+	evidence_title.add_theme_font_size_override("font_size", 21 if tall else 23)
+	evidence_body.position.y = 44.0 if tall else 75.0 * K
+	evidence_body.size.y = 54.0 if tall else 40.0 * K
 	phase_strip.tooltip_text = _authoritative_snapshot_line() if _agent_mode else ""
 	if value == Phase.FAILED:
 		primary_button.position = Vector2(295, 853) * K

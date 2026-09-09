@@ -243,9 +243,22 @@ func _initialize() -> void:
 	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.CODE)
 	var farm := level.get_node("Hud/FarmLayout") as Control
 	var compact_scale := Vector2(0.825, 0.778)
-	for phase in [CropAdaptiveWateringDemo.Phase.MANUAL_COMPARE, CropAdaptiveWateringDemo.Phase.CODE, CropAdaptiveWateringDemo.Phase.CERTIFIED, CropAdaptiveWateringDemo.Phase.ACTIVE, CropAdaptiveWateringDemo.Phase.RUNNING, CropAdaptiveWateringDemo.Phase.FAILED, CropAdaptiveWateringDemo.Phase.LOCAL_FAILED, CropAdaptiveWateringDemo.Phase.LOCAL_COMPLETED, CropAdaptiveWateringDemo.Phase.CHAIN_ERROR, CropAdaptiveWateringDemo.Phase.FREE_PLAY]:
+	var plot_rects: Array[Rect2] = []
+	for phase in [CropAdaptiveWateringDemo.Phase.MANUAL_COMPARE, CropAdaptiveWateringDemo.Phase.OLD_TOOL, CropAdaptiveWateringDemo.Phase.CODE, CropAdaptiveWateringDemo.Phase.CERTIFIED, CropAdaptiveWateringDemo.Phase.ACTIVE, CropAdaptiveWateringDemo.Phase.RUNNING, CropAdaptiveWateringDemo.Phase.CANDIDATE_VALIDATING, CropAdaptiveWateringDemo.Phase.CANDIDATE_PRESENTING, CropAdaptiveWateringDemo.Phase.FAILED, CropAdaptiveWateringDemo.Phase.LOCAL_FAILED, CropAdaptiveWateringDemo.Phase.LOCAL_COMPLETED, CropAdaptiveWateringDemo.Phase.CHAIN_ERROR, CropAdaptiveWateringDemo.Phase.FREE_PLAY]:
 		level.call("_set_phase", phase)
-		await process_frame
+		for frame in range(3):
+			await process_frame
+		for index in range(8):
+			var plot := grid.get_child(index) as CropPlotCard
+			var rect := plot.crop_art.get_global_rect()
+			if plot_rects.size() < 8:
+				plot_rects.append(rect)
+			elif not rect.is_equal_approx(plot_rects[index]):
+				failures.append("阶段 %d 的第 %d 块作物发生位移。" % [phase, index])
+			var plaque := plot.get_node("Canvas/ResultPlaque") as Control
+			var lower_bound := (grid.get_child(index + 4) as Control).get_global_rect().position.y if index < 4 else evidence_panel.get_global_rect().position.y
+			if plaque.get_global_rect().end.y + 4.0 > lower_bound:
+				failures.append("结果标签必须与下一排作物或说明区保持间距。")
 		if not farm.scale.is_equal_approx(compact_scale) or not farm.position.is_equal_approx(Vector2(446, 266) * (720.0 / 941.0)):
 			failures.append("农田阶段 %d 必须沿用已确认的缩小尺寸与位置。" % phase)
 		if farm.get_global_rect().end.y > evidence_panel.get_global_rect().position.y:
@@ -263,6 +276,16 @@ func _initialize() -> void:
 	level.call("_hide_code_drawer")
 	if not farm.scale.is_equal_approx(compact_scale):
 		failures.append("关闭技能卷轴后必须恢复农田的正常尺寸。")
+	level.call("_begin_manual_compare")
+	for selected in [false, true]:
+		if selected:
+			level.call("_on_plot_pressed", 1)
+		for frame in range(3):
+			await process_frame
+		if evidence_body.get_content_height() > evidence_body.size.y:
+			failures.append("手动比较说明必须完整显示，不能因预留结果行而截断。")
+		if evidence_panel.get_global_rect().end.y + 4 > level.water_choices.get_global_rect().position.y:
+			failures.append("手动比较说明不得遮挡水量选择按钮。")
 	level.queue_free()
 	await process_frame
 	story_overlay = (load("res://scenes/ui/story_dialogue_overlay.tscn") as PackedScene).instantiate() as StoryDialogueOverlay
