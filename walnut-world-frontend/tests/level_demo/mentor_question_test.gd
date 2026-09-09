@@ -76,6 +76,13 @@ func _initialize() -> void:
 	socket.incoming.append({"type": "response.done", "response_id": "reply_2"})
 	await process_frame
 	check(question.state == MentorQuestion.State.LISTENING and question.reply_text.text.ends_with("新的解释。"), "完成事件恢复聆听并保留增量回答")
+	socket.incoming.append({"type": "response.output_text.delta", "response_id": "reply_3", "text": "第三轮回答。"})
+	socket.incoming.append({"type": "response.canceled", "response_id": ""})
+	socket.incoming.append({"type": "response.output_text.delta", "response_id": "reply_3", "text": "迟到的旧字幕"})
+	socket.incoming.append({"type": "response.output_audio.delta", "response_id": "reply_3", "audio": "AQABAA=="})
+	await process_frame
+	check(question.state == MentorQuestion.State.LISTENING and question.reply_text.text.ends_with("第三轮回答。"), "空 response_id 的取消事件仍应取消当前已知回答")
+	check(question.voice.get("_audio").is_empty() and not question.voice.speaker.playing, "匿名取消后不能继续播放上一段已知回答的迟到音频")
 	question.ask_button.pressed.emit()
 	check(socket.state == WebSocketPeer.STATE_CLOSED and socket.sent.back().type == "close", "第二次点击停止并关闭连接")
 	check(not question.voice.microphone.playing and not question.voice.speaker.playing, "关闭清理录音和播放")
@@ -103,6 +110,11 @@ func _initialize() -> void:
 	level.code_drawer.hide()
 	await process_frame
 	check(question.visible, "关闭卷轴恢复入口")
+	socket.incoming.append({"type": "voice.error", "code": "VOICE_CONFIGURATION_INVALID"})
+	await process_frame
+	check(question.voice.state == "IDLE" and question.voice.get("_socket") == null, "服务配置错误后释放语音连接")
+	check(not question.voice.microphone.playing and not question.voice.speaker.playing, "服务错误后停止录音和播放")
+	check(question.ask_label.text == "问叮当" and not question.ask_button.disabled and not level.code_button.disabled, "语音错误不能锁住提问按钮或代码入口")
 	# Preserve resampling phase across uneven capture blocks (48k -> 16k).
 	var codec := Pcm.new()
 	var samples := PackedVector2Array()

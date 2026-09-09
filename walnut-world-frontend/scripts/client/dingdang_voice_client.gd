@@ -161,11 +161,12 @@ func _receive(message: Dictionary) -> void:
 		_set_state("READY")
 	elif kind == "voice.error":
 		var code := str(message.get("code", ""))
-		_fail({"VOICE_DISABLED": "当前服务尚未开启语音。", "VOICE_AUTH_FAILED": "登录状态已过期，请重新进入游戏。", "VOICE_SESSION_UNAVAILABLE": "当前关卡会话不可用，请重新进入。"}.get(code, "语音服务暂时不可用，请稍后重试。"))
+		_fail({"VOICE_DISABLED": "当前服务尚未开启语音。", "VOICE_CONFIGURATION_INVALID": "语音服务尚未准备好，你可以继续操作关卡。", "VOICE_AUTH_FAILED": "语音鉴权失败，请重新连接；持续失败请联系老师。", "VOICE_SESSION_UNAVAILABLE": "当前关卡会话不可用，请重新进入。"}.get(code, "语音服务暂时不可用，请稍后重试。"))
 	elif kind == "session.closed":
 		close()
 	elif kind == "response.canceled":
-		_cancel_response(str(message.get("response_id", _response_id)))
+		var cancelled_id := str(message.get("response_id", ""))
+		_cancel_response(_response_id if cancelled_id.is_empty() else cancelled_id)
 	elif kind.begins_with("conversation.item.input_audio_transcription."):
 		if kind.ends_with("started"):
 			transcript_received.emit("", true)
@@ -190,6 +191,8 @@ func _receive(message: Dictionary) -> void:
 				return
 		if _new_response or (not response_id.is_empty() and response_id != _response_id):
 			_response_id = response_id
+			if not response_id.is_empty():
+				_drop_anonymous = false
 			_new_response = false
 			response_started.emit()
 		if kind in ["response.output_text.delta", "response.output_text.done"]:
@@ -216,8 +219,7 @@ func _cancel_response(response_id: String) -> void:
 			_cancelled_ids.erase(_cancelled_ids.keys()[0])
 		if not _response_id.is_empty() and response_id != _response_id:
 			return # A late cancellation must not stop a newer answer.
-	else:
-		_drop_anonymous = true
+	_drop_anonymous = true
 	_clear_audio()
 	_new_response = true
 	response_cancelled.emit()
