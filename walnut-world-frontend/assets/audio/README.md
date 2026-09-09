@@ -1,5 +1,15 @@
 # 核桃代码世界 SFX
 
+## 背景音乐（2026-09-09 新增）
+
+`Morning_In_The_Garden_Patch.mp3` 由项目负责人提供，原文件来自 `D:/Chrome/ChromeDownloads/Morning_In_The_Garden_Patch.mp3`，未经转码，时长约 162.30 秒。它不属于下方的 CC0 音效包。SHA-256：`38e099b13b62a05008d62be263ba359f99719aeda9acb4409ab5a63404c6b576`。
+
+音乐预置在 `scenes/audio/background_music.tscn`，由 `GameFlow/BackgroundMusic` 唯一实例播放，经独立 Music 总线输出。MP3 导入设置 `loop=true`；默认音量 -20 dB（另受 Master -3 dB 影响），启动从 -60 dB 在 1.2 秒内淡入。正常关闭游戏窗口时先用 1.2 秒淡出，再退出。
+
+开始页、农田、实验、重开与返回首页共用同一播放器，页面切换不重置进度。直接运行独立关卡场景（F6）不会加载 GameFlow 的 BGM；运行项目（F5）或 `game_flow.tscn` 可试听。音量与淡入淡出时长在播放器的 `music_volume_db`、`fade_seconds` 导出属性调整。
+
+测试：`tests/level_demo/background_music_test.gd` 验证 MP3 解码、曲末循环、淡入淡出、切页/重开连续播放与退出处理连接。未进行人工听感验收。
+
 2026-09-09 下载并接入的首批 CC0 音频，共 9 个文件，约 0.7 MB。短音效为 44.1 kHz／单声道／16 位 WAV，环境声为 OGG。文件已做峰值限制及首尾淡入淡出；这些是技术处理，不代表人工听感验收已完成。
 
 | 文件 | 原始素材 | 使用位置 |

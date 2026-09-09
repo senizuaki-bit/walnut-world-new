@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/audio/background_music.gd" id="script"]
+[ext_resource type="AudioStream" path="res://assets/audio/Morning_In_The_Garden_Patch.mp3" id="music"]
+
+[node name="BackgroundMusic" type="AudioStreamPlayer"]
+process_mode = 3
+stream = ExtResource("music")
+volume_db = -60.0
+bus = &"Music"
+script = ExtResource("script")
