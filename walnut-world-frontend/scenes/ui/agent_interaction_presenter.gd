@@ -163,6 +163,8 @@ func _reject(reason: String) -> bool:
 
 func _response_label(response_type: String, hint_level_value: Variant) -> String:
 	match response_type:
+		"message":
+			return "对话"
 		"question":
 			return "追问"
 		"hint":

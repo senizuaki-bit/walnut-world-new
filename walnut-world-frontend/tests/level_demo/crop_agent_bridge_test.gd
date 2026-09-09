@@ -87,7 +87,7 @@ class FakeSession:
 		var interactions: Array[Dictionary] = [{
 			"interaction_id": "interaction_hint",
 			"role": "teaching_agent",
-			"response_type": "hint",
+			"response_type": "message",
 			"hint_level": 1,
 			"question": null,
 			"feedback": {"message": "请比较同一下标的目标值与当前值。"},

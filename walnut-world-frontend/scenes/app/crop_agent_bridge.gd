@@ -74,6 +74,8 @@ func configure(
 	_session.connect("capability_unavailable", _on_capability_unavailable)
 	_session.connect("interactions_recovered", _on_interactions_recovered)
 	_session.connect("run_resolved", _on_run_resolved)
+	if _session.has_signal("objective_available"):
+		_session.connect("objective_available", _on_objective_available)
 
 
 func activate_initial_projection() -> Dictionary:
@@ -343,6 +345,11 @@ func _on_run_resolved(run: Dictionary) -> void:
 		_last_run = run.duplicate(true)
 
 
+func _on_objective_available(_run: Dictionary) -> void:
+	if _submission_running and is_instance_valid(_level):
+		_level.update_agent_submission_stage("运行已成功，世界结果已提交。叮当正在整理反馈……")
+
+
 func _candidate_mode_enabled() -> bool:
 	return bool(_candidate_config.get("enabled", false))
 
@@ -368,7 +375,7 @@ func _teaching_responses_only(interactions: Array[Dictionary]) -> Array[Dictiona
 	# 只留 "hint" 会把苏格拉底式提问整条丢掉，学生点了按钮却什么都看不到。
 	var visible: Array[Dictionary] = []
 	for interaction: Dictionary in interactions:
-		if str(interaction.get("response_type", "")) in ["hint", "question"]:
+		if str(interaction.get("response_type", "")) in ["hint", "question", "message"] and str(interaction.get("role", "")) in ["teaching_agent", "bug_agent"]:
 			visible.append(interaction.duplicate(true))
 	return visible
 
@@ -483,3 +490,5 @@ func _disconnect_dependencies() -> void:
 			_session.disconnect("interactions_recovered", _on_interactions_recovered)
 		if _session.is_connected("run_resolved", _on_run_resolved):
 			_session.disconnect("run_resolved", _on_run_resolved)
+		if _session.has_signal("objective_available") and _session.is_connected("objective_available", _on_objective_available):
+			_session.disconnect("objective_available", _on_objective_available)
