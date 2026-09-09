@@ -12,6 +12,8 @@
 
 ## 角色 2D 提示与权威世界演出
 
+叮当师傅新增[长按提问前端原型](docs/design/mentor-question-prototype.md)，用于本地演示聆听、逐字回复和“我懂了”关闭流程；不读取麦克风或请求语音/Agent 服务，示例回复不代表真实 Agent 输出。固定台词沿用原对话框。
+
 这两条表现链彼此独立，不能混用：
 
 - `AgentInteraction.role=bug_agent` 经 `AgentInteractionPresenter` 的 FIFO 队列触发本地 `world_cue_requested("bug_legion", active)`，只显示/关闭 `BugLegion2D`。这是角色对话的本地 2D 视觉提示，不创建 `WorldPresentationEvent`，不推进 World revision，也不改变 Snapshot。

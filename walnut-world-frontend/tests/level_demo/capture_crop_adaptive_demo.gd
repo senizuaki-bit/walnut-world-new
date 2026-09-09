@@ -20,7 +20,7 @@ func _initialize() -> void:
 		elif argument.begins_with("--output="):
 			output_path = argument.trim_prefix("--output=")
 	state_name = {"free_play": "free", "world_feedback": "feedback"}.get(state_name, state_name)
-	if state_name not in ["start", "intro", "manual", "manual_choice", "old_tool", "skill_tree", "workshop", "workshop_dialogue", "workshop_branch", "workshop_summary", "bug", "growth", "patch", "free", "preview", "feedback", "hint", "validating", "unlocked", "code", "failed", "results", "complete"]:
+	if state_name not in ["start", "intro", "manual", "manual_choice", "old_tool", "skill_tree", "workshop", "workshop_dialogue", "workshop_branch", "workshop_summary", "bug", "growth", "patch", "free", "preview", "feedback", "hint", "validating", "unlocked", "code", "failed", "results", "complete", "question_idle", "question_listening", "question_answering", "question_complete", "question_farm"]:
 		push_error("Unknown capture state: %s" % state_name)
 		quit(1)
 		return
@@ -39,7 +39,25 @@ func _initialize() -> void:
 		level.timing_scale = 0.05
 		if state_name != "intro":
 			(level.get_node("StoryDialogueOverlay") as StoryDialogueOverlay).skip_sequence()
-		if state_name == "manual":
+		if state_name.begins_with("question_"):
+			if state_name == "question_farm":
+				level.call("_set_phase", CropAdaptiveWateringDemo.Phase.CODE)
+			else:
+				level.call("_begin_workshop_experiments")
+				level.story_dialogue.skip_sequence()
+			var question := level.mentor_question
+			if state_name in ["question_listening", "question_answering", "question_complete"]:
+				question.begin_hold()
+				await create_timer(0.4).timeout
+				if state_name != "question_listening":
+					question.end_hold()
+					await create_timer(0.8).timeout
+					if state_name == "question_complete":
+						question.typing_timer.wait_time = 0.001
+						var deadline := Time.get_ticks_msec() + 20000
+						while question.state != MentorQuestion.State.COMPLETE and Time.get_ticks_msec() < deadline:
+							await process_frame
+		elif state_name == "manual":
 			level.call("_begin_manual_compare")
 		elif state_name == "manual_choice":
 			level.call("_begin_manual_compare")

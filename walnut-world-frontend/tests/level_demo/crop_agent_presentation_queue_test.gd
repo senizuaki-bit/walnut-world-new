@@ -59,7 +59,11 @@ func _initialize() -> void:
 		_abort("FIFO 第二项 Bug 先生开始展示时必须同步显示 2D 军团。")
 		return
 	overlay.skip_sequence()
-	await create_timer(0.22).timeout
+	# Atlas loading can delay frames on Windows. Wait for the observable dismissal
+	# with a deadline instead of assuming a 0.18 s animation has settled at 0.22 s.
+	var dismiss_deadline := Time.get_ticks_msec() + 2000
+	while legion.visible and Time.get_ticks_msec() < dismiss_deadline:
+		await process_frame
 	if presenter.is_presenting() or presenter.pending_count() != 0 or legion.visible:
 		_abort("队列结束后必须关闭 Bug 军团且不残留待展示 Interaction。")
 		return
