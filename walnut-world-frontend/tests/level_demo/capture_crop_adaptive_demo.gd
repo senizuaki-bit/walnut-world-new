@@ -49,9 +49,15 @@ func _initialize() -> void:
 			if state_name in ["question_listening", "question_answering", "question_complete"]:
 				# Screenshot-only display state: no audio capture or model request.
 				question.call("_on_voice_state", "READY")
+				question.voice.state = "READY" # Display-only fixture; processing remains off.
 				if state_name != "question_listening":
+					question.voice.set("_new_response", false)
 					question.call("_on_response_started")
+					question.call("_on_transcript_received", "目标湿度和当前湿度，应该先比较哪个？", true)
 					question.call("_on_text_received", "先比较同一下标的目标湿度与当前湿度，再计算它们的差。", state_name == "question_complete")
+					if state_name == "question_complete":
+						question.voice.set("_new_response", true)
+						question.call("_on_response_finished")
 		elif state_name == "manual":
 			level.call("_begin_manual_compare")
 		elif state_name == "manual_choice":

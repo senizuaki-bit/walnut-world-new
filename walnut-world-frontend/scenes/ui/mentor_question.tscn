@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scenes/ui/mentor_question.gd" id="script"]
 [ext_resource type="Theme" path="res://resources/ui/v2/theme.tres" id="theme"]
@@ -7,12 +7,13 @@
 [ext_resource type="Font" path="res://resources/ui/v2/bold.tres" id="bold"]
 [ext_resource type="Texture2D" path="res://assets/ui/microphone.svg" id="mic"]
 [ext_resource type="PackedScene" path="res://scenes/ui/dingdang_voice_client.tscn" id="voice"]
+[ext_resource type="Theme" path="res://resources/ui/voice_actions.tres" id="actions"]
 
 [sub_resource type="StyleBoxFlat" id="paper"]
 content_margin_left = 12.0
 content_margin_top = 12.0
 content_margin_right = 12.0
-content_margin_bottom = 8.0
+content_margin_bottom = 12.0
 bg_color = Color(0.985, 0.93, 0.77, 1)
 border_width_left = 2
 border_width_top = 2
@@ -61,7 +62,7 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -216.0
-offset_top = -305.0
+offset_top = -370.0
 offset_right = -18.0
 offset_bottom = -14.0
 grow_horizontal = 0
@@ -73,41 +74,92 @@ alignment = 2
 [node name="ReplyPanel" type="PanelContainer" parent="Stack"]
 unique_name_in_owner = true
 visible = false
-custom_minimum_size = Vector2(0, 218)
+custom_minimum_size = Vector2(0, 278)
 layout_mode = 2
 theme_override_styles/panel = SubResource("paper")
 
 [node name="Content" type="VBoxContainer" parent="Stack/ReplyPanel"]
 layout_mode = 2
-theme_override_constants/separation = 4
+theme_override_constants/separation = 10
+
+[node name="Header" type="HBoxContainer" parent="Stack/ReplyPanel/Content"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="Title" type="Label" parent="Stack/ReplyPanel/Content/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("bold")
+theme_override_font_sizes/font_size = 14
+text = "语音对话"
+
+[node name="LatestButton" type="Button" parent="Stack/ReplyPanel/Content/Header"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(54, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.15, 0.36, 0.27, 1)
+theme_override_colors/font_hover_color = Color(0.15, 0.36, 0.27, 1)
+theme_override_colors/font_disabled_color = Color(0.47, 0.48, 0.37, 1)
+theme_override_styles/normal = ExtResource("empty")
+theme_override_styles/hover = SubResource("focus")
+theme_override_styles/pressed = SubResource("focus")
+theme_override_styles/focus = SubResource("focus")
+theme_override_styles/disabled = ExtResource("empty")
+text = "最新 ↓"
+tooltip_text = "回到最新一句，并继续跟随字幕"
+disabled = true
 
 [node name="ReplyScroll" type="ScrollContainer" parent="Stack/ReplyPanel/Content"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 154)
+custom_minimum_size = Vector2(0, 160)
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
+vertical_scroll_mode = 2
 
-[node name="ReplyText" type="Label" parent="Stack/ReplyPanel/Content/ReplyScroll"]
+[node name="ReplyText" type="RichTextLabel" parent="Stack/ReplyPanel/Content/ReplyScroll"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.13, 0.25, 0.19, 1)
-theme_override_font_sizes/font_size = 18
-autowrap_mode = 2
+theme_override_colors/default_color = Color(0.13, 0.25, 0.19, 1)
+theme_override_colors/selection_color = Color(0.30, 0.53, 0.36, 0.3)
+theme_override_font_sizes/normal_font_size = 17
+theme_override_constants/line_separation = 5
+fit_content = true
+scroll_active = false
+selection_enabled = true
+autowrap_mode = 3
 
-[node name="UnderstoodButton" type="Button" parent="Stack/ReplyPanel/Content"]
+[node name="Actions" type="HBoxContainer" parent="Stack/ReplyPanel/Content"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 42)
+theme_override_constants/separation = 6
+
+[node name="InterruptButton" type="Button" parent="Stack/ReplyPanel/Content/Actions"]
 unique_name_in_owner = true
-visible = false
-custom_minimum_size = Vector2(80, 36)
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+size_flags_horizontal = 3
+theme = ExtResource("actions")
+text = "打断回答"
+tooltip_text = "停止叮当当前的回答，继续听你说话；不会结束对话"
+disabled = true
+
+[node name="UnderstoodButton" type="Button" parent="Stack/ReplyPanel/Content/Actions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(46, 42)
 layout_mode = 2
 size_flags_horizontal = 8
-text = "我懂了"
+text = "收起"
+tooltip_text = "收起文字，不关闭语音连接"
+theme_override_font_sizes/font_size = 14
 theme_override_colors/font_color = Color(0.13, 0.30, 0.23, 1)
 theme_override_styles/normal = ExtResource("empty")
 theme_override_styles/hover = SubResource("focus")
 theme_override_styles/pressed = SubResource("focus")
 theme_override_styles/focus = SubResource("focus")
+theme_override_styles/disabled = ExtResource("empty")
 
 [node name="AskButton" type="Button" parent="Stack"]
 unique_name_in_owner = true
@@ -179,12 +231,6 @@ text = "向叮当师傅请教"
 autowrap_mode = 2
 horizontal_alignment = 1
 vertical_alignment = 1
-
-[node name="InterruptButton" type="Button" parent="Stack/ReplyPanel/Content"]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-text = "打断，我来说"
 
 [node name="FollowTimer" type="Timer" parent="."]
 wait_time = 0.01
