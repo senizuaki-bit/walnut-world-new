@@ -73,9 +73,16 @@ func _initialize() -> void:
 	socket.incoming.append({"type": "response.canceled", "response_id": "reply_1"})
 	await process_frame
 	check(question.state == MentorQuestion.State.ANSWERING, "旧回答迟到的取消事件不能打断新回答")
+	var completions := {"count": 0}
+	question.voice.response_finished.connect(func(): completions.count += 1)
+	# The real Doubao service ends with audio.done without a response.done.
+	socket.incoming.append({"type": "response.output_text.done", "response_id": "reply_2", "text": ""})
+	socket.incoming.append({"type": "response.output_audio.done", "response_id": "reply_2"})
+	await process_frame
+	check(question.state == MentorQuestion.State.LISTENING and question.reply_text.text.ends_with("新的解释。") and completions.count == 1, "真实服务仅发送 audio.done 时也恢复聆听并保留增量回答")
 	socket.incoming.append({"type": "response.done", "response_id": "reply_2"})
 	await process_frame
-	check(question.state == MentorQuestion.State.LISTENING and question.reply_text.text.ends_with("新的解释。"), "完成事件恢复聆听并保留增量回答")
+	check(completions.count == 1, "后续 response.done 不重复发出回答完成信号")
 	socket.incoming.append({"type": "response.output_text.delta", "response_id": "reply_3", "text": "第三轮回答。"})
 	socket.incoming.append({"type": "response.canceled", "response_id": ""})
 	socket.incoming.append({"type": "response.output_text.delta", "response_id": "reply_3", "text": "迟到的旧字幕"})
@@ -83,6 +90,9 @@ func _initialize() -> void:
 	await process_frame
 	check(question.state == MentorQuestion.State.LISTENING and question.reply_text.text.ends_with("第三轮回答。"), "空 response_id 的取消事件仍应取消当前已知回答")
 	check(question.voice.get("_audio").is_empty() and not question.voice.speaker.playing, "匿名取消后不能继续播放上一段已知回答的迟到音频")
+	socket.incoming.append({"type": "response.output_audio.done", "response_id": ""})
+	await process_frame
+	check(completions.count == 1, "取消后迟到的匿名 audio.done 不作为新回答完成")
 	question.ask_button.pressed.emit()
 	check(socket.state == WebSocketPeer.STATE_CLOSED and socket.sent.back().type == "close", "第二次点击停止并关闭连接")
 	check(not question.voice.microphone.playing and not question.voice.speaker.playing, "关闭清理录音和播放")

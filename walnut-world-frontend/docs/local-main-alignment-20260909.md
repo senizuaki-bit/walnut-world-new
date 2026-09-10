@@ -2,7 +2,7 @@
 
 ## 当前结论
 
-2026-09-09，前端正式界面到真实 Gateway、PostgreSQL、Docker 编译沙箱、Worker 和 DeepSeek 的正常业务链路已验证。实时语音仍被后端凭据配置阻塞，尚不能宣布所有功能验收完成。
+2026-09-10 更新：前端正式界面到真实 Gateway、PostgreSQL、Docker 编译沙箱、Worker 和 DeepSeek 的正常业务链路已验证。用户提供临时凭据后，真实 Godot 语音客户端→main Gateway→豆包实时语音也已通过两轮合成语音输入验收；实际麦克风、耳机听感尚待人工检查。
 
 - 集成分支：`codex/frontend-main-local-20260909`，工作树 `D:/FeishuAIreview/walnut-interface-audit-20260909`。
 - 基线：`origin/main` / `00052e9`。后端、Agent 和根目录文档均保留 main；所有提交差异限定在 `walnut-world-frontend/`。
@@ -23,14 +23,16 @@
 | 工坊动画断言 | 原失败把验证错误区的有意排版变化算成动画移动；现在等错误区布局完成后测按钮动画稳定性，保留独立错误布局测试，两项均通过 |
 | 语音客户端协议 | 前轮真实 Godot WebSocket→main 路由测试通过；外部 Provider 与上下文读取被测试替身替换，此证据不代表真实豆包语音通过 |
 | 语音取消与失败边界 | 新增用例复现空 response_id 取消后旧字幕/音频继续进入的问题；前端修复后通过。配置失败会释放连接与音频、恢复提问按钮，代码入口仍可用 |
+| 真实豆包凭据 | main Agent 原有检查脚本返回 VOICE_CONNECTED、VOICE_AUDIO_OK，收到 153644 字节的 24 kHz PCM |
+| 真实三端语音 | 使用生产 Godot 客户端、真实 main 路由和豆包；以本机合成的 16 kHz PCM 替代物理麦克风，两轮均收到识别文字、回复文字和音频并进入播放；上下文从测试数字 17 更新为 83 后正确回答 83；打断收到服务端确认，关闭释放播放资源 |
+| 语音结束事件 | 实测部分回答只有 response.output_audio.done，没有 response.done；前端支持两种结束事件并去重，保留已排队音频。回归用例修复前失败、修复后通过，取消后的匿名结束事件不会误报新回答完成 |
+| 语音后数据恢复 | 只读检查确认 Session、Skill、Draft、World、Interaction cursor 与此前指纹一致，零 HTTP 写请求 |
 
 正常主链路在现有本地持久样例数据中执行，新增了测试草稿、编译失败、Run 和聊天记录，没有重置这份数据库。完成时已恢复为成功代码。数据卷被保留。
 
 ## 未完成与限制
 
-1. **真实语音：** 实际 main WebSocket 在 start 后返回 `voice.error / VOICE_CONFIGURATION_INVALID`。默认 Agent 密钥文件不存在，当前进程环境未配置豆包凭据；等待用户提供本机密钥路径。密钥只配置后端进程环境，不加入代码/提交，也不发给前端。之后仍需完成真实语音连通和耳机/麦克风验收。
-
-   后续复核了原目录/集成目录默认密钥路径，以及 Process、User、Machine 三层豆包凭据环境变量，均未配置。当前主服务仍为 RUNNING。前端按主协议将无 ID 的取消作用于当前回答，并过滤在途旧包；鉴权错误提示同时涵盖游戏与上游凭据问题，不再一律误报游戏登录过期。
+1. **真人语音与凭据有效期：** 2026-09-09 的 `VOICE_CONFIGURATION_INVALID` 已由临时进程环境配置解除。供应商凭据未写入代码、配置文件、Git 或前端进程；用户计划测试后销毁，销毁后语音将不可用，后续服务重启也需要重新提供有效凭据。自动验收使用合成录音和无头音频驱动，不能证明物理麦克风权限、实际扬声器听感或回声效果。实际真人连续说话、插话和耳机体验仍待检查。
 2. **故障注入：** main 自带真实 Provider 验收在独立临时数据库中故意丢失一次模型响应，编译后的提示工作流报 `hint decision closure mismatch: SOURCE,DEGRADED`，终态 INTERNAL_ERROR。本轮未修改后端/Agent，也没有通过前端伪造反馈掩盖错误。正常网络路径随后独立验证通过。
 3. **可选世界演出：** 当前 Crop 场景沿用发布的 `world_presentation_enabled=false`、`skill_patch_enabled=false`。强制打开另一条 HARVEST 演出开关时，历史持久数据接口返回 EVENT_SEQUENCE_GAP；没有为通过验收而跳过校验或把本地动作冒充权威演出。
 4. 部分 Godot 场景短时退出仍报告 ObjectDB/resource 未释放；不影响已验证业务断言，但不能称为无警告。
@@ -60,5 +62,8 @@ $godot = (Get-Command Godot_v4.7.1-stable_win64_console.exe).Source
 - `audit-results/live-current-session-full.log`
 - `audit-results/live-recovery-before.json`、`live-recovery-after.log`
 - `audit-results/live-voice-readiness.json`
+- `audit-results/live-doubao-frontend-after-fix.log`（真实供应商；前述 readiness 是未配置时的历史结果）
+- `audit-results/voice-audio-done-before-fix.log`、`voice-audio-done-after-fix.log`
+- `audit-results/live-after-doubao-recovery.log`
 - `audit-results/live-m1-e2e.log`（故障注入失败证据）
 - `audit-results/final-frontend-regression.log`、`final-version-check.log`

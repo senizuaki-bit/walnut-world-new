@@ -174,9 +174,11 @@ func _receive(message: Dictionary) -> void:
 			var text := str(message.get("text", ""))
 			if not text.is_empty():
 				transcript_received.emit(text, kind.ends_with("completed"))
-	elif kind == "response.done":
+	elif kind in ["response.done", "response.output_audio.done"]:
 		var completed_id := str(message.get("response_id", ""))
-		if _cancelled_ids.has(completed_id) or (not completed_id.is_empty() and completed_id != _response_id):
+		# Doubao can finish its output with audio.done alone. This marks
+		# generation complete; already queued PCM still drains normally.
+		if _new_response or (completed_id.is_empty() and _drop_anonymous) or _cancelled_ids.has(completed_id) or (not completed_id.is_empty() and completed_id != _response_id):
 			return
 		_new_response = true
 		response_finished.emit()
