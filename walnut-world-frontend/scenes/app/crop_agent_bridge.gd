@@ -158,7 +158,7 @@ func _on_draft_changed(source: String, state: int) -> void:
 
 
 func _on_submit_requested(source: String) -> void:
-	if not _projection_active or _submission_running or _build_running or _activation_running or _level == null:
+	if not _projection_active or _submission_running or _build_running or _activation_running or _hint_running or _level == null:
 		return
 	_submission_running = true
 	_last_error_message = ""
@@ -266,7 +266,7 @@ func _on_submit_requested(source: String) -> void:
 
 
 func _on_build_requested(source: String) -> void:
-	if not _projection_active or _submission_running or _build_running or _activation_running or _level == null:
+	if not _projection_active or _submission_running or _build_running or _activation_running or _hint_running or _level == null:
 		return
 	_build_running = true
 	_last_error_message = ""
@@ -294,7 +294,7 @@ func _on_build_requested(source: String) -> void:
 
 
 func _on_activation_requested() -> void:
-	if not _projection_active or _submission_running or _build_running or _activation_running or _level == null:
+	if not _projection_active or _submission_running or _build_running or _activation_running or _hint_running or _level == null:
 		return
 	_activation_running = true
 	_last_error_message = ""
@@ -321,14 +321,20 @@ func _on_activation_requested() -> void:
 
 
 func _on_hint_requested(message: String) -> void:
-	if not _projection_active or _hint_running or _submission_running or _level == null:
+	if not _projection_active or _hint_running or _submission_running or _build_running or _activation_running or _level == null:
 		return
 	_hint_running = true
-	_level.update_agent_submission_stage("正在向叮当师傅请求正式提示……", false)
+	_last_error_message = ""
+	_last_error_code = ""
+	_last_error.clear()
+	_level.set_hint_pending(true)
+	_level.update_agent_submission_stage("叮当师傅正在查看代码和验证结果……", false)
 	await _session.call("request_hint", _candidate_hint_message(message))
 	if not is_instance_valid(self):
 		return
 	_hint_running = false
+	if is_instance_valid(_level):
+		_level.set_hint_pending(false)
 
 
 func configure_voice(base_url: String, token: String, session_id: String) -> void:
