@@ -23,6 +23,10 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 ClientStore="*res://autoload/client_store.gd"
 SessionController="*res://autoload/session_controller.gd"
 
+[audio]
+
+driver/enable_input=true
+
 [display]
 
 window/size/viewport_width=1280

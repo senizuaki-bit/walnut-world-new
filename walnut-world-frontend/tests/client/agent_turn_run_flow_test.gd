@@ -14,6 +14,7 @@ class Game:
 	var evidence_reads := 0
 	var event_reads := 0
 	var emit_event_gap := false
+	var command_reads := 0
 
 	func submit_agent_turn(context: Dictionary, _session: String, _key: String, value: Dictionary) -> Dictionary:
 		contexts.append(context.duplicate(true))
@@ -22,10 +23,11 @@ class Game:
 
 	func get_command(context: Dictionary, command_id: String) -> Dictionary:
 		contexts.append(context.duplicate(true))
+		command_reads += 1
 		return {"ok": true, "headers": {}, "value": {
 			"command_id": command_id,
-			"terminal": true,
-			"status": "APPLIED",
+			"terminal": command_reads > 2,
+			"status": "APPLIED" if command_reads > 2 else "RUNNING",
 			"result": {"result_type": "WORLD_COMMIT", "world_id": "world_demo_0001", "previous_revision": 4, "world_revision": 5, "first_event_sequence": 8, "last_event_sequence": 9},
 			"links": {"run": "/v1/runs/run_demo_0001"},
 		}}
@@ -41,7 +43,7 @@ class Game:
 			"terminal": true,
 			"skill": {"skill_id": "skill_demo_0001", "skill_version_id": "skillver_demo_0001", "artifact_sha256": "c".repeat(64), "certification_id": "cert_demo_0001"},
 			"world_application": {"status": "COMMITTED", "receipt": _receipt(), "failure": null},
-			"agent_feedback": _feedback(),
+			"agent_feedback": _feedback() if command_reads > 2 else null,
 			"evidence_refs": [{"evidence_id": "evidence_world_demo_0001"}],
 		}}
 
@@ -131,8 +133,16 @@ func _initialize() -> void:
 	controller.configure(game, product)
 	controller.configure_polling({"initial_delay_seconds": 0.0, "base_delay_seconds": 0.0, "max_delay_seconds": 0.0, "jitter_ratio": 0.0, "interaction_delay_seconds": 0.0, "interaction_deadline_seconds": 0.02})
 	controller.configure_authority(_bootstrap(), {"session_id": "session_demo_0001", "world_id": "world_demo_0001", "content": _bootstrap().content})
+	var early_notices: Array[Dictionary] = []
+	controller.objective_available.connect(func(run: Dictionary) -> void:
+		early_notices.append({"run": run, "revision": store.world_snapshot.revision, "pending": store.get_pending_operation("agent_turn"), "flow": store.flow_state})
+	)
 	product.mismatch_feedback = true
 	await controller.request_turn()
+	if early_notices.size() != 1 or early_notices[0].revision != 4 or early_notices[0].pending.is_empty() or early_notices[0].flow == WalnutClientStore.FlowState.COMPLETED or early_notices[0].run.agent_feedback != null:
+		push_error("Early successful Run must announce once while keeping pending operation and world unchanged until feedback closure.")
+		quit(1)
+		return
 	if (
 		store.flow_state == WalnutClientStore.FlowState.COMPLETED
 		or str(store.last_error.get("code", "")) != "INTERACTION_RECONCILIATION_TIMEOUT"
@@ -154,6 +164,7 @@ func _initialize() -> void:
 		or product.calls < 1
 		or str(game.request.input.get("task_id", "")) != "task_demo_0001"
 		or int(game.request.client_state.client_turn_sequence) != 4
+		or store.objective_result.get("run_id") != "run_demo_0001"
 	):
 		push_error("Agent Turn must close Run/Evidence/Events/Snapshot/current Interaction: %s" % str(store.last_error))
 		quit(1)

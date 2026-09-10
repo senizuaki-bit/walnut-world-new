@@ -27,7 +27,7 @@ func _initialize() -> void:
 		or overlay.portrait.texture == null
 		or (overlay.portrait as ArtMotionTexture).motion_id != "char-bug-talk"
 		or overlay.body_label.text != "边界问题出现了。"
-		or overlay.response_badge.text != "任务说明"
+		or overlay.response_badge.text != "对话"
 	):
 		push_error("Bug AgentInteraction must resolve to the Bug 先生 portrait presentation.")
 		quit(1)

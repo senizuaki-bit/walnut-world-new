@@ -77,5 +77,28 @@ func _initialize() -> void:
 		)
 		quit(1)
 		return
+	# Main selects the latest successful Run even after restart, where the
+	# client only has a summary. Repeated questions must close the same way.
+	store.set_objective_result({"summary": "Run succeeded before reconnect."})
+	product.referenced_run_id = "run_success_demo_0001"
+	for _repeat in range(2):
+		await controller.request_hint("刚才成功了吗？")
+		if store.flow_state != WalnutClientStore.FlowState.ACTIVE or not store.get_pending_operation("agent_hint").is_empty():
+			push_error("Successful Run hint must match the server-selected reference after restart and on repeat.")
+			quit(1)
+			return
+	# A later rejected Build may produce no Run reference; stale local Run
+	# identity cannot override the response to this exact accepted MESSAGE.
+	store.set_objective_result({"run_id": "run_old_demo_0001"})
+	product.referenced_run_id = null
+	await controller.request_hint()
+	if not store.get_pending_operation("agent_hint").is_empty():
+		quit(1)
+		return
+	var wrong := {"session_id": "session_demo_0001", "turn_id": "turn_other_demo_0001", "feedback": {"turn_id": game.request.turn_id, "command_id": "cmd_hint_demo_0001", "run_id": null, "source": "provider", "degraded": false, "fallback_reason": null}}
+	if controller.call("_interaction_matches_turn", wrong, "session_demo_0001", game.request.turn_id, "cmd_hint_demo_0001", "", true):
+		push_error("Server-selected Run must never loosen exact Turn identity.")
+		quit(1)
+		return
 	print("AGENT_HINT_TURN_FLOW_TEST_PASS")
 	quit(0)

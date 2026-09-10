@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/client/dingdang_voice_client.gd" id="script"]
+
+[sub_resource type="AudioStreamMicrophone" id="microphone"]
+
+[sub_resource type="AudioStreamGenerator" id="generator"]
+mix_rate = 24000.0
+buffer_length = 0.2
+
+[node name="VoiceClient" type="Node"]
+script = ExtResource("script")
+
+[node name="Microphone" type="AudioStreamPlayer" parent="."]
+stream = SubResource("microphone")
+bus = &"VoiceCapture"
+
+[node name="Speaker" type="AudioStreamPlayer" parent="."]
+stream = SubResource("generator")
+bus = &"Voice"

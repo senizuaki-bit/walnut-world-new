@@ -1,12 +1,8 @@
 class_name MentorQuestion
 extends Control
-## Local interaction prototype only: no microphone, transcription or Agent request.
-## Demo copy depends on the lesson, never on what the child actually says.
-
+## Click to start/stop the public Dingdang voice session. No canned answers.
 signal answering_changed(answering: bool)
-
-enum State { IDLE, HOLDING, RECORDING, THINKING, ANSWERING, COMPLETE }
-
+enum State { IDLE, CONNECTING, LISTENING, ANSWERING, COMPLETE }
 @onready var ask_button: Button = %AskButton
 @onready var ask_label: Label = %AskLabel
 @onready var reply_panel: PanelContainer = %ReplyPanel
@@ -14,204 +10,186 @@ enum State { IDLE, HOLDING, RECORDING, THINKING, ANSWERING, COMPLETE }
 @onready var reply_scroll: ScrollContainer = %ReplyScroll
 @onready var understood_button: Button = %UnderstoodButton
 @onready var status_label: Label = %QuestionStatus
-@onready var hold_timer: Timer = $HoldTimer
-@onready var limit_timer: Timer = $LimitTimer
-@onready var thinking_timer: Timer = $ThinkingTimer
-@onready var typing_timer: Timer = $TypingTimer
+@onready var interrupt_button: Button = %InterruptButton
 @onready var follow_timer: Timer = $FollowTimer
-
+@onready var voice: Node = $VoiceClient
 var state: State = State.IDLE
+var context_provider: Callable
 var _context := ""
-var _demo_reply := ""
-var _state_before_hold: State = State.IDLE
-var _touch_index := -1
 var _follow_text := true
-var _typed_characters := 0
-
+var _answer := ""
+var _transcript := ""
+var _notice_visible := false
 
 func _ready() -> void:
-	ask_button.button_down.connect(begin_hold)
-	ask_button.button_up.connect(end_hold)
-	ask_button.mouse_exited.connect(_on_mouse_exited)
-	hold_timer.timeout.connect(_begin_recording)
-	limit_timer.timeout.connect(end_hold)
-	thinking_timer.timeout.connect(_begin_answer)
-	typing_timer.timeout.connect(_type_next_character)
+	ask_button.pressed.connect(toggle_voice)
 	understood_button.pressed.connect(dismiss_reply)
+	interrupt_button.pressed.connect(voice.interrupt)
 	follow_timer.timeout.connect(_follow_reply_end)
 	reply_scroll.gui_input.connect(_on_scroll_input)
 	reply_scroll.get_v_scroll_bar().gui_input.connect(_on_scroll_input)
 	reply_scroll.get_v_scroll_bar().changed.connect(_schedule_follow)
-	get_window().focus_exited.connect(_on_focus_exited)
+	voice.state_changed.connect(_on_voice_state)
+	voice.text_received.connect(_on_text_received)
+	voice.transcript_received.connect(_on_transcript_received)
+	voice.response_started.connect(_on_response_started)
+	voice.response_finished.connect(_on_response_finished)
+	voice.response_cancelled.connect(_on_response_cancelled)
+	voice.failed.connect(_on_voice_error)
+	get_window().focus_exited.connect(reset)
 	visibility_changed.connect(_on_visibility_changed)
 	reset()
 
+func configure_voice(base_url: String, token: String, session_id: String, provider: Callable) -> void:
+	context_provider = provider
+	voice.configure(base_url, token, session_id)
 
-func configure_context(context: String, demo_reply: String) -> void:
-	if context != _context:
-		reset()
+func configure_context(context: String) -> void:
 	_context = context
-	_demo_reply = demo_reply
-
 
 func set_available(available: bool) -> void:
 	visible = available
 
+func set_editor_open(open: bool) -> void:
+	var stack := $Stack as Control
+	stack.anchor_left = 0.0 if open else 1.0
+	stack.anchor_right = stack.anchor_left
+	stack.offset_left = 18.0 if open else -216.0
+	stack.offset_right = 216.0 if open else -18.0
 
-func begin_hold() -> void:
-	if not is_visible_in_tree() or state not in [State.IDLE, State.COMPLETE]:
-		return
-	_state_before_hold = state
-	state = State.HOLDING
-	status_label.text = "按住说话，移出取消"
-	hold_timer.start()
-
-
-func end_hold() -> void:
-	if state == State.HOLDING:
-		hold_timer.stop()
-		state = _state_before_hold
-		status_label.text = "请按住按钮说话"
-	elif state == State.RECORDING:
-		limit_timer.stop()
-		state = State.THINKING
-		reply_text.text = "让我想一想……"
-		reply_text.visible_characters = -1
-		reply_panel.show()
-		ask_label.text = "师傅思考中…"
-		ask_button.disabled = true
-		status_label.text = "向叮当师傅请教"
-		thinking_timer.start()
-
-
-func cancel_hold() -> void:
-	if state not in [State.HOLDING, State.RECORDING]:
-		return
-	var was_recording := state == State.RECORDING
-	hold_timer.stop()
-	limit_timer.stop()
-	state = State.IDLE if was_recording else _state_before_hold
-	ask_label.text = "长按提问"
-	status_label.text = "已取消，可以重新提问"
-	_touch_index = -1
-
-
-func dismiss_reply() -> void:
-	if state != State.COMPLETE:
-		return
-	reset()
-	ask_button.grab_focus()
-
-
-func reset() -> void:
-	for timer: Timer in [hold_timer, limit_timer, thinking_timer, typing_timer, follow_timer]:
-		timer.stop()
-	state = State.IDLE
-	_typed_characters = 0
-	_touch_index = -1
-	reply_panel.hide()
-	_follow_text = true
-	reply_text.text = ""
-	reply_scroll.scroll_vertical = 0
-	understood_button.hide()
-	ask_button.disabled = false
-	ask_label.text = "长按提问"
-	status_label.text = "向叮当师傅请教"
-	answering_changed.emit(false)
-
-
-func _begin_recording() -> void:
-	if state != State.HOLDING:
-		return
-	state = State.RECORDING
-	reply_panel.hide()
-	understood_button.hide()
-	ask_label.text = "松开结束"
-	status_label.text = "正在聆听 · 移出取消"
-	limit_timer.start()
-
-
-func _begin_answer() -> void:
-	if state != State.THINKING:
-		return
-	state = State.ANSWERING
-	_typed_characters = 0
-	ask_label.text = "师傅回答中…"
-	reply_text.text = ""
-	reply_text.visible_characters = 0
-	reply_scroll.scroll_vertical = 0
-	_follow_text = true
-	answering_changed.emit(true)
-	typing_timer.start()
-
-
-func _type_next_character() -> void:
-	if state != State.ANSWERING:
-		return
-	# Stop auto-follow when the child has scrolled up to re-read earlier words.
-	var bar := reply_scroll.get_v_scroll_bar()
-	if not _follow_text and bar.value + bar.page >= bar.max_value - 1.0:
-		_follow_text = true
-	_typed_characters += 1
-	reply_text.text = _demo_reply.substr(0, _typed_characters)
-	reply_text.visible_characters = -1
-	if _follow_text:
-		_schedule_follow()
-	if _typed_characters >= _demo_reply.length():
-		typing_timer.stop()
-		state = State.COMPLETE
-		understood_button.show()
-		ask_button.disabled = false
-		ask_label.text = "长按提问"
-		answering_changed.emit(false)
-
-
-func _follow_reply_end() -> void:
-	if _follow_text and state in [State.ANSWERING, State.COMPLETE]:
-		reply_scroll.scroll_vertical = int(reply_scroll.get_v_scroll_bar().max_value)
-
-
-func _schedule_follow() -> void:
-	# Re-run after the scroll range includes wrapped lines and the confirm button.
-	if _follow_text and state in [State.ANSWERING, State.COMPLETE] and follow_timer.is_stopped():
-		follow_timer.start()
-
-
-func _on_scroll_input(event: InputEvent) -> void:
-	if (event is InputEventMouseButton and event.pressed) or event is InputEventScreenDrag or event is InputEventPanGesture or (event is InputEventKey and event.pressed):
-		_follow_text = false
-
-
-func _input(event: InputEvent) -> void:
+func toggle_voice() -> void:
 	if not is_visible_in_tree():
 		return
-	if event is InputEventScreenTouch and event.pressed and _touch_index == -1 and ask_button.get_global_rect().has_point(event.position):
-		_touch_index = event.index
-		begin_hold()
-		get_viewport().set_input_as_handled()
-	elif event is InputEventScreenTouch and event.index == _touch_index and not event.pressed:
-		if event.canceled or not ask_button.get_global_rect().has_point(event.position):
-			cancel_hold()
-		else:
-			end_hold()
-		_touch_index = -1
-		get_viewport().set_input_as_handled()
-	elif event is InputEventScreenDrag and event.index == _touch_index:
-		if not ask_button.get_global_rect().has_point(event.position):
-			cancel_hold()
-	elif event.is_action_pressed("ui_cancel") and state in [State.HOLDING, State.RECORDING]:
-		cancel_hold()
-		get_viewport().set_input_as_handled()
+	if voice.state != "IDLE":
+		voice.close()
+		return
+	_answer = ""
+	_transcript = ""
+	reply_text.text = ""
+	reply_panel.hide()
+	_follow_text = true
+	voice.start(_current_context())
 
+func _process(_delta: float) -> void:
+	if voice != null and voice.state != "IDLE":
+		voice.update_context(_current_context())
 
-func _on_mouse_exited() -> void:
-	if _touch_index == -1:
-		cancel_hold()
+func _current_context() -> Dictionary:
+	if context_provider.is_valid():
+		var value: Variant = context_provider.call()
+		if value is Dictionary:
+			return value
+	return {"code": "", "observation": _context}
 
+func dismiss_reply() -> void:
+	reply_panel.hide()
+	ask_button.grab_focus()
 
-func _on_focus_exited() -> void:
-	cancel_hold()
+func reset() -> void:
+	if not is_node_ready():
+		return
+	voice.close()
+	follow_timer.stop()
+	state = State.IDLE
+	_answer = ""
+	_transcript = ""
+	reply_text.text = ""
+	reply_panel.hide()
+	understood_button.hide()
+	interrupt_button.hide()
+	ask_button.disabled = false
+	ask_label.text = "问叮当"
+	status_label.text = "点击开始语音对话"
+	answering_changed.emit(false)
 
+func _on_voice_state(next: String) -> void:
+	match next:
+		"CONNECTING":
+			state = State.CONNECTING
+			ask_label.text = "取消连接"
+			status_label.text = "正在连接叮当……"
+			_show_notice("正在连接叮当师傅，请稍候……")
+		"READY":
+			state = State.LISTENING
+			ask_label.text = "结束对话"
+			status_label.text = "说完稍等，叮当会自动回答"
+			_show_notice("请对着麦克风说话，说完稍等，文字会显示在这里。")
+			interrupt_button.show()
+		"IDLE":
+			state = State.COMPLETE if not _answer.is_empty() else State.IDLE
+			ask_label.text = "问叮当"
+			status_label.text = "点击开始语音对话"
+			interrupt_button.hide()
+			understood_button.visible = not _answer.is_empty()
+			if _answer.is_empty() and _transcript.is_empty() and reply_panel.visible:
+				_show_notice("对话已结束，本次未收到识别文字或回答。\n\n请检查麦克风；说完话后稍等，叮当会自动回答。")
+			answering_changed.emit(false)
+
+func _on_response_started() -> void:
+	_answer = ""
+	state = State.ANSWERING
+	reply_panel.show()
+	understood_button.hide()
+	status_label.text = "叮当正在回答 · 可以直接插话"
+	answering_changed.emit(true)
+
+func _on_text_received(text: String, complete: bool) -> void:
+	_answer = text if complete else _answer + text
+	_render_text()
+	if complete:
+		understood_button.show()
+		state = State.LISTENING
+		answering_changed.emit(false)
+
+func _on_transcript_received(text: String, complete: bool) -> void:
+	_transcript = text if complete else _transcript + text
+	_render_text()
+
+func _on_response_cancelled() -> void:
+	state = State.LISTENING
+	status_label.text = "正在聆听，你可以继续说"
+	answering_changed.emit(false)
+
+func _on_response_finished() -> void:
+	state = State.LISTENING
+	status_label.text = "正在聆听，你可以继续说"
+	understood_button.visible = not _answer.is_empty()
+	answering_changed.emit(false)
+
+func _on_voice_error(message: String) -> void:
+	status_label.text = message
+	_show_notice(message + "\n\n你可以继续操作关卡，稍后再试。")
+	answering_changed.emit(false)
+
+func _show_notice(message: String) -> void:
+	_notice_visible = true
+	follow_timer.stop()
+	reply_text.text = message
+	reply_text.visible_characters = -1
+	reply_panel.show()
+	reply_scroll.set_deferred("scroll_vertical", 0)
+
+func _render_text() -> void:
+	if _notice_visible:
+		_notice_visible = false
+		_follow_text = true
+	reply_text.text = (("你：" + _transcript + "\n\n") if not _transcript.is_empty() else "") + _answer
+	reply_text.visible_characters = -1
+	reply_panel.visible = not reply_text.text.is_empty()
+	if _follow_text:
+		_schedule_follow()
+
+func _follow_reply_end() -> void:
+	if _follow_text:
+		reply_scroll.scroll_vertical = int(reply_scroll.get_v_scroll_bar().max_value)
+
+func _schedule_follow() -> void:
+	if _follow_text and not _notice_visible and follow_timer.is_stopped():
+		follow_timer.start()
+
+func _on_scroll_input(event: InputEvent) -> void:
+	if (event is InputEventMouseButton and event.pressed) or event is InputEventScreenDrag or event is InputEventPanGesture:
+		_follow_text = false
 
 func _on_visibility_changed() -> void:
 	if not is_visible_in_tree():

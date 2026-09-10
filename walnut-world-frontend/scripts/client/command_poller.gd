@@ -37,6 +37,8 @@ var _waiter: Callable
 var _clock_msec: Callable
 var _random_unit: Callable
 var _settings: Dictionary
+## Optional serialized observation hook: do not start overlapping Run reads.
+var resource_observer: Callable
 
 
 func _init(
@@ -166,6 +168,8 @@ func _poll_terminal_resource(
 				"The polled resource identity or terminal marker is invalid.",
 			)
 		resource_observed.emit(resource.duplicate(true))
+		if resource_observer.is_valid():
+			await resource_observer.call(resource.duplicate(true))
 		if method_name == "get_command":
 			command_observed.emit(resource.duplicate(true))
 		if bool(resource.terminal):

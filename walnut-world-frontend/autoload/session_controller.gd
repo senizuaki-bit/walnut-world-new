@@ -8,6 +8,7 @@ signal capability_unavailable(capability: String, message: String)
 signal interactions_recovered(interactions: Array[Dictionary])
 signal build_resolved(build: Dictionary)
 signal run_resolved(run: Dictionary)
+signal objective_available(run: Dictionary)
 signal world_playback_state_changed(state: String)
 signal patch_decision_resolved(interaction_id: String, patch_id: String, decision: String)
 
@@ -87,6 +88,7 @@ var _startup_authority_revalidation_pending := false
 var _startup_authority_guard_enabled := false
 var _last_presentation_pre_snapshot: Dictionary = {}
 var _last_presentation_final_snapshot: Dictionary = {}
+var _previewed_runs: Dictionary = {}
 
 
 func configure(
@@ -95,6 +97,7 @@ func configure(
 	_enable_patch_decisions_legacy := false,
 ) -> void:
 	game_gateway = gateway
+	_previewed_runs.clear()
 	product_gateway = product
 	# Runtime dependency injection is not rollout authority. Only a validated
 	# v0.6 capability response may enable the Patch request/decision surface.
@@ -2059,6 +2062,8 @@ func _execute_pending_turn_envelope_inner(slot: String, envelope: Dictionary, re
 	var turn_id := str(context.turn_id)
 	var interaction_cursor_before := int(context.interaction_cursor_before)
 	var poller := _new_poller()
+	if slot == "agent_turn":
+		poller.resource_observer = Callable(self, "_observe_objective_run").bind(context)
 	store.set_flow(WalnutClientStore.FlowState.TURN_RUNNING)
 	var recovery: Dictionary = context.get("recovery", {})
 	var command_result: Dictionary
@@ -2140,6 +2145,7 @@ func _execute_pending_turn_envelope_inner(slot: String, envelope: Dictionary, re
 			str(command.command_id),
 			referenced_run_id,
 			interaction_cursor_before,
+			[], {}, slot == "agent_hint",
 		)
 		if not hint_interactions.get("ok", false):
 			return hint_interactions
@@ -2169,13 +2175,9 @@ func _execute_pending_turn_envelope_inner(slot: String, envelope: Dictionary, re
 			if build_feedback
 			else WalnutClientStore.FlowState.ACTIVE
 		)
-		store.set_objective_result({
-			"summary": (
-				"Rejected Build feedback was recovered from the canonical AgentInteraction."
-				if build_feedback
-				else "Hint feedback was recovered from the canonical AgentInteraction."
-			),
-		})
+		# Conversation completion does not replace the last objective Run.
+		if build_feedback:
+			store.set_objective_result({"summary": "Rejected Build feedback was recovered from the canonical AgentInteraction."})
 		return {
 			"ok": true,
 			"status": 200,
@@ -2341,6 +2343,8 @@ func _execute_pending_turn_envelope_inner(slot: String, envelope: Dictionary, re
 	if not (world_presentation_enabled and recovery_mode):
 		store.set_objective_result({
 			"summary": "Run %s closed through Evidence, authoritative presentation, Snapshot and AgentInteraction." % run_id,
+			"run_id": run_id,
+			"objective_succeeded": true,
 		})
 	store.set_flow(WalnutClientStore.FlowState.COMPLETED)
 	world_playback_state_changed.emit("COMPLETED")
@@ -2357,6 +2361,30 @@ func _execute_pending_turn_envelope_inner(slot: String, envelope: Dictionary, re
 			"terminal_failure": false,
 		},
 	}
+
+
+func _observe_objective_run(command: Dictionary, context: Dictionary) -> void:
+	if bool(command.get("terminal", false)) or game_gateway == null:
+		return
+	var run_id := _run_id_from_command(command)
+	if run_id.is_empty() or _previewed_runs.has(run_id) or not game_gateway.has_method("get_run"):
+		return
+	var result: Dictionary = await game_gateway.get_run(_new_request_context(), run_id)
+	if not result.get("ok", false):
+		return # Final reconciliation still owns errors and durable retry state.
+	var run: Dictionary = result.get("value", {})
+	if not bool(run.get("terminal", false)) or str(run.get("status", "")) != "SUCCEEDED":
+		return
+	if not _run_matches_turn(run, str(context.session_id), str(context.turn_id), str(command.get("command_id", ""))):
+		return
+	var application: Dictionary = run.get("world_application", {})
+	var receipt: Variant = application.get("receipt")
+	if str(application.get("status", "")) != "COMMITTED" or not receipt is Dictionary or not _receipt_matches_pre_world(receipt, context.pre_world):
+		return
+	_previewed_runs[run_id] = true
+	# An objective notice does not settle the Command, clear retry envelopes,
+	# unlock a new action, or bypass authoritative world playback.
+	objective_available.emit(run.duplicate(true))
 
 
 func _pending_turn_envelope_context(slot: String, envelope: Dictionary) -> Dictionary:
@@ -3398,6 +3426,7 @@ func _wait_for_interaction(
 	after_sequence: int,
 	required_roles: Array[String] = [],
 	expected_feedback: Dictionary = {},
+	server_selects_hint_run := false,
 ) -> Dictionary:
 	if product_gateway == null or not product_gateway.has_method("list_interactions"):
 		return _local_failure("PRODUCT_GATEWAY_UNAVAILABLE", "Product AgentInteraction gateway is required for closure.")
@@ -3425,7 +3454,7 @@ func _wait_for_interaction(
 		for interaction in value.interactions:
 			recovered.append(interaction.duplicate(true))
 			if (
-				_interaction_matches_turn(interaction, session_id, turn_id, command_id, run_id)
+				_interaction_matches_turn(interaction, session_id, turn_id, command_id, run_id, server_selects_hint_run)
 				and (
 					expected_feedback.is_empty()
 					or interaction.get("feedback") == expected_feedback
@@ -3675,20 +3704,25 @@ func _same_world_authority(snapshot: Dictionary, pre_world: Dictionary) -> bool:
 	return true
 
 
-func _interaction_matches_turn(interaction: Dictionary, session_id: String, turn_id: String, command_id: String, run_id: String) -> bool:
+func _interaction_matches_turn(interaction: Dictionary, session_id: String, turn_id: String, command_id: String, run_id: String, server_selects_hint_run := false) -> bool:
 	var feedback: Variant = interaction.get("feedback")
 	if not feedback is Dictionary:
 		return false
+	# MESSAGE requests do not bind a Run. The validated server reply chooses
+	# its latest result, including after restart or a newer Build. Correlate
+	# the exact accepted Turn/Command, never an obsolete UI observation.
+	var run_matches: bool = (
+		feedback.get("run_id") == null
+		if run_id.is_empty() else str(feedback.get("run_id", "")) == run_id
+	)
+	if server_selects_hint_run:
+		run_matches = feedback.get("run_id") == null or ContractValidator.validate_identifier(feedback.get("run_id"), "run_id").ok
 	return (
 		str(interaction.get("session_id", "")) == session_id
 		and str(interaction.get("turn_id", "")) == turn_id
 		and str(feedback.get("turn_id", "")) == turn_id
 		and str(feedback.get("command_id", "")) == command_id
-		and (
-			feedback.get("run_id") == null
-			if run_id.is_empty()
-			else str(feedback.get("run_id", "")) == run_id
-		)
+		and run_matches
 		and str(feedback.get("source", "")) == "provider"
 		and not bool(feedback.get("degraded", true))
 		and feedback.get("fallback_reason") == null

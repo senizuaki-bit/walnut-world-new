@@ -3,6 +3,9 @@ extends SceneTree
 
 func _initialize() -> void:
 	var failures: Array[String] = []
+	var runtime := Engine.get_version_info()
+	if int(runtime.major) != 4 or int(runtime.minor) != 7 or int(runtime.patch) != 1:
+		failures.append("前端测试必须实际运行于 Godot 4.7.1。")
 	var project := ConfigFile.new()
 	if project.load("res://project.godot") != OK:
 		failures.append("project.godot 必须可读取。")
@@ -11,7 +14,8 @@ func _initialize() -> void:
 		if "4.7" not in features:
 			failures.append("project.godot 必须把 Godot 兼容特征锁定为 4.7。")
 	var selected_files := {
-		"根 README": ProjectSettings.globalize_path("res://../README.md"),
+		# The combined repository README belongs to the fixed main baseline.
+		# Enforce the frontend's own setup docs and actual executable instead.
 		"前端 README": ProjectSettings.globalize_path("res://README.md"),
 		"离线门禁": ProjectSettings.globalize_path("res://scripts/run-offline-tests.ps1"),
 		"真实网关门禁": ProjectSettings.globalize_path("res://scripts/run-real-gateway-e2e.ps1"),

@@ -74,6 +74,8 @@ func configure(
 	_session.connect("capability_unavailable", _on_capability_unavailable)
 	_session.connect("interactions_recovered", _on_interactions_recovered)
 	_session.connect("run_resolved", _on_run_resolved)
+	if _session.has_signal("objective_available"):
+		_session.connect("objective_available", _on_objective_available)
 
 
 func activate_initial_projection() -> Dictionary:
@@ -323,6 +325,23 @@ func _on_hint_requested(message: String) -> void:
 	_hint_running = false
 
 
+func configure_voice(base_url: String, token: String, session_id: String) -> void:
+	if is_instance_valid(_level):
+		_level.mentor_question.configure_voice(base_url, token, session_id, Callable(self, "_voice_context"))
+
+
+func _voice_context() -> Dictionary:
+	if not is_instance_valid(_level):
+		return {}
+	return {
+		"code": _level.code_editor.text,
+		"observation": "当前界面阶段：%s；%s" % [
+			CropAdaptiveWateringDemo.Phase.keys()[int(_level.get("_phase"))],
+			str(_store.get("objective_result").get("summary", "")) if is_instance_valid(_store) else "",
+		],
+	}
+
+
 func _on_interactions_recovered(interactions: Array[Dictionary]) -> void:
 	if not _projection_active:
 		_pending_interactions = interactions.duplicate(true)
@@ -341,6 +360,11 @@ func _on_interactions_recovered(interactions: Array[Dictionary]) -> void:
 func _on_run_resolved(run: Dictionary) -> void:
 	if _submission_running:
 		_last_run = run.duplicate(true)
+
+
+func _on_objective_available(_run: Dictionary) -> void:
+	if _submission_running and is_instance_valid(_level):
+		_level.update_agent_submission_stage("运行已成功，世界结果已提交。叮当正在整理反馈……")
 
 
 func _candidate_mode_enabled() -> bool:
@@ -368,7 +392,7 @@ func _teaching_responses_only(interactions: Array[Dictionary]) -> Array[Dictiona
 	# 只留 "hint" 会把苏格拉底式提问整条丢掉，学生点了按钮却什么都看不到。
 	var visible: Array[Dictionary] = []
 	for interaction: Dictionary in interactions:
-		if str(interaction.get("response_type", "")) in ["hint", "question"]:
+		if str(interaction.get("response_type", "")) in ["hint", "question", "message"] and str(interaction.get("role", "")) in ["teaching_agent", "bug_agent"]:
 			visible.append(interaction.duplicate(true))
 	return visible
 
@@ -483,3 +507,5 @@ func _disconnect_dependencies() -> void:
 			_session.disconnect("interactions_recovered", _on_interactions_recovered)
 		if _session.is_connected("run_resolved", _on_run_resolved):
 			_session.disconnect("run_resolved", _on_run_resolved)
+		if _session.has_signal("objective_available") and _session.is_connected("objective_available", _on_objective_available):
+			_session.disconnect("objective_available", _on_objective_available)

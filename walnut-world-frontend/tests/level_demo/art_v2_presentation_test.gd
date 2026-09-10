@@ -260,7 +260,6 @@ func _verify_second_review(level: CropAdaptiveWateringDemo, failures: Array[Stri
 	var button := level.workshop_action_button
 	await process_frame
 	await process_frame
-	var before := button.get_global_rect()
 	level.call("_on_workshop_action_pressed")
 	var skin := button.get_theme_stylebox("normal") as StyleBoxTexture
 	var motion := button.get_node("Feedback") as ArtMotionTexture
@@ -268,6 +267,12 @@ func _verify_second_review(level: CropAdaptiveWateringDemo, failures: Array[Stri
 		failures.append("错误动画必须成为原按钮的皮肤。")
 	if level.get_node_or_null("WorkshopOverlay/WorkshopFeedback") != null:
 		failures.append("不能保留远离按钮的装饰反馈色条。")
+	# Validation intentionally makes room for the separate error block; its
+	# layout is covered by workshop_error_layout_test. Measure animation-only
+	# movement after that deferred layout has settled.
+	await process_frame
+	await process_frame
+	var before := button.get_global_rect()
 	button.call("show_feedback", true)
 	if motion.motion_id != "button-success-motion":
 		failures.append("成功反馈必须复用同一按钮。")
