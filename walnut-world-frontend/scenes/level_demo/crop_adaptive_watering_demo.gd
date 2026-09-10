@@ -969,6 +969,7 @@ func _reset_code() -> void:
 	# walnut_backend.int1_e2e_authority._watering_source, so this restores the
 	# authoritative starting point rather than a client-only approximation.
 	code_editor.text = INITIAL_PRACTICE_CODE
+	_on_code_changed()
 	_draft_active = false
 	_build_result.clear()
 	_set_phase(Phase.CODE)
@@ -1370,18 +1371,27 @@ func fail_agent_submission(stage: String, message: String, error: Dictionary = {
 
 func complete_agent_submission(summary: String) -> void:
 	_agent_stage_message_visible = false
+	_layout_completion(false)
 	_set_phase(Phase.COMPLETED)
+	completion_title.text = "本次验证成功"
+	completion_summary.text = "你的程序完成了当前关卡目标。\n\n可以重玩本关，\n或返回农场。"
+	replay_button.visible = true
+	replay_button.disabled = false
+	return_button.visible = true
+	return_button.disabled = false
+	next_button.visible = true
+	next_button.disabled = false
+	next_button.text = "下一关预告  →"
 	completion_card.visible = true
 	completion_card.modulate.a = 1.0
 	completion_card.scale = Vector2.ONE
-	evidence_title.text = "正式 Agent 验证已闭环"
+	evidence_title.text = "本次验证成功"
 	var feedback: Variant = _last_agent_interaction.get("feedback")
 	var feedback_message := str(feedback.get("message", "")) if feedback is Dictionary else ""
-	evidence_body.text = "%s%s\n%s\n[color=#8b5a2b]结果来自正式 Run、Receipt 与最终权威 Snapshot。[/color]" % [
-		summary,
-		"\n%s" % feedback_message if not feedback_message.is_empty() and feedback_message != summary else "",
-		_authoritative_snapshot_line(),
-	]
+	evidence_body.text = "程序已经完成当前关卡目标，结果已由游戏服务确认。"
+	if not feedback_message.is_empty():
+		evidence_body.text += "\n" + feedback_message.replace("[", "[lb]")
+	evidence_title.tooltip_text = "运行记录：%s\n%s" % [summary, _authoritative_snapshot_line()]
 	_reveal_evidence()
 
 
@@ -1432,7 +1442,7 @@ func _set_phase(value: Phase) -> void:
 		Phase.GROWTH_SUMMARY: "书书成长总结",
 		Phase.SKILL_UNLOCKED: "4★技能解锁",
 		Phase.FREE_PLAY: "完成后自由状态",
-		Phase.COMPLETED: "完成归档",
+		Phase.COMPLETED: "验证完成",
 		Phase.CANDIDATE_VALIDATING: "候选校验",
 		Phase.CANDIDATE_PRESENTING: "候选演出",
 		Phase.LOCAL_FAILED: "候选未通过",
