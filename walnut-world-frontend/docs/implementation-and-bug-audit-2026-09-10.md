@@ -87,3 +87,43 @@
 本轮未重新进行收费模型长流程、真人语音体验测试或飞书/秒搭生产部署验收，不能把这些部分记为本轮通过。
 
 关联：`service-failure-ui-and-backend-followup.md`（模型迁移和 Agent 校验修复已完成）。
+
+## 补充：仅前端范围检查
+
+在用户明确只考虑前端后，补查启动门禁、主动提示和语音阅读状态。本节不要求修改后端。
+
+### P1：启动失败仍可进入农场，且没有应用内重试
+
+- `app_root.gd` 的 `_start()` 设置 `_starting=true` 后，失败路径不恢复；
+  `_finish()` 设置 `_startup_reported=true`。再次调用 `_start()` 不会重新启动。
+- `game_start_screen.gd` 的进入按钮在动画开始时就可点击，没有绑定启动就绪状态。
+  `CropAgentBridge` 未取得初始投影时又会直接忽略提交请求。
+- 隔离无 token 场景复现：`AUTH_TOKEN_MISSING`，`enter_disabled=false`；点击后
+  `level_visible_after_enter=true`，但 `projection_active=false`；第二次启动未产生新结果。
+- 改进：前端启动中/失败/已就绪三种状态明确展示；进入门禁跟随就绪状态；
+  对可恢复连接失败提供受控重试。缺失或过期凭据仍应明确提示所需配置，不伪造登录成功。
+
+### P2：结束后的语音文字会因切换窗口而被清空
+
+- `mentor_question.gd` 将窗口 `focus_exited` 直接连接 `reset()`；
+  reset 同时清空 `_answer`、`_transcript` 并隐藏对话框。
+- 复现：回答已经结束、语音处于 IDLE，仍可见的文字在模拟失焦后变为空字符串。
+- 改进：失焦时停止录音/播放即可；保留已经完成的文字，直到用户明确清除或切换会话。
+  暂停采集与删除阅读内容应分开处理。
+
+### 主动分层提示入口缺失
+
+- Crop 场景 `_set_phase()` 无条件设置 `hint_button.visible=false`；本轮探针也确认 CODE
+  阶段不可见。旧的正式 `agent_hint_requested → request_hint` 链路有实现，但没有可见按钮触发。
+- 当前“问叮当”是独立实时语音，不会提交正式 Hint Turn，不能视为原分层提示入口的等价替代。
+- 改进：按交互设计保留一个清晰的“给我提示”入口，复用现有前端控制器，不增加后端接口。
+
+### 前端体验待完善（不冒充已复现故障）
+
+- 完成/准备阶段仍有 Run、Receipt、Snapshot、world revision、state_hash 等工程信息进入
+  学生主界面；应将正常文案改为儿童能理解的描述，诊断细节放到可展开区域。
+- 当前语音面板没有选择麦克风、输入电平检测或键盘输入替代入口。麦克风兼容设置依赖
+  `user://voice-input.cfg`。可先补选麦和电平反馈；恢复现有文字提示按钮即可提供无麦帮助。
+
+补充证据：本地 `audit-results/frontend-extra-probes.gd` 及 `frontend-extra-probes.log`。
+探针未连接服务、未采集真实音频、未修改当前玩家状态；本节仍为检查结果，尚未修复。
