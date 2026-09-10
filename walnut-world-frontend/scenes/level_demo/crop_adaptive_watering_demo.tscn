@@ -1,4 +1,6 @@
-[gd_scene load_steps=68 format=3]
+[gd_scene load_steps=69 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/ui/bug_practice_panel.tscn" id="bug_practice"]
 
 [ext_resource type="PackedScene" path="res://scenes/audio/farm_audio.tscn" id="farm_audio"]
 
@@ -4212,3 +4214,7 @@ mouse_filter = 2
 color = Color(0.46,0.5,0.39,0.33)
 
 [node name="FarmAudio" parent="." instance=ExtResource("farm_audio")]
+
+[node name="BugPracticePanel" parent="." instance=ExtResource("bug_practice")]
+unique_name_in_owner = true
+layout_mode = 1

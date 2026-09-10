@@ -12,6 +12,7 @@ signal agent_draft_changed(source: String)
 signal book_speech_retry_requested
 var _book_speech_retry_pending := false
 var book_speaker: AudioStreamPlayer
+@onready var practice: Control = %BugPracticePanel
 
 enum Phase {
 	INTRO,
@@ -190,6 +191,12 @@ var _last_candidate_result: Dictionary = {}
 
 
 func _ready() -> void:
+	practice.visibility_changed.connect(_refresh_audio_ambience)
+	practice.visibility_changed.connect(_refresh_mentor_question)
+	practice.entry_ready.connect(func():
+		if _phase == Phase.INTRO and is_visible_in_tree() and not story_dialogue.visible:
+			_play_intro()
+	)
 	for overlay: CanvasItem in [story_dialogue, code_drawer, skill_tree_overlay, workshop_overlay, bug_challenge_overlay, growth_summary_overlay, completion_card]:
 		overlay.visibility_changed.connect(_refresh_audio_ambience)
 	patch_dialog.visibility_changed.connect(_refresh_audio_ambience)
@@ -309,7 +316,13 @@ func restart_level() -> void:
 		card.show_gap(false)
 		card.set_attention(false)
 	_set_phase(Phase.INTRO)
-	_play_intro()
+	if practice.enabled:
+		await practice.enter_level()
+		if practice.visible:
+			story_dialogue.skip_sequence()
+			mentor_question.reset()
+	else:
+		_play_intro()
 
 
 static func evaluate_source(source: String) -> Dictionary:
@@ -1568,7 +1581,7 @@ func _refresh_mentor_question() -> void:
 	var available := supported and is_visible_in_tree() and not (
 		story_dialogue.visible
 		or skill_tree_overlay.visible or bug_challenge_overlay.visible
-		or growth_summary_overlay.visible or completion_card.visible
+		or growth_summary_overlay.visible or completion_card.visible or practice.visible
 	)
 	mentor_question.configure_context("%d:%d:%s" % [_phase, _workshop_step, patch_dialog.visible])
 	mentor_question.set_editor_open(code_drawer.visible)
@@ -1617,7 +1630,7 @@ func present_stage_audio(result: Dictionary) -> void:
 func _refresh_audio_ambience() -> void:
 	if not is_node_ready():
 		return
-	var quiet := patch_dialog.visible
+	var quiet := patch_dialog.visible or practice.visible
 	for overlay: CanvasItem in [story_dialogue, code_drawer, skill_tree_overlay, workshop_overlay, bug_challenge_overlay, growth_summary_overlay, completion_card]:
 		quiet = quiet or overlay.visible
 	sfx.set_ambience_enabled(not quiet and is_visible_in_tree())

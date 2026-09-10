@@ -121,6 +121,8 @@ func activate_initial_projection() -> Dictionary:
 	_projection_active = true
 	if not _pending_interactions.is_empty():
 		var visible := _candidate_hints_only(_pending_interactions) if _candidate_mode_enabled() else _pending_interactions
+		if _level.practice.enabled:
+			visible = _practice_visible_interactions(visible)
 		var historical: Array[Dictionary] = []
 		var unseen: Array[Dictionary] = []
 		for interaction: Dictionary in visible:
@@ -177,6 +179,11 @@ func _on_submit_requested(source: String) -> void:
 		return
 	_submission_running = true
 	_objective_committed = false
+	if _level.practice.enabled:
+		var entry_ok: bool = await _level.practice.ensure_entry()
+		if not entry_ok:
+			_submission_running = false
+			return
 	_last_error_message = ""
 	_last_error_code = ""
 	_last_error.clear()
@@ -234,6 +241,15 @@ func _on_submit_requested(source: String) -> void:
 	var result: Variant = await _session.call("request_submit_and_run")
 	if not is_instance_valid(self):
 		return
+	if _level.practice.enabled and _objective_committed:
+		_refresh_level_authority_projection()
+		_submission_running = false
+		_pending_submission_interactions.clear()
+		var main_result := _submit_result(result if result is Dictionary else {}, source, true)
+		main_result["legacy_feedback_closed"] = bool(main_result.get("ok", false))
+		main_result["ok"] = true # This signal reports the verified main objective.
+		submit_action_finished.emit(main_result)
+		return
 	if not result is Dictionary or not bool(result.get("ok", false)):
 		var controller_message := str(result.get("message", "Agent Turn 未能闭环。")) if result is Dictionary else "Agent Turn 未能闭环。"
 		var diagnostic_message := _last_error_message if not _last_error_message.is_empty() else controller_message
@@ -273,6 +289,12 @@ func _on_submit_requested(source: String) -> void:
 		_finish_failure("目标", str(objective_result.get("summary", "权威验证未通过。")))
 		submit_action_finished.emit(_submit_result(result, source, false))
 		return
+	if _level.practice.enabled:
+		_submission_running = false
+		_pending_submission_interactions.clear()
+		_level.practice.complete_main(_last_run)
+		submit_action_finished.emit(_submit_result(result, source, true))
+		return
 	if _book_speech != null:
 		for interaction: Dictionary in _pending_submission_interactions:
 			if interaction.get("role") == "book_agent" and interaction.get("response_type") == "growth_summary":
@@ -291,6 +313,8 @@ func _on_submit_requested(source: String) -> void:
 
 func _on_build_requested(source: String) -> void:
 	if not _projection_active or _submission_running or _build_running or _activation_running or _hint_running or _level == null:
+		return
+	if _level.practice.enabled and _level.practice.visible:
 		return
 	_build_running = true
 	_last_error_message = ""
@@ -320,6 +344,8 @@ func _on_build_requested(source: String) -> void:
 func _on_activation_requested() -> void:
 	if not _projection_active or _submission_running or _build_running or _activation_running or _hint_running or _level == null:
 		return
+	if _level.practice.enabled and _level.practice.visible:
+		return
 	_activation_running = true
 	_last_error_message = ""
 	_last_error_code = ""
@@ -347,6 +373,8 @@ func _on_activation_requested() -> void:
 func _on_hint_requested(message: String) -> void:
 	if not _projection_active or _hint_running or _submission_running or _build_running or _activation_running or _level == null:
 		return
+	if _level.practice.enabled and _level.practice.visible:
+		return
 	_hint_running = true
 	_last_error_message = ""
 	_last_error_code = ""
@@ -368,6 +396,24 @@ func configure_voice(base_url: String, token: String, session_id: String) -> voi
 	_book_speech.configure(base_url, token, session_id)
 	if is_instance_valid(_level):
 		_level.mentor_question.configure_voice(base_url, token, session_id, Callable(self, "_voice_context"))
+		_level.practice.configure(base_url, token, session_id)
+		if not _level.practice.completed.is_connected(_on_practice_completed):
+			_level.practice.completed.connect(_on_practice_completed)
+			_level.practice.restart_requested.connect(_level.replay_requested.emit)
+			_level.practice.challenge_entered.connect(_on_practice_entered)
+
+
+func _on_practice_entered() -> void:
+	_level.mentor_question.reset()
+	_level.story_dialogue.skip_sequence()
+	_level.agent_interaction_presenter.clear_queue()
+	_level.bug_legion_2d.show_legion()
+
+
+func _on_practice_completed(summary: Dictionary) -> void:
+	_level.bug_legion_2d.hide_legion()
+	_level.set("_completion_book_message", str(summary.get("message", "")))
+	_level.complete_agent_submission("主关与本局 Bug 挑战均已通过。")
 
 
 func _retry_book_speech() -> void:
@@ -405,6 +451,8 @@ func _voice_context() -> Dictionary:
 
 
 func _on_interactions_recovered(interactions: Array[Dictionary]) -> void:
+	if is_instance_valid(_level) and _level.practice.enabled:
+		interactions = _practice_visible_interactions(interactions)
 	if not _projection_active:
 		_pending_interactions = interactions.duplicate(true)
 	elif _level == null:
@@ -430,6 +478,18 @@ func _on_objective_available(_run: Dictionary) -> void:
 		# Preserve that fact if the later feedback/closure step fails.
 		_objective_committed = true
 		_level.update_agent_submission_stage("运行已成功，世界结果已提交。叮当正在整理反馈……")
+		if _level.practice.enabled:
+			_level.mentor_question.reset()
+			_level.story_dialogue.skip_sequence()
+			_level.practice.complete_main(_run)
+
+
+func _practice_visible_interactions(interactions: Array[Dictionary]) -> Array[Dictionary]:
+	var visible: Array[Dictionary] = []
+	for interaction in interactions:
+		if str(interaction.get("role", "")) not in ["bug_agent", "book_agent"]:
+			visible.append(interaction)
+	return visible
 
 
 func _candidate_mode_enabled() -> bool:
@@ -495,6 +555,8 @@ func _on_error_reported(error: Dictionary) -> void:
 		_last_error_code = str(error.get("code", ""))
 		_last_error_message = str(error.get("message", "正式服务发生错误。"))
 		if _submission_running and _objective_committed:
+			if _level.practice.enabled:
+				return # Legacy feedback cannot replace the post-success challenge.
 			_level.fail_agent_submission("反馈", _last_error_message, _last_error, true, true)
 			return
 		if (_submission_running or _build_running) and _last_error_code == "SANDBOX_COMPILE_ERROR":
@@ -557,6 +619,12 @@ func _exit_tree() -> void:
 
 func _disconnect_dependencies() -> void:
 	if is_instance_valid(_level):
+		if _level.practice.completed.is_connected(_on_practice_completed):
+			_level.practice.completed.disconnect(_on_practice_completed)
+		if _level.practice.challenge_entered.is_connected(_on_practice_entered):
+			_level.practice.challenge_entered.disconnect(_on_practice_entered)
+		if _level.practice.restart_requested.is_connected(_level.replay_requested.emit):
+			_level.practice.restart_requested.disconnect(_level.replay_requested.emit)
 		if build_action_finished.is_connected(_level.present_stage_audio):
 			build_action_finished.disconnect(_level.present_stage_audio)
 		if activation_action_finished.is_connected(_level.present_stage_audio):

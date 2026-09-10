@@ -359,6 +359,31 @@ func _initialize() -> void:
 	await process_frame
 	if level.book_speaker.playing:
 		failures.append("离开完成卡必须停止书书的语音。")
+	# The new entry flow gates the main write and survives a legacy Book failure.
+	var practice_cases = load("res://tests/client/bug_practice_flow_test.gd")
+	var practice_api = practice_cases.FakeGateway.new()
+	level.practice.add_child(practice_api)
+	practice_api.challenge.run_id = "run_committed"
+	level.practice.api = practice_api
+	level.practice.enabled = true
+	practice_api.fail_action = "start"
+	var prior_stages := session.stages.size()
+	await bridge._on_submit_requested(source)
+	if session.stages.size() != prior_stages:
+		failures.append("本局 start 未确认前不得提交主关。")
+	session.fail_next_summary = true
+	var speech_calls: int = speech.calls
+	await bridge._on_submit_requested(source)
+	while level.practice.busy: await process_frame
+	if level.practice.state.get("phase") != "CHALLENGE_READY" or level.completion_card.visible:
+		failures.append("主关成功后即进入挑战，旧反馈失败不能替代挑战或提前完成。")
+	if speech.calls != speech_calls:
+		failures.append("新挑战流程不得调用旧 Book 音频接口。")
+	var legacy: Array[Dictionary] = [
+		{"role": "bug_agent"}, {"role": "book_agent"}, {"role": "teaching_agent"},
+	]
+	if bridge._practice_visible_interactions(legacy) != [{"role": "teaching_agent"}]:
+		failures.append("新流程只过滤旧 Bug/Book 展示，保留叮当教学反馈。")
 	speech.queue_free()
 	bridge.queue_free()
 	session.queue_free()
