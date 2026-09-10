@@ -1,5 +1,7 @@
 extends Control
 
+signal startup_retry_requested
+
 @onready var start_screen: GameStartScreen = %GameStartScreen
 @onready var crop_adaptive_watering_demo: CropAdaptiveWateringDemo = %CropAdaptiveWateringDemo
 @onready var transition: ColorRect = %Transition
@@ -14,6 +16,7 @@ func _ready() -> void:
 	get_tree().auto_accept_quit = false
 	get_tree().root.close_requested.connect(_on_close_requested)
 	start_screen.enter_farm_requested.connect(_enter_farm)
+	start_screen.retry_requested.connect(func(): startup_retry_requested.emit())
 	crop_adaptive_watering_demo.replay_requested.connect(_replay_level)
 	crop_adaptive_watering_demo.return_home_requested.connect(_return_home)
 	crop_adaptive_watering_demo.next_level_requested.connect(_show_next_level_preview)
@@ -36,7 +39,7 @@ func _exit_tree() -> void:
 
 
 func _enter_farm() -> void:
-	if _transitioning:
+	if _transitioning or not start_screen.can_enter():
 		return
 	_transitioning = true
 	await _fade_to(1.0)
@@ -45,6 +48,10 @@ func _enter_farm() -> void:
 	crop_adaptive_watering_demo.restart_level()
 	await _fade_to(0.0)
 	_transitioning = false
+
+
+func set_startup_state(value: String, message := "") -> void:
+	start_screen.set_service_state(value, message)
 
 
 func _replay_level() -> void:
