@@ -7,7 +7,7 @@
 
 ## 提交项
 
-开发接入：[完整前端接口文档](walnut-world-backend/docs/frontend-api/README.md) · [Bug军团与书书接口](walnut-world-backend/docs/frontend-api/Bug军团与书书接口.md) · [Bug军团实现逻辑](walnut-world-backend/docs/architecture/bug-practice.md)。最新 Demo 后端支持“主关正确→每局一次Bug变式挑战→书书总结及语音”；正式前端需按新协议接入。
+开发接入：[完整前端接口文档](walnut-world-backend/docs/frontend-api/README.md) · [Bug军团与书书接口](walnut-world-backend/docs/frontend-api/Bug军团与书书接口.md) · [Bug军团实现逻辑](walnut-world-backend/docs/architecture/bug-practice.md)。`all` 已接入“主关正确→每局一次Bug变式挑战→书书总结及语音”；接入范围、真实验证和本机配音凭据待办见[前端联调记录](walnut-world-frontend/docs/testing/bug-practice-integration.md)。
 
 | 提交项 | 地址 |
 |---|---|
@@ -215,7 +215,7 @@ tools/godot-4.5.2/Godot_v4.5.2-stable_win64.exe --headless --path walnut-world-f
 | 飞书生产接入 | 接口合同与角色边界已设计，当前交付明确排除生产接入 |
 | 儿童真实用户验证 | 现有证据以工程回归和内部评审为主，尚无课堂试点数据 |
 | 集成套件稳定性 | 部分并发/时序用例在复用库上浮动失败，单独跑均通过；需要全新库才能取得干净信号 |
-| 旧管线 Bug / Patch 阈值 | 保留兼容历史逻辑；新Bug练习不使用该阈值，前端需按新协议过滤旧自动展示 |
+| 旧管线 Bug / Patch 阈值 | 保留兼容历史逻辑；新Bug练习不使用该阈值，all 前端已过滤旧 Bug/Book 自动展示 |
 
 ## 一类值得记录的缺陷
 

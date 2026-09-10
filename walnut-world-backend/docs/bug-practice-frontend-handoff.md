@@ -1,6 +1,6 @@
 # Bug 军团变式题：后端接口与前端接入说明
 
-更新：2026-09-10。此次交付后端，正式前端尚未接入这套新流程。完整字段、错误码和验收清单见[前端接口参考](frontend-api/Bug军团与书书接口.md)，后端设计见[实现逻辑](architecture/bug-practice.md)。
+更新：2026-09-11。`all` 分支已接入正式前端，验证范围及真实配音待办见[前端联调记录](../../walnut-world-frontend/docs/testing/bug-practice-integration.md)。完整字段、错误码和验收清单见[前端接口参考](frontend-api/Bug军团与书书接口.md)，后端设计见[实现逻辑](architecture/bug-practice.md)。
 
 ## 产品流程
 
