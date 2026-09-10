@@ -39,7 +39,7 @@ func _ready() -> void:
 	voice.response_finished.connect(_on_response_finished)
 	voice.response_cancelled.connect(_on_response_cancelled)
 	voice.failed.connect(_on_voice_error)
-	get_window().focus_exited.connect(reset)
+	get_window().focus_exited.connect(_on_focus_exited)
 	visibility_changed.connect(_on_visibility_changed)
 	reset()
 
@@ -111,6 +111,12 @@ func reset() -> void:
 	ask_button.disabled = false
 	ask_label.text = "问叮当"
 	status_label.text = "点击开始语音对话"
+	answering_changed.emit(false)
+
+func _on_focus_exited() -> void:
+	# Stop recording/playback when leaving the game, but keep readable answers.
+	voice.close()
+	follow_timer.stop()
 	answering_changed.emit(false)
 
 func _on_voice_state(next: String) -> void:

@@ -34,6 +34,7 @@ var _context_due := 0
 var _start_sent := false
 var _response_id := ""
 var _cancelled_ids: Dictionary = {}
+var _finished_ids: Dictionary = {}
 var _drop_anonymous := false
 var _new_response := true
 var _capture_pipe: RefCounted
@@ -72,6 +73,7 @@ func start(context: Dictionary) -> void:
 	_started_at = Time.get_ticks_msec()
 	_start_sent = false
 	_cancelled_ids.clear()
+	_finished_ids.clear()
 	_drop_anonymous = false
 	_new_response = true
 	_response_id = ""
@@ -220,9 +222,23 @@ func _receive(message: Dictionary) -> void:
 		if _new_response or (completed_id.is_empty() and _drop_anonymous) or _cancelled_ids.has(completed_id) or (not completed_id.is_empty() and completed_id != _response_id):
 			return
 		_new_response = true
+		if not _response_id.is_empty():
+			_finished_ids[_response_id] = true
+			if _finished_ids.size() > 128:
+				_finished_ids.erase(_finished_ids.keys()[0])
 		response_finished.emit()
 	elif kind.begins_with("response.output_"):
 		var response_id := str(message.get("response_id", ""))
+		# Text and audio finish independently. A trailing text completion belongs
+		# to the same answer; it must not clear it or reopen finished playback.
+		if _finished_ids.has(response_id):
+			if response_id == _response_id and not _cancelled_ids.has(response_id) and kind in ["response.output_text.delta", "response.output_text.done"]:
+				var trailing_text := str(message.get("text", ""))
+				if not trailing_text.is_empty():
+					text_received.emit(trailing_text, kind.ends_with("done"))
+			return
+		if _new_response and kind.ends_with("done") and str(message.get("text", "")).is_empty():
+			return
 		if _cancelled_ids.has(response_id) or (response_id.is_empty() and _drop_anonymous):
 			# Anonymous canceled chunks cannot be distinguished safely. A new
 			# explicit started event opens the next response; late deltas do not.

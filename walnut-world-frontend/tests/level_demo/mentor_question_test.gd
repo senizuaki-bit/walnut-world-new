@@ -99,6 +99,12 @@ func _initialize() -> void:
 	socket.incoming.append({"type": "response.done", "response_id": "reply_2"})
 	await process_frame
 	check(completions.count == 1, "后续 response.done 不重复发出回答完成信号")
+	socket.incoming.append({"type": "response.output_text.done", "response_id": "reply_2", "text": ""})
+	await process_frame
+	check(question.reply_text.get_parsed_text().ends_with("新的解释。") and completions.count == 1 and not question.voice.can_interrupt(), "音频结束后的空文字结束不清空回答或重新开始播放")
+	socket.incoming.append({"type": "response.output_text.done", "response_id": "reply_2", "text": "新的解释，完整句。"})
+	await process_frame
+	check(question.reply_text.get_parsed_text().ends_with("新的解释，完整句。"), "音频先结束仍接收同一回答的完整文字")
 	socket.incoming.append({"type": "response.output_text.delta", "response_id": "reply_3", "text": "第三轮回答。"})
 	socket.incoming.append({"type": "response.canceled", "response_id": ""})
 	socket.incoming.append({"type": "response.output_text.delta", "response_id": "reply_3", "text": "迟到的旧字幕"})
@@ -113,6 +119,8 @@ func _initialize() -> void:
 	check(socket.state == WebSocketPeer.STATE_CLOSED and socket.sent.back().type == "close", "第二次点击停止并关闭连接")
 	check(not question.voice.microphone.playing and not question.voice.speaker.playing, "关闭清理录音和播放")
 	check(question.reply_panel.visible and question.reply_text.get_parsed_text().contains("第三轮回答。"), "结束对话保留收到的字幕")
+	question.get_window().focus_exited.emit()
+	check(question.reply_panel.visible and question.reply_text.get_parsed_text().contains("第三轮回答。"), "结束后切换窗口仍保留可阅读文字")
 	question.ask_button.pressed.emit()
 	question.ask_button.pressed.emit()
 	check(question.voice.state == "IDLE", "连接中可以取消")
