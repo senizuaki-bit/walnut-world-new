@@ -176,10 +176,10 @@ func _initialize() -> void:
 	if (level.get_node("Hud/WateringCan") as AnimatedSprite2D).visible:
 		failures.append("WATER 权威协议未发布前不得播放本地浇水动画冒充 Agent 结果。")
 	var evidence := level.get_node("Hud/EvidencePanel/Margin/Content/EvidenceBody") as RichTextLabel
-	if not evidence.text.contains("权威 Run 已闭环") or not evidence.text.contains("正式 Run"):
-		failures.append("正式闭环完成后必须显示权威结果来源。")
-	if not evidence.text.contains("revision 2") or not evidence.text.contains("state_hash_2"):
-		failures.append("新关卡必须将最终权威 Snapshot 身份投影到可见证据。")
+	if not evidence.text.contains("游戏服务确认"):
+		failures.append("完成文案必须说明结果已经服务确认。")
+	if not level.evidence_title.tooltip_text.contains("revision 2") or not level.evidence_title.tooltip_text.contains("state_hash_2") or evidence.text.contains("state_hash_2"):
+		failures.append("精确运行记录应保留在诊断提示中，不占用学生正文。")
 	var projection: Dictionary = level.formal_projection_state()
 	if (
 		projection.get("content") != store.content
