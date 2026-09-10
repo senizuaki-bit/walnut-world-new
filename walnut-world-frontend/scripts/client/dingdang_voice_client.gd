@@ -12,6 +12,7 @@ const Pcm = preload("res://scripts/client/voice_pcm.gd")
 const CapturePipe = preload("res://scripts/client/voice_capture_pipe.gd")
 const MAX_AUDIO_FRAMES := 24000 * 20
 const READY_TIMEOUT_MS := 20000
+const CAPTURE_TIMEOUT_MS := 5000
 @onready var microphone: AudioStreamPlayer = $Microphone
 @onready var speaker: AudioStreamPlayer = $Speaker
 var capture_enabled := true # Injectable hardware seam; production always captures.
@@ -28,6 +29,7 @@ var _playback: AudioStreamGeneratorPlayback
 var _playback_capacity := 0
 var _audio := PackedVector2Array()
 var _started_at := 0
+var _capture_started_at := 0
 var _context_due := 0
 var _start_sent := false
 var _response_id := ""
@@ -145,7 +147,10 @@ func _process(_delta: float) -> void:
 			_fail("叮当返回了无法识别的消息。")
 			return
 		_receive(message)
-	if state != "READY" or _socket == null:
+	if state not in ["PREPARING", "READY"] or _socket == null:
+		return
+	if state == "PREPARING" and Time.get_ticks_msec() - _capture_started_at > CAPTURE_TIMEOUT_MS:
+		_fail("没有收到麦克风数据，请检查录音权限和设备后重试。")
 		return
 	if _context_due > 0 and Time.get_ticks_msec() >= _context_due:
 		_context_due = 0
@@ -164,9 +169,15 @@ func _process(_delta: float) -> void:
 			if available > 0:
 				packets = _codec.encode(_capture.get_buffer(available), AudioServer.get_mix_rate())
 		for packet in packets:
+			if _socket == null:
+				return
 			if _socket.get_current_outbound_buffered_amount() > 64000 or _socket.put_packet(packet) != OK:
 				_fail("语音网络跟不上录音速度，请重新连接。")
 				return
+		# Server readiness does not mean the physical microphone is ready.
+		# Send the first complete frame before inviting the player to speak.
+		if state == "PREPARING" and not packets.is_empty():
+			_set_state("READY")
 	_fill_speaker()
 
 func _receive(message: Dictionary) -> void:
@@ -183,7 +194,10 @@ func _receive(message: Dictionary) -> void:
 			else:
 				_capture.clear_buffer()
 				microphone.play()
-		_set_state("READY")
+			_capture_started_at = Time.get_ticks_msec()
+			_set_state("PREPARING")
+		else:
+			_set_state("READY")
 	elif kind == "voice.error":
 		var code := str(message.get("code", ""))
 		_fail({"VOICE_DISABLED": "当前服务尚未开启语音。", "VOICE_CONFIGURATION_INVALID": "语音服务尚未准备好，你可以继续操作关卡。", "VOICE_AUTH_FAILED": "语音鉴权失败，请重新连接；持续失败请联系老师。", "VOICE_SESSION_UNAVAILABLE": "当前关卡会话不可用，请重新进入。"}.get(code, "语音服务暂时不可用，请稍后重试。"))

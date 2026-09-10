@@ -120,11 +120,16 @@ func _on_voice_state(next: String) -> void:
 			ask_label.text = "取消连接"
 			status_label.text = "正在连接叮当……"
 			_show_notice("正在连接叮当师傅，请稍候……")
+		"PREPARING":
+			state = State.CONNECTING
+			ask_label.text = "取消连接"
+			status_label.text = "正在准备麦克风……"
+			_show_notice("正在准备麦克风，请等显示「可以开始说话」后再开口。")
 		"READY":
 			state = State.LISTENING
 			ask_label.text = "结束对话"
-			status_label.text = "说完稍等，叮当会自动回答"
-			_show_notice("请对着麦克风说话，说完稍等，文字会显示在这里。")
+			status_label.text = "可以开始说话 · 说完稍等自动回答"
+			_show_notice("麦克风已就绪，可以开始说话。说完稍等，识别文字会显示在这里。")
 			interrupt_button.show()
 		"IDLE":
 			state = State.COMPLETE if not _answer.is_empty() else State.IDLE
