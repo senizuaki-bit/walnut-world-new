@@ -42,6 +42,7 @@ var _world_presentation_gateway: RefCounted
 var _bootstrap: Dictionary = {}
 var _starting := false
 var _startup_reported := false
+var _startup_succeeded := false
 
 
 func _enter_tree() -> void:
@@ -65,6 +66,9 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	_configure_crop_agent_bridge()
+	if game_flow != null and game_flow.has_signal("startup_retry_requested"):
+		game_flow.startup_retry_requested.connect(_retry_startup)
+	_set_startup_ui("CONNECTING", "正在连接农场并读取学习进度，请稍候。")
 	call_deferred("_start")
 
 
@@ -98,7 +102,7 @@ func _exit_tree() -> void:
 
 
 func _start() -> void:
-	if _starting:
+	if _starting or _startup_reported:
 		return
 	_starting = true
 	if store == null or session_controller == null:
@@ -644,6 +648,29 @@ func _fail(code: String, message: String) -> void:
 	_finish({"ok": false, "error_code": code, "message": message})
 
 
+func _set_startup_ui(state: String, message: String) -> void:
+	if game_flow != null and game_flow.has_method("set_startup_state"):
+		game_flow.set_startup_state(state, message)
+
+
+func _retry_startup() -> void:
+	if _starting or not _startup_reported or _startup_succeeded:
+		return
+	if _transport != null and _transport.has_method("shutdown"):
+		_transport.shutdown()
+	_transport = null
+	_bootstrap.clear()
+	_startup_reported = false
+	# Revalidate authority without deleting drafts or pending write envelopes.
+	if store != null:
+		store.begin_authority_revalidation()
+		store.set_flow(WalnutClientStore.FlowState.BOOTSTRAPPING)
+	if session_controller != null:
+		session_controller.begin_startup_authority_revalidation()
+	_set_startup_ui("CONNECTING", "正在重新连接，原有代码和进度会保留。")
+	_start()
+
+
 func _finish(result: Dictionary) -> void:
 	if _startup_reported:
 		return
@@ -681,6 +708,16 @@ func _finish(result: Dictionary) -> void:
 				str(final_result.get("message", "启动权威恢复失败，未展示缓存内容。")),
 			)
 	_startup_reported = true
+	_starting = false
+	_startup_succeeded = bool(final_result.get("ok", false))
+	if _startup_succeeded:
+		_set_startup_ui("READY", "学习进度已读取，可以进入农场。")
+	else:
+		var code := str(final_result.get("error_code", ""))
+		if code in ["AUTH_TOKEN_MISSING", "APP_AUTOLOAD_UNAVAILABLE", "APP_CONFIGURATION_INVALID", "CLIENT_PERSISTENCE_CORRUPT"]:
+			_set_startup_ui("BLOCKED", "连接配置未就绪，请联系老师检查后重新打开游戏。")
+		else:
+			_set_startup_ui("FAILED", "暂时无法读取学习进度，请检查连接后重试。")
 	startup_finished.emit(final_result)
 
 

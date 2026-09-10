@@ -2,6 +2,7 @@ class_name GameStartScreen
 extends Control
 
 signal enter_farm_requested
+signal retry_requested
 
 @onready var title_group: Control = %TitleGroup
 @onready var hero_card: Control = %HeroCard
@@ -9,10 +10,12 @@ signal enter_farm_requested
 @onready var enter_button: Button = %EnterButton
 @onready var leaf_left: Label = %LeafLeft
 @onready var leaf_right: Label = %LeafRight
+@onready var connection_tip: Label = $HeroCard/Margin/Content/Copy/Tip
 
 var _intro_tween: Tween
 var _idle_tween: Tween
 var _button_tween: Tween
+var _service_state := "READY"
 
 
 func _ready() -> void:
@@ -25,7 +28,7 @@ func _ready() -> void:
 func play_intro() -> void:
 	visible = true
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	enter_button.disabled = false
+	_refresh_service_button()
 	if _intro_tween != null and _intro_tween.is_valid():
 		_intro_tween.kill()
 	if _idle_tween != null and _idle_tween.is_valid():
@@ -74,9 +77,30 @@ func _start_idle_motion() -> void:
 
 
 func _on_enter_pressed() -> void:
+	if _service_state == "FAILED":
+		enter_button.disabled = true
+		retry_requested.emit()
+		return
+	if not can_enter():
+		return
 	enter_button.disabled = true
 	_bounce_button(Vector2(0.93, 0.93), Vector2(1.04, 1.04))
 	enter_farm_requested.emit()
+
+
+func can_enter() -> bool:
+	return _service_state == "READY"
+
+
+func set_service_state(value: String, message := "") -> void:
+	_service_state = value
+	connection_tip.text = message if not message.is_empty() else "主人公和小核桃一起进入农场"
+	_refresh_service_button()
+
+
+func _refresh_service_button() -> void:
+	enter_button.disabled = _service_state not in ["READY", "FAILED"]
+	enter_button.text = {"READY": "进入农场  →", "CONNECTING": "正在连接……", "FAILED": "重新连接", "BLOCKED": "连接未就绪"}.get(_service_state, "正在连接……")
 
 
 func _on_enter_hovered() -> void:
