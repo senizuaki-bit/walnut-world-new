@@ -43,6 +43,7 @@ class FakeSession:
 	var store: FakeStore
 	var stages: Array[String] = []
 	var fail_next_turn := false
+	var fail_next_hint := false
 	var next_turn_error: Dictionary = {}
 
 	func _init(value: FakeStore) -> void:
@@ -90,6 +91,11 @@ class FakeSession:
 
 	func request_hint(_message: String) -> void:
 		stages.append("hint")
+		await get_tree().process_frame
+		if fail_next_hint:
+			fail_next_hint = false
+			store.error_reported.emit({"code": "PROVIDER_UNAVAILABLE", "message": "提示服务暂时不可用，请重试。"})
+			return
 		var interactions: Array[Dictionary] = [{
 			"interaction_id": "interaction_hint",
 			"role": "teaching_agent",
@@ -220,11 +226,26 @@ func _initialize() -> void:
 		if not level.code_drawer.visible or level.code_editor.text != source or level.formal_projection_state().snapshot != before_retry.snapshot:
 			failures.append("我自己修改必须打开现有代码，不能修改草稿或世界。")
 	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.CODE)
-	level.call("_on_hint_pressed")
+	if not level.hint_button.visible or level.drawer_hint_button.disabled:
+		failures.append("代码阶段必须提供农场和编辑器文字提示入口。")
+	var stages_before_hint := session.stages.size()
+	level.drawer_hint_button.pressed.emit()
+	if not level.hint_button.disabled or not run_button.disabled:
+		failures.append("请求提示时必须显示等待状态并阻止并行运行。")
+	level.hint_button.pressed.emit()
+	level.agent_submit_requested.emit(source)
+	if session.stages.size() != stages_before_hint + 1:
+		failures.append("提示等待期间不得重复请求或并发运行。")
 	for _frame in range(5):
 		await process_frame
-	if session.stages.back() != "hint" or not evidence.text.contains("同一下标"):
+	if session.stages.back() != "hint" or not evidence.text.contains("同一下标") or level.hint_button.disabled:
 		failures.append("问叮当必须通过正式 Hint Turn 展示 AgentInteraction。")
+	story_overlay.skip_sequence()
+	session.fail_next_hint = true
+	level.hint_button.pressed.emit()
+	for _frame in range(5): await process_frame
+	if level.hint_button.disabled or run_button.disabled or not evidence.text.contains("重试"):
+		failures.append("提示失败必须恢复按钮并显示可重试反馈。")
 	session.next_turn_error = {"code": "INTERNAL_ERROR", "category": "INTERNAL", "message": "RAW_PROVIDER_ERROR", "details": {"exception_type": "WorkflowInvariantError"}}
 	story_overlay.skip_sequence()
 	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.CODE)

@@ -352,7 +352,7 @@ func _initialize() -> void:
 	})
 	await controller.request_turn()
 	if (
-		str(store.last_error.get("code", "")) != "TURN_COMMAND_FAILED"
+		str(store.last_error.get("code", "")) != "PROVIDER_UNAVAILABLE"
 		or store.flow_state != WalnutClientStore.FlowState.ERROR
 		or game.run_reads != 3
 		or game.evidence_reads != 3

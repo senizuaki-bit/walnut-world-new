@@ -87,6 +87,7 @@ const CROP_TEXTURES := [
 @onready var evidence_body: RichTextLabel = %EvidenceBody
 @onready var primary_button: Button = %PrimaryButton
 @onready var hint_button: Button = %HintButton
+@onready var drawer_hint_button: Button = %DrawerHintButton
 @onready var mentor_question: MentorQuestion = %MentorQuestion
 @onready var farm_mentor: ArtMotionTexture = $FarmMentor
 @onready var request_patch_button: Button = %RequestPatchButton
@@ -169,6 +170,7 @@ var _drawer_tween: Tween
 var _evidence_tween: Tween
 var _button_tweens: Dictionary = {}
 var _agent_mode := false
+var _hint_pending := false
 var _synchronizing_agent_draft := false
 var _agent_source := ""
 var _agent_task_title := ""
@@ -201,6 +203,7 @@ func _ready() -> void:
 	patch_dialog.visibility_changed.connect(func() -> void: $PatchBackdrop.visible = patch_dialog.visible)
 	primary_button.pressed.connect(_on_primary_pressed)
 	hint_button.pressed.connect(_on_hint_pressed)
+	drawer_hint_button.pressed.connect(_on_hint_pressed)
 	request_patch_button.pressed.connect(_on_patch_requested)
 	code_button.pressed.connect(_show_code_drawer)
 	dismiss_code_button.pressed.connect(_hide_code_drawer)
@@ -756,12 +759,15 @@ func _on_bug_continue_pressed() -> void:
 
 
 func _on_hint_pressed() -> void:
+	if _hint_pending:
+		return
 	_bounce(hint_button)
 	if _phase not in [Phase.CODE, Phase.FAILED, Phase.CERTIFIED, Phase.ACTIVE, Phase.LOCAL_FAILED, Phase.LOCAL_COMPLETED, Phase.CHAIN_ERROR]:
 		evidence_body.text = "先完成当前观察步骤，叮当师傅会根据真实结果继续帮助你。"
 		_reveal_evidence()
 		return
 	if _agent_mode:
+		_hide_code_drawer()
 		agent_hint_requested.emit("请根据我当前的代码和最近一次权威验证结果，给出下一层教学提示。")
 		return
 	if _same_failure_key.is_empty():
@@ -783,6 +789,11 @@ func _on_hint_pressed() -> void:
 	_show_teaching_dialogue("L%d · 分层教学" % _hint_level)
 	_reveal_evidence()
 	_refresh_patch_button()
+
+
+func set_hint_pending(pending: bool) -> void:
+	_hint_pending = pending
+	_set_phase(_phase)
 
 
 func _on_patch_requested() -> void:
@@ -1261,7 +1272,7 @@ func update_agent_submission_stage(message: String, keep_running := true) -> voi
 	_agent_stage_message_visible = true
 	if keep_running and _phase != Phase.RUNNING:
 		_set_phase(Phase.RUNNING)
-	evidence_title.text = "正式 Agent 链路"
+	evidence_title.text = "叮当师傅正在想办法" if _hint_pending else "正在准备验证"
 	evidence_body.text = message
 	_reveal_evidence()
 
@@ -1323,6 +1334,13 @@ func _on_agent_world_cue_requested(presentation_key: StringName, active: bool) -
 ## So only a transient phase is replaced, and only with fixed child-facing copy.
 func present_agent_error(message: String) -> void:
 	_last_chain_error_detail = message
+	if _hint_pending:
+		_agent_stage_message_visible = false
+		evidence_title.text = "这次提示没有收到"
+		evidence_title.tooltip_text = message
+		evidence_body.text = "代码和进度已保留。稍后点击「给我提示」重试，也可以继续自己修改。"
+		_reveal_evidence()
+		return
 	var frozen_transient_phase: bool = _phase in [Phase.RUNNING, Phase.BUILDING, Phase.ACTIVATING]
 	if not frozen_transient_phase and not _agent_stage_message_visible:
 		return
@@ -1456,12 +1474,17 @@ func _set_phase(value: Phase) -> void:
 	_refresh_authority_strip()
 	_apply_v2_layout(value)
 	primary_button.visible = value in [Phase.INTRO, Phase.OLD_TOOL, Phase.FAILED]
-	hint_button.visible = false
-	# Preserve the existing scroll button position without a second question entry.
-	$Hud/ToolRail/HintSpace.visible = value in [Phase.CODE, Phase.CERTIFIED, Phase.ACTIVE, Phase.FAILED, Phase.LOCAL_FAILED, Phase.LOCAL_COMPLETED, Phase.CHAIN_ERROR]
+	var can_hint := value in [Phase.CODE, Phase.CERTIFIED, Phase.ACTIVE, Phase.FAILED, Phase.LOCAL_FAILED, Phase.LOCAL_COMPLETED, Phase.CHAIN_ERROR]
+	hint_button.visible = can_hint
+	$Hud/ToolRail/HintSpace.visible = false
+	for button: Button in [hint_button, drawer_hint_button]:
+		button.disabled = not can_hint or _hint_pending
+		button.text = "正在请求…" if _hint_pending else "给我提示"
+		button.tooltip_text = "根据代码和验证结果获取文字提示"
 	code_button.visible = value in [Phase.CODE, Phase.CERTIFIED, Phase.ACTIVE, Phase.LOCAL_FAILED, Phase.LOCAL_COMPLETED, Phase.CHAIN_ERROR]
 	_refresh_patch_button()
-	run_button.disabled = value not in [Phase.CODE, Phase.CERTIFIED, Phase.ACTIVE, Phase.FAILED, Phase.LOCAL_FAILED, Phase.LOCAL_COMPLETED, Phase.CHAIN_ERROR]
+	run_button.disabled = not can_hint or _hint_pending
+	reset_button.disabled = _hint_pending
 	match value:
 		Phase.INTRO:
 			primary_button.text = "查看旧工具演示  →"
