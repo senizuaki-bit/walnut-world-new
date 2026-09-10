@@ -20,7 +20,7 @@ func _initialize() -> void:
 		elif argument.begins_with("--output="):
 			output_path = argument.trim_prefix("--output=")
 	state_name = {"free_play": "free", "world_feedback": "feedback"}.get(state_name, state_name)
-	if state_name not in ["start", "intro", "manual", "manual_choice", "old_tool", "skill_tree", "workshop", "workshop_dialogue", "workshop_branch", "workshop_summary", "bug", "growth", "patch", "free", "preview", "feedback", "hint", "validating", "unlocked", "code", "failed", "results", "complete", "question_idle", "question_listening", "question_answering", "question_complete", "question_farm"]:
+	if state_name not in ["start", "intro", "manual", "manual_choice", "old_tool", "skill_tree", "workshop", "workshop_dialogue", "workshop_branch", "workshop_summary", "bug", "growth", "patch", "free", "preview", "feedback", "hint", "validating", "unlocked", "code", "failed", "results", "complete", "question_idle", "question_listening", "question_answering", "question_complete", "question_farm", "service_failure", "pending_result"]:
 		push_error("Unknown capture state: %s" % state_name)
 		quit(1)
 		return
@@ -121,6 +121,10 @@ func _initialize() -> void:
 		elif state_name == "code":
 			level.call("_set_phase", CropAdaptiveWateringDemo.Phase.CODE)
 			level.call("_show_code_drawer")
+		elif state_name in ["service_failure", "pending_result"]:
+			# Display fixture only; no submission, provider request or world mutation.
+			var error_code := "INTERNAL_ERROR" if state_name == "service_failure" else "RESOURCE_RECONCILIATION_TIMEOUT"
+			level.fail_agent_submission("验证", "fixture", {"code": error_code}, true)
 		elif state_name == "failed":
 			level.set("_build_result", CropAdaptiveWateringDemo.evaluate_source(CropAdaptiveWateringDemo.STARTER_CODE))
 			for action in level.get("_build_result").actions:

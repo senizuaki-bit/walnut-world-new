@@ -237,6 +237,21 @@ func _initialize() -> void:
 		level.fail_agent_submission(stage, raw)
 		if raw in evidence_body.text:
 			failures.append("%s失败不得把原始服务错误显示给学生。" % stage)
+	level.fail_agent_submission("代码检查", "RAW", {"code": "INTERNAL_ERROR", "category": "INTERNAL"})
+	if level.evidence_title.text != "服务执行失败" or evidence_body.text.contains("已通过") or evidence_body.text.contains("编译检查未通过"):
+		failures.append("构建服务失败不能声称代码已通过，也不能误判编译错误。")
+	level.fail_agent_submission("验证", "RAW", {"code": "RESOURCE_RECONCILIATION_TIMEOUT"}, true)
+	if level.evidence_title.text != "暂时无法确认结果" or evidence_body.text.contains("世界没有变化") or not evidence_body.text.contains("可能仍在处理"):
+		failures.append("超时属于未知结果，不能断言世界没变或让学生反复修改答案。")
+	level.fail_agent_submission("代码检查", "RAW", {"code": "SANDBOX_COMPILE_ERROR"})
+	if level.evidence_title.text != "代码检查未通过":
+		failures.append("明确的编译错误应提示修改代码。")
+	level.fail_agent_submission("目标", "RAW", {}, true)
+	if level.evidence_title.text != "运行完成，目标还未达成" or not level.evidence_title.tooltip_text.is_empty():
+		failures.append("目标未达成必须与服务失败区分，并清除上次错误提示。")
+	level.fail_agent_submission("验证", "RAW", {"code": "[url]RAW_SECRET[/url]"})
+	if not level.evidence_title.tooltip_text.is_empty() or evidence_body.text.contains("RAW_SECRET"):
+		failures.append("任意错误字段不能作为原始文本或富文本展示。")
 	level.present_candidate_chain_error("RAW_CANDIDATE_ERROR_SHOULD_STAY_INTERNAL")
 	if "RAW_CANDIDATE_ERROR_SHOULD_STAY_INTERNAL" in evidence_body.text:
 		failures.append("候选演示失败不得把内部错误代码显示给学生。")
