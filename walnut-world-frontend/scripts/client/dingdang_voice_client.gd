@@ -25,6 +25,7 @@ var _socket: RefCounted
 var _capture: AudioEffectCapture
 var _codec := Pcm.new()
 var _playback: AudioStreamGeneratorPlayback
+var _playback_capacity := 0
 var _audio := PackedVector2Array()
 var _started_at := 0
 var _context_due := 0
@@ -90,6 +91,10 @@ func interrupt() -> void:
 		return
 	_cancel_response(_response_id)
 	_send({"type": "interrupt"})
+
+func can_interrupt() -> bool:
+	# Audio generation can finish before the queued speech has been heard.
+	return state == "READY" and (not _new_response or not _audio.is_empty() or (_playback != null and _playback.get_frames_available() < _playback_capacity))
 
 func close() -> void:
 	if _socket != null:
@@ -251,6 +256,7 @@ func _clear_audio() -> void:
 	if is_instance_valid(speaker):
 		speaker.stop()
 	_playback = null
+	_playback_capacity = 0
 
 func _fill_speaker() -> void:
 	if _audio.is_empty():
@@ -258,6 +264,8 @@ func _fill_speaker() -> void:
 	if _playback == null:
 		speaker.play()
 		_playback = speaker.get_stream_playback() as AudioStreamGeneratorPlayback
+		if _playback != null:
+			_playback_capacity = _playback.get_frames_available()
 	if _playback == null:
 		return
 	var count := mini(_audio.size(), _playback.get_frames_available())
