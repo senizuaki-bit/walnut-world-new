@@ -43,6 +43,7 @@ class FakeSession:
 	var store: FakeStore
 	var stages: Array[String] = []
 	var fail_next_turn := false
+	var next_turn_error: Dictionary = {}
 
 	func _init(value: FakeStore) -> void:
 		store = value
@@ -58,6 +59,11 @@ class FakeSession:
 
 	func request_submit_and_run() -> Dictionary:
 		stages.append("turn")
+		if not next_turn_error.is_empty():
+			store.set_flow(WalnutClientStore.FlowState.ERROR)
+			store.error_reported.emit(next_turn_error.duplicate(true))
+			next_turn_error.clear()
+			return {"ok": false, "stage": "RUN", "message": "Run closure did not complete."}
 		if fail_next_turn:
 			fail_next_turn = false
 			store.set_flow(WalnutClientStore.FlowState.ERROR)
@@ -219,6 +225,15 @@ func _initialize() -> void:
 		await process_frame
 	if session.stages.back() != "hint" or not evidence.text.contains("同一下标"):
 		failures.append("问叮当必须通过正式 Hint Turn 展示 AgentInteraction。")
+	session.next_turn_error = {"code": "INTERNAL_ERROR", "category": "INTERNAL", "message": "RAW_PROVIDER_ERROR", "details": {"exception_type": "WorkflowInvariantError"}}
+	story_overlay.skip_sequence()
+	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.CODE)
+	run_button.pressed.emit()
+	for _frame in range(10): await process_frame
+	if level.evidence_title.text != "服务执行失败" or not evidence.text.contains("代码检查已通过") or evidence.text.contains("RAW_PROVIDER_ERROR") or level.primary_button.disabled:
+		failures.append("已认证代码遇到后端内部错误，应显示服务失败、保留修改入口，不能让学生继续改正确答案。")
+	if action_results.back().code != "INTERNAL_ERROR" or not level.evidence_title.tooltip_text.contains("INTERNAL_ERROR"):
+		failures.append("后端错误编号必须传递到结果和可查看的标题提示。")
 	bridge.queue_free()
 	session.queue_free()
 	store.queue_free()

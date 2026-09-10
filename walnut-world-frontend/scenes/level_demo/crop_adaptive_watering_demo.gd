@@ -1335,20 +1335,36 @@ func present_agent_error(message: String) -> void:
 	_reveal_evidence()
 
 
-func fail_agent_submission(stage: String, message: String) -> void:
+func fail_agent_submission(stage: String, message: String, error: Dictionary = {}, code_checked := false) -> void:
 	_last_chain_error_detail = "%s: %s" % [stage, message]
 	_agent_stage_message_visible = false
 	_set_phase(Phase.FAILED)
-	match stage:
-		"构建":
-			evidence_title.text = "代码还没准备好"
-			evidence_body.text = "编译检查没有通过，世界没有变化。\n请根据角色提示检查代码，再点一次“直接运行”。"
-		"激活", "运行准备":
-			evidence_title.text = "运行准备暂未完成"
-			evidence_body.text = "这次没有取得可运行版本，世界没有变化。\n请稍后重试；如果仍未完成，可以先请求提示。"
-		_:
-			evidence_title.text = "这次验证没有完成"
-			evidence_body.text = "世界没有变化，你的代码也还在。\n可以再点一次“直接运行”，或者先问问叮当师傅。"
+	var code := str(error.get("code", ""))
+	var checked := "代码检查已通过。" if code_checked else ""
+	# Classification uses structured evidence, never substrings of a raw error.
+	if code == "RESOURCE_RECONCILIATION_TIMEOUT":
+		evidence_title.text = "暂时无法确认结果"
+		evidence_body.text = checked + "等待结果超时，服务可能仍在处理。\n代码已保留，请稍后查看结果，不必因此反复修改答案。"
+	elif code == "SANDBOX_COMPILE_ERROR":
+		evidence_title.text = "代码检查未通过"
+		evidence_body.text = "编译检查未通过。\n点击「我自己修改」，根据提示检查代码后再运行。"
+	elif code in ["SANDBOX_RUNTIME_ERROR", "SANDBOX_RESOURCE_LIMIT"]:
+		evidence_title.text = "程序运行未完成"
+		evidence_body.text = checked + ("程序超过了运行限制。" if code == "SANDBOX_RESOURCE_LIMIT" else "程序运行时发生错误。") + "\n代码已保留，可以查看提示并修改后再运行。"
+	elif stage == "目标" and error.is_empty():
+		evidence_title.text = "运行完成，目标还未达成"
+		evidence_body.text = "这次运行结果尚未达到关卡目标。\n点击「我自己修改」，对照结果调整代码，也可以问叮当。"
+	elif code == "INTERNAL_ERROR" or str(error.get("category", "")) == "INTERNAL":
+		evidence_title.text = "服务执行失败"
+		evidence_body.text = checked + "本次服务执行失败，代码已保留。\n请联系老师检查服务状态，无需因此反复修改答案。"
+	else:
+		evidence_title.text = "代码检查暂未完成" if stage in ["构建", "代码检查"] else ("运行准备暂未完成" if stage in ["激活", "运行准备"] else "暂时无法确认结果")
+		evidence_body.text = checked + "这一步暂未完成，代码已保留。\n请稍后重试；如果持续出现，请联系老师检查服务状态。"
+	# A bounded identifier is useful for support; raw messages/details stay internal.
+	var identifier := RegEx.new()
+	identifier.compile("^[A-Z][A-Z0-9_]{0,79}$")
+	if identifier.search(code) != null:
+		evidence_title.tooltip_text = "错误编号：%s\n需要帮助时，可以把此编号告诉老师。" % code
 	_reveal_evidence()
 
 
@@ -1380,6 +1396,7 @@ func _authoritative_snapshot_line() -> String:
 
 
 func _set_phase(value: Phase) -> void:
+	evidence_title.tooltip_text = ""
 	var previous_phase := _phase
 	_phase = value
 	if value != previous_phase:

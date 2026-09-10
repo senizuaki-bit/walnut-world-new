@@ -20,6 +20,7 @@ var _build_running := false
 var _activation_running := false
 var _last_error_message := ""
 var _last_error_code := ""
+var _last_error: Dictionary = {}
 var _projection_active := false
 var _pending_interactions: Array[Dictionary] = []
 var _pending_submission_interactions: Array[Dictionary] = []
@@ -162,6 +163,7 @@ func _on_submit_requested(source: String) -> void:
 	_submission_running = true
 	_last_error_message = ""
 	_last_error_code = ""
+	_last_error.clear()
 	_pre_run_snapshot.clear()
 	_last_run.clear()
 	_local_candidate_result.clear()
@@ -252,7 +254,7 @@ func _on_submit_requested(source: String) -> void:
 				_level.present_candidate_chain_error(str(evaluation.get("code", "CANDIDATE_EVALUATION_FAILED")))
 				submit_action_finished.emit(_submit_result(result, source, false))
 				return
-		_finish_failure("验证", str(objective_result.get("summary", "权威验证未通过。")))
+		_finish_failure("目标", str(objective_result.get("summary", "权威验证未通过。")))
 		submit_action_finished.emit(_submit_result(result, source, false))
 		return
 	_submission_running = false
@@ -268,6 +270,8 @@ func _on_build_requested(source: String) -> void:
 		return
 	_build_running = true
 	_last_error_message = ""
+	_last_error_code = ""
+	_last_error.clear()
 	_level.begin_agent_build()
 	_store.call("mark_draft_dirty", source)
 	await _session.call("request_build")
@@ -282,7 +286,7 @@ func _on_build_requested(source: String) -> void:
 		"正式 Build/Certification 已闭环。" if build_ok else "正式构建未产生 CERTIFIED 结果。",
 	))
 	if not build_ok:
-		_level.fail_agent_submission("构建", _last_error_message if not _last_error_message.is_empty() else "正式构建未产生 CERTIFIED 结果。")
+		_level.fail_agent_submission("构建", _last_error_message if not _last_error_message.is_empty() else "正式构建未产生 CERTIFIED 结果。", _last_error)
 		return
 	_certified_source = source
 	_active_source = ""
@@ -294,6 +298,8 @@ func _on_activation_requested() -> void:
 		return
 	_activation_running = true
 	_last_error_message = ""
+	_last_error_code = ""
+	_last_error.clear()
 	_level.begin_agent_activation()
 	await _session.call("request_activation")
 	if not is_instance_valid(self):
@@ -308,7 +314,7 @@ func _on_activation_requested() -> void:
 		"正式 SkillActivation 已发布。" if activation_ok else "正式激活未发布精确 Skill tuple。",
 	))
 	if not activation_ok:
-		_level.fail_agent_submission("激活", _last_error_message if not _last_error_message.is_empty() else "正式激活未发布精确 Skill tuple。")
+		_level.fail_agent_submission("激活", _last_error_message if not _last_error_message.is_empty() else "正式激活未发布精确 Skill tuple。", _last_error, _certified_source == str(_store.get("local_source")))
 		return
 	_active_source = _certified_source
 	_level.complete_agent_activation()
@@ -423,6 +429,7 @@ func _candidate_hint_message(fallback: String) -> String:
 
 func _on_error_reported(error: Dictionary) -> void:
 	if _projection_active and _level != null:
+		_last_error = error.duplicate(true)
 		_last_error_code = str(error.get("code", ""))
 		_last_error_message = str(error.get("message", "正式服务发生错误。"))
 		_level.present_agent_error(_last_error_message)
@@ -431,6 +438,7 @@ func _on_error_reported(error: Dictionary) -> void:
 func _on_capability_unavailable(_capability: String, message: String) -> void:
 	if _projection_active and _level != null:
 		_last_error_code = "CAPABILITY_UNAVAILABLE"
+		_last_error = {"code": _last_error_code, "message": message}
 		_last_error_message = message
 		_level.present_agent_error(message)
 
@@ -438,7 +446,7 @@ func _on_capability_unavailable(_capability: String, message: String) -> void:
 func _finish_failure(stage: String, message: String) -> void:
 	_submission_running = false
 	_refresh_level_authority_projection()
-	_level.fail_agent_submission(stage, _last_error_message if not _last_error_message.is_empty() else message)
+	_level.fail_agent_submission(stage, _last_error_message if not _last_error_message.is_empty() else message, _last_error, not _certified_source.is_empty() and _certified_source == str(_store.get("local_source")))
 	if not _pending_submission_interactions.is_empty():
 		_level.present_agent_interactions(_pending_submission_interactions)
 		_pending_submission_interactions.clear()
