@@ -1440,6 +1440,7 @@ func _set_phase(value: Phase) -> void:
 			primary_button.text = "查看旧工具演示  →"
 		Phase.FAILED:
 			primary_button.text = "我自己修改  →"
+			primary_button.disabled = false
 	_refresh_mentor_question()
 
 

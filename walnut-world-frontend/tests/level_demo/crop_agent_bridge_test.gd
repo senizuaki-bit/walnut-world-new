@@ -189,6 +189,9 @@ func _initialize() -> void:
 	if session.stages != ["build", "activate", "turn", "turn"] or action_stages != ["BUILD", "ACTIVATION", "SUBMIT", "SUBMIT"]:
 		failures.append("同源重试必须复用已认证/已激活 tuple，只再产生 Submit。")
 	session.fail_next_turn = true
+	# The real lesson disables PrimaryButton during manual comparison.
+	# A terminal submission failure must not inherit that old UI lock.
+	level.call("_begin_manual_compare")
 	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.CODE)
 	run_button.pressed.emit()
 	for _frame in range(10):
@@ -202,6 +205,14 @@ func _initialize() -> void:
 		failures.append("资源轮询超时必须保留净化后的 code/message，不得折叠成无结构结果。")
 	story_overlay.skip_sequence()
 	await process_frame
+	var before_retry: Dictionary = level.formal_projection_state()
+	if level.primary_button.disabled or not level.primary_button.visible:
+		failures.append("提交失败后必须恢复我自己修改按钮，不能继承手动比较阶段的禁用状态。")
+	else:
+		level.primary_button.pressed.emit()
+		await process_frame
+		if not level.code_drawer.visible or level.code_editor.text != source or level.formal_projection_state().snapshot != before_retry.snapshot:
+			failures.append("我自己修改必须打开现有代码，不能修改草稿或世界。")
 	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.CODE)
 	level.call("_on_hint_pressed")
 	for _frame in range(5):
