@@ -883,6 +883,10 @@ func request_build() -> void:
 		# try again is decided inside _submit_build_attempt, which retries under a
 		# new identity when the failure it found belonged to an older attempt.
 		store.set_flow(WalnutClientStore.FlowState.BUILD_FAILED)
+		var build_error: Variant = command.get("error")
+		if build_error is Dictionary and not build_error.is_empty():
+			store.report_error(build_error)
+			store.set_flow(WalnutClientStore.FlowState.BUILD_FAILED)
 		if str(command.get("status", "")) == "REJECTED":
 			var rejected_build := await _recover_rejected_build(command)
 			if not rejected_build.get("ok", false):
@@ -981,7 +985,8 @@ func request_activation() -> void:
 		return
 	var command: Dictionary = command_result.value
 	if str(command.get("status", "")) != "APPLIED":
-		store.report_error(_local_error("ACTIVATION_COMMAND_REJECTED", "Activation command did not reach APPLIED."))
+		var activation_error: Variant = command.get("error")
+		store.report_error(activation_error if activation_error is Dictionary and not activation_error.is_empty() else _local_error("ACTIVATION_COMMAND_REJECTED", "Activation command did not reach APPLIED."))
 		return
 	var resource: Variant = command.get("result")
 	if not resource is Dictionary or str(resource.get("resource_type", "")) != "SKILL_ACTIVATION":
@@ -2497,6 +2502,11 @@ func _pending_turn_terminal_result(
 	if store != null:
 		store.clear_pending_operation(slot)
 	var error := _local_error(code, message)
+	# The terminal Command was already validated by the gateway. Preserve its
+	# classification and diagnostics instead of replacing it with a local label.
+	var command_error: Variant = command.get("error")
+	if str(command.get("status", "")) in ["FAILED", "REJECTED"] and command_error is Dictionary and not command_error.is_empty():
+		error = command_error.duplicate(true)
 	return {
 		"ok": true,
 		"status": 200,

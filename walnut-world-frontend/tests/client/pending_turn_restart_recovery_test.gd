@@ -12,6 +12,7 @@ class Game:
 	extends RefCounted
 	var calls: Array[Dictionary] = []
 	var terminal_failure := false
+	var backend_error := {"code": "INTERNAL_ERROR", "category": "INTERNAL", "retryable": false, "message": "Workflow exhausted bounded recovery attempts.", "details": {"exception_type": "WorkflowInvariantError"}}
 
 	func submit_agent_turn(_context: Dictionary, session_id: String, key: String, request: Dictionary) -> Dictionary:
 		calls.append({
@@ -28,6 +29,7 @@ class Game:
 				"command_id": command_id,
 				"terminal": true,
 				"status": "FAILED",
+				"error": backend_error.duplicate(true),
 				"result": null,
 				"links": {},
 			}}
@@ -289,9 +291,9 @@ func _initialize() -> void:
 		game.calls.size() != 2
 		or game.calls[1].request != failed_request
 		or not restored.get_pending_operation("agent_hint").is_empty()
-		or str(restored.last_error.get("code", "")) != "TURN_COMMAND_FAILED"
+		or restored.last_error != game.backend_error
 	):
-		_abort("Terminal pending Turn reconciliation must clear the original envelope without a new identity.", absolute_path)
+		_abort("Terminal pending Turn must preserve the backend error and clear the original envelope without a new identity.", absolute_path)
 		return
 
 	DirAccess.remove_absolute(absolute_path)
