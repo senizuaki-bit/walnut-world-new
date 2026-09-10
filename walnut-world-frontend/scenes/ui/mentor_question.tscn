@@ -92,6 +92,7 @@ horizontal_scroll_mode = 0
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.13, 0.25, 0.19, 1)
 theme_override_font_sizes/font_size = 18
 autowrap_mode = 2
 
@@ -112,7 +113,7 @@ theme_override_styles/focus = SubResource("focus")
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
-tooltip_text = "点击开始连续语音对话，再次点击结束"
+tooltip_text = "点击后直接说话，说完稍等自动回答；再次点击会关闭对话"
 theme_override_constants/h_separation = 7
 theme_override_font_sizes/font_size = 19
 theme_override_fonts/font = ExtResource("bold")
@@ -175,6 +176,7 @@ theme_override_font_sizes/font_size = 13
 theme_override_colors/font_color = Color(1, 0.97, 0.85, 1)
 theme_override_styles/normal = SubResource("caption")
 text = "向叮当师傅请教"
+autowrap_mode = 2
 horizontal_alignment = 1
 vertical_alignment = 1
 

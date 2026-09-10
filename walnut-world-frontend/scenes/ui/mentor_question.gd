@@ -19,6 +19,7 @@ var _context := ""
 var _follow_text := true
 var _answer := ""
 var _transcript := ""
+var _notice_visible := false
 
 func _ready() -> void:
 	ask_button.pressed.connect(toggle_voice)
@@ -107,10 +108,12 @@ func _on_voice_state(next: String) -> void:
 			state = State.CONNECTING
 			ask_label.text = "取消连接"
 			status_label.text = "正在连接叮当……"
+			_show_notice("正在连接叮当师傅，请稍候……")
 		"READY":
 			state = State.LISTENING
 			ask_label.text = "结束对话"
-			status_label.text = "正在聆听 · 再次点击结束"
+			status_label.text = "说完稍等，叮当会自动回答"
+			_show_notice("请对着麦克风说话，说完稍等，文字会显示在这里。")
 			interrupt_button.show()
 		"IDLE":
 			state = State.COMPLETE if not _answer.is_empty() else State.IDLE
@@ -118,6 +121,8 @@ func _on_voice_state(next: String) -> void:
 			status_label.text = "点击开始语音对话"
 			interrupt_button.hide()
 			understood_button.visible = not _answer.is_empty()
+			if _answer.is_empty() and _transcript.is_empty() and reply_panel.visible:
+				_show_notice("对话已结束，本次未收到识别文字或回答。\n\n请检查麦克风；说完话后稍等，叮当会自动回答。")
 			answering_changed.emit(false)
 
 func _on_response_started() -> void:
@@ -153,9 +158,21 @@ func _on_response_finished() -> void:
 
 func _on_voice_error(message: String) -> void:
 	status_label.text = message
+	_show_notice(message + "\n\n你可以继续操作关卡，稍后再试。")
 	answering_changed.emit(false)
 
+func _show_notice(message: String) -> void:
+	_notice_visible = true
+	follow_timer.stop()
+	reply_text.text = message
+	reply_text.visible_characters = -1
+	reply_panel.show()
+	reply_scroll.set_deferred("scroll_vertical", 0)
+
 func _render_text() -> void:
+	if _notice_visible:
+		_notice_visible = false
+		_follow_text = true
 	reply_text.text = (("你：" + _transcript + "\n\n") if not _transcript.is_empty() else "") + _answer
 	reply_text.visible_characters = -1
 	reply_panel.visible = not reply_text.text.is_empty()
@@ -167,7 +184,7 @@ func _follow_reply_end() -> void:
 		reply_scroll.scroll_vertical = int(reply_scroll.get_v_scroll_bar().max_value)
 
 func _schedule_follow() -> void:
-	if _follow_text and follow_timer.is_stopped():
+	if _follow_text and not _notice_visible and follow_timer.is_stopped():
 		follow_timer.start()
 
 func _on_scroll_input(event: InputEvent) -> void:

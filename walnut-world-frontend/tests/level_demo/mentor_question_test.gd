@@ -51,8 +51,10 @@ func _initialize() -> void:
 	question.configure_voice("http://127.0.0.1:8790", "test-only-token", "session_voice_demo", func(): return {"code": "int main() {}", "observation": "正在编辑"})
 	question.ask_button.pressed.emit()
 	check(question.state == MentorQuestion.State.CONNECTING, "第一次点击连接语音")
+	check(question.reply_panel.visible and question.reply_text.text.contains("正在连接"), "点击后立刻显示对话框，连接中不再空白等待")
 	for _frame in range(3): await process_frame
 	check(question.state == MentorQuestion.State.LISTENING, "等待真实 ready 事件后进入聆听")
+	check(question.reply_panel.visible and question.reply_text.text.contains("麦克风"), "尚无转写也显示聆听说明")
 	check(socket.sent.size() == 1 and socket.sent[0].type == "start", "每个连接只发送一次 start")
 	check(not socket.url.contains("test-only-token") and socket.url.ends_with("/dingdang-voice"), "token 只在首帧，不在 URL")
 	check(socket.audio.is_empty(), "没有采集音频时不能伪造上传")
@@ -96,9 +98,11 @@ func _initialize() -> void:
 	question.ask_button.pressed.emit()
 	check(socket.state == WebSocketPeer.STATE_CLOSED and socket.sent.back().type == "close", "第二次点击停止并关闭连接")
 	check(not question.voice.microphone.playing and not question.voice.speaker.playing, "关闭清理录音和播放")
+	check(question.reply_panel.visible and question.reply_text.text.contains("第三轮回答。"), "结束对话保留收到的字幕")
 	question.ask_button.pressed.emit()
 	question.ask_button.pressed.emit()
 	check(question.voice.state == "IDLE", "连接中可以取消")
+	check(question.reply_panel.visible and question.reply_text.text.contains("本次未收到"), "提前结束且没有回复时保留明确说明")
 	question.ask_button.pressed.emit()
 	for _frame in range(2): await process_frame
 	question.get_window().focus_exited.emit()
@@ -125,6 +129,7 @@ func _initialize() -> void:
 	check(question.voice.state == "IDLE" and question.voice.get("_socket") == null, "服务配置错误后释放语音连接")
 	check(not question.voice.microphone.playing and not question.voice.speaker.playing, "服务错误后停止录音和播放")
 	check(question.ask_label.text == "问叮当" and not question.ask_button.disabled and not level.code_button.disabled, "语音错误不能锁住提问按钮或代码入口")
+	check(question.reply_panel.visible and question.reply_text.text.contains("语音服务尚未准备好"), "服务失败显示在对话框中，不仅是按钮小字")
 	# Preserve resampling phase across uneven capture blocks (48k -> 16k).
 	var codec := Pcm.new()
 	var samples := PackedVector2Array()

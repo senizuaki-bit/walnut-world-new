@@ -2,6 +2,8 @@
 
 ## 当前结论
 
+2026-09-10 真人试用修正：本机四声道麦克风触发 Godot WASAPI 不支持声道数的错误，原生采集无有效输入，导致没有转写。前端已增加本机可选的 FFmpeg 单声道采集兼容方案，并让连接/聆听/失败状态立即显示在对话框。真实麦克风采集及关闭释放通过，完整问题界面的真实豆包回复显示和结束后保留通过。详见 [麦克风兼容记录](windows-microphone-compatibility.md)；此前合成音频测试不等于真人硬件验收。
+
 2026-09-10 更新：前端正式界面到真实 Gateway、PostgreSQL、Docker 编译沙箱、Worker 和 DeepSeek 的正常业务链路已验证。用户提供临时凭据后，真实 Godot 语音客户端→main Gateway→豆包实时语音也已通过两轮合成语音输入验收；实际麦克风、耳机听感尚待人工检查。
 
 - 集成分支：`codex/frontend-main-local-20260909`，工作树 `D:/FeishuAIreview/walnut-interface-audit-20260909`。
