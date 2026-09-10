@@ -9,6 +9,7 @@ signal response_cancelled
 signal failed(message: String)
 
 const Pcm = preload("res://scripts/client/voice_pcm.gd")
+const CapturePipe = preload("res://scripts/client/voice_capture_pipe.gd")
 const MAX_AUDIO_FRAMES := 24000 * 20
 const READY_TIMEOUT_MS := 20000
 @onready var microphone: AudioStreamPlayer = $Microphone
@@ -32,6 +33,7 @@ var _response_id := ""
 var _cancelled_ids: Dictionary = {}
 var _drop_anonymous := false
 var _new_response := true
+var _capture_pipe: RefCounted
 
 func _ready() -> void:
 	set_process(false)
@@ -52,7 +54,9 @@ func start(context: Dictionary) -> void:
 	if _token.is_empty() or _session_id.is_empty() or not (_base_url.begins_with("https://") or _base_url in ["http://127.0.0.1:8790", "http://localhost:8790"]):
 		_fail("请先连接游戏服务并进入当前关卡。")
 		return
-	if capture_enabled and (_capture == null or not ProjectSettings.get_setting("audio/driver/enable_input", false)):
+	var pipe := CapturePipe.new()
+	_capture_pipe = pipe if capture_enabled and pipe.configured() else null
+	if capture_enabled and _capture_pipe == null and (_capture == null or not ProjectSettings.get_setting("audio/driver/enable_input", false)):
 		_fail("麦克风尚未启用，请检查录音设置。")
 		return
 	_context = _bounded_context(context)
@@ -95,6 +99,9 @@ func close() -> void:
 	_socket = null
 	if is_instance_valid(microphone):
 		microphone.stop()
+	if _capture_pipe != null:
+		_capture_pipe.stop()
+		_capture_pipe = null
 	_clear_audio()
 	if _capture != null:
 		_capture.clear_buffer()
@@ -141,12 +148,20 @@ func _process(_delta: float) -> void:
 	if _socket == null:
 		return
 	if capture_enabled:
-		var available := _capture.get_frames_available()
-		if available > 0:
-			for packet in _codec.encode(_capture.get_buffer(available), AudioServer.get_mix_rate()):
-				if _socket.get_current_outbound_buffered_amount() > 64000 or _socket.put_packet(packet) != OK:
-					_fail("语音网络跟不上录音速度，请重新连接。")
-					return
+		var packets: Array[PackedByteArray] = []
+		if _capture_pipe != null:
+			packets = _capture_pipe.read_packets()
+			if not _capture_pipe.error.is_empty():
+				_fail(_capture_pipe.error)
+				return
+		else:
+			var available := _capture.get_frames_available()
+			if available > 0:
+				packets = _codec.encode(_capture.get_buffer(available), AudioServer.get_mix_rate())
+		for packet in packets:
+			if _socket.get_current_outbound_buffered_amount() > 64000 or _socket.put_packet(packet) != OK:
+				_fail("语音网络跟不上录音速度，请重新连接。")
+				return
 	_fill_speaker()
 
 func _receive(message: Dictionary) -> void:
@@ -156,8 +171,13 @@ func _receive(message: Dictionary) -> void:
 			_fail("语音格式与当前客户端不兼容。")
 			return
 		if capture_enabled:
-			_capture.clear_buffer()
-			microphone.play()
+			if _capture_pipe != null:
+				if not _capture_pipe.start():
+					_fail(_capture_pipe.error)
+					return
+			else:
+				_capture.clear_buffer()
+				microphone.play()
 		_set_state("READY")
 	elif kind == "voice.error":
 		var code := str(message.get("code", ""))
