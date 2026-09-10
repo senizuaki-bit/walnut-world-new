@@ -101,7 +101,9 @@ func set_result(water_units: int, animate: bool = true, is_error: bool = false) 
 	water_badge.text = "跳过" if water_units == 0 else ("%d份 · %d ml" % [water_units, water_units * 250])
 	water_badge.add_theme_color_override("font_color", Color(0.55, 0.13, 0.07, 1) if is_error else Color(0.06, 0.27, 0.20, 1))
 	self_modulate = Color.WHITE
-	_update_art(30 if is_error else 0, is_error and current_moisture >= target_moisture)
+	# A water choice is feedback, not a hydration update. Keep the artwork aligned
+	# with the current moisture shown on the card, even when the choice is wrong.
+	_update_art(target_moisture - current_moisture, current_moisture > target_moisture + 8)
 	if animate:
 		_bounce()
 
