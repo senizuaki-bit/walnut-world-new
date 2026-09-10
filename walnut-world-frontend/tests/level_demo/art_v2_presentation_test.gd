@@ -42,14 +42,12 @@ func _run() -> void:
 			failures.append("剧情可学习时不得显示完成标记。")
 	var dialogue := level.story_dialogue
 	dialogue.play_sequence("小核桃", null, ["正在读取这一块土地的湿度。"])
-	if (dialogue.portrait as ArtMotionTexture).motion_id != "char-walnut-talk":
-		failures.append("当前说话者必须切换说话动画。")
-	dialogue.advance()
+	if dialogue.body_label.visible_characters != -1:
+		failures.append("角色台词必须整句显示。")
 	if (dialogue.portrait as ArtMotionTexture).motion_id != "char-walnut-idle":
 		failures.append("台词完成后必须切回待机。")
 	dialogue.skip_sequence()
 	dialogue.play_sequence("书书", null, ["这是一段需要保留完整阅读空间的成长记录。".repeat(100)])
-	dialogue.advance()
 	await process_frame
 	await process_frame
 	var scroll := dialogue.get_node("DialogueCard/ContentRoot/ContentMargin/Scroll") as ScrollContainer

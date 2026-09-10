@@ -16,6 +16,9 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 
+# Local diagnostic runs and process state (may contain private runtime settings).
+.local-run/
+
 # Editor/script backups
 *.bak
 *.bak-*

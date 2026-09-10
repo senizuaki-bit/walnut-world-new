@@ -1086,6 +1086,17 @@ class ContextBuilder:
             # the current learning observation. Leave session_runs empty rather
             # than presenting this one Run as the entire Session history.
             skill_ref = event.skill_ref or run_result.skill_ref
+            skill = _require_snapshot(
+                await self._skills.get_bound_skill(skill_ref, operation_context),
+                SkillSnapshot,
+                "skill",
+            )
+            if skill.ref != run_result.skill_ref:
+                raise _context_error(
+                    "CONTEXT_SKILL_BINDING_MISMATCH",
+                    "completion summary source must belong to the successful run's binding",
+                )
+            _validate_snapshot_provenance(skill.request_context, operation_context, "skill")
             skill_history = _require_snapshot_sequence(
                 await self._skills.list_skill_history(
                     skill_ref.skill_id,
@@ -1440,10 +1451,14 @@ def validate_context_for_role(context: TurnContext) -> None:
                 "CONTEXT_BOOK_HISTORY_INCOMPLETE",
                 "book_agent requires completion run, skill history and learner projection",
             )
+        if context.skill is not None and context.skill.ref != context.run_result.skill_ref:
+            raise _context_error(
+                "CONTEXT_SKILL_BINDING_MISMATCH",
+                "completion summary source must belong to the successful run's binding",
+            )
         if any(
             (
                 context.world,
-                context.skill,
                 context.available_skills,
                 context.compile_result,
                 context.build_failure,

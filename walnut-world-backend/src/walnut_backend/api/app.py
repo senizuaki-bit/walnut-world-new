@@ -7,8 +7,10 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from walnut_backend.adapters.doubao_tts import BookSpeech
 from walnut_backend.adapters.postgres.agent_sessions import PostgresAgentSessionStore
 from walnut_backend.adapters.postgres.agent_turns import PostgresAgentTurnStore
+from walnut_backend.adapters.postgres.bug_practice import PracticeReads
 from walnut_backend.adapters.postgres.client_events import PostgresClientEventStore
 from walnut_backend.adapters.postgres.command_store import PostgresCommandStore
 from walnut_backend.adapters.postgres.dingdang_voice import PostgresDingdangVoiceContext
@@ -26,10 +28,14 @@ from walnut_backend.adapters.postgres.student_bootstrap import PostgresStudentBo
 from walnut_backend.adapters.postgres.workflow_jobs import PostgresWorkflowJobStore
 from walnut_backend.adapters.postgres.world import PostgresWorld
 from walnut_backend.adapters.postgres.world_presentation import PostgresWorldPresentation
+from walnut_backend.adapters.practice_judge import PracticeJudge
+from walnut_backend.adapters.practice_model import PracticeModel
 from walnut_backend.api.middleware import TransportMiddleware, WebSocketTransportMiddleware
 from walnut_backend.api.realtime import router as realtime_router
 from walnut_backend.api.routes.agent_sessions import router as agent_sessions_router
 from walnut_backend.api.routes.agent_turns import router as agent_turns_router
+from walnut_backend.api.routes.book_speech import router as book_speech_router
+from walnut_backend.api.routes.bug_practice import router as bug_practice_router
 from walnut_backend.api.routes.client_events import router as client_events_router
 from walnut_backend.api.routes.dingdang_voice import configured_voice
 from walnut_backend.api.routes.dingdang_voice import router as dingdang_voice_router
@@ -58,6 +64,7 @@ from walnut_backend.application.game.queries import GameQueries
 from walnut_backend.application.game.skill_activations import SkillActivations
 from walnut_backend.application.game.skill_builds import SkillBuildCommands
 from walnut_backend.application.game.student_bootstrap import StudentBootstrapQueries
+from walnut_backend.application.product.bug_practice import BugPractice
 from walnut_backend.application.product.content import ProductContent
 from walnut_backend.application.product.drafts import ProductDrafts
 from walnut_backend.application.product.interactions import ProductInteractions
@@ -120,10 +127,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             )
         app.state.product_drafts = ProductDrafts(PostgresProductDraftStore(sessions))
         app.state.product_content = ProductContent(PostgresProductContentStore(sessions))
-        app.state.product_interactions = ProductInteractions(PostgresProductInteractionStore(sessions))
+        app.state.product_interactions = ProductInteractions(
+            PostgresProductInteractionStore(sessions)
+        )
         app.state.product_workspaces = ProductWorkspaces(PostgresProductWorkspaceStore(sessions))
         app.state.dingdang_voice_context = PostgresDingdangVoiceContext(sessions)
         app.state.dingdang_voice_factory = configured_voice
+        app.state.book_speech = BookSpeech()
+        app.state.bug_practice = BugPractice(
+            PracticeReads(sessions), PracticeModel(), PracticeJudge(), app.state.book_speech
+        )
         if resolved_settings.realtime_wss_enabled:
             app.state.realtime_subscriptions = RealtimeSubscriptions(
                 PostgresWorld(sessions), PostgresEventStore(sessions)
@@ -131,6 +144,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         try:
             yield
         finally:
+            await app.state.bug_practice.close()
             await sessions.kw["bind"].dispose()
 
     app = FastAPI(lifespan=lifespan)
@@ -164,6 +178,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.include_router(product_patch_decision_router)
     app.include_router(product_workspaces_router)
     app.include_router(dingdang_voice_router)
+    app.include_router(book_speech_router)
+    app.include_router(bug_practice_router)
     if resolved_settings.realtime_wss_enabled:
         app.include_router(realtime_router)
     return app

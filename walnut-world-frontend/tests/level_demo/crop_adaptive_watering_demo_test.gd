@@ -13,7 +13,6 @@ func _initialize() -> void:
 	var story_overlay := level.get_node("StoryDialogueOverlay") as StoryDialogueOverlay
 	story_overlay.skip_sequence()
 	story_overlay.play_agent_presentation("叮当师傅", null, "请先完成两步代码实验。", "两个数组为什么要使用同一个 i？", "教学实验")
-	story_overlay.advance()
 	await create_timer(0.45).timeout
 	var dialogue_card := story_overlay.get_node("DialogueCard") as Control
 	var dialogue_question := story_overlay.get_node("DialogueCard/ContentRoot/ContentMargin/Scroll/Content/Question") as Label
@@ -307,7 +306,6 @@ func _initialize() -> void:
 	root.add_child(story_overlay)
 	await process_frame
 	story_overlay.play_agent_presentation("叮当师傅", null, "这是一段需要完整阅读的较长教学反馈。".repeat(80), "你观察到了什么？", "教学实验")
-	story_overlay.advance()
 	for _frame in range(4):
 		await process_frame
 	var scroll := story_overlay.get_node("DialogueCard/ContentRoot/ContentMargin/Scroll") as ScrollContainer

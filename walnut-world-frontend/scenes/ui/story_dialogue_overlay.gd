@@ -4,7 +4,7 @@ extends Control
 signal sequence_finished
 signal line_changed(line_index: int, line_text: String)
 
-@export_range(12.0, 80.0, 1.0) var characters_per_second := 34.0
+const FIXED_AUDIO := preload("res://assets/audio/dialogue/fixed_dialogue_audio.gd")
 
 @onready var dimmer: ColorRect = $Dimmer
 @onready var avatar_stage: Control = $AvatarStage
@@ -16,26 +16,34 @@ signal line_changed(line_index: int, line_text: String)
 @onready var question_label: Label = $DialogueCard/ContentRoot/ContentMargin/Scroll/Content/Question
 @onready var continue_hint: Label = $DialogueCard/ContentRoot/ContinueHint
 @onready var dialogue_scroll: ScrollContainer = $DialogueCard/ContentRoot/ContentMargin/Scroll
-@onready var typewriter_timer: Timer = $TypewriterTimer
 
 var _art_role := ""
 var _lines: Array[String] = []
 var _line_index := -1
-var _typing := false
 var _finishing := false
 var _hint_tween: Tween
 var _transition_tween: Tween
 var _card_rest_position := Vector2.ZERO
 var _avatar_rest_position := Vector2.ZERO
 var _previous_focus: WeakRef
+var line_voice: AudioStreamPlayer
+var _voiced_line := false
+var _question := ""
 
 
 func _ready() -> void:
 	visible = false
 	_card_rest_position = dialogue_card.position
 	_avatar_rest_position = avatar_stage.position
-	typewriter_timer.timeout.connect(_on_typewriter_tick)
 	dialogue_scroll.gui_input.connect(_gui_input)
+	line_voice = AudioStreamPlayer.new()
+	line_voice.bus = &"Voice"
+	add_child(line_voice)
+	line_voice.finished.connect(_on_line_voice_finished)
+	visibility_changed.connect(func() -> void:
+		if not is_visible_in_tree():
+			_stop_line_voice()
+	)
 
 
 func play_sequence(speaker_name: String, portrait_texture: Texture2D, lines: Array[String]) -> void:
@@ -63,14 +71,15 @@ func _start_sequence(
 		sequence_finished.emit()
 		return
 	_stop_active_tweens()
+	_stop_line_voice()
 	if not visible:
 		var owner := get_viewport().gui_get_focus_owner()
 		_previous_focus = weakref(owner) if owner != null else null
 	_configure_v2_layout(response_label_text.begins_with("L") or response_label_text in ["方向提示", "概念提示", "修改建议", "世界反馈", "成长总结", "目标复述"])
 	_lines = lines.duplicate()
+	_question = question
 	_line_index = -1
 	dialogue_scroll.scroll_vertical = 0
-	_typing = false
 	_finishing = false
 	speaker_label.text = speaker_name
 	portrait.texture = portrait_texture
@@ -102,12 +111,7 @@ func _start_sequence(
 func advance() -> void:
 	if not visible or _finishing:
 		return
-	if _typing:
-		typewriter_timer.stop()
-		body_label.visible_characters = -1
-		_typing = false
-		_show_continue_hint()
-		return
+	# Each click advances exactly one line, interrupting its audio if necessary.
 	if _line_index + 1 < _lines.size():
 		_advance_to_next_line()
 		return
@@ -121,7 +125,7 @@ func skip_sequence() -> void:
 
 
 func is_typing() -> bool:
-	return _typing
+	return false
 
 
 func get_line_index() -> int:
@@ -129,12 +133,17 @@ func get_line_index() -> int:
 
 
 func _gui_input(event: InputEvent) -> void:
+	# The scroll area's signal and its parent can receive the same GUI event.
+	if event.has_meta("story_dialogue_consumed"):
+		return
 	var mouse_event := event as InputEventMouseButton
 	var touch_event := event as InputEventScreenTouch
 	if mouse_event != null and mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.pressed:
+		event.set_meta("story_dialogue_consumed", true)
 		advance()
 		accept_event()
 	elif touch_event != null and touch_event.pressed:
+		event.set_meta("story_dialogue_consumed", true)
 		advance()
 		accept_event()
 
@@ -162,6 +171,7 @@ func _restore_focus() -> void:
 
 
 func _advance_to_next_line() -> void:
+	_stop_line_voice()
 	_line_index += 1
 	if _line_index >= _lines.size():
 		_finish_sequence(false)
@@ -172,30 +182,36 @@ func _advance_to_next_line() -> void:
 	continue_hint.scale = Vector2.ONE
 	dialogue_scroll.scroll_vertical = 0
 	body_label.text = _lines[_line_index]
-	body_label.visible_characters = 0
-	_typing = true
+	body_label.visible_characters = -1
 	if not _art_role.is_empty():
 		(portrait as ArtMotionTexture).play_clip("char-%s-talk" % _art_role)
-	typewriter_timer.wait_time = 1.0 / characters_per_second
-	typewriter_timer.start()
+	var lookup := speaker_label.text + "\n" + body_label.text + "\n" + _question
+	var clip := FIXED_AUDIO.CLIPS.get(lookup) as AudioStream
+	if clip != null and speaker_label.text != "系统":
+		_voiced_line = true
+		line_voice.stream = clip
+		line_voice.play()
+	_show_continue_hint()
 	line_changed.emit(_line_index, body_label.text)
 	_pulse_card()
 
 
-func _on_typewriter_tick() -> void:
-	if not _typing:
-		typewriter_timer.stop()
+func _on_line_voice_finished() -> void:
+	if not _voiced_line or not is_visible_in_tree() or _finishing:
 		return
-	body_label.visible_characters += 1
-	if body_label.visible_characters >= body_label.text.length():
-		typewriter_timer.stop()
-		body_label.visible_characters = -1
-		_typing = false
-		_show_continue_hint()
+	_voiced_line = false
+	_show_continue_hint()
+
+
+func _stop_line_voice() -> void:
+	_voiced_line = false
+	if is_instance_valid(line_voice):
+		line_voice.stop()
+		line_voice.stream = null
 
 
 func _show_continue_hint() -> void:
-	if not _art_role.is_empty():
+	if not _art_role.is_empty() and not _voiced_line:
 		(portrait as ArtMotionTexture).play_clip("char-%s-idle" % _art_role)
 	if _hint_tween != null and _hint_tween.is_valid():
 		_hint_tween.kill()
@@ -224,9 +240,8 @@ func _finish_sequence(immediate: bool) -> void:
 		return
 	# Cancel the old exit callback before an immediate close can emit completion.
 	_stop_active_tweens()
+	_stop_line_voice()
 	_finishing = true
-	_typing = false
-	typewriter_timer.stop()
 	if _hint_tween != null and _hint_tween.is_valid():
 		_hint_tween.kill()
 	continue_hint.visible = false
@@ -255,7 +270,6 @@ func _finish_sequence(immediate: bool) -> void:
 
 
 func _stop_active_tweens() -> void:
-	typewriter_timer.stop()
 	if _hint_tween != null and _hint_tween.is_valid():
 		_hint_tween.kill()
 	if _transition_tween != null and _transition_tween.is_valid():

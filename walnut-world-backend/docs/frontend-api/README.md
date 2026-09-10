@@ -1,6 +1,6 @@
 # 核桃代码世界：前后端接口联调文档
 
-更新：2026-09-09。适用当前单题 Demo、Walnut 主后端与复用的 Agent 库。本文按实际代码编写，不要求前端连接独立 Agent 服务；当前性能先维持现状。
+更新：2026-09-10。适用当前单题 Demo、Walnut 主后端与复用的 Agent 库。本文是完整接入入口，包含正式主关、主动教学与语音，以及新增“主关正确→每局一次Bug挑战→书书总结和音频”。前端只连接主后端，不连接独立 Agent 服务。
 
 ## 文档入口
 
@@ -9,10 +9,15 @@
 | 本文 | 八个功能模块的调用顺序、字段来源、完成条件与界面处理 |
 | [HTTP 接口参考](HTTP接口参考.md) | 28 个已实现 HTTP 操作的参数、必填字段、枚举、响应与 JSON 示例 |
 | [问叮当实时语音](实时语音接口.md) | 点击开启／关闭、音频格式、上下文更新、打断及全部公开消息 |
+| [Bug军团与书书完整接口](Bug军团与书书接口.md) | 5个练习动作、旧Book音频、完整字段、错误码、恢复与界面验收 |
+| [Bug军团接入顺序](../bug-practice-frontend-handoff.md) | start→prepare→answer→summary 的完整请求/响应示例 |
+| [Bug军团实现逻辑](../architecture/bug-practice.md) | 状态机、错题读取、模型出题、真实C++判题、幂等与语音 |
 | [补充接口](补充接口.md) | 教师学习查询、MCP、可选世界 WebSocket 和客户端事件 |
 | [examples](examples) | 完整请求／响应 JSON；均为示例数据，使用前替换为当前资源值 |
 
 字段参考由实际 FastAPI 路由和 `agent/contracts` 生成。表格展开常用嵌套字段，更深层定义及条件必填可直接打开各接口的 Schema 链接。JSON 示例通过 Schema 校验，但不代表这些示例 ID 已存在于本机数据库，也不是一次可直接顺序执行的会话。
+
+`HTTP接口参考.md` 的28个操作是原有合同接口。新增练习与Book音频属于Demo扩展，在《Bug军团与书书完整接口》中维护；它们返回最终HTTP200结果，不使用主关202 Command协议。旧前端仍可运行原流程，新前端必须按下文消费新挑战和新总结。
 
 ## 0. 所有模块共用的约定
 
@@ -30,7 +35,7 @@ X-Correlation-Id: corr_<本次请求UUID>
 X-Schema-Version: 1.0.0
 ```
 
-JSON 写请求再携带：
+主关合同中的JSON写请求再携带（练习接口的答题ID约定见扩展文档）：
 
 ```http
 Content-Type: application/json
@@ -279,11 +284,11 @@ Run 的关键字段：
 | `skill_patch`、`patch_decision` | 可选代码建议及学生决定 |
 | `feedback.source`、`degraded` | 回复来源信息，不是过关判断依据 |
 
-调度、连续失败计数与教学等级都由后端负责。当前单题 Demo 中，修改代码形成新技能版本不会简单把连续错误清零；满足后端规则时触发 Bug，正式成功后清零。不同编译诊断允许累计，历史错误详情保留。普通提问、轮询和语音音频帧不增加失败次数。
+新Bug练习流程不按失败阈值触发：主关正式Run成功后调用prepare，一局只生成一道同难度变式题；本局错误代码和证据用于出题。每次进入先start新的entry，旧局错误不进入新局练习上下文。普通提问、轮询和语音帧不增加失败次数。
 
-**当前没有公开的失败计数写接口，也没有专门的失败计数 GET。** 不要假定公共 Interaction 必有 `failure_count` 字段，不要在前端单独计数后指定 Agent。后端存储的计数与错误历史用于选角和上下文。
+**没有公开的失败计数写接口。** 新Challenge.failure_count是用于出题的本局证据条数，EntryStatus.attempts是挑战完成判题次数，二者不能互换。不要假定公共Interaction含failure_count。历史主关计数仍存在，不由start物理清空。
 
-自动提交反馈与主动提问共用教学策略。内部 `teaching_agent` 标识保留兼容，产品可以统一称“问叮当”。当前豆包只用于主动实时语音；小核桃调度、自动教学、Bug、Book 和保留的文字提问使用现有 DS 链路。`world_agent` 枚举存在不意味着有独立可调用接口；世界规则由后端执行。
+主动文字提示与语音始终使用叮当（teaching_agent）。旧主关管线仍可能产生阈值触发的bug_agent提问和task_completed的Book交互，用于兼容旧端与回放；新界面消费游标但忽略这些旧版Bug/Book展示，使用prepare/summary结果。Bug出题与Book文字走现有模型Relay；豆包负责主动实时语音和书书TTS。`world_agent`枚举存在不意味着有独立可调用接口。
 
 ## 6. 文字提问与代码修改建议
 
@@ -352,19 +357,20 @@ WS /product-experience/v1/sessions/{session_id}/dingdang-voice
 
 ## 8. 学习记录与成长总结
 
-本模块由后端 learner worker 自动处理，没有学生前端调用的“写学习档案”或“生成总结”接口。
+正式学习档案仍由后端learner worker自动处理，没有学生前端“写学习档案”接口。新Demo提供挑战通过后生成总结的practice summary接口；练习状态目前不会写入持久化学习档案。
 
 | 页面需求 | 使用接口／字段 |
 | --- | --- |
 | 展示本次成功／失败及错误 | Run、Evidence |
-| 展示本次成长总结 | Interaction 列表中 `response_type="growth_summary"`，用 feedback.run_id 对应本次成功 |
+| 新流程最终总结 | 主关Run成功→prepare→answer正确→summary；完整文字音频同时就绪再展示 |
+| 旧版已归档总结 | Interaction列表的growth_summary，用feedback.run_id对应成功；旧speech接口补音频 |
 | 恢复任务进度 | Workspace.current_task 与最新正式 Run |
 | 展示教学阶段／提示等级 | Interaction.hint_level 及回复；语音由共享策略引导 |
 | 教师查看掌握情况与班级统计 | 补充文档中的教师身份只读接口 |
 
-成功后可以先显示运行成功，并把总结区域显示为“总结生成中”。等本次 Run 的 growth_summary 到达后替换；不要一直要求最新一条交互必须是 Book，因为期间可能插入学生的文字提问。
+新流程主关成功后显示Bug挑战准备中，而不是立即展示旧Book。挑战通过后summary返回完整结果，再同时展示全文和播放音频。当前旧前端已有的Book展示需要由前端同事按新状态机调整，不能同时开启两种完成展示。
 
-同一个成功 Run 的总结应按 interaction_id／run_id 去重。网络恢复时读取已有总结，不通过再提交一次运行来获取总结。由代码建议辅助完成的学习标记由后端计算，前端不手工修改“独立完成”状态。
+旧总结按interaction_id/run_id去重，新挑战按entry_id/challenge_id恢复，summary可重放。恢复总结不重新执行主关。由代码建议辅助完成的学习标记由后端计算，前端不手工修改“独立完成”状态。
 
 当前学生端没有独立公开的完整 LearnerProfile／知识点掌握表查询接口。需要教师查询时使用教师身份和脱敏 learner_ref，不能把教师查询当作学生 token 可调用的通用 profile 接口。
 
@@ -374,15 +380,17 @@ WS /product-experience/v1/sessions/{session_id}/dingdang-voice
 | --- | --- |
 | 首次进入、退出后重新进入 | 同一当前会话恢复，草稿和世界状态正确 |
 | 连续两次保存代码 | Draft revision 前进；旧版本保存产生明确冲突 |
-| 提交正确代码 | Build CERTIFIED → Activation → Run SUCCEEDED/COMMITTED；随后 Book 总结 |
-| 修改三版错误代码再分别提交 | 保留每次错误，符合规则时第三次触发 Bug，不因版本更新清零 |
+| 提交正确代码 | Build CERTIFIED → Activation → Run SUCCEEDED/COMMITTED；prepare生成一题Bug挑战 |
+| 主关连续答错并主动提示 | 错误作为本局出题证据；主动提示仍是叮当，不展示旧自动Bug提问 |
+| Bug挑战答错、重试、答对 | 同题同局；重复ID只计一次；正确后summary返回全文及完整音频 |
+| 新的一局 | 新entry；本局错误上下文从start时重新开始，不能用旧Run触发 |
 | 正式运行成功后再提问 | 反馈关联最新成功 Run，不把“总结未完成”说成运行失败 |
 | 连续文字聊天 | 本轮问题与近期历史进入上下文；不会重复执行技能 |
 | 申请建议、分别接受与拒绝 | 接受只改草稿；拒绝不改草稿；都不自动运行 |
 | 开启语音、修改代码、运行、插话、关闭 | 代码和正式结果能刷新，音频可打断，关闭后停止录音播放 |
 | 提交后断线再恢复 | 根据已保存 command_id 对账，不重复提交；列表不重复显示 |
 
-当前已知性能和联调问题见 [最新实测报告](../../../outputs/published-read-optimization.md)。这些实测时间不是接口 SLA。本次文档整理没有修改前端或后端业务代码。
+最近新增练习流程的真实实测与故障修复见[复查报告](../../../outputs/practice-bug-recheck-2026-09-10.md)，主关读取性能的历史报告见[读取优化记录](../../../outputs/published-read-optimization.md)。这些实测时间不是接口 SLA。
 
 ## 10. 文档维护
 

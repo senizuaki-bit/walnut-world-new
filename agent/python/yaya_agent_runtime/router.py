@@ -31,12 +31,7 @@ class RoleRouter:
             )
             return RoleRoute(event_type, role, "same-failure threshold applied")
         if event_type == "hint_requested":
-            role = (
-                "bug_agent"
-                if event.failure_count >= self._bug_failure_threshold
-                else "teaching_agent"
-            )
-            return RoleRoute(event_type, role, "hint uses the same-failure threshold")
+            return RoleRoute(event_type, "teaching_agent", "explicit help always calls Dingdang")
         if event_type == "skill_patch_requested":
             return RoleRoute(
                 event_type,

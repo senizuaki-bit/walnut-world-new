@@ -9,6 +9,9 @@ signal agent_build_requested(source: String)
 signal agent_activation_requested
 signal agent_hint_requested(message: String)
 signal agent_draft_changed(source: String)
+signal book_speech_retry_requested
+var _book_speech_retry_pending := false
+var book_speaker: AudioStreamPlayer
 
 enum Phase {
 	INTRO,
@@ -44,9 +47,9 @@ const INITIAL_PRACTICE_CODE: String = "#include <iostream>\nusing namespace std;
 const STARTER_CODE: String = "#include <iostream>\nusing namespace std;\n\nint main() {\n    int moisture[8] = {20, 65, 45, 90, 60, 35, 55, 50};\n    int target[8]   = {60, 70, 50, 65, 60, 70, 50, 65};\n\n    for (int i = 0; i < 8; i++) {\n        int gap = 60 - moisture[i];\n\n        if (gap >= 30) {\n            cout << \"WATER \" << i << \" 2\\n\";\n        } else if (gap > 0) {\n            cout << \"WATER \" << i << \" 1\\n\";\n        }\n    }\n    return 0;\n}\n"
 const CORRECT_CODE: String = "#include <iostream>\nusing namespace std;\n\nint main() {\n    int moisture[8] = {20, 65, 45, 90, 60, 35, 55, 50};\n    int target[8]   = {60, 70, 50, 65, 60, 70, 50, 65};\n\n    for (int i = 0; i < 8; i++) {\n        int gap = target[i] - moisture[i];\n\n        if (gap >= 30) {\n            cout << \"WATER \" << i << \" 2\\n\";\n        } else if (gap > 0) {\n            cout << \"WATER \" << i << \" 1\\n\";\n        }\n    }\n    return 0;\n}\n"
 const INTRO_LINES: Array[String] = [
-	"刚才的阵雨没有落在每一块土地上。",
-	"相同的湿度，面对不同作物，也许需要完全不同的动作。",
-	"先看看旧工具为什么照顾不好这片混合试验田吧。",
+	"哎呀！土地怎么都这样了！！",
+	"作物没有水分都枯萎了，我们要赶紧给他们浇浇水呀",
+	"现在每块土壤的湿度都不一样，我们每个植物浇水量可能会有差异，看看以前大家是怎么浇水的吧",
 ]
 const WORKSHOP_EXPERIMENTS: Array[Dictionary] = [
 	{
@@ -144,6 +147,8 @@ const CROP_TEXTURES := [
 @onready var bug_continue_button: Button = %BugContinueButton
 @onready var growth_summary_overlay: Control = %GrowthSummaryOverlay
 @onready var growth_summary_body: RichTextLabel = %GrowthSummaryBody
+@onready var book_summary_body: RichTextLabel = %BookSummary
+var _completion_book_message := ""
 @onready var archive_button: Button = %ArchiveButton
 @onready var sfx: FarmAudio = $FarmAudio
 
@@ -387,6 +392,10 @@ func _play_intro() -> void:
 
 
 func _on_primary_pressed() -> void:
+	if _book_speech_retry_pending:
+		_book_speech_retry_pending = false
+		book_speech_retry_requested.emit()
+		return
 	_bounce(primary_button)
 	match _phase:
 		Phase.INTRO:
@@ -1227,6 +1236,8 @@ func update_agent_draft_state(state: int) -> void:
 
 
 func begin_agent_submission(message: String) -> void:
+	_stop_book_speech()
+	_completion_book_message = ""
 	_agent_stage_message_visible = true
 	_set_phase(Phase.RUNNING)
 	_hide_code_drawer()
@@ -1313,6 +1324,10 @@ func _project_agent_interaction(interaction: Dictionary) -> bool:
 		"L%d" % hint_level if response_type == "hint" else "Agent 反馈",
 	]
 	evidence_body.text = message
+	if role_id == &"book_agent" and response_type == "growth_summary":
+		_completion_book_message = message
+		if _phase == Phase.COMPLETED:
+			_present_book_completion_summary()
 	_reveal_evidence()
 	return true
 
@@ -1354,14 +1369,17 @@ func present_agent_error(message: String) -> void:
 	_reveal_evidence()
 
 
-func fail_agent_submission(stage: String, message: String, error: Dictionary = {}, code_checked := false) -> void:
+func fail_agent_submission(stage: String, message: String, error: Dictionary = {}, code_checked := false, objective_committed := false) -> void:
 	_last_chain_error_detail = "%s: %s" % [stage, message]
 	_agent_stage_message_visible = false
-	_set_phase(Phase.FAILED)
+	_set_phase(Phase.CHAIN_ERROR if objective_committed else Phase.FAILED)
 	var code := str(error.get("code", ""))
 	var checked := "代码检查已通过。" if code_checked else ""
 	# Classification uses structured evidence, never substrings of a raw error.
-	if code == "RESOURCE_RECONCILIATION_TIMEOUT":
+	if objective_committed:
+		evidence_title.text = "运行已成功，反馈暂未完成"
+		evidence_body.text = "你的程序已完成当前关卡目标，结果已保存。\n后续反馈暂未完成，无需因此修改答案或重复运行。"
+	elif code == "RESOURCE_RECONCILIATION_TIMEOUT":
 		evidence_title.text = "暂时无法确认结果"
 		evidence_body.text = checked + "等待结果超时，服务可能仍在处理。\n代码已保留，请稍后查看结果，不必因此反复修改答案。"
 	elif code == "SANDBOX_COMPILE_ERROR":
@@ -1403,6 +1421,8 @@ func complete_agent_submission(summary: String) -> void:
 	completion_card.visible = true
 	completion_card.modulate.a = 1.0
 	completion_card.scale = Vector2.ONE
+	if not _completion_book_message.is_empty():
+		_present_book_completion_summary()
 	evidence_title.text = "本次验证成功"
 	var feedback: Variant = _last_agent_interaction.get("feedback")
 	var feedback_message := str(feedback.get("message", "")) if feedback is Dictionary else ""
@@ -1411,6 +1431,53 @@ func complete_agent_submission(summary: String) -> void:
 		evidence_body.text += "\n" + feedback_message.replace("[", "[lb]")
 	evidence_title.tooltip_text = "运行记录：%s\n%s" % [summary, _authoritative_snapshot_line()]
 	_reveal_evidence()
+
+
+func _present_book_completion_summary() -> void:
+	completion_summary.visible = false
+	$CompletionCard/Margin/Content/RewardTool.visible = false
+	$CompletionCard/Margin/Content/RewardCaption.visible = false
+	book_summary_body.text = "书书的成长总结\n\n" + _completion_book_message
+	book_summary_body.scroll_to_line(0)
+	book_summary_body.visible = true
+
+
+func present_book_speech_wait(failed: bool) -> void:
+	_book_speech_retry_pending = failed
+	completion_card.visible = false
+	book_summary_body.visible = false
+	_set_phase(Phase.CHAIN_ERROR if failed else Phase.RUNNING)
+	evidence_title.text = "运行已成功，语音暂未准备好" if failed else "书书正在准备总结和语音"
+	evidence_body.text = "结果已保存。点击重试，仅重新准备语音，无需再次运行代码。" if failed else "等文字和语音都准备好，就一起展示给你。"
+	if failed:
+		primary_button.text = "重试总结语音"
+		primary_button.disabled = false
+	_reveal_evidence()
+
+
+func complete_book_submission(interaction: Dictionary, stream: AudioStreamWAV) -> void:
+	_book_speech_retry_pending = false
+	# No await between projecting the text, exposing its card, and starting audio.
+	_project_agent_interaction(interaction)
+	complete_agent_submission(str(interaction.get("interaction_id", "")))
+	if book_speaker == null:
+		book_speaker = AudioStreamPlayer.new()
+		book_speaker.bus = &"Voice"
+		add_child(book_speaker)
+		completion_card.visibility_changed.connect(func():
+			if not completion_card.visible: _stop_book_speech()
+		)
+		visibility_changed.connect(func():
+			if not is_visible_in_tree(): _stop_book_speech()
+		)
+	book_speaker.stream = stream
+	book_speaker.play()
+
+
+func _stop_book_speech() -> void:
+	if is_instance_valid(book_speaker):
+		book_speaker.stop()
+		book_speaker.stream = null
 
 
 func _authoritative_snapshot_line() -> String:
@@ -1594,6 +1661,8 @@ func _apply_v2_layout(value: Phase) -> void:
 		$Hud/ToolRail/HintSpace.custom_minimum_size = Vector2(290, 65) * K
 
 func _layout_completion(compact: bool) -> void:
+	book_summary_body.visible = false
+	completion_summary.visible = true
 	const K := 720.0 / 941.0
 	completion_card.position = Vector2(485, 211) * K if compact else Vector2(465, 145) * K
 	completion_card.size = Vector2(724, 497) * K if compact else Vector2(764, 646) * K

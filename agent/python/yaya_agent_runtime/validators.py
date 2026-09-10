@@ -39,7 +39,7 @@ _PERMANENT_JUDGMENT_PATTERNS = (
 _JUDGMENT_CLAUSE_BOUNDARY = re.compile(r"[，。！？；：,.!?;:\n]")
 _JUDGMENT_DISCLAIMER_PREFIX = re.compile(
     r"(?:这(?:次(?:运行|表现|结果|成功))?|本次(?:运行|表现|结果|成功))?"
-    r"(?:并|也)?(?:不(?:能|足以)?(?:代表|说明|证明|意味着)|不是说|不能说)"
+    r"(?:并|也)?(?:不(?:能|足以)?(?:代表|说明|证明|意味着|推断)|不外推为|不是说|不能说)"
     r"(?:你|你们|学生|学习者)?(?:已经|已|就)?"
 )
 _ROLE_RESPONSES = {
@@ -318,10 +318,14 @@ def validate_decision(
         and context.run_result is not None
         and context.run_result.task_success
     )
-    if context.event.event_type == "hint_requested" and not successful_hint and any(
-        phrase in decision.message
-        or (decision.question is not None and phrase in decision.question)
-        for phrase in _FALSE_SUCCESS_PHRASES
+    if (
+        context.event.event_type == "hint_requested"
+        and not successful_hint
+        and any(
+            phrase in decision.message
+            or (decision.question is not None and phrase in decision.question)
+            for phrase in _FALSE_SUCCESS_PHRASES
+        )
     ):
         # Only a Hint that carries an already successful Run may confirm that
         # earlier result. The question itself never executes or settles a Run.
@@ -371,8 +375,8 @@ def validate_decision(
         decision = _canonical_teaching_copy(decision, context, config.limits.max_message_chars)
     elif context.role == "bug_agent":
         decision = _canonical_bug_copy(decision, context, config.limits.max_message_chars)
-    elif context.role == "book_agent":
-        decision = _canonical_book_copy(decision, context, config.limits.max_message_chars)
+    # Book summaries keep the provider's evidence-validated prose. Replacing it
+    # with a success template discards the analysis of this student's program.
     return decision
 
 
@@ -513,39 +517,6 @@ def _reproducible_failure_count(context: TurnContext) -> int:
         # context; only the current Build owns this feedback's Evidence.
         return context.event.failure_count
     return len(context.failure_history)
-
-
-def _canonical_book_copy(
-    decision: DecisionDraft,
-    context: TurnContext,
-    maximum: int,
-) -> DecisionDraft:
-    if not context.session_runs:
-        message = _bounded(
-            (
-                f"本次运行已完成“{context.task.title}”。"
-                "具体进步：你写的程序达成了当前任务目标。"
-                "可迁移问题：下次输入规模改变时，你会怎样先验证循环或条件边界？"
-            ),
-            maximum,
-        )
-        return _replace_public_copy(decision, message=message, question=None)
-
-    # Retained historical contexts still describe their complete Session.
-    attempts = len(context.session_runs)
-    failures = sum(not item.task_success for item in context.session_runs)
-    versions = len(context.skill_history)
-    message = _bounded(
-        (
-            f"规范运行和世界提交已确认“{context.task.title}”完成。"
-            f"本 Session 共记录 {attempts} 次运行，其中 {failures} 次尚未完成，"
-            f"并使用了 {versions} 个已记录 Skill 版本。"
-            "具体进步：你让已认证 Skill 达成了当前可观察目标。"
-            "可迁移问题：下次输入规模改变时，你会怎样先验证循环或条件边界？"
-        ),
-        maximum,
-    )
-    return _replace_public_copy(decision, message=message, question=None)
 
 
 def _bounded(value: str, maximum: int) -> str:

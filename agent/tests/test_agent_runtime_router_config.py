@@ -44,7 +44,7 @@ class AgentRuntimeRouterAndRoleConfigTests(unittest.IsolatedAsyncioTestCase):
         )
         self.assertEqual(
             router.route(make_event("hint_requested", failure_count=3)).role,
-            "bug_agent",
+            "teaching_agent",
         )
 
     async def test_no_action_events_are_explicit_and_never_claim_a_role(self) -> None:

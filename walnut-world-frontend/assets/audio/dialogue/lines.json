@@ -1,0 +1,20 @@
+{
+  "voices": {
+    "芽芽": "ICL_uranus_zh_female_keainvsheng_tob",
+    "叮当师傅": "ICL_uranus_zh_male_huzishushu_tob",
+    "书书": "ICL_uranus_zh_male_bujiqingnian_tob"
+  },
+  "lines": [
+    {"id":"yaya_intro_01","speaker":"芽芽","text":"哎呀！土地怎么都这样了！！","audio_source":"provided"},
+    {"id":"yaya_intro_02","speaker":"芽芽","text":"作物没有水分都枯萎了，我们要赶紧给他们浇浇水呀","audio_source":"provided"},
+    {"id":"yaya_intro_03","speaker":"芽芽","text":"现在每块土壤的湿度都不一样，我们每个植物浇水量可能会有差异，看看以前大家是怎么浇水的吧","audio_source":"provided"},
+    {"id":"yaya_complete","speaker":"芽芽","text":"每一种作物都得到了适合自己的照顾。世界目标已经完成，现在请书书根据真实学习路线归档。","question":"这次规则为什么能照顾不同作物？"},
+    {"id":"dingdang_workshop","speaker":"叮当师傅","text":"先做两个小实验，把数组、缺口和水量在世界里一一对应起来。","question":"两个数组为什么要使用同一个 i？"},
+    {"id":"dingdang_goal","speaker":"叮当师傅","text":"两个数组要用同一个 i 找到同一块土地。现在还没有失败 Run，我不会假装某一行已经出错。"},
+    {"id":"dingdang_hint_0","speaker":"叮当师傅","text":"胡萝卜土地正确，但1号番茄漏浇、5号番茄水量不足，6号土豆反而多浇。它们有什么共同点？"},
+    {"id":"dingdang_hint_1","speaker":"叮当师傅","text":"循环、分支和输出位置都在工作。请只检查 gap 这一行里的“目标值”从哪里来。"},
+    {"id":"dingdang_hint_2","speaker":"叮当师傅","text":"两个数组用相同下标记录同一块土地；i 变化时，当前值和目标值要一起变化。"},
+    {"id":"dingdang_hint_3","speaker":"叮当师傅","text":"局部支架：目标数组[同一下标] - 当前数组[同一下标]。"},
+    {"id":"shushu_archive","speaker":"书书","text":"我只记录已经发生的事实：代码变化、使用过的提示，以及是否接受过 AI 修改。","question":"你想把哪一步带到下一次挑战？"}
+  ]
+}

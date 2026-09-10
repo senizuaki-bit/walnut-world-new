@@ -889,7 +889,9 @@ foreach ($secretName in @(
     'WALNUT_LLM_UPSTREAM_API_KEY',
     'WALNUT_LLM_UPSTREAM_API_KEY_FILE',
     'YAYA_DOUBAO_VOICE_API_KEY',
-    'YAYA_DOUBAO_VOICE_API_KEY_FILE'
+    'YAYA_DOUBAO_VOICE_API_KEY_FILE',
+    'YAYA_BOOK_TTS_API_KEY',
+    'YAYA_BOOK_TTS_API_KEY_FILE'
 )) {
     $start.EnvironmentVariables.Remove($secretName) | Out-Null
 }

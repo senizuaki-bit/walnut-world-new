@@ -540,7 +540,7 @@ class PedagogyPolicy:
             raise PedagogyPolicyError("bug_agent requires the same-failure threshold")
         if (
             policy_input.role == "teaching_agent"
-            and policy_input.event_type in {"run_failed", "hint_requested"}
+            and policy_input.event_type == "run_failed"
             and policy_input.failure_count >= BUG_FAILURE_THRESHOLD
         ):
             raise PedagogyPolicyError("same-failure threshold requires bug_agent")

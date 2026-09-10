@@ -1,0 +1,71 @@
+{
+  "yaya_intro_01": {
+    "sha256": "6296774d3cc9910541c40dc832fee39f8013ead64d0f590cc79606fea3c308a5",
+    "duration_seconds": 3.036,
+    "source": "provided",
+    "original_filename": "keainvsheng-01-urgent.wav",
+    "audio_sha256": "cbc88568278471560183d4330c6fcd084b09f05639dbc03d6262085f5a69e033"
+  },
+  "yaya_intro_02": {
+    "sha256": "3c3fba199adbaa926c94994a55b55b27ef15c9a7d708216adb88cde678f33eab",
+    "duration_seconds": 4.884,
+    "source": "provided",
+    "original_filename": "keainvsheng-02-urgent.wav",
+    "audio_sha256": "738425b9a1f0c5215b88b5e5fd586c71f3d728c2ca0d086de8d022d55b773043"
+  },
+  "yaya_intro_03": {
+    "sha256": "5fc667db13a1ac963438034d8a7e5245f4b7e793ea006a3dcd56cdf663ee7ab4",
+    "duration_seconds": 8.475,
+    "source": "provided",
+    "original_filename": "keainvsheng-03-thinking.wav",
+    "audio_sha256": "72690446e1fb274a4f7600059c2035e873b3e0268b173ce77594aa6c74f9a695"
+  },
+  "yaya_complete": {
+    "sha256": "99dcfa68c642d6dd2274efda0e0956be6ef09fbb1f0d565ca70fb4afcf5eac8b",
+    "speaker": "ICL_uranus_zh_female_keainvsheng_tob",
+    "duration_seconds": 12.376,
+    "generation_seconds": 2.266
+  },
+  "dingdang_workshop": {
+    "sha256": "d7fc4236ae5f74c20d75ace3cfd32cb6f3ff8497059f3878e93518d39e5ed2e0",
+    "speaker": "ICL_uranus_zh_male_huzishushu_tob",
+    "duration_seconds": 13.987,
+    "generation_seconds": 2.375
+  },
+  "dingdang_goal": {
+    "sha256": "810ec3b41a9f22518a6a779466a4f021be3fd58c1f2675bb7946e15ba154010b",
+    "speaker": "ICL_uranus_zh_male_huzishushu_tob",
+    "duration_seconds": 12.205,
+    "generation_seconds": 2.172
+  },
+  "dingdang_hint_0": {
+    "sha256": "6163eb0a4cb3631f55cb77744e85b99c8b4ea5865dc67033069019a87d69a15d",
+    "speaker": "ICL_uranus_zh_male_huzishushu_tob",
+    "duration_seconds": 11.168,
+    "generation_seconds": 2.047
+  },
+  "dingdang_hint_1": {
+    "sha256": "51d75927e5462fa8e4a0ad95ac3371c67029f2cf9059e197aa93ffef82bd7518",
+    "speaker": "ICL_uranus_zh_male_huzishushu_tob",
+    "duration_seconds": 9.169,
+    "generation_seconds": 1.703
+  },
+  "dingdang_hint_2": {
+    "sha256": "fb40ff34e857960565c5037fb283e8edd5995c0405abc9713eceac97dd65c597",
+    "speaker": "ICL_uranus_zh_male_huzishushu_tob",
+    "duration_seconds": 10.609,
+    "generation_seconds": 2.046
+  },
+  "dingdang_hint_3": {
+    "sha256": "47701f2f903ab1099aa1df1870916245c0f6ffff9a982ecd57fcee7144e4557a",
+    "speaker": "ICL_uranus_zh_male_huzishushu_tob",
+    "duration_seconds": 7.001,
+    "generation_seconds": 1.579
+  },
+  "shushu_archive": {
+    "sha256": "a1e646003a62aa543466acdf7edceaf4609ef5f712aa3eb59e97e8861ea88aab",
+    "speaker": "ICL_uranus_zh_male_bujiqingnian_tob",
+    "duration_seconds": 10.759,
+    "generation_seconds": 2.14
+  }
+}

@@ -38,8 +38,8 @@ class NonLiveRunnerContractTests(unittest.TestCase):
         self.assertNotIn("skipTest(", source)
 
         runner = _load_non_live_runner()
-        self.assertEqual(runner.EXPECTED_DISCOVERED_TESTS, 637)
-        self.assertEqual(runner.EXPECTED_NON_LIVE_TESTS, 635)
+        self.assertEqual(runner.EXPECTED_DISCOVERED_TESTS, 641)
+        self.assertEqual(runner.EXPECTED_NON_LIVE_TESTS, 639)
         non_live_ids = tuple(
             f"synthetic_non_live.Case.test_{index:04d}"
             for index in range(runner.EXPECTED_NON_LIVE_TESTS)

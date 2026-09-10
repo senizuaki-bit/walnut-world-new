@@ -300,6 +300,15 @@ def parse_openai_completion_response(
             provider_payload,
             config.model,
         )
+        # DeepSeek accepts the persisted v4 request name but reports its flash
+        # alias in response bytes. Preserve the dispatch's configured identity
+        # for this observed pair only; unrelated model drift stays detectable.
+        if (
+            config.provider == "deepseek"
+            and config.model == "deepseek-v4-flash"
+            and response_model == "deepseek-flash"
+        ):
+            response_model = config.model
         output = strict_json_object(content.encode("utf-8"), "assistant content")
         _validate_output(output, output_schema_mapping)
     except AgentToolInputError as error:

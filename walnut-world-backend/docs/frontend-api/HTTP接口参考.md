@@ -1,6 +1,6 @@
 # HTTP 接口字段参考
 
-更新日期：2026-09-09。由实际挂载路由与本地合同生成；包含默认关闭但可配置启用的路由。先读 [联调主文档](README.md)。
+更新日期：2026-09-10。由实际挂载路由与本地合同生成；包含默认关闭但可配置启用的路由。先读 [联调主文档](README.md)。新增练习和Book音频的完整字段见 [Demo扩展接口](Bug军团与书书接口.md)。
 
 请求头和异步流程见主文档。普通接口直接返回资源 JSON，不包 `{code,data}`；MCP 是 JSON-RPC。示例是合同样例，ID、版本、哈希需替换为当前接口返回值，不是现成可用的业务数据。
 
@@ -36,6 +36,12 @@
 | [读取单条反馈及建议决定](#getproductagentinteraction) | `GET /product-experience/v1/sessions/{session_id}/agent-interactions/{interaction_id}` | 路由已挂载；仍需有效身份与资源 |
 | [接受或拒绝代码建议](#recordproductpatchdecision) | `POST /product-experience/v1/sessions/{session_id}/agent-interactions/{interaction_id}/patches/{patch_id}/decision` | WALNUT_ENABLE_SKILL_PATCH=true（同时要求 WORLD_PRESENTATION） |
 | [恢复工作区](#getproductsessionworkspace) | `GET /product-experience/v1/sessions/{session_id}/workspace` | 路由已挂载；仍需有效身份与资源 |
+| [Demo扩展 Book语音](Bug军团与书书接口.md) | `POST /product-experience/v1/sessions/{session_id}/agent-interactions/{interaction_id}/speech` | 主后端认证；同步返回最终结果 |
+| [Demo扩展 start](Bug军团与书书接口.md) | `POST /product-experience/v1/sessions/{session_id}/practice-entries/{entry_id}/start` | 主后端认证；同步返回最终结果 |
+| [Demo扩展 status](Bug军团与书书接口.md) | `POST /product-experience/v1/sessions/{session_id}/practice-entries/{entry_id}/status` | 主后端认证；同步返回最终结果 |
+| [Demo扩展 prepare](Bug军团与书书接口.md) | `POST /product-experience/v1/sessions/{session_id}/practice-entries/{entry_id}/prepare` | 主后端认证；同步返回最终结果 |
+| [Demo扩展 answer](Bug军团与书书接口.md) | `POST /product-experience/v1/sessions/{session_id}/practice-entries/{entry_id}/answer` | 主后端认证；同步返回最终结果 |
+| [Demo扩展 summary](Bug军团与书书接口.md) | `POST /product-experience/v1/sessions/{session_id}/practice-entries/{entry_id}/summary` | 主后端认证；同步返回最终结果 |
 
 ## getGameBootstrap
 

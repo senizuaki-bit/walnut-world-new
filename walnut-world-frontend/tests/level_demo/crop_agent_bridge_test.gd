@@ -3,6 +3,24 @@ extends SceneTree
 const LEVEL_PATH := "res://scenes/level_demo/crop_adaptive_watering_demo.tscn"
 const BridgeScript := preload("res://scenes/app/crop_agent_bridge.gd")
 
+class FakeBookSpeech:
+	extends Node
+	signal release
+	var calls := 0
+	var reject := true
+	func prepare(_interaction: Dictionary) -> Dictionary:
+		calls += 1
+		await release
+		if reject:
+			return {"ok": false, "code": "BOOK_SPEECH_RESOURCE_NOT_GRANTED"}
+		var stream := AudioStreamWAV.new()
+		stream.format = AudioStreamWAV.FORMAT_16_BITS
+		stream.mix_rate = 24000
+		var pcm := PackedByteArray()
+		pcm.resize(48000)
+		stream.data = pcm
+		return {"ok": true, "stream": stream}
+
 
 class FakeStore:
 	extends Node
@@ -39,18 +57,29 @@ class FakeSession:
 	signal capability_unavailable(capability: String, message: String)
 	signal interactions_recovered(interactions: Array[Dictionary])
 	signal run_resolved(run: Dictionary)
+	signal objective_available(run: Dictionary)
 
 	var store: FakeStore
 	var stages: Array[String] = []
 	var fail_next_turn := false
 	var fail_next_hint := false
+	var fail_next_build := false
 	var next_turn_error: Dictionary = {}
+	var fail_next_summary := false
+	var include_book := false
 
 	func _init(value: FakeStore) -> void:
 		store = value
 
 	func request_build() -> void:
 		stages.append("build")
+		if fail_next_build:
+			fail_next_build = false
+			store.set_flow(WalnutClientStore.FlowState.BUILD_FAILED)
+			store.error_reported.emit({"code": "SANDBOX_COMPILE_ERROR", "message": "Compiler rejected the source."})
+			await get_tree().process_frame
+			store.error_reported.emit({"code": "INTERNAL_ERROR", "message": "Teaching feedback unavailable."})
+			return
 		store.set_flow(4)
 
 	func request_activation() -> void:
@@ -60,6 +89,13 @@ class FakeSession:
 
 	func request_submit_and_run() -> Dictionary:
 		stages.append("turn")
+		if fail_next_summary:
+			fail_next_summary = false
+			objective_available.emit({"run_id": "run_committed", "status": "SUCCEEDED"})
+			store.error_reported.emit({"code": "INTERNAL_ERROR", "message": "Summary unavailable."})
+			await get_tree().process_frame
+			store.set_flow(WalnutClientStore.FlowState.ERROR)
+			return {"ok": false, "stage": "RUN", "message": "Summary unavailable."}
 		if not next_turn_error.is_empty():
 			store.set_flow(WalnutClientStore.FlowState.ERROR)
 			store.error_reported.emit(next_turn_error.duplicate(true))
@@ -83,6 +119,8 @@ class FakeSession:
 			"question": null,
 			"feedback": {"message": "正式 Agent 已验证这次提交。"},
 		}]
+		if include_book:
+			interactions.append({"interaction_id":"interaction_book_speech", "role":"book_agent", "response_type":"growth_summary", "feedback":{"message":"循环逐一配对目标湿度与当前湿度。"}})
 		interactions_recovered.emit(interactions)
 		store.world_snapshot = {"world_id": "world_demo", "revision": 2, "state_hash": "state_hash_2"}
 		store.objective_result = {"objective_succeeded": true, "summary": "权威 Run 已闭环。"}
@@ -255,6 +293,73 @@ func _initialize() -> void:
 		failures.append("已认证代码遇到后端内部错误，应显示服务失败、保留修改入口，不能让学生继续改正确答案。")
 	if action_results.back().code != "INTERNAL_ERROR" or not level.evidence_title.tooltip_text.contains("INTERNAL_ERROR"):
 		failures.append("后端错误编号必须传递到结果和可查看的标题提示。")
+	story_overlay.skip_sequence()
+	session.fail_next_summary = true
+	var snapshot_before_summary := store.world_snapshot.duplicate(true)
+	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.CODE)
+	run_button.pressed.emit()
+	if level.evidence_title.text != "运行已成功，反馈暂未完成":
+		failures.append("收到已提交的成功 Run 后，反馈错误不能立即误报世界没有变化。")
+	for _frame in range(10): await process_frame
+	if level.evidence_title.text != "运行已成功，反馈暂未完成" or not evidence.text.contains("结果已保存"):
+		failures.append("成功 Run 后的总结故障必须与程序执行失败区分。")
+	if store.world_snapshot != snapshot_before_summary or bool(action_results.back().ok):
+		failures.append("提前获知运行成功不能伪造完整闭环或修改世界快照。")
+	session.next_turn_error = {"code": "INTERNAL_ERROR", "message": "Next run failed."}
+	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.CODE)
+	run_button.pressed.emit()
+	for _frame in range(10): await process_frame
+	if level.evidence_title.text != "服务执行失败":
+		failures.append("上次成功通知不能掩盖下一次运行的失败。")
+	story_overlay.skip_sequence()
+	session.fail_next_build = true
+	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.CODE)
+	level.agent_submit_requested.emit(source + "\n// compile rejection check")
+	if level.evidence_title.text != "代码检查未通过":
+		failures.append("编译拒绝必须立即显示代码检查未通过，不能等待教学反馈时误报没有连上。")
+	for _frame in range(10): await process_frame
+	if level.evidence_title.text != "代码检查未通过" or not evidence.text.contains("编译"):
+		failures.append("教学反馈失败不能覆盖已经确认的编译错误。")
+	level.complete_agent_submission("run_book_summary")
+	var book_message := "你用同一下标配对当前湿度和目标湿度，条件判断让足够湿润的地块跳过了浇水。换一组湿度后，你会先检查哪个条件？"
+	level.restore_agent_interaction({"role": "book_agent", "response_type": "growth_summary", "feedback": {"message": book_message}})
+	var book_summary := level.get_node_or_null("CompletionCard/Margin/Content/BookSummary") as RichTextLabel
+	if book_summary == null or not book_summary.visible or not book_summary.text.contains(book_message):
+		failures.append("通关卡必须展示书书的真实总结，不能被固定奖励文案遮挡。")
+	level.begin_agent_submission("new submission")
+	level.complete_agent_submission("run_without_book")
+	# A new completion must not reuse the last run's summary before feedback arrives.
+	if book_summary != null and book_summary.visible:
+		failures.append("新一轮运行不能复用上一轮书书的总结。")
+	var speech := FakeBookSpeech.new()
+	root.add_child(speech)
+	bridge._book_speech = speech
+	session.include_book = true
+	story_overlay.skip_sequence()
+	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.CODE)
+	level.agent_submit_requested.emit(source)
+	for _frame in range(3): await process_frame
+	if speech.calls != 1 or level.completion_card.visible or evidence.text.contains("循环逐一配对"):
+		failures.append("完整语音准备好之前不得展示书书的文字或完成卡。")
+	var stages_before_speech_retry := session.stages.size()
+	speech.release.emit()
+	await process_frame
+	if level.primary_button.text != "重试总结语音" or level.completion_card.visible:
+		failures.append("语音失败必须提供单独重试，且不能提前展示总结。")
+	speech.reject = false
+	level.primary_button.pressed.emit()
+	await process_frame
+	speech.release.emit()
+	await process_frame
+	if speech.calls != 2 or session.stages.size() != stages_before_speech_retry:
+		failures.append("重试语音不得重新构建、激活或执行代码。")
+	if not level.completion_card.visible or not level.book_summary_body.text.contains("循环逐一配对") or not is_instance_valid(level.book_speaker) or not level.book_speaker.playing:
+		failures.append("文字与完整音频就绪后必须同时展示和播放。")
+	level.completion_card.hide()
+	await process_frame
+	if level.book_speaker.playing:
+		failures.append("离开完成卡必须停止书书的语音。")
+	speech.queue_free()
 	bridge.queue_free()
 	session.queue_free()
 	store.queue_free()

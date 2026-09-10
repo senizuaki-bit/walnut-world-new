@@ -52,6 +52,19 @@ LABELS = {
     "getRedactedEvidenceForFeishu": "教师读取脱敏证据",
     "feishuTeacherMcp": "教师只读 MCP 工具",
 }
+
+DEMO_EXTENSIONS = {
+    "/product-experience/v1/sessions/{session_id}/practice-entries/{entry_id}/{action}": (
+        "start",
+        "status",
+        "prepare",
+        "answer",
+        "summary",
+    ),
+    "/product-experience/v1/sessions/{session_id}/agent-interactions/{interaction_id}/speech": (
+        "",
+    ),
+}
 FLAGS = {
     "listWorldPresentationEvents": "WALNUT_ENABLE_WORLD_PRESENTATION=true",
     "recordProductPatchDecision": "WALNUT_ENABLE_SKILL_PATCH=true（同时要求 WORLD_PRESENTATION）",
@@ -235,7 +248,7 @@ def main():
     lines = [
         "# HTTP 接口字段参考",
         "",
-        "更新日期：2026-09-09。由实际挂载路由与本地合同生成；包含默认关闭但可配置启用的路由。先读 [联调主文档](README.md)。",
+        "更新日期：2026-09-10。由实际挂载路由与本地合同生成；包含默认关闭但可配置启用的路由。先读 [联调主文档](README.md)。新增练习和Book音频的完整字段见 [Demo扩展接口](Bug军团与书书接口.md)。",
         "",
         "请求头和异步流程见主文档。普通接口直接返回资源 JSON，不包 `{code,data}`；MCP 是 JSON-RPC。示例是合同样例，ID、版本、哈希需替换为当前接口返回值，不是现成可用的业务数据。",
         "",
@@ -245,8 +258,23 @@ def main():
         "| --- | --- | --- |",
     ]
     mounted = []
+    extensions = []
     for path, item in actual.items():
         for method, op in item.items():
+            if path in DEMO_EXTENSIONS:
+                for action in DEMO_EXTENSIONS[path]:
+                    concrete = path.replace("{action}", action)
+                    extensions.append(
+                        {
+                            "method": method.upper(),
+                            "path": concrete,
+                            "reference": "Bug军团与书书接口.md",
+                        }
+                    )
+                    lines.append(
+                        f"| [Demo扩展 {action or 'Book语音'}](Bug军团与书书接口.md) | `{method.upper()} {concrete}` | 主后端认证；同步返回最终结果 |"
+                    )
+                continue
             operation = op["operationId"]
             assert operation in LABELS, operation
             mounted.append((method, path, operation))
@@ -336,6 +364,7 @@ def main():
         lines += [f"### {name}", "", *schema_section(read(source), source), ""]
     (OUT / "HTTP接口参考.md").write_text("\n".join(lines), encoding="utf-8")
     manifest = {
+        "demo_extensions": extensions,
         "http_operations": [
             {"method": m.upper(), "path": p, "operation_id": o} for m, p, o in mounted
         ],
@@ -349,7 +378,7 @@ def main():
         json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     print(
-        f"Generated {len(mounted)} HTTP operations and {len(copied)} schema-validated examples; no services started."
+        f"Generated {len(mounted)} contract HTTP operations, {len(extensions)} documented demo extensions and {len(copied)} schema-validated examples; no services started."
     )
 
 

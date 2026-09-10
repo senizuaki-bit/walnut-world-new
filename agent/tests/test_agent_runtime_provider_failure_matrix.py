@@ -65,6 +65,8 @@ from yaya_agent_runtime.adapters.openai_compatible import (  # noqa: E402
     ProviderProtocolError,
     ProviderTransportError,
 )
+from yaya_agent_runtime.model_output import build_model_output_schema  # noqa: E402
+from yaya_agent_runtime.schema_validation import validate_instance  # noqa: E402
 
 
 class _SequenceTransport:
@@ -475,6 +477,37 @@ class ProviderFailureMatrixTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(inference["concept"], "for_loop")
         self.assertEqual(inference["evidence_ids"], ["evidence_001"])
         self.assertIn("第一个字符必须是 {", cast(str, instruction["instruction"]))
+
+    def test_pre_tool_repair_shape_matches_bug_question_schema(self) -> None:
+        context = _teaching_context()
+        assert context.teaching_directive is not None
+        for response_types in [("question", "message")]:
+            with self.subTest(response_types=response_types):
+                directive = replace(
+                    context.teaching_directive,
+                    allowed_response_types=response_types,
+                )
+                messages = PromptBuilder().after_validation_error(
+                    (),
+                    role="bug_agent",
+                    error_code="INVARIANT_VIOLATION",
+                    details={
+                        "validation_error": "value must match exactly one declared schema variant"
+                    },
+                    final_only=False,
+                    directive=directive,
+                    required_evidence_aliases=("evidence_001",),
+                )
+                instruction = json.loads(messages[-1].content)
+                shape = instruction["required_final_envelope_shape"]
+                schema = build_model_output_schema(
+                    (),
+                    max_tool_calls=0,
+                    role="bug_agent",
+                    directive=directive,
+                    required_evidence_aliases=("evidence_001",),
+                )
+                validate_instance(shape, schema)
 
     async def test_invalid_json_repairs_once_and_repair_exhaustion_falls_back(self) -> None:
         valid = _provider_response(decision_output("world_agent"))

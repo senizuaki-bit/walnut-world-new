@@ -1,4 +1,36 @@
 {
+  "demo_extensions": [
+    {
+      "method": "POST",
+      "path": "/product-experience/v1/sessions/{session_id}/agent-interactions/{interaction_id}/speech",
+      "reference": "Bug军团与书书接口.md"
+    },
+    {
+      "method": "POST",
+      "path": "/product-experience/v1/sessions/{session_id}/practice-entries/{entry_id}/start",
+      "reference": "Bug军团与书书接口.md"
+    },
+    {
+      "method": "POST",
+      "path": "/product-experience/v1/sessions/{session_id}/practice-entries/{entry_id}/status",
+      "reference": "Bug军团与书书接口.md"
+    },
+    {
+      "method": "POST",
+      "path": "/product-experience/v1/sessions/{session_id}/practice-entries/{entry_id}/prepare",
+      "reference": "Bug军团与书书接口.md"
+    },
+    {
+      "method": "POST",
+      "path": "/product-experience/v1/sessions/{session_id}/practice-entries/{entry_id}/answer",
+      "reference": "Bug军团与书书接口.md"
+    },
+    {
+      "method": "POST",
+      "path": "/product-experience/v1/sessions/{session_id}/practice-entries/{entry_id}/summary",
+      "reference": "Bug军团与书书接口.md"
+    }
+  ],
   "http_operations": [
     {
       "method": "GET",

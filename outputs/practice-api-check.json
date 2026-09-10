@@ -1,0 +1,98 @@
+{
+  "problem": {
+    "title": "八块农田的智能灌溉",
+    "brief": "新的一批八块农田需要根据土壤湿度和目标湿度决定浇水量。请遍历每块地，计算目标湿度减去当前湿度的差值，按规则输出浇水指令。",
+    "focus": "本次没有出现错误，属于巩固当前规则：正确使用循环、数组下标和 if/else 分级判断。",
+    "moisture": [
+      80,
+      40,
+      25,
+      70,
+      55,
+      30,
+      65,
+      45
+    ],
+    "target": [
+      75,
+      40,
+      50,
+      100,
+      60,
+      60,
+      35,
+      80
+    ],
+    "challenge_id": "challenge_6f05e3101cee4598849ee26551743edc",
+    "run_id": "run_927734c80428d71904722800",
+    "source": "provider",
+    "failure_count": 0,
+    "starter_source": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int moisture[8] = {80, 40, 25, 70, 55, 30, 65, 45};\n    int target[8] = {75, 40, 50, 100, 60, 60, 35, 80};\n    // 测试器会提供这两组数据。读取部分已写好，请保留。\n    for (int i = 0; i < 8; i++) cin >> moisture[i];\n    for (int i = 0; i < 8; i++) cin >> target[i];\n\n    // 在这里编写循环，计算每块土地的 gap，输出应浇水的土地与份数。\n    // 输出格式：cout << \"WATER \" << i << \" \" << units << \"\\n\";\n\n    return 0;\n}\n",
+    "rules": {
+      "language": "cpp",
+      "plot_count": 8,
+      "gap": "target[i] - moisture[i]",
+      "actions": [
+        "gap >= 30: WATER i 2",
+        "0 < gap < 30: WATER i 1",
+        "gap <= 0: 不输出"
+      ],
+      "output": "按下标从0到7，每个动作单独一行，以换行结束。保留预置的输入读取代码。"
+    },
+    "starter_skill": {
+      "skill_id": "skill_bug_practice",
+      "display_name": "八块农田的智能灌溉",
+      "source_bundle": {
+        "language": "CPP20",
+        "entrypoint": "main.cpp",
+        "files": [
+          {
+            "path": "main.cpp",
+            "content": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int moisture[8] = {80, 40, 25, 70, 55, 30, 65, 45};\n    int target[8] = {75, 40, 50, 100, 60, 60, 35, 80};\n    // 测试器会提供这两组数据。读取部分已写好，请保留。\n    for (int i = 0; i < 8; i++) cin >> moisture[i];\n    for (int i = 0; i < 8; i++) cin >> target[i];\n\n    // 在这里编写循环，计算每块土地的 gap，输出应浇水的土地与份数。\n    // 输出格式：cout << \"WATER \" << i << \" \" << units << \"\\n\";\n\n    return 0;\n}\n",
+            "content_sha256": "a254eedeaf0a0754a9daa727ff4b4cdc2240f57d01b77f41411f8574bc70b802"
+          }
+        ]
+      },
+      "compiler_profile": "YAYA_CPP20_SAFE_V1",
+      "test_suite_version": "bug-practice-v1"
+    }
+  },
+  "wrong": {
+    "correct": false,
+    "stage": "PUBLIC_TEST",
+    "message": "输出还没有符合全部规则。检查同一下标、缺口为 0 和 30 时的动作，以及每行 WATER 的格式。",
+    "build_id": "build_d075e777339c4d5c823ef886a308c0ac",
+    "status": "REJECTED",
+    "compiler_profile": "YAYA_CPP20_SAFE_V1",
+    "test_suite_version": "bug-practice-v1",
+    "diagnostics": [
+      {
+        "code": "PUBLIC_TEST_OUTPUT_MISMATCH",
+        "message": "Public Test Output Mismatch"
+      }
+    ],
+    "attempts": 1,
+    "challenge_id": "challenge_6f05e3101cee4598849ee26551743edc"
+  },
+  "correct": {
+    "correct": true,
+    "stage": "PASSED",
+    "message": "变式挑战通过！公开数据和边界测试都正确。",
+    "build_id": "build_b0208a0bb6364485a1f4db898e36b852",
+    "status": "SUCCEEDED",
+    "compiler_profile": "YAYA_CPP20_SAFE_V1",
+    "test_suite_version": "bug-practice-v1",
+    "diagnostics": [],
+    "attempts": 2,
+    "challenge_id": "challenge_6f05e3101cee4598849ee26551743edc"
+  },
+  "summary": {
+    "challenge_id": "challenge_6f05e3101cee4598849ee26551743edc",
+    "message": "主关卡用 for 循环遍历下标 0 到 7，在同一 i 下读取 moisture[i] 与 target[i] 求差 gap，再用 if / else if 分级：gap>=30 输出 2 份、0<gap<30 输出 1 份、gap<=0 不输出，5 个地块浇水全部正确。变式题换了湿度与目标数据，你保留预置的输入读取，把同样的循环、同下标数组和分级条件迁移过去，共尝试 2 次：第一次因输出未符合全部规则被拒，第二次通过公开与边界测试。失败那次提交里循环体尚未写入，因此不能断定某条边界写错，只说明规则还没落地。",
+    "source": "provider",
+    "speaker": "ICL_uranus_zh_male_bujiqingnian_tob",
+    "text_sha256": "2e1369abe187c9f3b0bb6d404981779203a671f446cbbadf50d4867195fcd5d9",
+    "format": "pcm_s16le",
+    "sample_rate": 24000
+  }
+}

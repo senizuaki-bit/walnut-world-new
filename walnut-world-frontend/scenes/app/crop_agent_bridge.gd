@@ -10,6 +10,12 @@ signal activation_action_finished(result: Dictionary)
 signal submit_action_finished(result: Dictionary)
 
 const WaterCandidateEvaluatorScript := preload("res://scripts/client/water_candidate_evaluator.gd")
+const BookSpeechClient := preload("res://scripts/client/book_speech_client.gd")
+var _book_speech: Node
+var _book_pending: Dictionary = {}
+var _book_submit_result: Dictionary = {}
+var _book_preparing := false
+var _book_generation := 0
 
 var _store: Node
 var _session: Node
@@ -28,6 +34,7 @@ var _interaction_cursor_at_configuration := 0
 var _candidate_config: Dictionary = {"enabled": false, "content_ref": {}, "plot_rules": {}}
 var _pre_run_snapshot: Dictionary = {}
 var _last_run: Dictionary = {}
+var _objective_committed := false
 var _local_candidate_result: Dictionary = {}
 var _certified_source := ""
 var _active_source := ""
@@ -40,6 +47,10 @@ func configure(
 	candidate_config: Dictionary = {},
 ) -> void:
 	_disconnect_dependencies()
+	_book_generation += 1
+	_book_preparing = false
+	_book_pending.clear()
+	_book_submit_result.clear()
 	_store = store
 	_session = session
 	_level = level
@@ -50,6 +61,7 @@ func configure(
 	_interaction_cursor_at_configuration = int(interaction_cursor) if typeof(interaction_cursor) == TYPE_INT else 0
 	_pre_run_snapshot.clear()
 	_last_run.clear()
+	_objective_committed = false
 	_local_candidate_result.clear()
 	_certified_source = ""
 	_active_source = ""
@@ -66,6 +78,7 @@ func configure(
 	activation_action_finished.connect(_level.present_stage_audio)
 	_level.configure_candidate_compatibility_available(bool(_candidate_config.get("enabled", false)))
 	_level.agent_submit_requested.connect(_on_submit_requested)
+	_level.book_speech_retry_requested.connect(_retry_book_speech)
 	_level.agent_build_requested.connect(_on_build_requested)
 	_level.agent_activation_requested.connect(_on_activation_requested)
 	_level.agent_hint_requested.connect(_on_hint_requested)
@@ -158,9 +171,12 @@ func _on_draft_changed(source: String, state: int) -> void:
 
 
 func _on_submit_requested(source: String) -> void:
+	if not _book_pending.is_empty():
+		return
 	if not _projection_active or _submission_running or _build_running or _activation_running or _hint_running or _level == null:
 		return
 	_submission_running = true
+	_objective_committed = false
 	_last_error_message = ""
 	_last_error_code = ""
 	_last_error.clear()
@@ -257,6 +273,14 @@ func _on_submit_requested(source: String) -> void:
 		_finish_failure("目标", str(objective_result.get("summary", "权威验证未通过。")))
 		submit_action_finished.emit(_submit_result(result, source, false))
 		return
+	if _book_speech != null:
+		for interaction: Dictionary in _pending_submission_interactions:
+			if interaction.get("role") == "book_agent" and interaction.get("response_type") == "growth_summary":
+				_book_pending = interaction.duplicate(true)
+		if not _book_pending.is_empty():
+			_book_submit_result = _submit_result(result, source, true)
+			await _retry_book_speech()
+			return
 	_submission_running = false
 	if not _pending_submission_interactions.is_empty():
 		_level.present_agent_interactions(_pending_submission_interactions)
@@ -338,8 +362,34 @@ func _on_hint_requested(message: String) -> void:
 
 
 func configure_voice(base_url: String, token: String, session_id: String) -> void:
+	if _book_speech == null:
+		_book_speech = BookSpeechClient.new()
+		add_child(_book_speech)
+	_book_speech.configure(base_url, token, session_id)
 	if is_instance_valid(_level):
 		_level.mentor_question.configure_voice(base_url, token, session_id, Callable(self, "_voice_context"))
+
+
+func _retry_book_speech() -> void:
+	if _book_pending.is_empty() or _book_speech == null or _book_preparing:
+		return
+	_book_preparing = true
+	var generation := _book_generation
+	_submission_running = true
+	_level.present_book_speech_wait(false)
+	var speech: Dictionary = await _book_speech.prepare(_book_pending)
+	if not is_instance_valid(self) or not is_instance_valid(_level) or generation != _book_generation:
+		return
+	_book_preparing = false
+	_submission_running = false
+	if not speech.get("ok", false):
+		_level.present_book_speech_wait(true)
+		submit_action_finished.emit({"ok": false, "code": speech.get("code", "BOOK_SPEECH_UNAVAILABLE"), "stage": "SPEECH"})
+		return
+	_level.complete_book_submission(_book_pending, speech.stream)
+	_book_pending.clear()
+	_pending_submission_interactions.clear()
+	submit_action_finished.emit(_book_submit_result)
 
 
 func _voice_context() -> Dictionary:
@@ -376,6 +426,9 @@ func _on_run_resolved(run: Dictionary) -> void:
 
 func _on_objective_available(_run: Dictionary) -> void:
 	if _submission_running and is_instance_valid(_level):
+		# SessionController has checked this turn's SUCCEEDED Run and commit receipt.
+		# Preserve that fact if the later feedback/closure step fails.
+		_objective_committed = true
 		_level.update_agent_submission_stage("运行已成功，世界结果已提交。叮当正在整理反馈……")
 
 
@@ -435,9 +488,18 @@ func _candidate_hint_message(fallback: String) -> String:
 
 func _on_error_reported(error: Dictionary) -> void:
 	if _projection_active and _level != null:
+		# A later teaching-service failure cannot change the compiler's result.
+		if (_submission_running or _build_running) and _last_error_code == "SANDBOX_COMPILE_ERROR":
+			return
 		_last_error = error.duplicate(true)
 		_last_error_code = str(error.get("code", ""))
 		_last_error_message = str(error.get("message", "正式服务发生错误。"))
+		if _submission_running and _objective_committed:
+			_level.fail_agent_submission("反馈", _last_error_message, _last_error, true, true)
+			return
+		if (_submission_running or _build_running) and _last_error_code == "SANDBOX_COMPILE_ERROR":
+			_level.fail_agent_submission("代码检查", _last_error_message, _last_error)
+			return
 		_level.present_agent_error(_last_error_message)
 
 
@@ -452,7 +514,7 @@ func _on_capability_unavailable(_capability: String, message: String) -> void:
 func _finish_failure(stage: String, message: String) -> void:
 	_submission_running = false
 	_refresh_level_authority_projection()
-	_level.fail_agent_submission(stage, _last_error_message if not _last_error_message.is_empty() else message, _last_error, not _certified_source.is_empty() and _certified_source == str(_store.get("local_source")))
+	_level.fail_agent_submission(stage, _last_error_message if not _last_error_message.is_empty() else message, _last_error, not _certified_source.is_empty() and _certified_source == str(_store.get("local_source")), _objective_committed)
 	if not _pending_submission_interactions.is_empty():
 		_level.present_agent_interactions(_pending_submission_interactions)
 		_pending_submission_interactions.clear()
@@ -501,6 +563,8 @@ func _disconnect_dependencies() -> void:
 			activation_action_finished.disconnect(_level.present_stage_audio)
 		if _level.agent_submit_requested.is_connected(_on_submit_requested):
 			_level.agent_submit_requested.disconnect(_on_submit_requested)
+		if _level.book_speech_retry_requested.is_connected(_retry_book_speech):
+			_level.book_speech_retry_requested.disconnect(_retry_book_speech)
 		if _level.agent_build_requested.is_connected(_on_build_requested):
 			_level.agent_build_requested.disconnect(_on_build_requested)
 		if _level.agent_activation_requested.is_connected(_on_activation_requested):

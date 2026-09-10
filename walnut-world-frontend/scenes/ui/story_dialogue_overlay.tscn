@@ -291,6 +291,3 @@ theme_override_font_sizes/font_size = 14
 text = "点击继续  ·  空格 / Enter  ▾"
 horizontal_alignment = 0
 vertical_alignment = 1
-
-[node name="TypewriterTimer" type="Timer" parent="."]
-wait_time = 0.03

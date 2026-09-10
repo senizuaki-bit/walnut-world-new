@@ -5,7 +5,7 @@ from datetime import datetime
 from yaya_agent_contracts import EvidenceRef
 
 from .context_builder import _competency_summaries
-from .domain import BUG_FAILURE_THRESHOLD, LearnerProfileSnapshot, TaskSnapshot
+from .domain import LearnerProfileSnapshot, TaskSnapshot
 from .pedagogy_policy import (
     PedagogyEvidence,
     PedagogyEvidenceOutcome,
@@ -31,7 +31,7 @@ def conversation_directive(
     """
     directive = PedagogyPolicy().decide(
         PedagogyInput(
-            role="bug_agent" if failure_count >= BUG_FAILURE_THRESHOLD else "teaching_agent",
+            role="teaching_agent",
             event_type="hint_requested",
             failure_count=failure_count,
             hint_requested=True,

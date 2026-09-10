@@ -1,6 +1,6 @@
 # walnut-world-backend
 
-当前 Demo 前后端联调请读 **[完整接口文档（2026-09-09）](docs/frontend-api/README.md)**，覆盖八个功能模块、HTTP 字段与示例、实时语音及可选接口。下文包含早期生产拓扑和交付记录，当前路由与联调流程以新文档及实际代码为准。
+当前 Demo 前后端联调请读 **[完整接口文档（2026-09-10）](docs/frontend-api/README.md)**，覆盖主关、主动教学、实时语音、[Bug军团与书书接口](docs/frontend-api/Bug军团与书书接口.md)及可选接口。后端设计见[Bug军团实现逻辑](docs/architecture/bug-practice.md)。下文包含早期生产拓扑和交付记录，当前路由与联调流程以新文档及实际代码为准。
 
 核桃代码世界唯一生产 HTTP Gateway、PostgreSQL 写入与 Alembic 迁移权威。INT1 生产拓扑只由本仓库的 `backend` 服务公开端口；`postgres`、一次性 `migrate`、私有 `llm-relay`、digest-pinned DinD、镜像预载任务、`workflow-worker` 与独立 `learner-worker` 都不暴露产品 HTTP。`workflow-worker` 闭合 Control、Build/Certification、Activation、Turn 与 Run/World/Event/Evidence，并耐久写入 terminal hand-off；`learner-worker` 独立闭合 Learner、Product AgentInteraction 与 Workspace。DinD 与 `workflow-worker` 共享固定 Linux runtime volume/socket，避免 Windows host path 被误作嵌套容器 bind source；Worker 不挂载 Docker Desktop host socket。Gateway 不代理 sibling Agent 的历史 `yaya_agent_backend` 服务，也不读取或迁移其 `yaya_*` 私表。
 

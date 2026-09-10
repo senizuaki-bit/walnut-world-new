@@ -1236,6 +1236,19 @@ offset_bottom = 370.32943676939425
 theme_override_font_sizes/font_size = 18
 autowrap_mode = 2
 
+[node name="BookSummary" type="RichTextLabel" parent="CompletionCard/Margin/Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 45.0
+offset_top = 160.0
+offset_right = 539.0
+offset_bottom = 395.0
+theme_override_colors/default_color = Color(0.24, 0.38, 0.22, 1)
+theme_override_font_sizes/normal_font_size = 18
+bbcode_enabled = false
+scroll_active = true
+
 [node name="Actions" type="Control" parent="CompletionCard/Margin/Content"]
 layout_mode = 0
 alignment = 1

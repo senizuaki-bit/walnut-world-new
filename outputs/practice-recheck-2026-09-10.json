@@ -1,0 +1,173 @@
+{
+  "problem": {
+    "title": "菜园喷灌分级",
+    "brief": "菜园里8块菜地排成一行，每块地当前土壤湿度和目标湿度分别记录在两个长度为8的数组中。请按同一下标逐一比较，判断每块地需要喷灌几份水。",
+    "focus": "本次没有出现错误，继续巩固同一下标比较、按缺口大小分级输出的规则。",
+    "moisture": [
+      25,
+      80,
+      50,
+      95,
+      40,
+      60,
+      20,
+      70
+    ],
+    "target": [
+      10,
+      80,
+      51,
+      60,
+      75,
+      30,
+      55,
+      100
+    ],
+    "challenge_id": "challenge_a81bd825b0e84e0da52272c04aa65521",
+    "run_id": "run_3c02bdb25d8f8e10536f4d34",
+    "source": "provider",
+    "failure_count": 0,
+    "starter_source": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int moisture[8] = {25, 80, 50, 95, 40, 60, 20, 70};\n    int target[8] = {10, 80, 51, 60, 75, 30, 55, 100};\n    // 测试器会提供这两组数据。读取部分已写好，请保留。\n    for (int i = 0; i < 8; i++) cin >> moisture[i];\n    for (int i = 0; i < 8; i++) cin >> target[i];\n\n    // 在这里编写循环，计算每块土地的 gap，输出应浇水的土地与份数。\n    // 输出格式：cout << \"WATER \" << i << \" \" << units << \"\\n\";\n\n    return 0;\n}\n",
+    "rules": {
+      "language": "cpp",
+      "plot_count": 8,
+      "gap": "target[i] - moisture[i]",
+      "actions": [
+        "gap >= 30: WATER i 2",
+        "0 < gap < 30: WATER i 1",
+        "gap <= 0: 不输出"
+      ],
+      "output": "按下标从0到7，每个动作单独一行，以换行结束。保留预置的输入读取代码。"
+    },
+    "starter_skill": {
+      "skill_id": "skill_bug_practice",
+      "display_name": "菜园喷灌分级",
+      "source_bundle": {
+        "language": "CPP20",
+        "entrypoint": "main.cpp",
+        "files": [
+          {
+            "path": "main.cpp",
+            "content": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int moisture[8] = {25, 80, 50, 95, 40, 60, 20, 70};\n    int target[8] = {10, 80, 51, 60, 75, 30, 55, 100};\n    // 测试器会提供这两组数据。读取部分已写好，请保留。\n    for (int i = 0; i < 8; i++) cin >> moisture[i];\n    for (int i = 0; i < 8; i++) cin >> target[i];\n\n    // 在这里编写循环，计算每块土地的 gap，输出应浇水的土地与份数。\n    // 输出格式：cout << \"WATER \" << i << \" \" << units << \"\\n\";\n\n    return 0;\n}\n",
+            "content_sha256": "ba19226e936d9d59bf31e4faa465c4f17c985f2044d3727f6fdb1f8c83f4e013"
+          }
+        ]
+      },
+      "compiler_profile": "YAYA_CPP20_SAFE_V1",
+      "test_suite_version": "bug-practice-v1"
+    }
+  },
+  "compile_error": {
+    "correct": false,
+    "stage": "COMPILE",
+    "message": "代码还没有编译通过，请检查语法后再试。",
+    "build_id": "build_5c6b21e6293543bf91b33f2666eed0dc",
+    "status": "REJECTED",
+    "compiler_profile": "YAYA_CPP20_SAFE_V1",
+    "test_suite_version": "bug-practice-v1",
+    "diagnostics": [
+      {
+        "code": "COMPILE_ERROR",
+        "message": "/tmp/yaya-source/main.cpp:2:12: error: expected ')' at end of input"
+      },
+      {
+        "code": "COMPILE_ERROR",
+        "message": "/tmp/yaya-source/main.cpp:2:12: error: expected '}' at end of input"
+      },
+      {
+        "code": "COMPILE_ERROR",
+        "message": "/tmp/yaya-source/main.cpp:2:12: error: expected primary-expression at end of input"
+      },
+      {
+        "code": "COMPILE_ERROR",
+        "message": "/tmp/yaya-source/main.cpp:2:5: error: cannot declare '::main' to be a global variable"
+      },
+      {
+        "code": "COMPILE_ERROR",
+        "message": "2 | int main( {"
+      },
+      {
+        "code": "COMPILE_ERROR",
+        "message": "|            )"
+      },
+      {
+        "code": "COMPILE_ERROR",
+        "message": "|            ^"
+      },
+      {
+        "code": "COMPILE_ERROR",
+        "message": "|           ~^"
+      },
+      {
+        "code": "COMPILE_ERROR",
+        "message": "|         ~  ^"
+      },
+      {
+        "code": "COMPILE_ERROR",
+        "message": "|     ^~~~"
+      }
+    ],
+    "attempts": 1,
+    "challenge_id": "challenge_a81bd825b0e84e0da52272c04aa65521"
+  },
+  "wrong": {
+    "correct": false,
+    "stage": "PUBLIC_TEST",
+    "message": "输出还没有符合全部规则。检查同一下标、缺口为 0 和 30 时的动作，以及每行 WATER 的格式。",
+    "build_id": "build_4c2b17875dda40ba84985fbd23391505",
+    "status": "REJECTED",
+    "compiler_profile": "YAYA_CPP20_SAFE_V1",
+    "test_suite_version": "bug-practice-v1",
+    "diagnostics": [
+      {
+        "code": "PUBLIC_TEST_OUTPUT_MISMATCH",
+        "message": "Public Test Output Mismatch"
+      }
+    ],
+    "attempts": 2,
+    "challenge_id": "challenge_a81bd825b0e84e0da52272c04aa65521"
+  },
+  "hardcoded": {
+    "correct": false,
+    "stage": "HIDDEN_TEST",
+    "message": "输出还没有符合全部规则。检查同一下标、缺口为 0 和 30 时的动作，以及每行 WATER 的格式。",
+    "build_id": "build_72bc7835f8eb4213a19582223f26fb69",
+    "status": "REJECTED",
+    "compiler_profile": "YAYA_CPP20_SAFE_V1",
+    "test_suite_version": "bug-practice-v1",
+    "diagnostics": [
+      {
+        "code": "HIDDEN_TEST_OUTPUT_MISMATCH",
+        "message": "A hidden certification test did not pass."
+      }
+    ],
+    "attempts": 3,
+    "challenge_id": "challenge_a81bd825b0e84e0da52272c04aa65521"
+  },
+  "correct": {
+    "correct": true,
+    "stage": "PASSED",
+    "message": "变式挑战通过！公开数据和边界测试都正确。",
+    "build_id": "build_36a9f362f6dc4c54a3a87011687652c6",
+    "status": "SUCCEEDED",
+    "compiler_profile": "YAYA_CPP20_SAFE_V1",
+    "test_suite_version": "bug-practice-v1",
+    "diagnostics": [],
+    "attempts": 4,
+    "challenge_id": "challenge_a81bd825b0e84e0da52272c04aa65521"
+  },
+  "summary": {
+    "challenge_id": "challenge_a81bd825b0e84e0da52272c04aa65521",
+    "message": "主关用 for (int i = 0; i < 8; i++) 遍历 8 块地，通过 target[i] 与 moisture[i] 同下标相减得到 gap，再用 gap >= 30、gap > 0 两级条件分别输出 2 份、1 份，gap <= 0 不输出，一次通过并完成 5 处浇水。变式题共尝试 4 次：第 1 次代码残缺未编译通过，第 2、3 次分别停在公开测试和隐藏测试，第 4 次补全循环与分级判断后通过。整个过程说明同下标数组比较和分级条件已经能稳定迁移到新数据上。",
+    "source": "provider",
+    "speaker": "ICL_uranus_zh_male_bujiqingnian_tob",
+    "text_sha256": "91f16c28737aa9cb7120d5044a6154ba1ff8bf145e50194ea1d017a9e843708b",
+    "format": "pcm_s16le",
+    "sample_rate": 24000
+  },
+  "checks": {
+    "concurrent_same_answer_one_build": true,
+    "summary_replay_identical": true,
+    "one_challenge_per_entry": true
+  }
+}

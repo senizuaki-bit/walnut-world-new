@@ -38,7 +38,7 @@ from yaya_agent_runtime import (  # noqa: E402
     world_commit_receipt_sha256,
 )
 from yaya_agent_runtime.context_builder import validate_context_for_role  # noqa: E402
-from yaya_agent_runtime.errors import InvalidAgentOutput  # noqa: E402
+from yaya_agent_runtime.errors import AgentContextError, InvalidAgentOutput  # noqa: E402
 from yaya_agent_runtime.evidence import build_evidence_aliases  # noqa: E402
 
 
@@ -130,6 +130,16 @@ def _draft(context):
 
 
 class BookCurrentCompletionTests(unittest.IsolatedAsyncioTestCase):
+    async def test_book_rejects_source_from_a_different_skill_version(self) -> None:
+        reads = _BookReads()
+        reads.skill = replace(
+            reads.skill,
+            ref=replace(reads.skill.ref, skill_version_id="skillver_unrelated_0001"),
+        )
+        with self.assertRaises(AgentContextError) as raised:
+            await _builder(reads).build(reads.event, "book_agent", reads.operation)
+        self.assertEqual(raised.exception.code, "CONTEXT_SKILL_BINDING_MISMATCH")
+
     async def test_bounded_disclaimers_are_allowed_in_message_and_inference(self) -> None:
         reads = _BookReads()
         context = await _builder(reads).build(reads.event, "book_agent", reads.operation)
@@ -138,6 +148,8 @@ class BookCurrentCompletionTests(unittest.IsolatedAsyncioTestCase):
             "这只是本次运行里表现出的情况，不代表已经永久掌握；后面还需要再验证一次。",
             "这不是说你已经永久掌握，只是本次运行中值得继续留意的一点。",
             "本次成功不能证明你永久掌握。",
+            "仅基于本次运行证据，不外推为永久掌握。",
+            "但仅凭这一次成功，不能推断已永久掌握。",
         ):
             for field in ("message", "reason"):
                 with self.subTest(text=text, field=field):
@@ -163,6 +175,10 @@ class BookCurrentCompletionTests(unittest.IsolatedAsyncioTestCase):
             "不能不说你已经永久掌握。",
             "并不是说你没有永久掌握。",
             "你并非没有编程能力，你已经永久掌握。",
+            "不能不推断已永久掌握。",
+            "并非不能推断已永久掌握。",
+            "不外推为永久掌握，但你已经永久掌握。",
+            "不能推断已永久掌握，你永远不会失败。",
             "You have permanent mastery and will not fail again.",
             "You will never repeat any mistake.",
         ):
@@ -186,7 +202,14 @@ class BookCurrentCompletionTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(
             reads.calls,
-            ["get_task", "get_session", "get_run", "list_skill_history", "get_profile"],
+            [
+                "get_task",
+                "get_session",
+                "get_run",
+                "get_bound_skill",
+                "list_skill_history",
+                "get_profile",
+            ],
         )
         self.assertEqual(context.run_result, reads.run)
         self.assertEqual(context.session_runs, ())
@@ -198,11 +221,14 @@ class BookCurrentCompletionTests(unittest.IsolatedAsyncioTestCase):
         reads = _BookReads()
         context = await _builder(reads).build(reads.event, "book_agent", reads.operation)
         config = PackagedRoleConfigProvider.load().get("book_agent")
-        decision = validate_decision(_draft(context), config, context, ())
+        model_message = (
+            "这次你用循环逐一处理地块，并用条件判断选择需要浇水的地块；"
+            "本次运行已完成目标。下次地块数量变化时，你会怎样确定循环结束的位置？"
+        )
+        draft = replace(_draft(context), message=model_message)
+        decision = validate_decision(draft, config, context, ())
 
-        self.assertIn("本次", decision.message)
-        self.assertIn(context.task.title, decision.message)
-        self.assertIn("你写的程序达成了当前任务目标", decision.message)
+        self.assertEqual(decision.message, model_message)
         self.assertNotIn("世界提交", decision.message)
         self.assertNotIn("Skill", decision.message)
         self.assertNotIn("本 Session 共记录", decision.message)
@@ -214,6 +240,7 @@ class BookCurrentCompletionTests(unittest.IsolatedAsyncioTestCase):
         payload = json.loads(prompt[1].content)["turn_context"]
         self.assertNotIn("session_runs", payload)
         self.assertIn("run_result", payload)
+        self.assertEqual(payload["skill"]["source_code"], reads.skill.source_code)
         self.assertIn("本次完成", prompt[0].content)
 
     async def test_history_tool_is_absent_for_current_summary_and_retained_for_legacy(self) -> None:
@@ -241,7 +268,7 @@ class BookCurrentCompletionTests(unittest.IsolatedAsyncioTestCase):
         legacy_definitions = registry.model_definitions("book_agent", config.allowed_tools, legacy)
         self.assertIn("get_session_runs", {item["name"] for item in legacy_definitions})
         legacy_decision = validate_decision(_draft(legacy), config, legacy, ())
-        self.assertIn("本 Session 共记录 1 次运行，其中 0 次尚未完成", legacy_decision.message)
+        self.assertEqual(legacy_decision.message, _draft(legacy).message)
 
 
 if __name__ == "__main__":
