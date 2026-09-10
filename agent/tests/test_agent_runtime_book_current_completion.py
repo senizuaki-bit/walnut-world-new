@@ -38,6 +38,7 @@ from yaya_agent_runtime import (  # noqa: E402
     world_commit_receipt_sha256,
 )
 from yaya_agent_runtime.context_builder import validate_context_for_role  # noqa: E402
+from yaya_agent_runtime.errors import InvalidAgentOutput  # noqa: E402
 from yaya_agent_runtime.evidence import build_evidence_aliases  # noqa: E402
 
 
@@ -129,6 +130,56 @@ def _draft(context):
 
 
 class BookCurrentCompletionTests(unittest.IsolatedAsyncioTestCase):
+    async def test_bounded_disclaimers_are_allowed_in_message_and_inference(self) -> None:
+        reads = _BookReads()
+        context = await _builder(reads).build(reads.event, "book_agent", reads.operation)
+        config = PackagedRoleConfigProvider.load().get("book_agent")
+        for text in (
+            "这只是本次运行里表现出的情况，不代表已经永久掌握；后面还需要再验证一次。",
+            "这不是说你已经永久掌握，只是本次运行中值得继续留意的一点。",
+            "本次成功不能证明你永久掌握。",
+        ):
+            for field in ("message", "reason"):
+                with self.subTest(text=text, field=field):
+                    draft = _draft(context)
+                    if field == "message":
+                        draft = replace(draft, message=text)
+                    else:
+                        draft = replace(
+                            draft,
+                            learner_inference=replace(draft.learner_inference, reason=text),
+                        )
+                    validate_decision(draft, config, context, ())
+
+    async def test_disclaimers_do_not_hide_other_permanent_claims(self) -> None:
+        reads = _BookReads()
+        context = await _builder(reads).build(reads.event, "book_agent", reads.operation)
+        config = PackagedRoleConfigProvider.load().get("book_agent")
+        for text in (
+            "你已经永久掌握。",
+            "不代表已经永久掌握，但你已经永久掌握。",
+            "不代表已经永久掌握，但你永远不会失败。",
+            "不代表本次失败，你已经永久掌握。",
+            "不能不说你已经永久掌握。",
+            "并不是说你没有永久掌握。",
+            "你并非没有编程能力，你已经永久掌握。",
+            "You have permanent mastery and will not fail again.",
+            "You will never repeat any mistake.",
+        ):
+            for field in ("message", "reason"):
+                with self.subTest(text=text, field=field):
+                    draft = _draft(context)
+                    if field == "message":
+                        draft = replace(draft, message=text)
+                    else:
+                        draft = replace(
+                            draft,
+                            learner_inference=replace(draft.learner_inference, reason=text),
+                        )
+                    with self.assertRaises(InvalidAgentOutput) as raised:
+                        validate_decision(draft, config, context, ())
+                    self.assertEqual(raised.exception.code, "PERMANENT_LEARNER_JUDGMENT")
+
     async def test_book_build_reads_current_completion_without_run_history(self) -> None:
         reads = _BookReads()
         context = await _builder(reads).build(reads.event, "book_agent", reads.operation)

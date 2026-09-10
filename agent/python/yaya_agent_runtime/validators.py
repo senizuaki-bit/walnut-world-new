@@ -36,6 +36,12 @@ _PERMANENT_JUDGMENT_PATTERNS = (
     re.compile(r"\bnever\s+(?:make|repeat)\b.{0,40}\b(?:mistake|error)\b", re.IGNORECASE),
     re.compile(r"\bwill\s+not\s+fail\s+again\b", re.IGNORECASE),
 )
+_JUDGMENT_CLAUSE_BOUNDARY = re.compile(r"[，。！？；：,.!?;:\n]")
+_JUDGMENT_DISCLAIMER_PREFIX = re.compile(
+    r"(?:这(?:次(?:运行|表现|结果|成功))?|本次(?:运行|表现|结果|成功))?"
+    r"(?:并|也)?(?:不(?:能|足以)?(?:代表|说明|证明|意味着)|不是说|不能说)"
+    r"(?:你|你们|学生|学习者)?(?:已经|已|就)?"
+)
 _ROLE_RESPONSES = {
     "world_agent": frozenset({"message"}),
     "xiaohutao": frozenset({"message"}),
@@ -46,10 +52,14 @@ _ROLE_RESPONSES = {
 
 
 def _contains_permanent_judgment(value: str) -> bool:
-    normalized = value.casefold()
-    return any(phrase.casefold() in normalized for phrase in _PERMANENT_JUDGMENT_PHRASES) or any(
-        pattern.search(value) for pattern in _PERMANENT_JUDGMENT_PATTERNS
-    )
+    for phrase in _PERMANENT_JUDGMENT_PHRASES:
+        for match in re.finditer(re.escape(phrase), value, re.IGNORECASE):
+            # Only exempt an explicit disclaimer directly governing this occurrence.
+            # A negative word elsewhere (or a double negative) must not hide a claim.
+            prefix = _JUDGMENT_CLAUSE_BOUNDARY.split(value[: match.start()])[-1].strip()
+            if _JUDGMENT_DISCLAIMER_PREFIX.fullmatch(prefix) is None:
+                return True
+    return any(pattern.search(value) for pattern in _PERMANENT_JUDGMENT_PATTERNS)
 
 
 def validate_decision(
