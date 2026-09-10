@@ -14,9 +14,12 @@ func _initialize() -> void:
 	var capture_pid := int(capture.get("_process").pid)
 	var frames := 0
 	var nonzero := 0
+	var started_at := Time.get_ticks_msec()
+	var first_packet_ms := -1
 	var deadline := Time.get_ticks_msec() + 4000
 	while Time.get_ticks_msec() < deadline:
 		for packet in capture.read_packets():
+			if first_packet_ms < 0: first_packet_ms = Time.get_ticks_msec() - started_at
 			if packet.size() != 640:
 				capture.stop()
 				quit(1)
@@ -32,7 +35,7 @@ func _initialize() -> void:
 		push_error("VOICE_CAPTURE_LIVE_FAILED frames=%d cleanup=%s error=%s" % [frames, not OS.is_process_running(capture_pid), capture_error])
 		quit(1)
 		return
-	print("VOICE_CAPTURE_LIVE_PASS frames=%d nonzero_samples=%d mono_s16le_16000=true child_released=true" % [frames, nonzero])
+	print("VOICE_CAPTURE_LIVE_PASS frames=%d first_packet_ms=%d nonzero_samples=%d mono_s16le_16000=true child_released=true" % [frames, first_packet_ms, nonzero])
 	# Exercise the production ready/capture/send/close lifecycle as well.
 	# Only the network transport is replaced; the physical microphone is real.
 	var socket = ProtocolTest.Socket.new()
@@ -40,11 +43,17 @@ func _initialize() -> void:
 	root.add_child(voice)
 	voice.socket_factory = func(): return socket
 	voice.configure("http://127.0.0.1:8790", "test-token", "test-session")
+	var states: Array[String] = []
+	var readiness := {"first_packet_sent": false}
+	voice.state_changed.connect(func(value: String):
+		states.append(value)
+		if value == "READY": readiness.first_packet_sent = not socket.audio.is_empty()
+	)
 	voice.start({})
 	deadline = Time.get_ticks_msec() + 6000
 	while socket.audio.size() < 50 and Time.get_ticks_msec() < deadline:
 		await create_timer(0.01).timeout
-	if socket.audio.size() < 50 or voice.microphone.playing or voice.get("_capture_pipe") == null:
+	if socket.audio.size() < 50 or voice.microphone.playing or voice.get("_capture_pipe") == null or states != ["CONNECTING", "PREPARING", "READY"] or not readiness.first_packet_sent:
 		voice.close()
 		push_error("VOICE_CAPTURE_CLIENT_LIFECYCLE_FAILED")
 		quit(1)

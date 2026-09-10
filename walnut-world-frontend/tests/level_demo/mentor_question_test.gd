@@ -3,6 +3,18 @@ const LEVEL := preload("res://scenes/level_demo/crop_adaptive_watering_demo.tscn
 const Pcm := preload("res://scripts/client/voice_pcm.gd")
 var failures: Array[String] = []
 
+class DelayedCapture:
+	extends RefCounted
+	var error := ""
+	var stopped := false
+	var packets: Array[PackedByteArray] = []
+	func start() -> bool: return true
+	func read_packets() -> Array[PackedByteArray]:
+		var result := packets.duplicate()
+		packets.clear()
+		return result
+	func stop() -> void: stopped = true
+
 class Socket:
 	extends RefCounted
 	var state := WebSocketPeer.STATE_CLOSED
@@ -163,6 +175,7 @@ func _initialize() -> void:
 	check(question.interrupt_button.get_global_rect().position.y >= question.reply_scroll.get_global_rect().end.y, "打断按钮固定在文字滚动区之外")
 	question.ask_button.pressed.emit()
 	# Preserve resampling phase across uneven capture blocks (48k -> 16k).
+	await check_microphone_startup(question)
 	var codec := Pcm.new()
 	var samples := PackedVector2Array()
 	samples.resize(9601)
@@ -187,3 +200,31 @@ func _initialize() -> void:
 
 func check(condition: bool, message: String) -> void:
 	if not condition: failures.append(message)
+
+func check_microphone_startup(question: MentorQuestion) -> void:
+	question.voice.capture_enabled = true
+	for scenario in ["ready", "cancel", "timeout"]:
+		var socket := Socket.new()
+		var capture := DelayedCapture.new()
+		question.voice.socket_factory = func(): return socket
+		question.ask_button.pressed.emit()
+		# Replace only hardware I/O; exercise the production startup state machine.
+		question.voice.set("_capture_pipe", capture)
+		for _frame in range(3): await process_frame
+		check(question.voice.state == "PREPARING" and question.state == MentorQuestion.State.CONNECTING, "服务器 ready 后须等待麦克风首包，不能提前聆听")
+		check(socket.audio.is_empty() and question.reply_text.get_parsed_text().contains("正在准备麦克风") and question.interrupt_button.disabled, "无采集数据时显示准备状态，不伪造录音")
+		if scenario == "ready":
+			var first := PackedByteArray()
+			first.resize(640) # Silence is valid input; readiness must not require loud speech.
+			capture.packets.append(first)
+			await process_frame
+			check(question.voice.state == "READY" and socket.audio.size() == 1 and socket.audio[0] == first, "首个完整录音包必须上传并进入就绪，静音也能就绪")
+			check(question.status_label.text.contains("可以开始说话"), "采集就绪后再明确提示开口")
+			question.ask_button.pressed.emit()
+		elif scenario == "cancel":
+			question.ask_button.pressed.emit()
+		else:
+			question.voice.set("_capture_started_at", Time.get_ticks_msec() - 5001)
+			await process_frame
+			check(question.reply_text.get_parsed_text().contains("没有收到麦克风数据"), "采集无数据超时后提供可见错误")
+		check(question.voice.state == "IDLE" and capture.stopped and question.voice.get("_capture_pipe") == null and socket.state == WebSocketPeer.STATE_CLOSED, "准备中取消、超时或正常结束都必须释放设备和连接")
