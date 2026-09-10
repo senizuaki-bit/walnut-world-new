@@ -330,21 +330,26 @@ class DockerCppSandboxTests(unittest.IsolatedAsyncioTestCase):
                     sandbox._active,  # pyright: ignore[reportPrivateUsage]
                     {},
                 )
-                leftovers = subprocess.run(
-                    [
-                        "docker",
-                        "ps",
-                        "--all",
-                        "--quiet",
-                        "--filter",
-                        "name=yaya-sbx-",
-                    ],
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                    timeout=30,
-                )
-                self.assertEqual(leftovers.stdout.strip(), "")
+                # Other worktrees or the running product may legitimately own
+                # sandboxes on this Docker daemon. Check only our two runs.
+                for run_id in ("run_docker_isolation_0001", "run_docker_timeout_0001"):
+                    leftovers = subprocess.run(
+                        [
+                            "docker",
+                            "ps",
+                            "--all",
+                            "--quiet",
+                            "--filter",
+                            "label=local.yaya.sandbox=true",
+                            "--filter",
+                            f"label=local.yaya.run_id={run_id}",
+                        ],
+                        check=True,
+                        capture_output=True,
+                        text=True,
+                        timeout=30,
+                    )
+                    self.assertEqual(leftovers.stdout.strip(), "", run_id)
             finally:
                 listener.close()
                 receiver.join(timeout=3)

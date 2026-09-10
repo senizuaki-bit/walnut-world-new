@@ -20,6 +20,7 @@ sys.path.insert(0, str(TEST_ROOT))
 import test_agent_backend_role_live_e2e as role_live  # noqa: E402
 from agent_runtime_fixtures import make_operation, make_reply  # noqa: E402
 from postgres_test_support import (  # noqa: E402
+    cleanup_sandbox_test_containers,
     postgres_test_server,
     reset_sandbox_recovery_results,
 )
@@ -314,10 +315,13 @@ class AgentBackendOutcomeAuthorityTests(unittest.IsolatedAsyncioTestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        cls._server_context.__exit__(None, None, None)
-        for target in cls._artifact_targets:
-            target.chmod(stat.S_IWRITE | stat.S_IREAD)
-        cls._artifact_context.__exit__(None, None, None)
+        try:
+            cleanup_sandbox_test_containers(owner_root=cls.artifact_root)
+        finally:
+            cls._server_context.__exit__(None, None, None)
+            for target in cls._artifact_targets:
+                target.chmod(stat.S_IWRITE | stat.S_IREAD)
+            cls._artifact_context.__exit__(None, None, None)
 
     async def asyncSetUp(self) -> None:
         await self._reset_database()

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import re
 import shutil
@@ -18,6 +19,42 @@ from pathlib import Path
 class PostgresTestServer:
     dsn: str
     container_name: str
+
+
+def cleanup_sandbox_test_containers(*, owner_root: Path) -> None:
+    """Remove only sandbox containers mounted from this disposable fixture.
+
+    Failed runs can leave a container even when no result receipt exists. Docker
+    names use deterministic run IDs, so resetting DB/receipts alone can collide
+    with the previous request hash. Labels and string prefixes are not ownership.
+    """
+    if not owner_root.is_absolute() or not owner_root.is_dir():
+        raise AssertionError("sandbox cleanup owner must be an existing absolute directory")
+    resolved_owner = owner_root.resolve(strict=True)
+    candidates = _docker("ps", "-aq", "--filter", "label=local.yaya.sandbox=true")
+    for container_id in candidates.stdout.split():
+        if re.fullmatch(r"[0-9a-f]{12,64}", container_id) is None:
+            raise AssertionError("Docker returned an invalid container identity")
+        inspected = _docker("inspect", container_id, check=False)
+        if inspected.returncode != 0:
+            if "no such" in inspected.stderr.lower():
+                continue
+            raise AssertionError("could not verify sandbox test container ownership")
+        container = json.loads(inspected.stdout)[0]
+        if container.get("Config", {}).get("Labels", {}).get("local.yaya.sandbox") != "true":
+            continue
+        mounts = [
+            mount
+            for mount in container.get("Mounts", [])
+            if mount.get("Type") == "bind" and mount.get("Destination") == "/opt/yaya/skill"
+        ]
+        if len(mounts) != 1:
+            continue
+        source = Path(mounts[0]["Source"])
+        if not source.is_absolute() or not source.resolve().is_relative_to(resolved_owner):
+            continue
+        # Remove the inspected immutable ID, never a name that could be reused.
+        _docker("rm", "--force", container_id)
 
 
 def reset_sandbox_recovery_results(result_root: Path, *, owner_root: Path) -> None:
@@ -39,6 +76,7 @@ def reset_sandbox_recovery_results(result_root: Path, *, owner_root: Path) -> No
         raise AssertionError("sandbox test result root escaped its owner")
     if result_root.is_symlink() or os.path.isjunction(result_root):
         raise AssertionError("sandbox test result root must not be a symbolic link")
+    cleanup_sandbox_test_containers(owner_root=resolved_owner_root)
     if result_root.exists():
         descendants = list(result_root.rglob("*"))
         if any(
@@ -174,6 +212,7 @@ def postgres_test_server(*, fixed_host_port: bool = False) -> Iterator[PostgresT
 
 __all__ = [
     "PostgresTestServer",
+    "cleanup_sandbox_test_containers",
     "postgres_test_server",
     "reset_sandbox_recovery_results",
 ]

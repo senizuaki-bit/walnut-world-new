@@ -23,6 +23,8 @@
 
 ## 未计入通过的旧套件
 
+后续排查更新：该超时已定位为测试 Docker 沙箱容器遗留，原始失败单例在定向清理后恢复通过。容器清理、旧断言修正及完整复验结果见 [Agent 超时排查](agent-timeout-diagnosis-2026-09-10.md)。以下保留本次首次发布时的验证记录。
+
 Agent全量非live runner的测试计数已与新增用例同步：发现641项、排除原有2个显式live项，目标639项。但本机运行旧的 `test_agent_backend_book_outcome_matrix` 时，主关命令在VALIDATING阶段45秒未终态；全套运行已中止，并单独复现该用例失败。
 
 为核对是否由本次修改引入，另从未修改的 `0b74899` 提取Agent基线，在独立测试数据库重跑 `test_book_provider_permanent_mastery_learner_reason_is_never_published`，同样因命令VALIDATING未结束而失败；基线还记录AGENT_TURN_CLAIM_FAILED。该旧套件的本机根因未定位，不能声称全量639项通过。以上433项后端测试、59项Agent定向测试和真实单网关练习验证均独立完成。
