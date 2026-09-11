@@ -156,6 +156,8 @@ var _completion_book_message := ""
 var _phase: int = Phase.INTRO
 var _manual_cursor: int = 0
 var _selected_manual_plot: int = -1
+var _manual_feedback_playing := false
+var _manual_feedback_revision := 0
 var _build_result: Dictionary = {}
 var _same_failure_key: String = ""
 var _same_failure_count: int = 0
@@ -269,6 +271,7 @@ func _ready() -> void:
 
 
 func restart_level() -> void:
+	_cancel_manual_feedback()
 	sfx.stop_all()
 	mentor_question.reset()
 	agent_interaction_presenter.clear_queue()
@@ -438,6 +441,7 @@ func _play_old_tool_demo() -> void:
 
 
 func _begin_manual_compare() -> void:
+	_cancel_manual_feedback()
 	_set_phase(Phase.MANUAL_COMPARE)
 	for child in plot_grid.get_children():
 		var card := child as CropPlotCard
@@ -454,7 +458,7 @@ func _begin_manual_compare() -> void:
 
 
 func _on_plot_pressed(index: int) -> void:
-	if _phase != Phase.MANUAL_COMPARE:
+	if _phase != Phase.MANUAL_COMPARE or _manual_feedback_playing or _manual_cursor >= MANUAL_ORDER.size():
 		return
 	var expected_index: int = MANUAL_ORDER[_manual_cursor]
 	if index != expected_index:
@@ -468,7 +472,7 @@ func _on_plot_pressed(index: int) -> void:
 
 
 func _choose_manual_water(units: int) -> void:
-	if _phase != Phase.MANUAL_COMPARE or _selected_manual_plot < 0:
+	if _phase != Phase.MANUAL_COMPARE or _manual_feedback_playing or _selected_manual_plot < 0:
 		return
 	var index := _selected_manual_plot
 	if units != EXPECTED_UNITS[index]:
@@ -476,11 +480,18 @@ func _choose_manual_water(units: int) -> void:
 		evidence_body.text = "再看看：当前湿度 %d，目标湿度 %d，缺口是 %+d。\n[b]缺口 ≥ 30 浇 2 份；0 < 缺口 < 30 浇 1 份；缺口 ≤ 0 不浇水。[/b]" % [MOISTURE[index], TARGET[index], TARGET[index] - MOISTURE[index]]
 		return
 	var selected_card := plot_grid.get_child(index) as CropPlotCard
-	selected_card.set_attention(false)
-	selected_card.set_result(units, true)
-	_manual_cursor += 1
 	_selected_manual_plot = -1
 	water_choices.visible = false
+	_set_manual_attention(-1)
+	_manual_feedback_playing = true
+	var feedback_revision := _manual_feedback_revision
+	var completed := await selected_card.play_manual_water_feedback(units, timing_scale)
+	if feedback_revision != _manual_feedback_revision:
+		return
+	_manual_feedback_playing = false
+	if not completed or _phase != Phase.MANUAL_COMPARE:
+		return
+	_manual_cursor += 1
 	if _manual_cursor < MANUAL_ORDER.size():
 		_set_manual_attention(MANUAL_ORDER[_manual_cursor])
 		var next_index: int = MANUAL_ORDER[_manual_cursor]
@@ -490,6 +501,13 @@ func _choose_manual_water(units: int) -> void:
 	evidence_title.text = "升级委托已经触发"
 	evidence_body.text = "[b]同下标读取当前值与目标值 → 计算 gap → 选择 0 / 1 / 2 份水[/b]\n新的 4★ 技能节点已经可以学习。"
 	_show_skill_tree(false)
+
+
+func _cancel_manual_feedback() -> void:
+	_manual_feedback_revision += 1
+	_manual_feedback_playing = false
+	for card: CropPlotCard in plot_grid.get_children():
+		card.cancel_manual_water_feedback()
 
 
 func _set_manual_attention(plot_index: int) -> void:
@@ -1515,6 +1533,7 @@ func _set_phase(value: Phase) -> void:
 	var previous_phase := _phase
 	_phase = value
 	if value != Phase.MANUAL_COMPARE:
+		_cancel_manual_feedback()
 		_set_manual_attention(-1)
 		water_choices.visible = false
 	if value != previous_phase:

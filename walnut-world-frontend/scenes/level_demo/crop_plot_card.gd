@@ -31,6 +31,8 @@ var _attention_active := false
 var _attention_selected := false
 var _error_active := false
 var _scanning := false
+var _feedback_token := 0
+var _manual_feedback_running := false
 @onready var soil_art: ArtMotionTexture = %Soil
 @onready var soil_glow: ArtMotionTexture = %SoilGlow
 
@@ -151,8 +153,58 @@ func show_candidate_outcome(hydration: int, status: String) -> void:
 
 
 func reset_candidate_display() -> void:
+	cancel_manual_water_feedback()
 	refresh_data()
 	set_result(-1, false)
+
+
+func play_manual_water_feedback(units: int, timing_scale: float = 1.0) -> bool:
+	"""Play the receive-water clips, then commit this card's result.
+
+	The returned await is cancelled by ``cancel_manual_water_feedback`` or by
+	a newer playback request. A zero-unit choice is an immediate skip and never
+	starts (or waits for) a fake watering animation.
+	"""
+	cancel_manual_water_feedback()
+	if units <= 0:
+		set_result(0, true)
+		return true
+	var token := _feedback_token
+	_manual_feedback_running = true
+	var crop_id: String = {"胡萝卜": "carrot", "番茄": "tomato", "土豆": "potato", "玉米": "corn"}.get(crop_name, "carrot")
+	var soil_wait := {"done": false}
+	var crop_wait := {"done": false}
+	_wait_motion_feedback(soil_art, "soil-receive-water", timing_scale, soil_wait)
+	_wait_motion_feedback(crop_art as ArtMotionTexture, "crop-%s-receive-water" % crop_id, timing_scale, crop_wait)
+	while token == _feedback_token and not (bool(soil_wait.done) and bool(crop_wait.done)):
+		await get_tree().process_frame
+	if token != _feedback_token:
+		return false
+	# Missing atlases are reported by the bounded ArtMotionTexture waiter. In
+	# that case commit the result immediately rather than blocking gameplay.
+	set_result(units, true)
+	await get_tree().process_frame
+	if token != _feedback_token:
+		return false
+	_manual_feedback_running = false
+	return true
+
+
+func _wait_motion_feedback(motion: ArtMotionTexture, clip_id: String, timing_scale: float, result: Dictionary) -> void:
+	await motion.play_clip_and_wait(clip_id, timing_scale)
+	result.done = true
+
+
+func cancel_manual_water_feedback() -> void:
+	if not _manual_feedback_running:
+		return
+	_feedback_token += 1
+	_manual_feedback_running = false
+	if not is_node_ready():
+		return
+	# Re-evaluate from the authoritative values so a cancelled waiter cannot
+	# restore a stale target-met frame from an earlier watering attempt.
+	_update_art(target_moisture - current_moisture, current_moisture > target_moisture + 8)
 
 
 func play_scan(duration: float = 0.34) -> void:

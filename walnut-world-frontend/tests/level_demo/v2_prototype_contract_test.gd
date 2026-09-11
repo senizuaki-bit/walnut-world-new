@@ -43,8 +43,8 @@ func _initialize() -> void:
 	level.call("_hide_lesson_overlays")
 	var first := level.plot_grid.get_child(0) as CropPlotCard
 	first.set_attention(true)
-	if first.attention_frame.visible or not first.soil_glow.visible or first.soil_glow.motion_id != "soil-severe-dry-selected-glow":
-		failures.append("Selection must follow the actual soil alpha, not a rectangular overlay")
+	if not first.attention_frame.visible or not first.attention_hint.visible or not first.soil_glow.visible or first.soil_glow.motion_id != "soil-severe-dry-selected-glow":
+		failures.append("Selection must follow the actual soil alpha with a visible silhouette and click cue")
 	first.show_candidate_action(250, 250, false)
 	if not is_equal_approx(first.moisture_bar.value, 2.5) or first.current_moisture != 20:
 		failures.append("Candidate hydration uses the existing 0–10000 scale and must not modify world values")

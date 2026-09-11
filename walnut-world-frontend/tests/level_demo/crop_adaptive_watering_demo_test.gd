@@ -110,7 +110,7 @@ func _initialize() -> void:
 				lowest_card_edge = maxf(lowest_card_edge, (card as Control).get_global_rect().end.y)
 			if lowest_card_edge > evidence_panel.get_global_rect().position.y:
 				failures.append("提示框必须放在农作物网格下方。")
-		level.call("_choose_manual_water", CropAdaptiveWateringDemo.EXPECTED_UNITS[expected_index])
+		await level.call("_choose_manual_water", CropAdaptiveWateringDemo.EXPECTED_UNITS[expected_index])
 	if not (level.get_node("SkillTreeOverlay") as Control).visible or int(level.get("_phase")) != CropAdaptiveWateringDemo.Phase.SKILL_TREE:
 		failures.append("手动比较完成后必须进入4★技能树页面。")
 	for card: CropPlotCard in grid.get_children():
