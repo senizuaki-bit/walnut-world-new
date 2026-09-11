@@ -2,6 +2,12 @@
 
 更新：2026-09-11。分支 `all`；接入基线为 `origin/main` 的 `13106a7`，快进合入，无冲突。本次只本地提交，不推送。
 
+## 远端 main 再次复核（2026-09-11）
+
+重新 fetch 后，远端新增 `9ce5298`，已通过本地合并提交 `cf822f4` 完整合入 `all`，无冲突。新增内容仅为 Agent 测试沙箱清理、Book 旧预期修正、runner 计数与诊断记录；`agent/python`、`agent/contracts`、`walnut-world-backend/src` 没有变化，与远端当前内容一致，不需要新增前端接口适配。
+
+本机复测：runner 合同 5 项、真实 Docker 沙箱清理 1 项均通过；Godot → 真实主路由的确定性 HTTP 协议测试通过。未重跑完整 640 项 Agent 套件。真实豆包配音仍待本机凭据配置，这次远端更新没有修复或替代该配置。仍只本地提交，不推送。
+
 ## 接入结果
 
 正式 AppRoot 配置完成后启用练习链：进入关卡 → start/status → 主关 Build/Activation/Run → 已验证的 SUCCEEDED Run → prepare → 独立 C++ 编辑器 → answer → summary 文字与完整 PCM 同时展示 → 完成归档。
