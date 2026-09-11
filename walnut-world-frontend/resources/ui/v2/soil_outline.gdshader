@@ -1,12 +1,13 @@
 shader_type canvas_item;
 uniform vec4 outline_color : source_color = vec4(1.0, 0.72, 0.17, 1.0);
 uniform float thickness = 7.0;
+uniform bool screen_space = false;
 varying vec4 tint;
 void vertex() {
 	tint = COLOR;
 }
 void fragment() {
-	vec2 d = TEXTURE_PIXEL_SIZE * thickness;
+	vec2 d = (screen_space ? fwidth(UV) : TEXTURE_PIXEL_SIZE) * thickness;
 	float center = texture(TEXTURE, UV).a;
 	float outer = 0.0;
 	float inner = 1.0;

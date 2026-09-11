@@ -448,8 +448,8 @@ func _begin_manual_compare() -> void:
 	_manual_cursor = 0
 	water_choices.visible = false
 	_set_manual_attention(MANUAL_ORDER[0])
-	evidence_title.text = "先读当前湿度和目标湿度，再决定水量"
-	evidence_body.text = "[b]缺口 ≥ 30：浇 2 份　0 < 缺口 < 30：浇 1 份。缺口 ≤ 0：不浇水。[/b]\n请先点击高亮的 1 号番茄。"
+	evidence_title.text = "手动比较 1/3 · 点击 01 号番茄"
+	evidence_body.text = "点击带「↓ 点击」标记和金色边框的土地。\n[b]缺口 ≥ 30：浇 2 份；0 < 缺口 < 30：浇 1 份；缺口 ≤ 0：不浇水。[/b]"
 	primary_button.disabled = true
 
 
@@ -461,6 +461,7 @@ func _on_plot_pressed(index: int) -> void:
 		(plot_grid.get_child(expected_index) as CropPlotCard).pulse_attention()
 		return
 	_selected_manual_plot = index
+	(plot_grid.get_child(index) as CropPlotCard).set_attention_selected(true)
 	water_choices.visible = true
 	evidence_title.text = "%d号%s：当前湿度 %d，目标湿度 %d" % [index, CROPS[index], MOISTURE[index], TARGET[index]]
 	evidence_body.text = "湿度缺口 = 目标湿度 - 当前湿度 = [b]%+d[/b]。\n[b]缺口 ≥ 30 浇 2 份；0 < 缺口 < 30 浇 1 份；缺口 ≤ 0 不浇水。[/b]" % (TARGET[index] - MOISTURE[index])
@@ -482,7 +483,9 @@ func _choose_manual_water(units: int) -> void:
 	water_choices.visible = false
 	if _manual_cursor < MANUAL_ORDER.size():
 		_set_manual_attention(MANUAL_ORDER[_manual_cursor])
-		evidence_body.text = "判断正确。继续检查下一块高亮土地。"
+		var next_index: int = MANUAL_ORDER[_manual_cursor]
+		evidence_title.text = "手动比较 %d/3 · 点击 %02d 号%s" % [_manual_cursor + 1, next_index, CROPS[next_index]]
+		evidence_body.text = "判断正确！点击带「↓ 点击」标记的下一块土地，继续比较湿度。"
 		return
 	evidence_title.text = "升级委托已经触发"
 	evidence_body.text = "[b]同下标读取当前值与目标值 → 计算 gap → 选择 0 / 1 / 2 份水[/b]\n新的 4★ 技能节点已经可以学习。"

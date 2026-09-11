@@ -90,7 +90,15 @@ func _initialize() -> void:
 			var attention := grid.get_child(card_index).get_node("%SoilGlow") as TextureRect
 			if attention.visible != (card_index == expected_index):
 				failures.append("手动验证阶段必须持续高亮当前土地%d。" % expected_index)
-		level.call("_on_plot_pressed", expected_index)
+			var hint := grid.get_child(card_index).get_node("%AttentionHint") as PanelContainer
+			if hint.visible != (card_index == expected_index) or hint.mouse_filter != Control.MOUSE_FILTER_IGNORE:
+				failures.append("点击标记必须仅提示目标，且不能挡住点击区域。")
+		var target_card := grid.get_child(expected_index) as CropPlotCard
+		if not target_card.attention_frame.visible or not target_card.hint_label.text.contains("点击"):
+			failures.append("当前地块必须同时具备持续描边和明确的点击文字。")
+		target_card.hit_button.pressed.emit()
+		if not target_card.hint_label.text.begins_with("✓"):
+			failures.append("点击地块后必须立即显示选中反馈。")
 		await process_frame
 		if expected_index == 1:
 			if not evidence_body.text.contains("当前湿度") or not evidence_body.text.contains("目标湿度"):

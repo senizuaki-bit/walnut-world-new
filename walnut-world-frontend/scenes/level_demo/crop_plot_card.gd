@@ -20,12 +20,15 @@ signal plot_pressed(plot_index: int)
 @onready var scan_glow: TextureRect = %ScanGlow
 @onready var attention_frame: TextureRect = %AttentionFrame
 @onready var hit_button: Button = %HitButton
+@onready var attention_hint: PanelContainer = %AttentionHint
+@onready var hint_label: Label = %HintLabel
 
 var _card_tween: Tween
 var _scan_tween: Tween
 var _attention_tween: Tween
 var _soil_state := "severe-dry"
 var _attention_active := false
+var _attention_selected := false
 var _error_active := false
 var _scanning := false
 @onready var soil_art: ArtMotionTexture = %Soil
@@ -81,6 +84,12 @@ func _refresh_glow() -> void:
 	soil_glow.visible = _error_active or _attention_active or _scanning or hit_button.has_focus() or hit_button.is_hovered()
 	if soil_glow.visible:
 		soil_glow.play_clip("soil-%s-%s-glow" % [_soil_state, mode])
+	# The atlas glow is decorative. Keep a crisp silhouette and a text cue
+	# independent of atlas playback, brightness, and reduced-motion settings.
+	attention_frame.visible = _attention_active or hit_button.has_focus() or hit_button.is_hovered()
+	attention_frame.modulate.a = 1.0 if _attention_active else 0.5
+	attention_hint.visible = _attention_active
+	hint_label.text = ("✓ %02d %s" if _attention_selected else "↓ 点击 %02d %s") % [plot_index, crop_name]
 
 
 func show_gap(show_value: bool) -> void:
@@ -158,17 +167,26 @@ func pulse_attention() -> void:
 	set_attention(true)
 	if _attention_tween != null and _attention_tween.is_valid():
 		_attention_tween.kill()
-	soil_glow.modulate.a = 1.0
+	attention_frame.modulate.a = 1.0
 	if bool(Engine.get_meta("art_reduced_motion", false)):
 		return
 	_attention_tween = create_tween()
-	_attention_tween.tween_property(soil_glow, "modulate:a", 0.6, 0.16)
-	_attention_tween.tween_property(soil_glow, "modulate:a", 1.0, 0.24)
+	_attention_tween.tween_property(attention_frame, "modulate:a", 0.7, 0.16)
+	_attention_tween.tween_property(attention_frame, "modulate:a", 1.0, 0.24)
 
 
 func set_attention(active: bool) -> void:
 	_attention_active = active
-	attention_frame.visible = false
+	if not active:
+		_attention_selected = false
+		if _attention_tween != null and _attention_tween.is_valid():
+			_attention_tween.kill()
+	hit_button.tooltip_text = "点击 %02d 号%s，比较湿度并选择水量" % [plot_index, crop_name] if active else ""
+	_refresh_glow()
+
+
+func set_attention_selected(selected: bool) -> void:
+	_attention_selected = selected
 	_refresh_glow()
 
 
