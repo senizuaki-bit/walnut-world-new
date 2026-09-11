@@ -229,9 +229,9 @@ func _initialize() -> void:
 		projection.get("content") != store.content
 		or projection.get("snapshot") != store.world_snapshot
 		or str(projection.get("source", "")) != source
-		or (level.get_node("Hud/TaskCard/Margin/Content/TaskTitle") as Label).text != "Water every thirsty plot"
+		or (level.get_node("Hud/TaskCard/Margin/Content/TaskTitle") as Label).text != "作物适配浇水器"
 	):
-		failures.append("CropAdaptiveWateringDemo 必须精确投影 Content、Draft 与 Snapshot。")
+		failures.append("关卡必须保留原始 Content、Draft 与 Snapshot，并将旧版英文任务名显示为中文。")
 	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.CODE)
 	run_button.pressed.emit()
 	for _frame in range(10):

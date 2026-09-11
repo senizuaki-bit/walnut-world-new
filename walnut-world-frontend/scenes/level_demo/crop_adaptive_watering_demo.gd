@@ -1058,7 +1058,9 @@ func load_authoritative_projection(content: Dictionary, snapshot: Dictionary) ->
 		return {"ok": false, "message": "权威 Snapshot 缺少 world_id/revision/state_hash。"}
 	_authoritative_content = content.duplicate(true)
 	_authoritative_snapshot = snapshot.duplicate(true)
-	_agent_task_title = str(task.get("name", "")).strip_edges()
+	var source_title := str(task.get("name", "")).strip_edges()
+	# Localize the legacy task name only for display; retain the original Content.
+	_agent_task_title = "作物适配浇水器" if source_title == "Water every thirsty plot" else source_title
 	task_title.text = _agent_task_title
 	_refresh_authority_strip()
 	return {"ok": true}
