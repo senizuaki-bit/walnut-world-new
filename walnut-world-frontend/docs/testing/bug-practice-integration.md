@@ -10,6 +10,14 @@
 
 ## 接入结果
 
+### 代码检查连续失败修复（2026-09-11）
+
+验收时出现构建成功后激活连续 409、之后保存草稿也连续 409。两个客户端恢复缺陷叠加：激活冲突的 Bootstrap 刷新错误地传入带 actor/content 的业务上下文，被仅接受四字段 WireAttemptContext 的 Gateway 拦截；草稿冲突则将旧 Draft 再次记为冲突，始终没有读取新的 CAS 基线。
+
+已修复：只对明确的激活版本冲突使用 WireAttemptContext 刷新，核对 actor/content/scope 后以递增版本和新幂等键重试一次；草稿冲突读取当前 Draft，保留刷新期间的本地编辑，提示再次明确检查后保存，不自动覆盖服务端并发编辑。界面将该情况标为“草稿版本已同步”，不再误报代码检查失败。
+
+验证：新增 `version_conflict_recovery_test.gd` 覆盖生产 Wire 参数校验、激活重试及新幂等键、跨 scope/认证失败不重试、草稿冲突恢复、读取期间编辑保留、读取失败/身份不匹配不覆盖基线；离线完整套件 **89/89 PASS**。对真实网关执行只读版本刷新，成功读取 registry revision 16。本轮没有在学生正在使用的会话中运行会改变世界或草稿的端到端测试；用户确认不保留当前编辑后，仅重开学生端，后端练习内存保持。
+
 正式 AppRoot 配置完成后启用练习链：进入关卡 → start/status → 主关 Build/Activation/Run → 已验证的 SUCCEEDED Run → prepare → 独立 C++ 编辑器 → answer → summary 文字与完整 PCM 同时展示 → 完成归档。
 
 - 五个操作统一连接主 Gateway，携带游戏 token 与请求追踪头；按最终 HTTP 200 处理，不轮询 Command，也不激活练习 build_id。

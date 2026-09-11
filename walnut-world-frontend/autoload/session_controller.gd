@@ -611,7 +611,27 @@ func request_save() -> Dictionary:
 	if not result.get("ok", false):
 		if int(result.get("status", 0)) == 409:
 			store.clear_pending_operation("draft_save")
-			store.record_draft_conflict(current_draft)
+			# A rejected CAS did not save the editor. Recover only the new base;
+			# keep local edits and require another explicit save before replacing it.
+			var refreshed: Dictionary = await product_gateway.get_draft(
+				_new_request_context(), str(current_draft.session_id), str(current_draft.draft_id),
+			)
+			if refreshed.get("ok", false):
+				var latest: Dictionary = refreshed.value
+				if (
+					latest.get("session_id") == current_draft.session_id
+					and latest.get("draft_id") == current_draft.draft_id
+					and latest.get("skill_id") == current_draft.skill_id
+					and latest.get("content_ref") == current_draft.content_ref
+					and int(latest.get("revision", -1)) > int(current_draft.revision)
+				):
+					store.record_draft_conflict(latest)
+					result = _local_failure("DRAFT_VERSION_CONFLICT", "The latest Draft base was recovered; local edits are preserved. Save again to submit them.")
+				else:
+					store.record_draft_conflict(current_draft)
+			else:
+				store.record_draft_conflict(current_draft)
+			store.report_error(result.get("error", {}))
 		elif store.local_source != submitted_source:
 			store.report_error(result.get("error", {}))
 		else:
@@ -966,7 +986,7 @@ func request_activation() -> void:
 		request["reason"] = activation_context.reason
 	store.set_flow(WalnutClientStore.FlowState.ACTIVATING)
 	var submission: Dictionary = await _submit_activation(request)
-	if not submission.get("ok", false):
+	if not submission.get("ok", false) and int(submission.get("status", 0)) == 409 and str(submission.get("error", {}).get("code", "")) == "CONTENT_VERSION_MISMATCH":
 		# The Registry advances on every activation, including this learner's own
 		# earlier ones, while activation_context only refreshes on success. A
 		# refused activation therefore left the cached revision stale for good:
@@ -1169,7 +1189,7 @@ func _find_existing_build_feedback(
 func _resynced_registry_revision(attempted_revision: int) -> int:
 	if game_gateway == null or not game_gateway.has_method("get_student_bootstrap"):
 		return -1
-	var refreshed: Dictionary = await game_gateway.get_student_bootstrap(_new_request_context())
+	var refreshed: Dictionary = await game_gateway.get_student_bootstrap(RequestContextFactory.new_wire_attempt())
 	if not refreshed.get("ok", false):
 		return -1
 	var value: Variant = refreshed.get("value")
@@ -1178,11 +1198,20 @@ func _resynced_registry_revision(attempted_revision: int) -> int:
 	var activation: Variant = value.get("activation")
 	if not activation is Dictionary:
 		return -1
+	if (
+		value.get("actor") != authority_context.get("actor")
+		or value.get("content") != authority_context.get("content_ref")
+		or activation.get("scope") != {
+			"world_id": activation_context.get("world_id"),
+			"agent_profile_id": activation_context.get("agent_profile_id"),
+		}
+	):
+		return -1
 	var revision: Variant = activation.get("registry_revision")
 	if typeof(revision) != TYPE_INT and typeof(revision) != TYPE_FLOAT:
 		return -1
 	var corrected := int(revision)
-	return corrected if corrected != attempted_revision and corrected >= 0 else -1
+	return corrected if corrected > attempted_revision else -1
 
 func request_hint(message: String = "Please give me the next hint.") -> void:
 	if not _student_action_readiness("Hint").get("ok", false):

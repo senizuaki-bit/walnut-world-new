@@ -1392,6 +1392,9 @@ func fail_agent_submission(stage: String, message: String, error: Dictionary = {
 	if objective_committed:
 		evidence_title.text = "运行已成功，反馈暂未完成"
 		evidence_body.text = "你的程序已完成当前关卡目标，结果已保存。\n后续反馈暂未完成，无需因此修改答案或重复运行。"
+	elif code == "DRAFT_VERSION_CONFLICT":
+		evidence_title.text = "草稿版本已同步"
+		evidence_body.text = "服务端的草稿有更新，你当前编辑的代码已保留。\n点击「我自己修改」确认代码，再次检查即可提交当前版本。"
 	elif code == "RESOURCE_RECONCILIATION_TIMEOUT":
 		evidence_title.text = "暂时无法确认结果"
 		evidence_body.text = checked + "等待结果超时，服务可能仍在处理。\n代码已保留，请稍后查看结果，不必因此反复修改答案。"
