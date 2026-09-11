@@ -7,7 +7,7 @@
 
 ## 提交项
 
-开发接入：[完整前端接口文档](walnut-world-backend/docs/frontend-api/README.md) · [Bug军团与书书接口](walnut-world-backend/docs/frontend-api/Bug军团与书书接口.md) · [Bug军团实现逻辑](walnut-world-backend/docs/architecture/bug-practice.md)。`all` 已接入“主关正确→每局一次Bug变式挑战→书书总结及语音”；接入范围、真实验证和本机配音凭据待办见[前端联调记录](walnut-world-frontend/docs/testing/bug-practice-integration.md)。
+开发接入：[完整前端接口文档](walnut-world-backend/docs/frontend-api/README.md) · [Bug军团与书书接口](walnut-world-backend/docs/frontend-api/Bug军团与书书接口.md) · [Bug军团实现逻辑](walnut-world-backend/docs/architecture/bug-practice.md)。`all` 已接入“主关正确→每局一次Bug变式挑战→书书总结及语音”；接入范围、真实验证和后端配音配置见[前端联调记录](walnut-world-frontend/docs/testing/bug-practice-integration.md)。
 
 | 提交项 | 地址 |
 |---|---|

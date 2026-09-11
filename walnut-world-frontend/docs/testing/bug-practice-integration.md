@@ -1,12 +1,12 @@
 # Bug 挑战前端接入与验证
 
-更新：2026-09-11。分支 `all`；接入基线为 `origin/main` 的 `13106a7`，快进合入，无冲突。本次只本地提交，不推送。
+更新：2026-09-11。分支 `all`；接入基线为 `origin/main` 的 `13106a7`，随后合入 `9ce5298`，均无冲突。按用户最新要求，完成远端复核后推送到 `origin/all`。
 
 ## 远端 main 再次复核（2026-09-11）
 
 重新 fetch 后，远端新增 `9ce5298`，已通过本地合并提交 `cf822f4` 完整合入 `all`，无冲突。新增内容仅为 Agent 测试沙箱清理、Book 旧预期修正、runner 计数与诊断记录；`agent/python`、`agent/contracts`、`walnut-world-backend/src` 没有变化，与远端当前内容一致，不需要新增前端接口适配。
 
-本机复测：runner 合同 5 项、真实 Docker 沙箱清理 1 项均通过；Godot → 真实主路由的确定性 HTTP 协议测试通过。未重跑完整 640 项 Agent 套件。真实豆包配音仍待本机凭据配置，这次远端更新没有修复或替代该配置。仍只本地提交，不推送。
+本机复测：runner 合同 5 项、真实 Docker 沙箱清理 1 项均通过；Godot → 真实主路由的确定性 HTTP 协议测试通过。未重跑完整 640 项 Agent 套件。推送前再次 fetch `main` 和 `all`：`origin/main` 仍为 `9ce5298`，`origin/all` 为 `0b74899`，两者均为本地 HEAD 的祖先，没有远端独有提交或分叉冲突。
 
 ## 接入结果
 
@@ -43,7 +43,9 @@
 | 后端定向测试 | `test_bug_practice.py`、`test_practice_reliability.py`、`test_book_speech.py`：22 passed |
 | 真实服务主链 | Godot → 真实主关构建/激活/Run 成功；Run `run_2151caa3083d3bad63c539b3` |
 | 真实模型出题与挑战判题 | 初次 `PRACTICE_PROBLEM_INVALID`，保留 entry/Run 后成功重试；challenge `challenge_62b0f2cc313141cbbadc83a9ff8b60e7`；真实编译错误与正确答案通过，主关源码/世界快照不受练习改变 |
-| 真实书书配音 | **未验证成功**：返回 `BOOK_SPEECH_CONFIGURATION_INVALID`，本机未发现豆包 key 文件；挑战保持 SUMMARY_PENDING，未提前展示半份总结 |
+| 真实书书配音配置 | 已补齐本机凭据；生产 `BookSpeech.synthesize` 真实调用成功，返回 163,444 字节 PCM（约 3.41 秒）。此前缺配置时的 `BOOK_SPEECH_CONFIGURATION_INVALID` 已消除 |
+| 真实实时语音配置 | 生产 `DoubaoRealtimeAdapter.open_session` 成功收到 `session.created`；该项验证连接与会话创建，不替代麦克风交互验收 |
+| 配置后真实全链复测 | Godot 真实网关测试退出码 0：entry-start、主关构建/激活/Run、真实出题、编译拒绝、正确答案及主关状态隔离、summary-text-audio 全部 PASS；Run `run_1dd69389bb4881c2b0d38319`，challenge `challenge_e1cd82e050634c5dbb6fc0baf166df27` |
 | 界面 | 1280×720 实际渲染检查，修复边距、按钮和代码可读性；下方截图使用确定性协议测试数据，不代表真实模型/TTS |
 
 ![挑战编辑器：确定性路由测试](evidence/bug-practice-challenge.png)
@@ -65,10 +67,11 @@
 
 ## 后续行动与未解决问题
 
-1. 提供本机豆包 key 文件路径，配置后端 `YAYA_DOUBAO_VOICE_API_KEY_FILE` 并重启网关，再验证真实语音、书书 TTS。前端只持有游戏 token。
+1. 本机已配置并重启后端：书书配音使用 `YAYA_BOOK_TTS_API_KEY_FILE`，实时语音使用 `YAYA_VOICE_MODE=doubao` 和 `YAYA_DOUBAO_VOICE_API_KEY_FILE`。同一 Key 获得两项权限时可以共用文件；直接 KEY 与 KEY_FILE 不能同时配置。凭据文件置于仓库外，仅当前 Windows 用户可读；前端只持有游戏 token。
 2. 本机已有数据库绑定 `deepseek-flash`，启动脚本需传 `-Model deepseek-flash`。此次保留已有模型与数据库，没有修改 profile 来绕过校验。
 3. 出题模型曾连续产生不符合题目规则的草稿；服务端拒绝后原局重试成功。前端提供可恢复错误，不伪造题目；后续可统计真实出题稳定性。
 4. 后端练习状态仍是单网关内存、6 小时有效；重启会导致 410。前端持久记录不能替代后端长期持久化，旧 entry 不能跨重启继续判题。
 5. 服务已在 `D:/FeishuAIreview/walnut-interface-audit-20260909` 的代码上启动。本工作区对应 `all`；原 `walnut-world-new` 仍为 `fronted-art`。
+6. 本次配音全链通过期间，后台另有 workflow job 出现 `RuntimeBoundaryError` 重试，未阻塞本次新练习和总结；该后台任务需后续单独排查，不将本次 PASS 解释为所有异步 Agent 任务均无错误。教师工作台本地仍缺妙搭环境及数据库连接配置。
 
 接口权威：[完整 API 入口](../../../walnut-world-backend/docs/frontend-api/README.md)、[Bug 与书书扩展](../../../walnut-world-backend/docs/frontend-api/Bug军团与书书接口.md)。
