@@ -148,7 +148,9 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\walnut-world-backend\s
 后端单元测试和前端离线套件无需真实供应商 Key：
 
 ```powershell
-.\walnut-world-backend\.venv\Scripts\python.exe -m pytest .\walnut-world-backend\tests\unit -q
+Push-Location .\walnut-world-backend
+.\.venv\Scripts\python.exe -m pytest .\tests\unit -q
+Pop-Location
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\walnut-world-frontend\scripts\run-offline-tests.ps1
 ```
 
