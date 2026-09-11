@@ -70,6 +70,14 @@
 
 原有无配音对白现在整句显示并保持 idle，因此同步修正旧角色呈现测试对 talk 动画的过时断言。全量日志中已有少量退出资源清理警告，不代表全部退出清理问题已解决。
 
+## 失败后的主动提示修复（2026-09-11）
+
+“给我提示”绑定失败 Run 或编译结果时，Agent 校验器此前会将模型的具体建议覆盖为“规范运行记录确认任务尚未完成；失败类型为 sandbox_execution_failed”等固定摘要。现在 `hint_requested` 保留通过校验的建议和引导问题；自动失败回执继续使用规范摘要，虚假成功宣称、提示等级和长度等检查仍然有效。
+
+回归覆盖失败 Run、编译失败及两者并存 × 三档提示 × question/hint，以及正文或问题中的虚假成功宣称。`test_agent_runtime_public_copy.py`、`test_hint_role_independence.py`、`test_conversation_teaching.py`、`test_agent_runtime_provider_failure_matrix.py` 共 25 项通过。此结果验证生产校验逻辑，不代表对真实模型每次建议质量的保证。
+
+主关失败时使用叮当提示排错；Bug 军团在主关 Run 成功并提交目标结果后进入，挑战通过后进入书书总结。本次不修改该门禁。已存储的旧提示不回写，需重新点击“给我提示”生成新建议。
+
 ## 复测
 
 ```powershell

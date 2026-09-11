@@ -340,7 +340,14 @@ def validate_decision(
                 "FALSE_SUCCESS_CLAIM",
                 "message claims success while the bound run says the task failed",
             )
-        if context.role in {"teaching_agent", "bug_agent"} and decision.response_type != "message":
+        # An explicit hint can carry a failed Run. Its validated explanation
+        # must survive just like a hint without a Run; the outcome guards above
+        # still reject false success. Automatic failure receipts stay canonical.
+        if (
+            context.role in {"teaching_agent", "bug_agent"}
+            and decision.response_type != "message"
+            and context.event.event_type != "hint_requested"
+        ):
             decision = _replace_message(
                 decision,
                 f"规范运行记录确认任务尚未完成；失败类型为 {run.failure_key}。",
@@ -349,6 +356,7 @@ def validate_decision(
         context.compile_result is not None
         and not context.compile_result.succeeded
         and decision.response_type != "message"
+        and context.event.event_type != "hint_requested"
     ):
         first_diagnostic = context.compile_result.diagnostics[0][:160]
         decision = _replace_message(

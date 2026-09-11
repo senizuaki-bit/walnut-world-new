@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import sys
 import unittest
+from dataclasses import replace
 from pathlib import Path
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[1] / "python"
@@ -25,6 +26,7 @@ from agent_runtime_fixtures import (  # noqa: E402
 from yaya_agent_contracts import EvidenceRef, EvidenceType, WorldCommitReceipt  # noqa: E402
 from yaya_agent_runtime import (  # noqa: E402
     PEDAGOGY_POLICY_VERSION,
+    CompileResultSnapshot,
     DecisionDraft,
     LearnerInference,
     RunResultSnapshot,
@@ -399,6 +401,65 @@ class HintKeepsProviderTeachingProseTests(unittest.TestCase):
             (),
         )
         self.assertEqual(decision.message, message)
+
+    def test_explicit_hints_keep_actionable_prose_after_run_and_compile_failures(self) -> None:
+        base = self._hint_context()
+        operation = make_operation()
+        failed_run = replace(
+            _failed_run(base.event, operation), failure_key="sandbox_execution_failed"
+        )
+        failed_compile = CompileResultSnapshot(
+            build_id="build_failed_hint_0001",
+            skill_ref=base.skill.ref,
+            succeeded=False,
+            diagnostics=("main.cpp:4: expected ';' before 'return'",),
+            evidence_refs=(make_evidence("evidence_compile_hint_0001"),),
+            request_context=operation,
+        )
+        for failure in (
+            {"run_result": failed_run},
+            {"compile_result": failed_compile},
+            {"run_result": failed_run, "compile_result": failed_compile},
+        ):
+            for level in (1, 2, 3):
+                for response_type in ("question", "hint"):
+                    with self.subTest(failure=tuple(failure), level=level, response_type=response_type):
+                        context = replace(
+                            base,
+                            hint_level=level,
+                            teaching_directive=replace(
+                                base.teaching_directive,
+                                phase=TeachingPhase.RECTIFICATION,
+                                hint_level=level,
+                            ),
+                            **failure,
+                        )
+                        provider = replace(
+                            _draft(
+                                "teaching_agent", "question",
+                                "先定位第一条诊断对应的代码，核对输入读取、数组下标和输出格式，再重新运行。",
+                                question="你能指出最先需要检查的那一行吗？",
+                            ),
+                            response_type=response_type,
+                            question=None if response_type == "hint" else "你能指出最先需要检查的那一行吗？",
+                            hint_level=level if response_type == "hint" else None,
+                        )
+                        result = validate_decision(provider, make_role_config("teaching_agent"), context, ())
+                        self.assertEqual(result.message, provider.message)
+                        self.assertEqual(result.question, provider.question)
+                        self.assertEqual(result.hint_level, provider.hint_level)
+                        self.assertNotIn("sandbox_execution_failed", result.message)
+
+    def test_failed_run_hint_still_rejects_success_claims_in_message_or_question(self) -> None:
+        base = self._hint_context()
+        context = replace(base, run_result=_failed_run(base.event, make_operation()))
+        for field in ("message", "question"):
+            with self.subTest(field=field):
+                decision = _draft("teaching_agent", "question", "检查输出格式。", question="先看哪一行？")
+                decision = replace(decision, **{field: "任务已经完成。"})
+                with self.assertRaises(InvalidAgentOutput) as raised:
+                    validate_decision(decision, make_role_config("teaching_agent"), context, ())
+                self.assertEqual(raised.exception.code, "HINT_CLAIMS_OUTCOME")
 
     def test_hint_over_the_role_limit_is_rejected_not_truncated(self) -> None:
         # Rejecting lets the model shorten on its repair round; truncating would
