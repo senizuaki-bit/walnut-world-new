@@ -37,7 +37,9 @@ async def book_speech(session_id: str, interaction_id: str, request: Request):
         audio = await request.app.state.book_speech.synthesize(identity, text)
     except BookSpeechError as error:
         return JSONResponse(
-            {"code": error.code}, status_code=503, headers={"Cache-Control": "no-store"}
+            {"code": error.code, "retryable": error.retryable},
+            status_code=503,
+            headers={"Cache-Control": "no-store"},
         )
     return JSONResponse(
         {

@@ -13,10 +13,11 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
-from jsonschema import ValidationError
+from jsonschema import ValidationError, validate
 from yaya_agent_runtime.bug_practice import (
+    PROBLEM_COPY_SCHEMA,
     PROBLEM_PROMPT,
-    PROBLEM_SCHEMA,
+    exercise_data,
     source_bundle,
     starter_source,
     validate_problem,
@@ -123,24 +124,28 @@ class BugPractice:
             if entry.problem is None:
                 entry.history = history
                 # Never publish an invalid draft; provide concrete feedback for repairs.
-                payload = history
+                data = exercise_data(":".join(self.key(session_id, entry_id, context)) + run_id)
+                payload = {**history, "exercise_data": data}
                 for attempt in range(3):
                     entry.generation += 1
                     value = await self.model.generate(
                         PROBLEM_PROMPT,
                         payload,
-                        PROBLEM_SCHEMA,
+                        PROBLEM_COPY_SCHEMA,
                         entry.context,
                         f"{entry_id}:{run_id}:problem:{entry.generation}",
                     )
                     try:
+                        validate(value, PROBLEM_COPY_SCHEMA)
+                        value = {**value, **data}
                         validate_problem(value)
                     except (ValueError, ValidationError):
                         if attempt < 2:
                             payload = {
                                 "history": history,
+                                "exercise_data": data,
                                 "previous_draft": value,
-                                "repair": "重新核对两个数组的每一项：target-moisture 必须同时包含负数、0、1到29、恰好30、大于30；共8项，整数在0到100之间，目标湿度有差异。修正上次草稿，保持同等难度。",
+                                "repair": "只修正 title、brief、focus 的文案与长度，严格遵守 schema，不要返回数组或其他字段。",
                             }
                             continue
                         raise ValueError("PRACTICE_PROBLEM_INVALID") from None

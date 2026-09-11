@@ -22,6 +22,7 @@ var _session: Node
 var _level: CropAdaptiveWateringDemo
 var _submission_running := false
 var _hint_running := false
+var _hint_queued := false
 var _build_running := false
 var _activation_running := false
 var _last_error_message := ""
@@ -371,10 +372,28 @@ func _on_activation_requested() -> void:
 
 
 func _on_hint_requested(message: String) -> void:
-	if not _projection_active or _hint_running or _submission_running or _build_running or _activation_running or _level == null:
+	if _level == null or _hint_running or _hint_queued:
+		return
+	if not _projection_active:
+		_level.present_agent_error("关卡还在连接，请连接完成后再获取提示。")
 		return
 	if _level.practice.enabled and _level.practice.visible:
 		return
+	# A compile rejection can be visible while its teaching feedback is closing.
+	# Accept one hint now and dispatch it after that existing operation finishes.
+	var requested_level := _level
+	_hint_queued = true
+	_level.set_hint_pending(true)
+	if _submission_running or _build_running or _activation_running:
+		_level.update_agent_submission_stage("正在整理刚才的结果，随后会自动获取提示……", false)
+	while _submission_running or _build_running or _activation_running:
+		await get_tree().process_frame
+		if not is_instance_valid(self): return
+		if not _projection_active or not is_instance_valid(requested_level) or _level != requested_level:
+			_hint_queued = false
+			if is_instance_valid(requested_level): requested_level.set_hint_pending(false)
+			return
+	_hint_queued = false
 	_hint_running = true
 	_last_error_message = ""
 	_last_error_code = ""
@@ -551,9 +570,11 @@ func _on_error_reported(error: Dictionary) -> void:
 		# A later teaching-service failure cannot change the compiler's result.
 		if (_submission_running or _build_running) and _last_error_code == "SANDBOX_COMPILE_ERROR":
 			return
-		_last_error = error.duplicate(true)
-		_last_error_code = str(error.get("code", ""))
-		_last_error_message = str(error.get("message", "正式服务发生错误。"))
+		# HTTP ErrorResponse wraps ContractError; command/local errors are already flat.
+		var cause: Variant = error.get("error", error)
+		_last_error = cause.duplicate(true) if cause is Dictionary else error.duplicate(true)
+		_last_error_code = str(_last_error.get("code", ""))
+		_last_error_message = str(_last_error.get("message", "正式服务发生错误。"))
 		if _submission_running and _objective_committed:
 			if _level.practice.enabled:
 				return # Legacy feedback cannot replace the post-success challenge.

@@ -83,20 +83,29 @@ async def practice(session_id: str, entry_id: str, action: str, request: Request
         code = str(error)
         if not re.fullmatch(r"(?:PRACTICE|BOOK_SPEECH)_[A-Z_]+", code):
             code = "PRACTICE_UNAVAILABLE"
-        retryable = code.startswith("BOOK_SPEECH_") or code in {
-            "PRACTICE_UNAVAILABLE",
-            "PRACTICE_MODEL_UNAVAILABLE",
-            "PRACTICE_JUDGE_UNAVAILABLE",
-            "PRACTICE_PROBLEM_INVALID",
-        }
-        status = 503 if retryable else 409
+        retryable = (
+            error.retryable
+            if isinstance(error, BookSpeechError)
+            else code
+            in {
+                "PRACTICE_UNAVAILABLE",
+                "PRACTICE_MODEL_UNAVAILABLE",
+                "PRACTICE_JUDGE_UNAVAILABLE",
+                "PRACTICE_PROBLEM_INVALID",
+            }
+        )
+        status = 503 if retryable or isinstance(error, BookSpeechError) else 409
         if code == "PRACTICE_ENTRY_EXPIRED":
             status = 410
         elif code == "PRACTICE_SESSION_UNAVAILABLE":
             status = 404
-        elif code.endswith("_INVALID") or code == "PRACTICE_REQUEST_TOO_LARGE":
+        elif not isinstance(error, BookSpeechError) and (
+            code.endswith("_INVALID") or code == "PRACTICE_REQUEST_TOO_LARGE"
+        ):
             status = 503 if retryable else 400
-        logger.info("Practice request ended: %s", code)
+        logger.warning(
+            "Practice request ended: action=%s code=%s retryable=%s", action, code, retryable
+        )
         return JSONResponse(
             {"code": code, "retryable": retryable},
             status_code=status,

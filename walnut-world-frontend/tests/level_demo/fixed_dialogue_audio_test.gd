@@ -24,6 +24,8 @@ func run() -> void:
 		check(clip.get_length() > 0.1, "Every packaged clip must contain complete audio")
 	var seen: Array[int] = []
 	var finished := {"count": 0}
+	var voice_finished := {"count": 0}
+	overlay.line_voice.finished.connect(func(): voice_finished.count += 1)
 	overlay.line_changed.connect(func(index, text):
 		seen.append(index)
 		check(text == level.INTRO_LINES[index], "Intro must use the user's exact text")
@@ -35,9 +37,10 @@ func run() -> void:
 	check(overlay.line_voice.playing, "Intro must play local audio immediately")
 	check(overlay.body_label.visible_characters == -1 and not overlay.is_typing(), "The entire sentence must appear immediately")
 	check(overlay.continue_hint.visible, "Click-to-continue must be available while speech is playing")
-	await create_timer(overlay.line_voice.stream.get_length() + 0.5).timeout
+	await wait_for_audio_end(overlay.line_voice, voice_finished, 1)
 	check(overlay.get_line_index() == 0 and overlay.visible and finished.count == 0, "Audio ending must wait on the current line")
 	check(not overlay.line_voice.playing, "Finished audio must not loop")
+	check(voice_finished.count == 1, "The first clip must finish naturally exactly once")
 	var screenshot := OS.get_environment("WALNUT_FIXED_DIALOGUE_SCREENSHOT")
 	if not screenshot.is_empty():
 		await RenderingServer.frame_post_draw
@@ -58,7 +61,8 @@ func run() -> void:
 			push_error(failure)
 		quit(1)
 		return
-	await create_timer(overlay.line_voice.stream.get_length() + 0.5).timeout
+	await wait_for_audio_end(overlay.line_voice, voice_finished, 2)
+	check(voice_finished.count == 2, "Interrupted second clip must not finish; third clip must finish once")
 	check(overlay.get_line_index() == 2 and overlay.visible and finished.count == 0, "The last line must also wait for a click after playback")
 	var enter := InputEventKey.new()
 	enter.keycode = KEY_ENTER
@@ -105,6 +109,16 @@ func run() -> void:
 		for failure in failures:
 			push_error(failure)
 		quit(1)
+
+
+func wait_for_audio_end(player: AudioStreamPlayer, completion: Dictionary, expected: int) -> void:
+	# Scene timers and the Dummy audio mixer do not share a clock. Under load a
+	# duration timer can fire before playback reaches the end. Observe playback,
+	# with a wall-clock deadline that still fails on looping or stuck audio.
+	var deadline := Time.get_ticks_msec() + int(ceil(player.stream.get_length() * 1000.0)) + 2500
+	while (player.playing or int(completion.count) < expected) and Time.get_ticks_msec() < deadline:
+		await process_frame
+	check(not player.playing, "Audio must naturally finish before the wall-clock deadline")
 
 
 func click_dialogue(overlay: StoryDialogueOverlay) -> void:

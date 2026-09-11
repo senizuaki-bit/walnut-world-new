@@ -15,6 +15,31 @@ from walnut_backend.api.app import create_app
 from walnut_backend.bootstrap import DEFAULT_CONTRACT_PATH, Settings
 
 
+@pytest.mark.parametrize(
+    "status,code,retryable",
+    [
+        (401, "BOOK_SPEECH_AUTH_FAILED", False),
+        (403, "BOOK_SPEECH_AUTH_FAILED", False),
+        (429, "BOOK_SPEECH_PROVIDER_UNAVAILABLE", True),
+        (503, "BOOK_SPEECH_PROVIDER_UNAVAILABLE", True),
+    ],
+)
+def test_provider_failures_distinguish_configuration_from_temporary_errors(
+    monkeypatch, status, code, retryable
+):
+    monkeypatch.setenv("YAYA_BOOK_TTS_API_KEY", "test-only-key")
+    monkeypatch.delenv("YAYA_BOOK_TTS_API_KEY_FILE", raising=False)
+
+    async def run():
+        service = BookSpeech(httpx.MockTransport(lambda request: httpx.Response(status)))
+        with pytest.raises(BookSpeechError) as caught:
+            await service.synthesize("test", "测试配音")
+        assert caught.value.code == code
+        assert caught.value.retryable is retryable
+
+    asyncio.run(run())
+
+
 def test_complete_audio_exact_text_voice_and_cache(monkeypatch):
     monkeypatch.setenv("YAYA_VOICE_MODE", "doubao")
     monkeypatch.setenv("YAYA_DOUBAO_VOICE_API_KEY", "test-private-key")
@@ -117,3 +142,16 @@ def test_route_reads_authorized_persisted_text_before_synthesis():
         )
         assert denied.status_code == 401
         assert len(calls) == 1
+
+        class UnconfiguredSpeech:
+            async def synthesize(self, identity, text):
+                raise BookSpeechError("BOOK_SPEECH_CONFIGURATION_INVALID")
+
+        app.state.book_speech = UnconfiguredSpeech()
+        unavailable = client.post(path, headers=headers, json={})
+        assert unavailable.status_code == 503
+        assert unavailable.json() == {
+            "code": "BOOK_SPEECH_CONFIGURATION_INVALID",
+            "retryable": False,
+        }
+        assert len(calls) == 2

@@ -135,7 +135,7 @@ class FakeSession:
 			store.error_reported.emit({"code": "PROVIDER_UNAVAILABLE", "message": "提示服务暂时不可用，请重试。"})
 			return
 		var interactions: Array[Dictionary] = [{
-			"interaction_id": "interaction_hint",
+			"interaction_id": "interaction_hint_" + str(stages.count("hint")),
 			"role": "teaching_agent",
 			"response_type": "message",
 			"hint_level": 1,
@@ -284,7 +284,7 @@ func _initialize() -> void:
 	for _frame in range(5): await process_frame
 	if level.hint_button.disabled or run_button.disabled or not evidence.text.contains("重试"):
 		failures.append("提示失败必须恢复按钮并显示可重试反馈。")
-	session.next_turn_error = {"code": "INTERNAL_ERROR", "category": "INTERNAL", "message": "RAW_PROVIDER_ERROR", "details": {"exception_type": "WorkflowInvariantError"}}
+	session.next_turn_error = {"status": "FAILED", "request_id": "req_test_0001", "error": {"code": "INTERNAL_ERROR", "category": "INTERNAL", "message": "RAW_PROVIDER_ERROR", "details": {"exception_type": "WorkflowInvariantError"}}}
 	story_overlay.skip_sequence()
 	level.call("_set_phase", CropAdaptiveWateringDemo.Phase.CODE)
 	run_button.pressed.emit()
@@ -317,9 +317,13 @@ func _initialize() -> void:
 	level.agent_submit_requested.emit(source + "\n// compile rejection check")
 	if level.evidence_title.text != "代码检查未通过":
 		failures.append("编译拒绝必须立即显示代码检查未通过，不能等待教学反馈时误报没有连上。")
+	var hints_before_compile_closure := session.stages.count("hint")
+	level.hint_button.pressed.emit()
+	if not level.hint_button.disabled or not evidence.text.contains("提示"):
+		failures.append("编译结果已显示但请求尚未结束时，提示点击必须立即反馈并排队，不能静默丢弃。")
 	for _frame in range(10): await process_frame
-	if level.evidence_title.text != "代码检查未通过" or not evidence.text.contains("编译"):
-		failures.append("教学反馈失败不能覆盖已经确认的编译错误。")
+	if session.stages.count("hint") != hints_before_compile_closure + 1 or not evidence.text.contains("同一下标") or level.hint_button.disabled:
+		failures.append("编译反馈结束后必须自动执行已点击的一次提示，无需玩家再点。calls=%s evidence=%s disabled=%s queued=%s running=%s" % [session.stages.count("hint") - hints_before_compile_closure, evidence.text, level.hint_button.disabled, bridge._hint_queued, bridge._hint_running])
 	level.complete_agent_submission("run_book_summary")
 	var book_message := "你用同一下标配对当前湿度和目标湿度，条件判断让足够湿润的地块跳过了浇水。换一组湿度后，你会先检查哪个条件？"
 	level.restore_agent_interaction({"role": "book_agent", "response_type": "growth_summary", "feedback": {"message": book_message}})

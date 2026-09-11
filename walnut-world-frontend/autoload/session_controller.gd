@@ -985,21 +985,26 @@ func request_activation() -> void:
 	if activation_context.has("reason"):
 		request["reason"] = activation_context.reason
 	store.set_flow(WalnutClientStore.FlowState.ACTIVATING)
-	var submission: Dictionary = await _submit_activation(request)
-	if not submission.get("ok", false) and int(submission.get("status", 0)) == 409 and str(submission.get("error", {}).get("code", "")) == "CONTENT_VERSION_MISMATCH":
-		# The Registry advances on every activation, including this learner's own
-		# earlier ones, while activation_context only refreshes on success. A
-		# refused activation therefore left the cached revision stale for good:
-		# every later Run rebuilt, then failed to activate, forever. Re-read the
-		# authoritative revision and try once more under it.
-		var corrected := await _resynced_registry_revision(
-			int(activation_context.expected_registry_revision)
-		)
-		if corrected >= 0:
-			activation_context.expected_registry_revision = corrected
-			request["expected_registry_revision"] = corrected
-			submission = await _submit_activation(request)
-	var command_result: Dictionary = await _new_poller().reconcile({}, submission)
+	var command_result: Dictionary = {}
+	for attempt in range(2):
+		var submission: Dictionary = await _submit_activation(request)
+		var submission_error: Dictionary = submission.get("error", {})
+		# Public HTTP errors retain ErrorResponse; terminal Commands carry ContractError.
+		var contract_error: Variant = submission_error.get("error", submission_error)
+		var stale: bool = not submission.get("ok", false) and int(submission.get("status", 0)) == 409 and contract_error is Dictionary and str(contract_error.get("code", "")) == "CONTENT_VERSION_MISMATCH"
+		command_result = submission if stale else await _new_poller().reconcile({}, submission)
+		if command_result.get("ok", false):
+			var resolved: Dictionary = command_result.value
+			stale = resolved.get("status") == "REJECTED" and str(resolved.get("error", {}).get("code", "")) == "CONTENT_VERSION_MISMATCH"
+		if not stale or attempt == 1:
+			break
+		# Retry only a definite rejection, under a newer revision from the same
+		# actor/content/scope. Unknown commit outcomes keep normal reconciliation.
+		var corrected := await _resynced_registry_revision(int(request.expected_registry_revision))
+		if corrected < 0:
+			break
+		activation_context.expected_registry_revision = corrected
+		request["expected_registry_revision"] = corrected
 	if not command_result.get("ok", false):
 		store.report_error(command_result.get("error", _local_error("ACTIVATION_COMMAND_FAILED", "Activation reconciliation failed.")))
 		return

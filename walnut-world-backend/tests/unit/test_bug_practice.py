@@ -46,7 +46,7 @@ class Model:
             return {
                 "message": "你把主关里学会的数组配对和分级判断用到了新的数据上，变式代码通过了公开数据和边界验证。这次练习展示了规则可以在不同农田里重复使用。"
             }
-        return copy.deepcopy(PROBLEM)
+        return {k: copy.deepcopy(PROBLEM[k]) for k in schema["required"]}
 
 
 class Judge:
@@ -208,6 +208,13 @@ def test_summary_retry_uses_new_dispatch_after_rejected_model_output():
 
 
 def test_problem_keeps_difficulty_and_has_executable_data_contract():
+    from yaya_agent_runtime.bug_practice import exercise_data
+
+    generated = [exercise_data(str(i)) for i in range(256)]
+    for i, data in enumerate(generated):
+        validate_problem({**PROBLEM, **data})
+        assert data == exercise_data(str(i))
+    assert len({tuple(data["moisture"]) for data in generated}) == 256
     validate_problem(PROBLEM)
     assert "int moisture[8]" in starter_source(PROBLEM)
     assert "cin >> target[i]" in starter_source(PROBLEM)
@@ -228,7 +235,7 @@ def test_invalid_problem_is_repaired_before_publication():
         async def generate(*args):
             value = await original_generate(*args)
             if len(service.model.calls) == 1:
-                value["target"] = [90] * 8
+                value["title"] = ""
             return value
 
         service.model.generate = generate
@@ -236,8 +243,29 @@ def test_invalid_problem_is_repaired_before_publication():
         await service.start("session_test", "a" * 32, context)
         problem = await service.prepare("session_test", "a" * 32, "run_1", context)
         validate_problem({k: problem[k] for k in PROBLEM})
-        assert service.model.calls[1]["previous_draft"]["target"] == [90] * 8
+        assert service.model.calls[1]["previous_draft"]["title"] == ""
         assert "repair" in service.model.calls[1]
+
+    asyncio.run(run())
+
+
+def test_problem_numbers_are_supplied_before_model_and_published_unchanged():
+    async def run():
+        service, context = setup()
+        original = service.model.generate
+
+        async def author(prompt, payload, schema, context, logical_id):
+            assert set(schema["required"]) == {"title", "brief", "focus"}
+            validate_problem({**PROBLEM, **payload["exercise_data"]})
+            return await original(prompt, payload, schema, context, logical_id)
+
+        service.model.generate = author
+        service.reads.passed = True
+        await service.start("session_test", "a" * 32, context)
+        value = await service.prepare("session_test", "a" * 32, "run_1", context)
+        assert value["moisture"] == service.model.calls[0]["exercise_data"]["moisture"]
+        assert value["target"] == service.model.calls[0]["exercise_data"]["target"]
+        assert len(service.model.calls) == 1
 
     asyncio.run(run())
 
@@ -315,3 +343,80 @@ def test_http_auth_gating_and_invalid_requests():
         entry = next(iter(service.entries.values()))
         entry.started -= timedelta(hours=7)
         assert client.post(base + "start", headers=headers, json={}).status_code == 410
+
+
+def test_configuration_failure_is_not_retryable_and_file_repair_preserves_pass(
+    monkeypatch, tmp_path
+):
+    import base64
+    import json
+    from pathlib import Path
+
+    import httpx
+    from fastapi.testclient import TestClient
+
+    from walnut_backend.adapters.doubao_tts import BookSpeech
+    from walnut_backend.api.app import create_app
+    from walnut_backend.bootstrap import DEFAULT_CONTRACT_PATH, Settings
+
+    missing = tmp_path / "book.key"
+    monkeypatch.setenv("YAYA_BOOK_TTS_API_KEY_FILE", str(missing))
+    monkeypatch.delenv("YAYA_BOOK_TTS_API_KEY", raising=False)
+    provider_calls = []
+
+    def provider(request):
+        provider_calls.append(request)
+        return httpx.Response(
+            200,
+            text="data: "
+            + json.dumps(
+                {
+                    "code": 0,
+                    "data": base64.b64encode(b"\x01\x00" * 240).decode(),
+                }
+            )
+            + '\n\ndata: {"code":20000000}\n\n',
+        )
+
+    app = create_app(
+        Settings.for_test(
+            contract_path=DEFAULT_CONTRACT_PATH,
+            contract_release_path=Path(__file__).resolve().parents[2] / "contract-release.json",
+        )
+    )
+    headers = {
+        "Authorization": "Bearer tenant_yaya:student_0001",
+        "X-Schema-Version": "1.0.0",
+        "X-Request-Id": "req_speech_config_0001",
+        "X-Trace-Id": "trace_speech_config_0001",
+        "X-Correlation-Id": "corr_speech_config_0001",
+    }
+    url = "/product-experience/v1/sessions/session_test/practice-entries/" + "a" * 32 + "/"
+    with TestClient(app) as client:
+        service, _ = setup()
+        service.speech = BookSpeech(httpx.MockTransport(provider))
+        app.state.bug_practice = service
+        client.post(url + "start", headers=headers, json={}).raise_for_status()
+        service.reads.passed = True
+        challenge = client.post(url + "prepare", headers=headers, json={"run_id": "run_1"}).json()
+        body = {"challenge_id": challenge["challenge_id"]}
+        answer = client.post(
+            url + "answer",
+            headers=headers,
+            json={**body, "answer_id": "b" * 32, "source": "correct"},
+        )
+        assert answer.json()["correct"]
+        for _ in range(2):
+            failed = client.post(url + "summary", headers=headers, json=body)
+            assert failed.status_code == 503
+            assert failed.json() == {
+                "code": "BOOK_SPEECH_CONFIGURATION_INVALID",
+                "retryable": False,
+            }
+        assert not provider_calls
+        assert client.post(url + "status", headers=headers, json={}).json()["passed"]
+        missing.write_text("test-only-key")
+        recovered = client.post(url + "summary", headers=headers, json=body)
+        assert recovered.status_code == 200 and recovered.json()["audio_base64"]
+        assert service.judge.calls == 1 and len(service.model.calls) == 2
+        assert len(provider_calls) == 1

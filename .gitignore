@@ -1,6 +1,5 @@
 # Third-party runtimes downloaded per-machine, not project source.
-# Godot_v4.5.2-stable_win64.exe alone is 157MB, over GitHub's 100MB file limit.
-# Install Godot 4.5.2 and Node yourself and point GODOT_EXE at the binary.
+# setup-play.ps1 installs Godot 4.7.1 here; runtime binaries are not source.
 tools/
 
 # macOS archive residue from unzipping the frontend bundle
@@ -25,3 +24,10 @@ __pycache__/
 
 # Former standalone frontend repo history, kept locally only
 walnut-world-frontend/frontend-repo-git-backup/
+
+# Provider credentials and local configuration must stay outside Git.
+.env
+.env.*
+!.env.example
+*.key
+.walnut-secrets/

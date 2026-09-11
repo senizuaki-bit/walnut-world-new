@@ -232,9 +232,18 @@ func _request(action: String, body: Dictionary) -> Dictionary:
 	restart_button.hide()
 	replay_audio.hide()
 	feedback.text = {"start": "正在建立本局练习记录……", "status": "正在恢复本局进度……", "prepare": "主关已通过，Bug 军团正在准备一道新挑战……", "answer": "正在编译并验证你的代码，请稍候……", "summary": "挑战已通过，书书正在准备完整总结和语音……"}.get(action, "正在连接……")
+	feedback.tooltip_text = ""
+	action_button.text = "正在处理……"
 	var generation := _generation
-	var response: Dictionary = await api.send(action, state.entry_id, body)
-	if generation != _generation: return {"ok": false}
+	var response: Dictionary = {}
+	for attempt in range(3):
+		response = await api.send(action, state.entry_id, body)
+		if generation != _generation: return {"ok": false}
+		if response.get("ok", false) or not response.get("retryable", false) or attempt == 2:
+			break
+		feedback.text = "服务暂时没有完成响应，正在自动重试（%d/2）……\n代码与已通过的结果已保留，无需重复点击。" % (attempt + 1)
+		await get_tree().create_timer(0.5 * (attempt + 1)).timeout
+		if generation != _generation: return {"ok": false}
 	busy = false
 	if not response.get("ok", false): _error(response)
 	return response
@@ -244,8 +253,11 @@ func _error(response: Dictionary) -> void:
 	var code := str(response.get("code", "PRACTICE_UNAVAILABLE"))
 	feedback.text = "本步暂未完成，代码和已通过的结果已保留。请稍后重试；如果持续失败，请联系老师。"
 	feedback.tooltip_text = code
+	var speech_configuration := code in ["BOOK_SPEECH_CONFIGURATION_INVALID", "BOOK_SPEECH_DISABLED", "BOOK_SPEECH_AUTH_FAILED", "BOOK_SPEECH_RESOURCE_NOT_GRANTED"]
 	var expired := code in ["PRACTICE_ENTRY_EXPIRED", "PRACTICE_LOCAL_STATE_INVALID"]
-	if expired:
+	if speech_configuration:
+		feedback.text = "主关和挑战已通过，答案无需修改。书书配音尚未配置好，请联系老师修复配音配置；修复后再继续获取总结。"
+	elif expired:
 		feedback.text = "本局练习已过期或服务已重启。请重新开始本局并再次提交主关；你的主关代码会保留。"
 		if code == "PRACTICE_LOCAL_STATE_INVALID":
 			feedback.text = "无法读取本局练习记录。请重新开始本局；你的主关代码会保留。"
@@ -258,7 +270,7 @@ func _error(response: Dictionary) -> void:
 		_next_action = "status"
 	elif code == "PRACTICE_LOCAL_SAVE_FAILED":
 		feedback.text = "无法保存本局进度，请检查本机存储空间和目录权限后重试。"
-	action_button.text = "重试本步"
+	action_button.text = "配置修复后重试" if speech_configuration else "重试本步"
 	action_button.disabled = expired
 	restart_button.visible = expired
 

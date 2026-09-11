@@ -26,6 +26,14 @@ class BookSpeechError(Exception):
         self.code = code
         super().__init__(code)
 
+    @property
+    def retryable(self) -> bool:
+        return self.code in {
+            "BOOK_SPEECH_PROVIDER_UNAVAILABLE",
+            "BOOK_SPEECH_INCOMPLETE",
+            "BOOK_SPEECH_INVALID_RESPONSE",
+        }
+
 
 class BookSpeech:
     def __init__(self, transport: httpx.AsyncBaseTransport | None = None):
@@ -77,6 +85,8 @@ class BookSpeech:
                     },
                 },
             ) as response:
+                if response.status_code in (401, 403):
+                    raise BookSpeechError("BOOK_SPEECH_AUTH_FAILED")
                 response.raise_for_status()
                 async for line in response.aiter_lines():
                     if not line.startswith("data:"):

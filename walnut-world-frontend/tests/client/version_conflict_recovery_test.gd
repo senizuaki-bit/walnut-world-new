@@ -3,6 +3,13 @@ extends SceneTree
 const Gateway := preload("res://addons/yaya_contract_client/agent_api_gateway.gd")
 var failures: Array[String] = []
 
+class ConflictTransport:
+	extends YayaAgentApiTransport
+	func execute(_operation: String, arguments: Dictionary) -> Dictionary:
+		await Engine.get_main_loop().process_frame
+		var context: Dictionary = arguments.request_context
+		return {"ok": false, "status": 409, "headers": {"x-request-id": context.request_id, "x-trace-id": context.trace_id, "x-correlation-id": context.correlation_id}, "error": {"request_id": context.request_id, "trace_id": context.trace_id, "status": "REJECTED", "data": null, "error": {"code": "CONTENT_VERSION_MISMATCH", "category": "VALIDATION", "retryable": false, "user_message_key": "content.version_mismatch", "stage": "REGISTRY"}}}
+
 class StaleRegistry:
 	extends RefCounted
 	var bootstrap: Dictionary
@@ -10,11 +17,15 @@ class StaleRegistry:
 	var keys: Array[String] = []
 	var reads := 0
 	var status := 409
-	func activate_skill_version(_attempt: Dictionary, _version: String, key: String, request: Dictionary) -> Dictionary:
+	var terminal_conflict := false
+	var always_conflict := false
+	func activate_skill_version(attempt: Dictionary, version: String, key: String, request: Dictionary) -> Dictionary:
 		requests.append(request.duplicate(true))
 		keys.append(key)
-		if int(request.expected_registry_revision) == 7:
-			return {"ok": false, "status": status, "error": {"code": "CONTENT_VERSION_MISMATCH"}}
+		if (int(request.expected_registry_revision) == 7 or always_conflict) and not terminal_conflict:
+			if status == 401: return {"ok": false, "status": 401, "error": {"code": "AUTHENTICATION_FAILED"}}
+			# Exercise the real gateway's response validation and retained envelope.
+			return await Gateway.new(ConflictTransport.new()).activate_skill_version(attempt, version, key, request)
 		return {"ok": true, "value": {"command_id": "cmd_activation_0001"}}
 	func get_student_bootstrap(attempt: Dictionary) -> Dictionary:
 		reads += 1
@@ -22,6 +33,8 @@ class StaleRegistry:
 		var guard: Dictionary = Gateway.new()._validate_wire_attempt_context(attempt)
 		return {"ok": true, "value": bootstrap} if guard.ok else guard
 	func get_command(_attempt: Dictionary, command_id: String) -> Dictionary:
+		if terminal_conflict and int(requests.back().expected_registry_revision) == 7:
+			return {"ok": true, "value": {"command_id": command_id, "terminal": true, "status": "REJECTED", "error": {"code": "CONTENT_VERSION_MISMATCH", "stage": "REGISTRY"}}}
 		return {"ok": true, "value": {"command_id": command_id, "terminal": true, "status": "APPLIED", "result": {"resource_type": "SKILL_ACTIVATION", "resource_id": "activation_demo_0001"}}}
 	func get_skill_activation(_attempt: Dictionary, _id: String) -> Dictionary:
 		return {"ok": true, "value": {"activation_id": "activation_demo_0001", "skill_id": "skill_demo_0001", "skill_version_id": "skillver_demo_0001", "certification_id": "cert_demo_0001", "artifact_sha256": "a".repeat(64), "activation_scope": bootstrap.activation.scope, "previous_registry_revision": 8, "registry_revision": 9, "activated_at": "2026-09-11T00:00:00Z"}}
@@ -54,24 +67,30 @@ func run() -> void:
 	var controller := root.get_node("SessionController")
 	store.persistence_enabled = false
 	controller.configure_polling({"initial_delay_seconds": 0.0, "base_delay_seconds": 0.0, "max_delay_seconds": 0.0, "jitter_ratio": 0.0})
-	for scenario in ["recover", "wrong_scope", "auth_failure"]:
+	for scenario in ["recover", "terminal_conflict", "wrong_scope", "wrong_actor", "wrong_content", "unchanged", "repeated_conflict", "auth_failure"]:
 		var authority := _bootstrap()
 		var game := StaleRegistry.new()
 		game.bootstrap = authority.duplicate(true)
 		game.bootstrap.activation.registry_revision = 8
 		if scenario == "wrong_scope": game.bootstrap.activation.scope.world_id = "world_other_0001"
+		if scenario == "wrong_actor": game.bootstrap.actor.actor_id = "learner_other_0001"
+		if scenario == "wrong_content": game.bootstrap.content.content_hash = "e".repeat(64)
+		if scenario == "unchanged": game.bootstrap.activation.registry_revision = 7
+		if scenario == "repeated_conflict": game.always_conflict = true
 		if scenario == "auth_failure": game.status = 401
+		if scenario == "terminal_conflict": game.terminal_conflict = true
 		controller.configure(game)
 		store.set_authoritative_bootstrap(authority)
 		controller.configure_authority(authority)
 		controller.certified_build = {"skill_id": "skill_demo_0001", "skill_version_id": "skillver_demo_0001", "artifact": {"artifact_sha256": "a".repeat(64)}, "certification": {"certification_id": "cert_demo_0001"}}
 		await controller.request_activation()
-		if scenario == "recover":
+		if scenario in ["recover", "terminal_conflict"]:
 			check(game.requests.size() == 2 and game.reads == 1, "Stale registry must refresh over the production wire contract and retry once.")
 			check(store.flow_state == WalnutClientStore.FlowState.ACTIVE and int(store.activation_authority.registry_revision) == 9, "Fresh activation must reconcile and become ACTIVE.")
 			check(game.keys.size() == 2 and game.keys[0] != game.keys[1], "Changed CAS revision requires a new idempotency key.")
 		else:
-			check(game.requests.size() == 1, "Changed scope and authentication failures must not retry activation.")
+			check(game.requests.size() == (2 if scenario == "repeated_conflict" else 1), "Recovery must be bounded and reject mismatched authority: " + scenario)
+			check(store.flow_state != WalnutClientStore.FlowState.ACTIVE, "Unresolved activation must not be reported as active: " + scenario)
 			if scenario == "auth_failure": check(game.reads == 0, "Authentication failure must not trigger registry refresh.")
 	for scenario in ["recover", "read_failure", "wrong_draft"]:
 		store._clear_authority_payload()

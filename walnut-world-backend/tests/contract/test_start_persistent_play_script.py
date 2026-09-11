@@ -6,13 +6,54 @@ import os
 import subprocess
 from pathlib import Path
 
+import pytest
+
 BACKEND_ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = BACKEND_ROOT / "scripts" / "start-persistent-play.ps1"
 
 
-def test_persistent_play_powershell_syntax_is_valid_without_execution() -> None:
+def test_stop_tolerates_exit_race_but_does_not_hide_real_stop_failure():
+    environment = {**os.environ, "WALNUT_TEST_PERSISTENT_PLAY_SCRIPT": str(SCRIPT)}
+    command = r"""
+$ErrorActionPreference = 'Stop'
+$ast = [Management.Automation.Language.Parser]::ParseFile($env:WALNUT_TEST_PERSISTENT_PLAY_SCRIPT,[ref]$null,[ref]$null)
+$definition = $ast.Find({param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq 'Stop-ProcessAndWait'}, $true)
+Invoke-Expression $definition.Extent.Text
+foreach ($race in @($true, $false)) {
+    $script:testProcess = Start-Process -FilePath (Join-Path $PSHOME 'powershell.exe') -ArgumentList '-NoProfile','-Command','Start-Sleep -Seconds 20' -WindowStyle Hidden -PassThru
+    function Stop-Process {
+        param($Id, $InputObject, [switch]$Force, $ErrorAction)
+        if ($race) { $script:testProcess.Kill(); $script:testProcess.WaitForExit() }
+        throw 'TEST_STOP_FAILURE'
+    }
+    $threw = $false
+    try { Stop-ProcessAndWait -Process $script:testProcess } catch { $threw = $true }
+    finally { if (-not $script:testProcess.HasExited) { $script:testProcess.Kill(); $script:testProcess.WaitForExit() } }
+    if ($threw -eq $race) { throw 'STOP_RACE_HANDLING_FAILED' }
+}
+"""
+    result = subprocess.run(
+        ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", command],
+        env=environment,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+@pytest.mark.parametrize(
+    "filename",
+    [
+        "start-persistent-play.ps1",
+        "setup-play.ps1",
+        "runtime-preflight.ps1",
+        "voice-environment.ps1",
+    ],
+)
+def test_persistent_play_powershell_syntax_is_valid_without_execution(filename) -> None:
     environment = os.environ.copy()
-    environment["WALNUT_TEST_PERSISTENT_PLAY_SCRIPT"] = str(SCRIPT)
+    environment["WALNUT_TEST_PERSISTENT_PLAY_SCRIPT"] = str(SCRIPT.with_name(filename))
     completed = subprocess.run(
         [
             "powershell.exe",
@@ -40,7 +81,7 @@ def test_persistent_play_supports_current_and_legacy_workspace_layouts() -> None
     script = SCRIPT.read_text(encoding="utf-8")
 
     for required in (
-        "[ValidateSet('Start', 'Status', 'Stop')]",
+        "[ValidateSet('Start', 'Status', 'Stop', 'Check')]",
         "$nestedFrontendRoot = Join-Path $frontendContainerRoot 'walnut-world-frontend'",
         "Join-Path $nestedFrontendRoot 'project.godot'",
         "$bundledAgentRoot = Join-Path $backendRoot 'agent'",
@@ -129,9 +170,7 @@ def test_run_directory_acl_is_idempotent_and_persists_only_the_dacl() -> None:
 
     fast_return = protect.index("if ($isExact) {\n        return")
     desktop_write = protect.index("[IO.Directory]::SetAccessControl($Path, $acl)")
-    core_write = protect.index(
-        "[IO.FileSystemAclExtensions]::SetAccessControl($directory, $acl)"
-    )
+    core_write = protect.index("[IO.FileSystemAclExtensions]::SetAccessControl($directory, $acl)")
     assert fast_return < desktop_write
     assert fast_return < core_write
     assert "Set-Acl" not in protect
@@ -155,6 +194,35 @@ def test_workers_are_recorded_health_checked_and_duplicate_start_is_blocked() ->
         "Protect-RunDirectory -Path $runtimeRoot",
     ):
         assert required in script
+
+
+def test_configuration_validation_precedes_state_mutation_and_reuse():
+    script = SCRIPT.read_text(encoding="utf-8")
+    assert script.index("-m walnut_backend.voice_preflight") < script.index(
+        "$state = Read-PersistentState"
+    )
+    assert script.index("Voice configuration changed or was not verified") < script.index(
+        "PERSISTENT_PLAY_ALREADY_RUNNING"
+    )
+    assert (
+        "-Name 'voice_configuration_sha256' -Value $voiceConfiguration.configuration_sha256"
+        in script
+    )
+    assert script.index("-m walnut_backend.play_preflight") < script.index(
+        "$state = Read-PersistentState"
+    )
+    assert script.index("Test-WalnutRuntime -GodotExe") < script.index(
+        "$state = Read-PersistentState"
+    )
+
+
+def test_separate_instance_cannot_use_player_ports_or_state():
+    script = SCRIPT.read_text(encoding="utf-8")
+    assert "An isolated instance requires three dedicated non-player ports." in script
+    assert '"walnut-$InstanceName-postgres"' in script
+    assert '"walnut-$InstanceName-pgdata"' in script
+    assert '"WalnutWorld\\$InstanceName"' in script
+    assert "if ($NoGame)" in script
 
 
 def test_seed_refusal_requires_independent_current_watering_authority_proof() -> None:
@@ -192,5 +260,7 @@ def test_authority_failure_stops_only_postgres_started_by_this_invocation() -> N
 
     assert "$postgresStartedThisInvocation = $false" in script
     assert script.count("$postgresStartedThisInvocation = $true") == 2
-    assert "if ($postgresStartedThisInvocation -and (Test-ScopedPostgresRunning))" in authority_setup
+    assert (
+        "if ($postgresStartedThisInvocation -and (Test-ScopedPostgresRunning))" in authority_setup
+    )
     assert "& docker stop $postgresName" in authority_setup

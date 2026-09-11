@@ -83,7 +83,7 @@ prepare 先通过 PostgresRunEvidenceStore 读取正式 Run，要求 status=SUCC
 
 ## 5. 变式生成与难度固定
 
-模型生成 title、brief、focus 和两组8元素数组。服务端 schema 限定字符串长度、整数0–100、字段集合；额外业务校验要求：
+服务端根据本局身份生成两组8元素数组，先保证全部边界；模型读取这些确定的数据和本局错误记录，只生成 title、brief、focus。服务端 schema 限定字符串长度、整数0–100、字段集合；额外业务校验要求：
 
 - 当前湿度数组和目标湿度数组分别不同于原关卡数组。
 - 目标湿度不全相同。
@@ -91,7 +91,9 @@ prepare 先通过 PostgresRunEvidenceStore 读取正式 Run，要求 status=SUCC
 
 规则由服务端固定，不由模型自由发明：gap>=30浇2份，0<gap<30浇1份，gap<=0不输出；输出按下标递增，每行 WATER i units。涉及数组、同下标、循环、分级条件，保持主关知识点和难度。
 
-合法 JSON 草稿若未通过业务边界校验，会连同上一草稿和具体修正要求再次提交模型，最多3次生成尝试。模型服务或 Relay 输出校验失败则向前端返回可重试错误；不会静默换成固定假题。
+数据构造明确包含 -1、0、1、29、30、31，另加一个负缺口和一个大于30的缺口，再打乱位置。所有重试复用同一组数据；模型不承担精确数值边界的构造。文案草稿仍经过严格校验，最多3次修正，不用预写文案替换真实模型输出。
+
+Relay 已明确拒绝的可修复 MODEL_OUTPUT 格式错误（例如总结多出 type 字段）在适配器内最多修复2次，使用不同 dispatch 身份和更严格的提示；未知请求结果继续按原身份查询，不能把未知是否完成当作重新生成依据。前端收到 retryable=true 时最多自动重试2次，显示等待状态并保留原 entry/challenge/answer_id 和源码。配置错误不自动重试，持续故障保留人工重试入口。
 
 starter_source 包含数组及已写好的输入读取，学生只写浇水循环。starter_skill 按正式编码界面的 source_bundle 格式提供内容、哈希、编译配置和测试版本。
 
@@ -128,6 +130,10 @@ RoleRouter 的 hint_requested 与主动实时语音保持 teaching_agent。旧 r
 ## 9. 配置与验证
 
 后端继续使用现有 `WALNUT_LLM_*` 配置及可恢复 Relay；判题需要 `WALNUT_RUNTIME_ROOT`、`WALNUT_SANDBOX_IMAGE`（digest镜像），可选 `WALNUT_DOCKER_EXECUTABLE`。书书语音优先 `YAYA_BOOK_TTS_API_KEY` 或 `YAYA_BOOK_TTS_API_KEY_FILE`（二选一），没有时复用现有豆包实时语音配置。不得把真实密钥放入仓库或前端。
+
+启动器在没有显式书书配置时读取 `%USERPROFILE%\.walnut-secrets\book-tts.key`，新终端和移动仓库均不需要重配。`-Action Check` 与 `Start` 共用配置检查，检查在 Docker、迁移和进程启动之前运行。检查不会调用供应商，输出明确标注 `provider_access=NOT_CHECKED`；配置摘要只保存哈希，用来拒绝误复用仍持有旧环境的网关。
+
+配音依赖失败统一返回 HTTP 503，但 `retryable` 区分原因：`BOOK_SPEECH_CONFIGURATION_INVALID`、`BOOK_SPEECH_DISABLED`、`BOOK_SPEECH_AUTH_FAILED` 和 `BOOK_SPEECH_RESOURCE_NOT_GRANTED` 需要修复配置或权限，不应自动重试；网络/429/服务暂不可用和未完成音频可重试。前端明确提示题目已通过，仅重试总结配音；修复文件后重试不重新判题、不重新生成已缓存总结。独立书书 speech 接口也返回相同 `retryable` 字段。配置错误只记录动作与错误码，不输出凭据或供应商原始响应。
 
 必需新增依赖 httpx 已列入 backend/pyproject.toml。安装沿用仓库现有 Python3.12、Agent本地包和Backend可编辑安装流程。正式启动入口 `walnut-world-backend/scripts/start-persistent-play.ps1` 会从子游戏进程环境中移除模型和TTS密钥。
 

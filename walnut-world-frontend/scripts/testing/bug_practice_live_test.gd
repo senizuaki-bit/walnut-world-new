@@ -9,6 +9,15 @@ func _initialize() -> void:
 	if OS.get_environment("WALNUT_PRACTICE_LIVE") != "1":
 		quit(2)
 		return
+	var binding: Dictionary = {}
+	var authority_path := "user://int1_client_authority.json"
+	if FileAccess.file_exists(authority_path):
+		var saved: Variant = JSON.parse_string(FileAccess.get_file_as_string(authority_path))
+		if saved is Dictionary: binding = saved.get("authority_binding", {})
+	if not preload("res://scripts/testing/practice_live_guard.gd").allowed(OS.get_environment("YAYA_API_BASE_URL"), binding, OS.get_environment("WALNUT_PRACTICE_ISOLATED_GATEWAY") == "1"):
+		print("PRACTICE_LIVE_ISOLATION_REQUIRED: use a dedicated local gateway and database; normal player gateway is blocked")
+		quit(2)
+		return
 	call_deferred("run")
 
 func run() -> void:

@@ -8,6 +8,8 @@ class FakeGateway:
 	extends Node
 	var calls: Array[Dictionary] = []
 	var fail_action := ""
+	var transient_action := ""
+	var transient_remaining := 0
 	var phase := "WAITING_MAIN"
 	var correct := false
 	var challenge := {
@@ -19,6 +21,9 @@ class FakeGateway:
 	func send(action: String, entry: String, body: Dictionary) -> Dictionary:
 		calls.append({"action": action, "entry": entry, "body": body.duplicate(true)})
 		await get_tree().process_frame
+		if transient_action == action and transient_remaining > 0:
+			transient_remaining -= 1
+			return {"ok": false, "code": "PRACTICE_CONNECTION_FAILED", "retryable": true}
 		if fail_action == action:
 			fail_action = ""
 			return {"ok": false, "code": "PRACTICE_CONNECTION_FAILED"}
@@ -74,6 +79,13 @@ func run() -> void:
 	await panel._answer()
 	check(fake.calls[-2].body.answer_id != pending.answer_id, "New attempt gets a new answer ID")
 	check(panel.state.phase == "SUMMARY_PENDING" and not panel.editor.visible, "Summary failure retains authoritative pass and disables answering")
+	for code in ["BOOK_SPEECH_CONFIGURATION_INVALID", "BOOK_SPEECH_DISABLED", "BOOK_SPEECH_AUTH_FAILED", "BOOK_SPEECH_RESOURCE_NOT_GRANTED"]:
+		panel._error({"code": code, "retryable": false})
+		check(panel.feedback.text.contains("已通过") and panel.feedback.text.contains("配音"), "Configuration feedback distinguishes passed code from speech failure")
+		check(not panel.feedback.text.contains("稍后重试") and panel.action_button.text == "配置修复后重试", "Configuration failures do not suggest waiting will fix them")
+		check(panel.state.phase == "SUMMARY_PENDING" and panel._next_action == "summary", "Configuration failure retains the summary-only retry")
+	panel._error({"code": "BOOK_SPEECH_PROVIDER_UNAVAILABLE", "retryable": true})
+	check(panel.action_button.text == "重试本步", "A later temporary failure restores the normal retry button")
 	count = fake.calls.size()
 	await panel._answer()
 	check(fake.calls.size() == count, "No new answer after pass")
@@ -96,6 +108,22 @@ func run() -> void:
 	fake.phase = "CHALLENGE_READY"
 	await panel.ensure_entry()
 	check(panel.state.entry_id == entry and panel.state.pending_answer == pending and not panel.editor.editable, "Recovery preserves unresolved write envelope")
+	fake.transient_action = "answer"
+	fake.transient_remaining = 1
+	await panel._answer()
+	check(fake.calls[-3].body == fake.calls[-2].body and fake.calls[-1].action == "summary", "Transient answer recovery must finish without a second user click")
+	# Summary transport failures must reuse the same passed challenge automatically.
+	panel.state.phase = "SUMMARY_PENDING"
+	fake.transient_action = "summary"
+	fake.transient_remaining = 2
+	count = fake.calls.size()
+	await panel._load_summary()
+	check(panel.state.phase == "COMPLETED" and fake.calls.size() == count + 3, "Two temporary summary failures recover automatically")
+	check(fake.calls[-1].body == fake.calls[-2].body and fake.calls[-2].body == fake.calls[-3].body, "Automatic retries keep the exact challenge identity")
+	fake.transient_remaining = 5
+	count = fake.calls.size()
+	await panel._load_summary()
+	check(fake.calls.size() == count + 3 and not panel.busy and panel.action_button.text == "重试本步", "Persistent outage has a bounded retry count and restores manual recovery")
 	panel.queue_free()
 	await process_frame
 	if not failures.is_empty():

@@ -15,6 +15,15 @@ var _attempt_audit_operation_counts: Dictionary = {}
 var _attempt_audit_history: Array[Dictionary] = []
 
 
+func _validate_configuration(original_base_url: String, original_bearer_token: String) -> String:
+	# Explicit isolated acceptance tests use a dedicated local gateway. Keep the
+	# pinned transport byte-identical and retain all other URL/token/limit checks.
+	if OS.get_environment("WALNUT_PRACTICE_LIVE") == "1" and OS.get_environment("WALNUT_PRACTICE_ISOLATED_GATEWAY") == "1" and OS.get_environment("YAYA_API_BASE_URL") == original_base_url:
+		if preload("res://scripts/testing/practice_live_guard.gd").allowed(original_base_url, {}, true):
+			return super._validate_configuration("http://127.0.0.1:8790", original_bearer_token)
+	return super._validate_configuration(original_base_url, original_bearer_token)
+
+
 func execute(operation: String, arguments: Dictionary) -> Dictionary:
 	var spec_result: Dictionary = _build_request_spec(operation, arguments)
 	var sequence := 0

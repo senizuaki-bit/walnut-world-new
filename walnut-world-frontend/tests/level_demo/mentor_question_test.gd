@@ -183,6 +183,13 @@ func _initialize() -> void:
 	check(question.interrupt_button.get_global_rect().position.y >= question.reply_scroll.get_global_rect().end.y, "打断按钮固定在文字滚动区之外")
 	question.ask_button.pressed.emit()
 	# Preserve resampling phase across uneven capture blocks (48k -> 16k).
+	var closed_socket := Socket.new()
+	question.voice.socket_factory = func(): return closed_socket
+	question.ask_button.pressed.emit()
+	closed_socket.incoming = [{"type": "voice.error", "code": "VOICE_DISABLED"}]
+	closed_socket.state = WebSocketPeer.STATE_CLOSED
+	await process_frame
+	check(question.reply_text.get_parsed_text().contains("尚未开启语音"), "服务错误与关闭同帧到达时必须保留具体原因，不能覆盖成连接断开")
 	await check_microphone_startup(question)
 	var codec := Pcm.new()
 	var samples := PackedVector2Array()

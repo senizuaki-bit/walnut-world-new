@@ -1,0 +1,86 @@
+name: Playable client and API regressions
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: 3.12.13
+      - name: Install tested dependencies and this checkout
+        shell: powershell
+        run: |
+          python -m pip install -r walnut-world-backend/requirements-play-win-py312.txt
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          python -m pip install --no-deps --no-build-isolation -e agent -e walnut-world-backend
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          python -m pip check
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Backend unit and transport contracts
+        shell: powershell
+        run: |
+          # The two PostgreSQL-backed modules run in the separate database job below.
+          python -m pytest walnut-world-backend/tests/unit walnut-world-backend/tests/contract --ignore=walnut-world-backend/tests/contract/test_game_read_operations.py --ignore=walnut-world-backend/tests/contract/test_world_presentation_route.py -q
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Install verified Godot and import fresh assets
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $ProgressPreference = 'SilentlyContinue'
+          $target = Join-Path $PWD 'tools/godot-4.7.1'
+          New-Item -ItemType Directory -Path $target -Force | Out-Null
+          $archive = Join-Path $target 'godot.zip'
+          Invoke-WebRequest -UseBasicParsing -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.7.1-stable/Godot_v4.7.1-stable_win64.exe.zip' -OutFile $archive
+          if ((Get-FileHash $archive -Algorithm SHA256).Hash -ine 'c7a289051eaefb460b0106b60e9cd5bee0ef55fd102dcb2bed1eb356cf3d90a1') { throw 'Godot checksum mismatch' }
+          Expand-Archive -LiteralPath $archive -DestinationPath $target -Force
+          & "$target/Godot_v4.7.1-stable_win64_console.exe" --headless --editor --path walnut-world-frontend --import
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Entire offline Godot regression suite
+        shell: powershell
+        run: |
+          & ./walnut-world-frontend/scripts/run-offline-tests.ps1
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+
+  database-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16.9-alpine@sha256:7c688148e5e156d0e86df7ba8ae5a05a2386aaec1e2ad8e6d11bdf10504b1fb7
+        env:
+          POSTGRES_DB: walnut_test
+          POSTGRES_USER: walnut_test
+          POSTGRES_PASSWORD: isolated_ci_only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U walnut_test -d walnut_test"
+          --health-interval 2s --health-timeout 3s --health-retries 30
+    env:
+      WALNUT_DATABASE_URL: postgresql+asyncpg://walnut_test:isolated_ci_only@127.0.0.1:5432/walnut_test
+      WALNUT_TEST_DATABASE_URL: postgresql+asyncpg://walnut_test:isolated_ci_only@127.0.0.1:5432/walnut_test
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: 3.12.13
+      - run: |
+          python -m pip install -r walnut-world-backend/requirements-play-win-py312.txt
+          python -m pip install --no-deps --no-build-isolation -e agent -e walnut-world-backend
+          python -m pip check
+      - name: Migrate the disposable database
+        working-directory: walnut-world-backend
+        run: python -m alembic upgrade head
+      - name: Real PostgreSQL consumer contracts
+        run: python -m pytest walnut-world-backend/tests/contract/test_game_read_operations.py walnut-world-backend/tests/contract/test_world_presentation_route.py -q

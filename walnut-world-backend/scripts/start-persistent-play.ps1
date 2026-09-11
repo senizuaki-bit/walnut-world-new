@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('Start', 'Status', 'Stop')]
+    [ValidateSet('Start', 'Status', 'Stop', 'Check')]
     [string]$Action = 'Start',
     [string]$PostgresImage = 'postgres:16.9-alpine@sha256:7c688148e5e156d0e86df7ba8ae5a05a2386aaec1e2ad8e6d11bdf10504b1fb7',
     [string]$SandboxImage = 'gcc@sha256:b99b86a28812b1e6453a231a947dc43d76fe192788a12f344a9b568bf9f5d24c',
@@ -10,12 +10,21 @@ param(
     [int]$TokenLifetimeSeconds = 7200,
     [string]$PythonExe = '',
     [string]$GodotExe = $env:GODOT_EXE,
-    [string]$UpstreamKeyFile = $env:WALNUT_LLM_UPSTREAM_API_KEY_FILE
+    [string]$UpstreamKeyFile = $env:WALNUT_LLM_UPSTREAM_API_KEY_FILE,
+    [ValidatePattern('^[a-z][a-z0-9-]{0,30}$')]
+    [string]$InstanceName = 'persistent-play',
+    [ValidateRange(1024, 65535)][int]$PostgresPort = 55433,
+    [ValidateRange(1024, 65535)][int]$RelayPort = 20999,
+    [ValidateRange(1024, 65535)][int]$GatewayPort = 8790,
+    [switch]$NoGame
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
+if ($PSVersionTable.PSEdition -ne 'Desktop') {
+    throw 'Use Windows PowerShell 5.1 (powershell.exe), not pwsh.'
+}
 if ($PSVersionTable.PSEdition -eq 'Desktop') {
     Add-Type -AssemblyName System.Security
 }
@@ -55,11 +64,21 @@ if ([string]::IsNullOrWhiteSpace($UpstreamKeyFile)) {
 }
 
 $postgresName = 'walnut-play-postgres'
-$postgresPort = 55433
-$relayPort = 20999
-$gatewayPort = 8790
 $postgresVolume = 'walnut-play-pgdata'
-$runtimeRoot = Join-Path $env:LOCALAPPDATA 'WalnutWorld\persistent-play'
+$runtimeRoot = Join-Path $env:LOCALAPPDATA "WalnutWorld\$InstanceName"
+if ($InstanceName -ne 'persistent-play') {
+    if ($PostgresPort -eq 55433 -or $RelayPort -eq 20999 -or $GatewayPort -eq 8790) {
+        throw 'An isolated instance requires three dedicated non-player ports.'
+    }
+    $postgresName = "walnut-$InstanceName-postgres"
+    $postgresVolume = "walnut-$InstanceName-pgdata"
+}
+elseif ($PostgresPort -ne 55433 -or $RelayPort -ne 20999 -or $GatewayPort -ne 8790) {
+    throw 'Custom ports require a separate -InstanceName.'
+}
+if (@($PostgresPort, $RelayPort, $GatewayPort | Select-Object -Unique).Count -ne 3) {
+    throw 'Postgres, relay and gateway ports must differ.'
+}
 $statePath = Join-Path $runtimeRoot 'state.json'
 
 function New-RandomHex([int]$ByteCount = 32) {
@@ -272,7 +291,13 @@ function Stop-ProcessAndWait {
     if ($null -eq $Process -or $Process.HasExited) {
         return
     }
-    Stop-Process -Id $Process.Id -Force -ErrorAction Stop
+    try {
+        Stop-Process -InputObject $Process -Force -ErrorAction Stop
+    }
+    catch {
+        # A launcher may exit when its child is stopped, between these checks.
+        if (-not $Process.HasExited) { throw }
+    }
     if (-not $Process.WaitForExit(10000)) {
         throw "Process $($Process.Id) did not exit within 10 seconds."
     }
@@ -458,7 +483,39 @@ function Stop-PersistentPlay {
     '{"status":"STOPPED","already_stopped":false,"volume_preserved":true}'
 }
 
+# Check configuration before touching runtime state, Docker, migrations or workers.
+if ($Action -in @('Start', 'Check')) {
+    if (-not (Test-Path -LiteralPath $backendPython -PathType Leaf)) { throw "Backend Python missing: $backendPython" }
+    if ($null -eq $agentRoot) { throw 'Agent workspace was not found.' }
+    . (Join-Path $PSScriptRoot 'voice-environment.ps1')
+    Initialize-WalnutVoiceEnvironment -AgentRoot $agentRoot
+    $env:PYTHONPATH = (Join-Path $backendRoot 'src') + ';' + (Join-Path $agentRoot 'python')
+    $voiceCheckOutput = (& $backendPython -m walnut_backend.voice_preflight | Out-String).Trim()
+    Write-Output $voiceCheckOutput
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Voice configuration is invalid. Configure YAYA_BOOK_TTS_API_KEY_FILE (or ~/.walnut-secrets/book-tts.key). Correct any enabled realtime voice configuration, then run -Action Check again.'
+    }
+    $voiceConfiguration = $voiceCheckOutput | ConvertFrom-Json
+    $UpstreamKeyFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($UpstreamKeyFile)
+    $playCheckOutput = (& $backendPython -m walnut_backend.play_preflight --key-file $UpstreamKeyFile --endpoint $UpstreamEndpoint --model $Model --provider $Provider | Out-String).Trim()
+    Write-Output $playCheckOutput
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Model configuration or dependencies are invalid. Check the private key file and its ACL, then run setup-play.ps1 and -Action Check.'
+    }
+    $playConfiguration = $playCheckOutput | ConvertFrom-Json
+    . (Join-Path $PSScriptRoot 'runtime-preflight.ps1')
+    Test-WalnutRuntime -GodotExe $GodotExe -PostgresImage $PostgresImage -SandboxImage $SandboxImage
+    if ($Action -eq 'Check') { exit 0 }
+}
+
 $state = Read-PersistentState
+if ($null -ne $state) {
+    $recordedGatewayPort = $state.PSObject.Properties['gateway_port']
+    if ([int]$state.postgres_port -ne $PostgresPort -or [int]$state.relay_port -ne $RelayPort -or
+        ($null -ne $recordedGatewayPort -and [int]$recordedGatewayPort.Value -ne $GatewayPort)) {
+        throw 'Use the original ports recorded for this instance; no process was changed.'
+    }
+}
 
 if ($Action -eq 'Status') {
     Show-PersistentStatus -State $state
@@ -489,6 +546,7 @@ if ($null -eq $state) {
         postgres_name = $postgresName
         postgres_port = $postgresPort
         relay_port = $relayPort
+        gateway_port = $gatewayPort
         database_password = New-RandomHex
         relay_secret = New-RandomHex
         auth_secret = New-RandomHex
@@ -536,6 +594,14 @@ if ($null -ne $existingProcesses.game -and -not $coreHealthy) {
     throw 'A recorded Godot process exists without a healthy persistent-play runtime.'
 }
 if ($coreHealthy) {
+    $recordedPlay = $state.PSObject.Properties['play_configuration_sha256']
+    if ($null -eq $recordedPlay -or [string]$recordedPlay.Value -cne [string]$playConfiguration.configuration_sha256) {
+        throw 'Backend source or model configuration changed. Finish the current practice, then use -Action Stop and -Action Start to load the updated runtime.'
+    }
+    $recordedVoice = $state.PSObject.Properties['voice_configuration_sha256']
+    if ($null -eq $recordedVoice -or [string]$recordedVoice.Value -cne [string]$voiceConfiguration.configuration_sha256) {
+        throw 'Voice configuration changed or was not verified for the running gateway. It has NOT been applied. Finish or preserve the current game before -Action Stop and -Action Start; restarting expires in-memory practice entries.'
+    }
     foreach ($rootBinding in @(
         @{ Name = 'backend_root'; Expected = $backendRoot },
         @{ Name = 'agent_root'; Expected = $agentRoot },
@@ -633,17 +699,7 @@ $env:WALNUT_LLM_RELAY_MAX_RESPONSE_BYTES = '2097152'
 $env:WALNUT_LLM_RELAY_CAPABILITY_TIMEOUT_MS = '5000'
 $env:WALNUT_LLM_PROVIDER = $Provider
 $env:WALNUT_LLM_MODEL = $Model
-# Only the game voice endpoint uses Doubao. The durable workers retain DS.
-if ([string]::IsNullOrWhiteSpace($env:YAYA_VOICE_MODE)) {
-    $env:YAYA_VOICE_MODE = 'doubao'
-}
-if ([string]::IsNullOrWhiteSpace($env:YAYA_DOUBAO_VOICE_API_KEY) -and
-    [string]::IsNullOrWhiteSpace($env:YAYA_DOUBAO_VOICE_API_KEY_FILE)) {
-    $localVoiceKey = Join-Path $agentRoot 'doubao-voice-api.key'
-    if (Test-Path -LiteralPath $localVoiceKey -PathType Leaf) {
-        $env:YAYA_DOUBAO_VOICE_API_KEY_FILE = $localVoiceKey
-    }
-}
+# Voice file resolution and local validation ran before any runtime mutation.
 $env:WALNUT_LLM_RESPONSE_FORMAT = 'json_object'
 $env:WALNUT_LLM_THINKING_MODE = 'disabled'
 $env:WALNUT_PROMPT_VERSION = 'int1-prompt-v1'
@@ -858,6 +914,8 @@ Set-StateValue -State $state -Name 'runtime_version' -Value '1.0.0'
 Set-StateValue -State $state -Name 'backend_root' -Value ([IO.Path]::GetFullPath($backendRoot))
 Set-StateValue -State $state -Name 'agent_root' -Value ([IO.Path]::GetFullPath($agentRoot))
 Set-StateValue -State $state -Name 'provider_started' -Value $true
+Set-StateValue -State $state -Name 'voice_configuration_sha256' -Value $voiceConfiguration.configuration_sha256
+Set-StateValue -State $state -Name 'play_configuration_sha256' -Value $playConfiguration.configuration_sha256
 Set-StateValue -State $state -Name 'relay_pid' -Value $relayProcess.Id
 Set-StateValue -State $state -Name 'relay_started_at' `
     -Value $relayProcess.StartTime.ToUniversalTime().ToString('o')
@@ -874,6 +932,10 @@ Set-StateValue -State $state -Name 'started_at' -Value ([DateTimeOffset]::UtcNow
 Write-PersistentState -State $state
 
 # ---- 6. Launch visible game ----
+if ($NoGame) {
+    Write-Output "PERSISTENT_PLAY_READY gateway=$gatewayPort relay=$relayPort game=SKIPPED"
+    exit 0
+}
 $studentToken = New-StudentJwt -Secret $authSecret -Issuer 'walnut-int1-local-diagnostic' -Audience 'walnut-game-client' -LifetimeSeconds $TokenLifetimeSeconds
 $start = [Diagnostics.ProcessStartInfo]::new()
 $start.FileName = $GodotExe

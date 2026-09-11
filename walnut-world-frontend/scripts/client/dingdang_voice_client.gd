@@ -128,6 +128,20 @@ func _process(_delta: float) -> void:
 	if _socket == null:
 		return
 	_socket.poll()
+	# Servers may send their final error and close within the same poll.
+	# Drain those packets before reporting a transport-only disconnect.
+	while _socket != null and _socket.get_available_packet_count() > 0:
+		var packet: PackedByteArray = _socket.get_packet()
+		if not _socket.was_string_packet():
+			_fail("叮当返回了无法识别的语音数据。")
+			return
+		var message: Variant = JSON.parse_string(packet.get_string_from_utf8())
+		if not message is Dictionary:
+			_fail("叮当返回了无法识别的消息。")
+			return
+		_receive(message)
+	if _socket == null:
+		return
 	if _socket.get_ready_state() == WebSocketPeer.STATE_CLOSED:
 		_fail("语音连接已断开，点击可重新连接。")
 		return
@@ -139,16 +153,6 @@ func _process(_delta: float) -> void:
 	if not _start_sent:
 		_start_sent = true
 		_send({"type": "start", "token": _token, "context": _context})
-	while _socket != null and _socket.get_available_packet_count() > 0:
-		var packet: PackedByteArray = _socket.get_packet()
-		if not _socket.was_string_packet():
-			_fail("叮当返回了无法识别的语音数据。")
-			return
-		var message: Variant = JSON.parse_string(packet.get_string_from_utf8())
-		if not message is Dictionary:
-			_fail("叮当返回了无法识别的消息。")
-			return
-		_receive(message)
 	if state not in ["PREPARING", "READY"] or _socket == null:
 		return
 	if state == "PREPARING" and Time.get_ticks_msec() - _capture_started_at > CAPTURE_TIMEOUT_MS:

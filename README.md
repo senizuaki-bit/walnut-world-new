@@ -100,7 +100,7 @@
         ┌────────┴────────┐
         ▼                 ▼
 walnut-world-frontend/    miaoda-teacher-workbench/
-   Godot 4.5.2 学生端          NestJS + React 教师工作台
+   Godot 4.7.1 学生端          NestJS + React 教师工作台
 ```
 
 | 目录 | 负责 |
@@ -139,14 +139,40 @@ walnut-world-frontend/    miaoda-teacher-workbench/
 
 关卡初始代码是**填空模板**（`/*目标*/`、`/*当前*/`、`/*边界*/`、`/*份数*/`），让孩子一打开就知道要做什么。
 
-## 跑起来
+## 首次使用（当前 main）
+
+请按 **[Windows 首次安装、配置与启动指南](walnut-world-backend/docs/operations/first-run-windows.md)** 操作。前后端和 Agent 已包含在同一仓库；本机依赖与个人密钥需要初始化。
+
+先安装 Git、uv、Docker Desktop（Linux containers），重新打开 Windows PowerShell 5.1，启动 Docker Desktop，然后执行：
+
+```powershell
+git clone --branch main https://github.com/senizuaki-bit/walnut-world-new.git
+cd walnut-world-new
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\walnut-world-backend\scripts\setup-play.ps1
+```
+
+初始化脚本安装 Python 3.12.13、锁定的依赖、本仓库 Agent、固定 digest 的数据库与 C++ 编译镜像，以及校验 SHA-256 的 Godot 4.7.1，并完成首次资源导入。无需本机 C++ 编译器，也无需手动配置数据库。
+
+按指南把个人密钥存到仓库外 `%USERPROFILE%\.walnut-secrets\`：模型 `deepseek-v4-flash.key`、书书配音 `book-tts.key`，以及可选的实时语音 `doubao-voice.key`。实时对话权限需单独确认。
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\walnut-world-backend\scripts\start-persistent-play.ps1 -Action Check
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\walnut-world-backend\scripts\start-persistent-play.ps1 -Action Start
+```
+
+`Check` 验证本地配置和依赖，不调用供应商；`Start` 自动迁移、初始化数据库并启动整套服务和游戏。看到 `PERSISTENT_PLAY_READY` 表示启动完成。`-Action Status` 查看状态；`-Action Stop` 停止并保留数据库卷。
+
+源码或密钥变化后，启动器会拒绝静默复用旧后台。更新步骤、保存数据、端口、日志、错误处理与回归命令见上述指南；接口修复的原因和证据见 [修复记录](walnut-world-backend/docs/operations/voice-startup-repair-20260911.md)。
+
+## 启动补充说明
 
 ### 前置
 
 - Windows + Docker Desktop
 - Python 3.12（后端 `.venv`）
-- Godot 4.5.2（`tools/godot-4.5.2/`）
+- Godot 4.7.1（`tools/godot-4.7.1/`）
 - 一个 LLM Provider Key（DeepSeek），存成纯文本文件
+- 书书配音凭据放在 `%USERPROFILE%\.walnut-secrets\book-tts.key`，或通过 `YAYA_BOOK_TTS_API_KEY_FILE` 指定仓库外文件。不要提交凭据。
 
 ### 数据库迁移
 
@@ -154,15 +180,26 @@ walnut-world-frontend/    miaoda-teacher-workbench/
 cd walnut-world-backend && .venv/Scripts/python.exe -m alembic upgrade head
 ```
 
-当前 head 是 `020_skill_artifact_per_build`。**换机器或拉新代码后必须先跑**，否则读写权威链会失败。
+当前 head 是 `020_skill_artifact_per_build`。正常使用 `Start` 会自动完成迁移，不要在没有配置数据库连接的情况下单独执行上面的开发命令。
 
 ### 启动整套（含游戏窗口）
 
-```bash
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "[Console]::OutputEncoding=[Text.Encoding]::UTF8; $env:WALNUT_LLM_UPSTREAM_API_KEY_FILE='C:\path\to\deepseek.key'; & '.\walnut-world-backend\scripts\start-persistent-play.ps1' -Action Start"
+先在 Windows PowerShell 检查本机配置（不启动服务、不写数据库、不调用供应商）：
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\walnut-world-backend\scripts\start-persistent-play.ps1 -Action Check
+```
+
+`CONFIGURED` 只表示凭据格式和文件可读，不代表供应商额度、鉴权或权限已在线验证。书书配音是完整通关流程的必需项，配置错误会在启动前阻止继续。实时对话语音是独立可选项：固定文件为 `%USERPROFILE%\.walnut-secrets\doubao-voice.key`，缺少配置时保持关闭；不能假定书书配音 Key 同时有实时语音权限。
+
+```powershell
+$env:WALNUT_LLM_UPSTREAM_API_KEY_FILE = 'C:\path\to\deepseek.key'
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\walnut-world-backend\scripts\start-persistent-play.ps1 -Action Start
 ```
 
 `-Action Status` 查看状态，`-Action Stop` 停止（数据卷保留）。
+
+显式环境变量优先于固定文件；无效的显式路径不会静默回退。相对路径会在启动前转换为绝对路径。修改配置后，若已有进程仍使用旧配置，`Start` 会明确拒绝复用；需要有计划地 `Stop`、再 `Start`。当前 Bug 练习状态仍保存在网关内存，重启会让本局练习过期，主关代码和数据库记录保留。
 
 脚本会依次拉起：PostgreSQL 容器 → 迁移与 seed → 私有 LLM relay → Gateway → workflow worker → learner worker → Godot 客户端。
 
@@ -177,10 +214,10 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "[Console]::OutputEnc
 cd walnut-world-backend && .venv/Scripts/python.exe -m pytest tests/unit -q
 ```
 
-前端（62 个用例，逐个跑）：
+前端完整离线套件（自动发现用例）：
 
-```bash
-tools/godot-4.5.2/Godot_v4.5.2-stable_win64.exe --headless --path walnut-world-frontend --script res://tests/client/<name>_test.gd
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\walnut-world-frontend\scripts\run-offline-tests.ps1
 ```
 
 后端集成测试需要一个**全新的** PostgreSQL，并设置 `WALNUT_TEST_DATABASE_URL`。注意：集成套件对共享库状态敏感，在复用过的库上跑会出现互不重合的浮动失败——判断回归时请用全新库。
