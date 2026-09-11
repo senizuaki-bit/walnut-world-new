@@ -80,6 +80,10 @@
 
 ## 复测
 
+2026-09-11 前端截图反馈已在 `all` 修复：历史英文任务名仅在 UI 映射为“作物适配浇水器”，原始 Content 保留；离开手动比较时清理指引，工坊不再激活农田，描边与名牌不再跨层覆盖教学面板；正确浇水等待土壤与作物的单次受水片段结束后再推进或打开技能树，重复点击、重玩和离开均有保护。
+
+验证：Godot 4.7.1 离线套件 90/90 通过，包含新增 `crop_manual_transition_test.gd`；三个修改脚本 GDA `valid=true`；1280×720 实际渲染确认中文标题、手动指引与无残留高亮的工坊页面。最终资源失败缓存修订另跑浇水转场回归通过。两个真实网关端到端测试依照离线脚本约定未执行；本次不修改或重跑学生端正式世界会话。
+
 ```powershell
 ./walnut-world-frontend/scripts/run-offline-tests.ps1 -GodotExe <Godot4.7.1控制台程序>
 ./walnut-world-backend/.venv/Scripts/python.exe walnut-world-frontend/scripts/testing/run-practice-http-test.py
@@ -95,7 +99,7 @@
 2. 本机已有数据库绑定 `deepseek-flash`，启动脚本需传 `-Model deepseek-flash`。此次保留已有模型与数据库，没有修改 profile 来绕过校验。
 3. 出题模型曾连续产生不符合题目规则的草稿；服务端拒绝后原局重试成功。前端提供可恢复错误，不伪造题目；后续可统计真实出题稳定性。
 4. 后端练习状态仍是单网关内存、6 小时有效；重启会导致 410。前端持久记录不能替代后端长期持久化，旧 entry 不能跨重启继续判题。
-5. 服务已在 `D:/FeishuAIreview/walnut-interface-audit-20260909` 的代码上启动。本工作区对应 `all`；原 `walnut-world-new` 仍为 `fronted-art`。
+5. 2026-09-11 用户确认后续任务统一基于 `all`，`fronted-art` 为旧版。当前开发目录 `D:/FeishuAIreview/walnut-world-new` 已切换 `all`；原联调目录 `D:/FeishuAIreview/walnut-interface-audit-20260909` 保留在 `6aac587` 分离头状态及原有本机资料。该目录之前启动的服务不会自动跟随当前开发目录更新。切换时已 fetch 并确认最新 `origin/main`（`9ce5298`）是 `all` 的祖先。
 6. 本次配音全链通过期间，后台另有 workflow job 出现 `RuntimeBoundaryError` 重试，未阻塞本次新练习和总结；该后台任务需后续单独排查，不将本次 PASS 解释为所有异步 Agent 任务均无错误。教师工作台本地仍缺妙搭环境及数据库连接配置。
 
 接口权威：[完整 API 入口](../../../walnut-world-backend/docs/frontend-api/README.md)、[Bug 与书书扩展](../../../walnut-world-backend/docs/frontend-api/Bug军团与书书接口.md)。
