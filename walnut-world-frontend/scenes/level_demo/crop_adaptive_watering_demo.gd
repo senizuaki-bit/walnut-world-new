@@ -564,7 +564,6 @@ func _show_workshop_step() -> void:
 		0:
 			gap_target_input.text = ""
 			gap_moisture_input.text = ""
-			(plot_grid.get_child(1) as CropPlotCard).pulse_attention()
 			gap_target_input.grab_focus()
 		1:
 			severe_boundary_input.text = ""
@@ -1515,6 +1514,9 @@ func _set_phase(value: Phase) -> void:
 	evidence_title.tooltip_text = ""
 	var previous_phase := _phase
 	_phase = value
+	if value != Phase.MANUAL_COMPARE:
+		_set_manual_attention(-1)
+		water_choices.visible = false
 	if value != previous_phase:
 		match value:
 			Phase.FAILED, Phase.LOCAL_FAILED, Phase.CHAIN_ERROR:

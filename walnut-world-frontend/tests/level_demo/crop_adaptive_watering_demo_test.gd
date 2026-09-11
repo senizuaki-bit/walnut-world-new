@@ -113,9 +113,17 @@ func _initialize() -> void:
 		level.call("_choose_manual_water", CropAdaptiveWateringDemo.EXPECTED_UNITS[expected_index])
 	if not (level.get_node("SkillTreeOverlay") as Control).visible or int(level.get("_phase")) != CropAdaptiveWateringDemo.Phase.SKILL_TREE:
 		failures.append("手动比较完成后必须进入4★技能树页面。")
+	for card: CropPlotCard in grid.get_children():
+		if card.attention_hint.visible or card._attention_active:
+			failures.append("离开手动比较时必须清除所有土地点击指引。")
+		if card.attention_frame.z_index != 0 or card.attention_hint.z_index != 0:
+			failures.append("土地描边与点击名牌不得通过独立层级覆盖后续教学页面。")
 	level.call("_on_skill_tree_continue_pressed")
 	if not (level.get_node("WorkshopOverlay") as Control).visible or int(level.get("_phase")) != CropAdaptiveWateringDemo.Phase.WORKSHOP:
 		failures.append("技能树委托后必须进入叮当三步实验页面。")
+	for card: CropPlotCard in grid.get_children():
+		if card.attention_hint.visible or card._attention_active:
+			failures.append("工坊第一步不得重新激活农田点击指引。")
 	var gap_code := level.get_node("WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopGapCode") as Control
 	var branch_code := level.get_node("WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopBranchCode") as Control
 	var summary_code := level.get_node("WorkshopOverlay/Card/Margin/Content/WorkshopCodePanel/Margin/Stack/WorkshopSummaryCode") as Control

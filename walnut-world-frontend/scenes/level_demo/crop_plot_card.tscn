@@ -84,7 +84,6 @@ visible = false
 
 [node name="AttentionFrame" type="TextureRect" parent="Canvas"]
 layout_mode = 0
-z_index = 1
 
 offset_left = 0.0
 offset_top = 41.317747077577046
@@ -317,7 +316,6 @@ offset_top = 0.0
 offset_right = 172.0
 offset_bottom = 33.0
 mouse_filter = 2
-z_index = 2
 theme_override_styles/panel = SubResource("attention_hint")
 
 [node name="HintLabel" type="Label" parent="Canvas/AttentionHint"]

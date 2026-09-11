@@ -22,8 +22,8 @@ func _run() -> void:
 	if (card.crop_art as ArtMotionTexture).motion_id != "crop-carrot-severe-dry-sway":
 		failures.append("严重缺水必须对应缺水作物动画。")
 	card.set_attention(true)
-	if not card.soil_glow.visible or card.attention_frame.visible:
-		failures.append("土地注意力必须使用透明轮廓动画，旧矩形框必须停用。")
+	if not card.soil_glow.visible or not card.attention_frame.visible or not card.attention_hint.visible:
+		failures.append("土地注意力必须同时提供装饰光效、清晰轮廓与点击名牌。")
 	card.show_candidate_outcome(7200, "OVERWATERED")
 	if not (card.crop_art as ArtMotionTexture).motion_id.contains("waterlogged"):
 		failures.append("过浇反馈必须展示过湿作物。")
