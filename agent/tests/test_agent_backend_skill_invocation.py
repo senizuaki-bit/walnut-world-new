@@ -26,6 +26,7 @@ from agent_runtime_fixtures import (  # noqa: E402
     make_world_state,
 )
 from postgres_test_support import (  # noqa: E402
+    cleanup_sandbox_test_containers,
     postgres_test_server,
     reset_sandbox_recovery_results,
 )
@@ -238,10 +239,13 @@ class AgentBackendSkillInvocationTests(unittest.IsolatedAsyncioTestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        cls._server_context.__exit__(None, None, None)
-        if cls._artifact_target is not None:
-            cls._artifact_target.chmod(stat.S_IWRITE | stat.S_IREAD)
-        cls._artifact_context.__exit__(None, None, None)
+        try:
+            cleanup_sandbox_test_containers(owner_root=cls.root)
+        finally:
+            cls._server_context.__exit__(None, None, None)
+            if cls._artifact_target is not None:
+                cls._artifact_target.chmod(stat.S_IWRITE | stat.S_IREAD)
+            cls._artifact_context.__exit__(None, None, None)
 
     async def asyncSetUp(self) -> None:
         await self._reset_database()
@@ -1378,7 +1382,14 @@ class AgentBackendSkillInvocationTests(unittest.IsolatedAsyncioTestCase):
         )
         successes = [item for item in outcomes if not isinstance(item, BaseException)]
         failures = [item for item in outcomes if isinstance(item, BaseException)]
-        self.assertEqual(len(successes), 1)
+        self.assertEqual(
+            len(successes),
+            1,
+            [
+                (type(error).__name__, getattr(error, "code", None), str(error))
+                for error in failures
+            ],
+        )
         self.assertEqual(len(failures), 1)
         self.assertIsInstance(failures[0], AgentToolExecutionError)
         self.assertEqual(failures[0].code, "TOOL_WORLD_REVISION_CONFLICT")

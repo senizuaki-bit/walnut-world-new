@@ -7,6 +7,7 @@ from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import replace
 from pathlib import Path
 from typing import Any, cast
+from unittest.mock import patch
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[1] / "python"
 TEST_ROOT = Path(__file__).resolve().parent
@@ -486,7 +487,43 @@ class AgentBackendBookOutcomeMatrixTests(unittest.IsolatedAsyncioTestCase):
 
         await self._assert_success_database_mutation_fails(skip_revision)
 
-    async def test_session_run_history_cross_session_fails_before_book_provider(self) -> None:
+    async def _assert_prior_history_excluded_from_current_summary(
+        self, mutation: _DatabaseMutation, *, forbidden: str
+    ) -> None:
+        llm = outcome._SchemaLlm()
+        stop, worker_task = await self._one_failure_then_activate(llm)
+        worker = cast(Any, self.composition.worker)
+        wrapper = outcome._MutatingOutcomeAuthority(
+            worker._outcome_authority, self.database, mutation, self._side_effect_fingerprint
+        )
+        worker._outcome_authority = wrapper
+        try:
+            with patch.object(
+                worker._hub._contexts._runs,
+                "list_session_runs",
+                side_effect=AssertionError("current summary must not read prior Run history"),
+            ) as history_read:
+                accepted = cast(Any, await self._accept(self.success_skill, 2))
+                terminal = await self._await_terminal(accepted.command.command_id)
+                history_read.assert_not_called()
+        finally:
+            await self._stop_worker(stop, worker_task)
+        self.assertEqual(wrapper.calls, 1)
+        self.assertEqual(terminal["status"], "APPLIED")
+        book_requests = [
+            request for request in llm.requests if _requested_role(request) == "book_agent"
+        ]
+        self.assertEqual(len(book_requests), 1)
+        request = book_requests[0]
+        payload = json.loads(request.messages[1].content)
+        context = payload["turn_context"]
+        self.assertNotIn("session_runs", context)
+        self.assertTrue(context["run_result"]["task_success"])
+        self.assertNotIn("get_session_runs", {item["name"] for item in payload["available_tools"]})
+        self.assertNotIn(forbidden, request.messages[1].content)
+        self.assertIn("本次完成", request.messages[0].content)
+
+    async def test_session_run_history_cross_session_is_excluded_from_current_summary(self) -> None:
         async def mutate(database: PostgresDatabase, event: GameEvent) -> None:
             await self._corrupt_prior_run_snapshot(
                 database,
@@ -495,9 +532,11 @@ class AgentBackendBookOutcomeMatrixTests(unittest.IsolatedAsyncioTestCase):
                 replacement="session_cross_scope_0001",
             )
 
-        await self._assert_success_database_mutation_fails(mutate)
+        await self._assert_prior_history_excluded_from_current_summary(
+            mutate, forbidden="session_cross_scope_0001"
+        )
 
-    async def test_session_run_history_cross_actor_fails_before_book_provider(self) -> None:
+    async def test_session_run_history_cross_actor_is_excluded_from_current_summary(self) -> None:
         async def mutate(database: PostgresDatabase, event: GameEvent) -> None:
             await self._corrupt_prior_run_snapshot(
                 database,
@@ -513,9 +552,11 @@ class AgentBackendBookOutcomeMatrixTests(unittest.IsolatedAsyncioTestCase):
                 replacement="student_cross_scope_0001",
             )
 
-        await self._assert_success_database_mutation_fails(mutate)
+        await self._assert_prior_history_excluded_from_current_summary(
+            mutate, forbidden="student_cross_scope_0001"
+        )
 
-    async def test_session_run_history_cross_content_fails_before_book_provider(self) -> None:
+    async def test_session_run_history_cross_content_is_excluded_from_current_summary(self) -> None:
         async def mutate(database: PostgresDatabase, event: GameEvent) -> None:
             await self._corrupt_prior_run_snapshot(
                 database,
@@ -531,9 +572,9 @@ class AgentBackendBookOutcomeMatrixTests(unittest.IsolatedAsyncioTestCase):
                 replacement="f" * 64,
             )
 
-        await self._assert_success_database_mutation_fails(mutate)
+        await self._assert_prior_history_excluded_from_current_summary(mutate, forbidden="f" * 64)
 
-    async def test_session_run_history_cross_world_fails_before_book_provider(self) -> None:
+    async def test_session_run_history_cross_world_is_excluded_from_current_summary(self) -> None:
         async def mutate(database: PostgresDatabase, event: GameEvent) -> None:
             await self._corrupt_prior_run_snapshot(
                 database,
@@ -542,7 +583,9 @@ class AgentBackendBookOutcomeMatrixTests(unittest.IsolatedAsyncioTestCase):
                 replacement="world_cross_scope_0001",
             )
 
-        await self._assert_success_database_mutation_fails(mutate)
+        await self._assert_prior_history_excluded_from_current_summary(
+            mutate, forbidden="world_cross_scope_0001"
+        )
 
     async def test_skill_history_missing_current_skill_fails_before_book_provider(self) -> None:
         async def hide_current_skill(database: PostgresDatabase, event: GameEvent) -> None:
